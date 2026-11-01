@@ -4671,9 +4671,8 @@
     // royal events: every 4-6 min each town gets an offer; the CPU decides by a fixed rule, I get a choice card
     var EV = [
       { t: 'A MERCHANT CARAVAN OFFERS 40 STONE FOR 12 GOLD', ok: function (s) { return s.res.gold >= 12; }, a: function (s) { s.res.gold -= 12; s.res.stone += 40; }, ai: function (s) { return s.res.stone < 60; } },
-      { t: 'A WANDERING HERO OFFERS TO JOIN WITH 3 SWORDSMEN FOR 20 GOLD', ok: function (s) { return s.res.gold >= 20; }, a: function (s, f) { s.res.gold -= 20; for (var i = 0; i < 3; i++) { if (f === me || s === ME_S) spawnMine('s', 1); else aiSpawn(f, 's'); } }, ai: function (s) { return s.res.gold > 150 && s.ppl.length > 60; } },
-      { t: 'BANDITS DEMAND 10 GOLD, OR THEY BURN 15 FOOD', ok: function (s) { return s.res.gold >= 10; }, a: function (s) { s.res.gold -= 10; }, no: function (s) { s.res.food = Math.max(0, s.res.food - 15); }, ai: function (s) { return s.res.food < 80 && s.res.gold > 30; } },
-      { t: 'A BUMPER HARVEST! HOLD A FEAST (20 FOOD) FOR NEW SETTLERS?', ok: function (s) { return s.res.food >= 20; }, a: function (s) { s.res.food -= 20; s.res.wood += 15; s.res.gold += 8; }, ai: function (s) { return s.res.food > 80; } },
+      { t: 'A WANDERING HERO OFFERS TO JOIN WITH 3 SWORDSMEN FOR 20 GOLD', ok: function (s) { return s.res.gold >= 20; }, a: function (s, f) { s.res.gold -= 20; for (var i = 0; i < 3; i++) { if (f === me || s === ME_S) spawnMine('s', 1); else aiSpawn(f, 's'); } }, ai: function () { return false; } },
+            { t: 'A BUMPER HARVEST! HOLD A FEAST (20 FOOD) FOR NEW SETTLERS?', ok: function (s) { return s.res.food >= 20; }, a: function (s) { s.res.food -= 20; s.res.wood += 15; s.res.gold += 8; }, ai: function (s) { return s.res.food > 80; } },
       { t: 'FOREST SPIRITS BLESS YOUR WOODCUTTERS: +30 WOOD', ok: function () { return true; }, a: function (s) { s.res.wood += 30; }, ai: function () { return true; }, free: 1 }
     ];
     var log63 = { offers: 0, yes: 0 }, card = null;
