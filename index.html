@@ -4678,9 +4678,9 @@
     ];
     var log63 = { offers: 0, yes: 0 }, card = null;
     function myCard(e) { if (card) card.remove(); card = document.createElement('div'); card.id = 'evCard';
-      card.style.cssText = 'position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:60;max-width:92vw;width:340px;background:#2a2013ee;border:2px solid #c9a24a;border-radius:10px;padding:10px;color:#f3e2b0;font:12px monospace;text-align:center;box-shadow:0 4px 18px #000a';
+      card.style.cssText = 'position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:60;max-width:92vw;width:340px;background:#fff;border:3px solid #000;padding:8px;color:#000;font:bold 11px monospace;text-align:center;box-shadow:0 4px 18px #000a';
       card.innerHTML = '<b>ROYAL EVENT</b><div style="margin:6px 0">' + e.t + '</div>'; var row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;justify-content:center';
-      var mk = function (txt, fn, dis) { var b = document.createElement('button'); b.textContent = txt; b.disabled = !!dis; b.style.cssText = 'flex:1;padding:8px;font:inherit;border-radius:6px;border:1px solid #c9a24a;background:#c9a24a;color:#221'; b.onclick = function (ev) { ev.stopPropagation(); fn(); card.remove(); card = null; updateRes(); }; row.appendChild(b); };
+      var mk = function (txt, fn, dis) { var b = document.createElement('button'); b.textContent = txt; b.disabled = !!dis; b.style.cssText = 'flex:1;padding:8px;font:inherit;border:0;background:#000;color:#fff'; b.onclick = function (ev) { ev.stopPropagation(); fn(); card.remove(); card = null; updateRes(); }; row.appendChild(b); };
       mk(e.free ? 'THANK THEM' : 'ACCEPT', function () { if (e.ok(ME_S)) { e.a(ME_S, me); log63.yes++; } }, !e.ok(ME_S)); if (!e.free) mk('DECLINE', function () { if (e.no) e.no(ME_S); });
       card.appendChild(row); document.body.appendChild(card); var ref = card; setTimeout(function () { if (card === ref) { if (e.no) e.no(ME_S); ref.remove(); card = null; showToast('THE EVENT PASSED'); } }, 25000); }
     var _e2 = econTick; econTick = function (dt) { _e2(dt); try { allSets().forEach(function (s) { if (!s || !s.res || s.ppl.length < 5) return; if (s.ev63 == null) s.ev63 = 180 + Math.random() * 120; s.ev63 -= dt; if (s.ev63 > 0) return; s.ev63 = 240 + Math.random() * 120;
@@ -4688,6 +4688,39 @@
         if (s === ME_S) { if (typeof document !== 'undefined' && document.body) myCard(e); else if (e.ok(s)) e.a(s, me); return; }
         var f = facIndex[s.f]; if (!f) return; if (e.ok(s) && e.ai(s)) { e.a(s, f); log63.yes++; } else if (e.no) e.no(s); }); } catch (x) {} };
     window.__v63 = { gateUps: function () { return gu63; }, events: function () { return log63; }, test: function (i) { myCard(EV[i || 0]); } };
+  })();
+  // v63b: minimal screen. tiny resource line, walk up to a building for its own small menu, rare things in the menu button
+  (function () {
+    var cs = document.createElement('style'); cs.textContent = 'body.min63 #pop,body.min63 #hud,body.min63 #cmdHint,body.min63 #ordBtns,body.min63 #lsBtn,body.min63 #genBtn,body.min63 #goals58,body.min63 #eraHud,body.min63 #cmdBar,body.min63 #armyBtn,body.min63 #propBtn{display:none!important}' +
+      'body.min63 #minimap{display:none!important}body.min63.map63 #minimap{display:block!important}body.min63 #liveStats:not(.on63){display:none!important}' +
+      'body.min63 #res{font:bold 12px monospace;white-space:nowrap;overflow:hidden}@media (max-width:500px){body.min63 #res{font-size:10px;letter-spacing:-0.5px}}' +
+      '#near63{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);transform:translateX(-50%);z-index:55;background:#fff;border:3px solid #000;padding:6px 8px;font:bold 12px monospace;text-align:center;display:none;max-width:86vw}' +
+      '#near63 b{display:block;margin-bottom:4px}#near63 button{font:bold 12px monospace;margin:2px;padding:7px 9px;background:#000;color:#fff;border:0}#near63 button:disabled{background:#999}';
+    document.head.appendChild(cs); document.body.classList.add('min63');
+    var IC = { food: '\ud83c\udf3e', water: '\ud83d\udca7', wood: '\ud83e\udeb5', stone: '\ud83e\udea8', gold: '\ud83e\ude99' };
+    function resLine() { try { var r = ME_S && ME_S.res; if (!r) return; var t = ['food', 'water', 'wood', 'stone', 'gold'].filter(function (k) { return r[k] != null; }).map(function (k) { return IC[k] + Math.floor(r[k]); }).join(' ') + ' \ud83d\udc64' + ME_S.ppl.length; var e = document.getElementById('res'); if (e.textContent !== t) e.textContent = t; } catch (e) {} }
+    var _ur = updateRes; updateRes = function () { _ur.apply(this, arguments); resLine(); };
+    // rare things live in the menu
+    var menu = document.getElementById('menu'); [['ORDERS', function () { ordOpen(true); }], ['MAP', function () { document.body.classList.toggle('map63'); }], ['FULL HUD', function () { document.body.classList.toggle('min63'); }]].forEach(function (d) {
+      var b = document.createElement('button'); b.textContent = d[0]; b.onclick = function (e) { e.stopPropagation(); d[1](); menu.style.display = 'none'; }; menu.appendChild(b); });
+    // walk-up building menus
+    var NAME = { hall: 'TOWN HALL', lumber: 'LUMBER CAMP', barracks: 'BARRACKS', market: 'MARKET', farm: 'FARM', well: 'WELL', house: 'HOUSE', quarry: 'QUARRY', wall: 'WALL' };
+    var box = document.createElement('div'); box.id = 'near63'; document.body.appendChild(box); var cur = '', shown = null;
+    function sellSurplus(s) { var R = s.res, n = 0, fk = s.ppl.length * 8 + 20; if (R.food > fk + 5) { n += trade(s, 'food', Math.floor((R.food - fk) * 0.5), true) || 0; } ['wood', 'stone'].forEach(function (r) { if (R[r] > 45) n += trade(s, r, Math.floor((R[r] - 45) * 0.5), true) || 0; }); return n; }
+    function acts(s, b) { var a = [], k = b.k;
+      if (k === 'barracks') { a.push(['TRAIN 1 (4\ud83c\udf3e 3\ud83e\ude99)', function () { if (!trainSoldier(s, 's')) showToast('NEED FOOD, GOLD AND A FREE ADULT'); }]); a.push(['TRAIN 5', function () { var n = 0; for (var i = 0; i < 5; i++) if (trainSoldier(s, 's')) n++; showToast(n + ' SOLDIERS TRAINED'); }]); }
+      if (k === 'market') a.push(['SELL SURPLUS', function () { var g0 = s.res.gold; sellSurplus(s); showToast('+' + Math.round(s.res.gold - g0) + ' GOLD'); }]);
+      if (k === 'hall') { a.push(['GOLD FOCUS', function () { if ((s.gcd60 || 0) > 0) return showToast('WORKERS REST ' + Math.ceil(s.gcd60) + 'S'); s.goldF60 = 60; s.gcd60 = 180; showToast('WORKERS PAN GOLD FOR 60S'); }]);
+        var h = me && me.hallObj, L = h ? h.gateUp60 || 0 : 3; if (h && L < 3) { var gc = { stone: 40 + 40 * (L + 1), wood: 20 + 10 * (L + 1) }; a.push(['GATE L' + (L + 1) + ' (' + cstr(gc) + ')', function () { if (!canPay(s, gc)) return showToast('NEED ' + cstr(gc)); pay(s, gc); h.gateUp60 = L + 1; showToast('GATE REINFORCED'); }, !canPay(s, gc)]); } }
+      var o = improveOpt(s, k); if (o && k !== 'wall') a.push([(o.b ? 'UPGRADE' : 'BUILD ANOTHER') + ' (' + cstr(o.c) + ')', function () { if (!doImprove(s, k)) showToast('NEED ' + cstr(o.c)); }, !canPay(s, o.c)]);
+      return a; }
+    function near() { var s = ME_S; if (!s) return null; var best = null, bd = 150; s.bld.forEach(function (b) { if (!b.L && !b.j) return; var p = bldPos(s, b), d = Math.hypot(px - p.x, py - p.y); if (d < bd) { bd = d; best = b; } }); return best; }
+    function tick() { try { resLine(); if (typeof NEWS38 !== 'undefined' && document.body.classList.contains('min63')) NEWS38.t = 0; var b = near(); if (!b || b.k === 'bank') { box.style.display = 'none'; shown = null; return; }
+      var s = ME_S, a = acts(s, b), sig = b.k + b.L + (b.j ? 'j' : '') + a.map(function (x) { return x[0] + !!x[2]; }).join('|'); box.style.display = 'block'; if (sig === cur && shown === b) return; cur = sig; shown = b;
+      box.innerHTML = '<b>' + (NAME[b.k] || b.k.toUpperCase()) + (b.L ? ' L' + b.L : '') + (b.j ? ' \u2692 BUILDING' : '') + '</b>';
+      a.forEach(function (x) { var bt = document.createElement('button'); bt.textContent = x[0]; bt.disabled = !!x[2]; bt.onclick = function (e) { e.stopPropagation(); x[1](); cur = ''; updateRes(); tick(); }; box.appendChild(bt); });
+      if (!a.length) box.innerHTML += '<div>WORKING</div>'; } catch (e) {} }
+    setInterval(tick, 300); window.__v63b = { near: function () { var b = near(); return b && b.k; }, tick: tick };
   })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
