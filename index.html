@@ -1696,7 +1696,7 @@
       ctx.restore();
       drawBox();
       if (hurtT > 0) { ctx.strokeStyle = '#000'; ctx.lineWidth = 12; ctx.strokeRect(6, 6, W - 12, H - 12); }
-      if (toastT > 0) { ctx.font = 'bold 18px monospace'; ctx.textAlign = 'center'; var tw = ctx.measureText(toast).width; ctx.fillStyle = '#000'; var thb = document.getElementById('topHud').getBoundingClientRect().bottom; var ty = Math.round((W < 600 ? thb + 100 : Math.max(H * 0.5 - 120, thb + 12))); var TL = [toast], lh = 30; if (tw + 20 > W - 20) { ctx.font = 'bold 13px monospace'; lh = 20; TL = []; var cur = ''; toast.split(' ').forEach(function (w) { var t2 = cur ? cur + ' ' + w : w; if (cur && ctx.measureText(t2).width > W - 50) { TL.push(cur); cur = w; } else cur = t2; }); if (cur) TL.push(cur); tw = 0; TL.forEach(function (l) { tw = Math.max(tw, ctx.measureText(l).width); }); } ctx.fillRect(W / 2 - tw / 2 - 10, ty, tw + 20, TL.length > 1 ? TL.length * lh + 10 : 30); ctx.fillStyle = '#fff'; TL.forEach(function (l, i) { ctx.fillText(l, W / 2, ty + (TL.length > 1 ? 20 + i * lh : 21)); }); }
+      if (toastT > 0) { ctx.font = 'bold 18px monospace'; ctx.textAlign = 'center'; var tw = ctx.measureText(toast).width; ctx.fillStyle = '#000'; var thb = document.getElementById('topHud').getBoundingClientRect().bottom; var ty = Math.round((H < 500 ? thb + 6 : W < 600 ? thb + 100 : Math.max(H * 0.5 - 120, thb + 12))); var TL = [toast], lh = 30; if (tw + 20 > W - 20) { ctx.font = 'bold 13px monospace'; lh = 20; TL = []; var cur = ''; toast.split(' ').forEach(function (w) { var t2 = cur ? cur + ' ' + w : w; if (cur && ctx.measureText(t2).width > W - 50) { TL.push(cur); cur = w; } else cur = t2; }); if (cur) TL.push(cur); tw = 0; TL.forEach(function (l) { tw = Math.max(tw, ctx.measureText(l).width); }); } ctx.fillRect(W / 2 - tw / 2 - 10, ty, tw + 20, TL.length > 1 ? TL.length * lh + 10 : 30); ctx.fillStyle = '#fff'; TL.forEach(function (l, i) { ctx.fillText(l, W / 2, ty + (TL.length > 1 ? 20 + i * lh : 21)); }); }
       drawMinimap();
       var nm = nearMarket();
       if (nm && !wasAtMarket) setShop(true);
@@ -5053,7 +5053,8 @@
     if (NEWS38.t <= 0 || !NEWS38.msg) return; var dpr = window.devicePixelRatio || 1, W = cv.width / dpr, H = cv.height / dpr, c = ctx;
     c.save(); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.globalAlpha = Math.min(1, NEWS38.t); c.font = 'bold ' + (W < 480 ? 10 : 12) + 'px monospace';
     var txt = '\u2605 CAPITAL NEWS: ' + NEWS38.msg, w = Math.min(W - 20, c.measureText(txt).width + 20), x = (W - w) / 2, y = W < 480 ? 150 : 118;
-    c.fillStyle = '#000'; c.fillRect(x, y, w, 22); c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(txt, W / 2, y + 15, w - 12); c.restore();
+    if (H < 500) { var hr81 = document.getElementById('topHud').getBoundingClientRect(), mb81 = document.getElementById('menuBtn').getBoundingClientRect(); txt = '\u2605 ' + NEWS38.msg; x = hr81.right + 8; w = Math.min(Math.max(120, mb81.left - 8 - x), c.measureText(txt).width + 20); y = hr81.top + 4; } // v81: on phones news sits beside the top bar, off the hero
+    c.fillStyle = '#000'; c.fillRect(x, y, w, 22); c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(txt, x + w / 2, y + 15, w - 12); c.restore();
   }
   var _et38 = econTick; econTick = function (dt) { _et38(dt); try { news38(dt); } catch (e) {} };
   var _mw38 = drawMiniWorld; drawMiniWorld = function () { var r = _mw38.apply(this, arguments); try { drawNews38(); } catch (e) {} return r; };
