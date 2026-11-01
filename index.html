@@ -2686,7 +2686,7 @@
     if (happyOf(s) < 0.45 && s.ppl.length > 3 && Math.random() < 0.5) { var ad = adults(s); if (ad.length > 2) { var p = ad[ad.length - 1]; s.ppl.splice(s.ppl.indexOf(p), 1); if (s.f === 'me') showToast(p.n.toUpperCase() + ' LEFT - TAXES TOO HIGH'); } }
   };
   var _ageYear29 = ageYear;
-  ageYear = function () { rollWeather(); if (ME_S && WX.k !== 'NORMAL') showToast('THIS YEAR: ' + WX.k); _ageYear29(); };
+  ageYear = function () { var pk = WX.k; rollWeather(); if (ME_S && WX.k !== 'NORMAL' && WX.k !== pk) showToast(WX.k + ({ 'GOOD HARVEST': ': MORE FOOD', 'BAD HARVEST': ': LESS FOOD', 'DROUGHT': ': LESS FOOD AND WATER' }[WX.k] || '')); _ageYear29(); };
   // AI: tax smartly, store food, bank gold
   var _plan29 = plan;
   plan = function (s) {
