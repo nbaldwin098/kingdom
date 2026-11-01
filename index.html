@@ -4705,22 +4705,40 @@
       var b = document.createElement('button'); b.textContent = d[0]; b.onclick = function (e) { e.stopPropagation(); d[1](); menu.style.display = 'none'; }; menu.appendChild(b); });
     // walk-up building menus
     var NAME = { hall: 'TOWN HALL', lumber: 'LUMBER CAMP', barracks: 'BARRACKS', market: 'MARKET', farm: 'FARM', well: 'WELL', house: 'HOUSE', quarry: 'QUARRY', wall: 'WALL' };
-    var box = document.createElement('div'); box.id = 'near63'; document.body.appendChild(box); var cur = '', shown = null;
+    var flag64 = false, box = document.createElement('div'); box.id = 'near63'; document.body.appendChild(box); var cur = '', shown = null;
     function sellSurplus(s) { var R = s.res, n = 0, fk = s.ppl.length * 8 + 20; if (R.food > fk + 5) { n += trade(s, 'food', Math.floor((R.food - fk) * 0.5), true) || 0; } ['wood', 'stone'].forEach(function (r) { if (R[r] > 45) n += trade(s, r, Math.floor((R[r] - 45) * 0.5), true) || 0; }); return n; }
     function acts(s, b) { var a = [], k = b.k;
       if (k === 'barracks') { a.push(['TRAIN 1 (4\ud83c\udf3e 3\ud83e\ude99)', function () { if (!trainSoldier(s, 's')) showToast('NEED FOOD, GOLD AND A FREE ADULT'); }]); a.push(['TRAIN 5', function () { var n = 0; for (var i = 0; i < 5; i++) if (trainSoldier(s, 's')) n++; showToast(n + ' SOLDIERS TRAINED'); }]); }
       if (k === 'market') a.push(['SELL SURPLUS', function () { var g0 = s.res.gold; sellSurplus(s); showToast('+' + Math.round(s.res.gold - g0) + ' GOLD'); }]);
       if (k === 'hall') { a.push(['GOLD FOCUS', function () { if ((s.gcd60 || 0) > 0) return showToast('WORKERS REST ' + Math.ceil(s.gcd60) + 'S'); s.goldF60 = 60; s.gcd60 = 180; showToast('WORKERS PAN GOLD FOR 60S'); }]);
         var h = me && me.hallObj, L = h ? h.gateUp60 || 0 : 3; if (h && L < 3) { var gc = { stone: 40 + 40 * (L + 1), wood: 20 + 10 * (L + 1) }; a.push(['GATE L' + (L + 1) + ' (' + cstr(gc) + ')', function () { if (!canPay(s, gc)) return showToast('NEED ' + cstr(gc)); pay(s, gc); h.gateUp60 = L + 1; showToast('GATE REINFORCED'); }, !canPay(s, gc)]); } }
+      // any unit this building makes (dock ships, airport jets, garage tanks, ...): build it right here
+      Object.keys(AU).forEach(function (t) { var u = AU[t]; if (u.b !== k || !canUnit(s, t) || t === 'w' && k !== 'dock') return; a.push([(UT[t].name || t) + ' (' + cstr(u.c) + ')', function () { var nr = NOREDIR; NOREDIR = true; var ok = trainSoldier(s, t); NOREDIR = nr; showToast(ok ? UT[t].name + ' READY' : 'NEED ' + cstr(u.c) + ' AND A FREE ADULT'); }, !canPay(s, u.c)]); });
+      if (k === 'barracks') { if (flag64) { a.length = 0; dests().filter(function (d) { return !/^GUARD|^RALLY/.test(d.n); }).slice(0, 5).forEach(function (d) { a.push([d.n, function () { ORD.n = 999; ORD.type = 'any'; dispatch(d); flag64 = false; }]); }); a.push(['\u2715 BACK', function () { flag64 = false; }]); return a; }
+        a.push(['\u2691 WAR FLAG: SEND ARMY', function () { flag64 = true; }, !pool('any').length]); }
+      if (k === 'bank') { a.info = 'SAFE ' + fmt(Math.floor(protectedGold(s))) + ' \u00b7 AT RISK ' + fmt(Math.floor(lootable(s))) + ' \u00b7 TAX ' + Math.round(myTax * 100) + '%';
+        a.push(['TAX -', function () { myTax = Math.max(0, Math.round((myTax - 0.02) * 100) / 100); try { localStorage.setItem(TAX_KEY, myTax); } catch (e) {} }]); a.push(['TAX +', function () { myTax = Math.min(0.6, Math.round((myTax + 0.02) * 100) / 100); try { localStorage.setItem(TAX_KEY, myTax); } catch (e) {} }]);
+        if (b.L) { var vc = upCostOf(b); a.push(['UPGRADE VAULT (' + cstr(vc) + ')', function () { orderUpgrade(s, b); }, !!b.j || !canPay(s, vc)]); } return a; }
       var o = improveOpt(s, k); if (o && k !== 'wall') a.push([(o.b ? 'UPGRADE' : 'BUILD ANOTHER') + ' (' + cstr(o.c) + ')', function () { if (!doImprove(s, k)) showToast('NEED ' + cstr(o.c)); }, !canPay(s, o.c)]);
       return a; }
     function near() { var s = ME_S; if (!s) return null; var best = null, bd = 150; s.bld.forEach(function (b) { if (!b.L && !b.j) return; var p = bldPos(s, b), d = Math.hypot(px - p.x, py - p.y); if (d < bd) { bd = d; best = b; } }); return best; }
-    function tick() { try { resLine(); if (typeof NEWS38 !== 'undefined' && document.body.classList.contains('min63')) NEWS38.t = 0; var b = near(); if (!b || b.k === 'bank') { box.style.display = 'none'; shown = null; return; }
-      var s = ME_S, a = acts(s, b), sig = b.k + b.L + (b.j ? 'j' : '') + a.map(function (x) { return x[0] + !!x[2]; }).join('|'); box.style.display = 'block'; if (sig === cur && shown === b) return; cur = sig; shown = b;
-      box.innerHTML = '<b>' + (NAME[b.k] || b.k.toUpperCase()) + (b.L ? ' L' + b.L : '') + (b.j ? ' \u2692 BUILDING' : '') + '</b>';
+    function tick() { try { resLine(); if (typeof NEWS38 !== 'undefined' && document.body.classList.contains('min63')) NEWS38.t = 0; var b = near(); if (!b) { box.style.display = 'none'; shown = null; flag64 = false; return; }
+      var s = ME_S, a = acts(s, b), sig = b.k + b.L + (b.j ? 'j' : '') + (a.info || '') + a.map(function (x) { return x[0] + !!x[2]; }).join('|'); box.style.display = 'block'; if (sig === cur && shown === b) return; cur = sig; shown = b;
+      box.innerHTML = '<b>' + (NAME[b.k] || b.k.toUpperCase()) + (b.L ? ' L' + b.L : '') + (b.j ? ' \u2692 BUILDING' : '') + '</b>' + (a.info ? '<div>' + a.info + '</div>' : '');
       a.forEach(function (x) { var bt = document.createElement('button'); bt.textContent = x[0]; bt.disabled = !!x[2]; bt.onclick = function (e) { e.stopPropagation(); x[1](); cur = ''; updateRes(); tick(); }; box.appendChild(bt); });
       if (!a.length) box.innerHTML += '<div>WORKING</div>'; } catch (e) {} }
+    var _bu = bankUiTick; bankUiTick = function (dt) { if (document.body.classList.contains('min63')) { var nb = nearBank(); if (nb && nb.s === ME_S) { bankEl.style.display = 'none'; return; } } _bu(dt); };
     setInterval(tick, 300); window.__v63b = { near: function () { var b = near(); return b && b.k; }, tick: tick };
+  })();
+  // v65: landscape game. portrait phones get a rotate screen; short landscape screens get a compact HUD
+  (function () {
+    var st = document.createElement('style'); st.textContent = '#rot65{display:none;position:fixed;inset:0;z-index:9999;background:#fff;color:#000;font:bold 18px monospace;text-align:center;flex-direction:column;align-items:center;justify-content:center;gap:16px}' +
+      '#rot65 .ph{width:60px;height:100px;border:5px solid #000;border-radius:10px;animation:r65 2s infinite}@keyframes r65{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}' +
+      '@media (orientation:portrait) and (max-width:900px){#rot65{display:flex}}' +
+      '@media (orientation:landscape) and (max-height:500px){#near63{bottom:8px!important;padding:4px 6px!important;font-size:11px!important;max-width:52vw!important}#near63 button{padding:5px 7px!important;font-size:11px!important}' +
+      '#joy{transform:scale(.72);transform-origin:left bottom}#atk{transform:scale(.72);transform-origin:right bottom}#rcol{transform:scale(.8);transform-origin:right bottom}#evCard{top:8px!important;left:auto!important;right:70px!important;transform:none!important;width:250px!important;padding:5px!important}#ordP{max-height:80vh!important;overflow:auto!important}#menu{max-height:80vh;overflow:auto}}';
+    document.head.appendChild(st); var d = document.createElement('div'); d.id = 'rot65'; d.innerHTML = '<div class="ph"></div><div>ROTATE YOUR PHONE</div><div style="font-size:12px">KINGDOM IS PLAYED SIDEWAYS</div>'; document.body.appendChild(d);
+    try { if (screen.orientation && screen.orientation.lock) document.addEventListener('click', function f() { screen.orientation.lock('landscape').catch(function () {}); document.removeEventListener('click', f); }); } catch (e) {}
   })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
