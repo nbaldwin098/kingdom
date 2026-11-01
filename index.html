@@ -1964,7 +1964,7 @@
       items.push({ label: 'SELL 5 ' + r.toUpperCase() + ' @' + price(r).toFixed(2), btn: '+' + (5 * price(r) * mk).toFixed(1) + ' GOLD', dis: R[r] < 5, act: function () { trade(s, r, 5, true); } });
       items.push({ label: 'BUY 5 ' + r.toUpperCase() + ' @' + price(r).toFixed(2), btn: (5 * price(r) / mk).toFixed(1) + ' GOLD', dis: R.gold < 5 * price(r) / mk, act: function () { trade(s, r, 5, false); } });
     });
-    ['house', 'farm', 'well', 'lumber', 'quarry', 'granary', 'bank', 'market', 'barracks', 'wall', 'hall'].forEach(function (k) {
+    ['house', 'farm', 'well', 'lumber', 'quarry', 'granary', 'bank', 'market', 'barracks', 'prison', 'wall', 'hall'].forEach(function (k) {
       var lo = k === 'hall' ? s.bld[0] : lowest(s, k), busy = s.jobs.length >= 3;
       if (lo && (lo.L > 0 || k === 'hall')) { var c = lo.L ? upCostOf(lo) : EB.hall.c; items.push({ label: (lo.L ? 'UPGRADE ' : 'BUILD ') + ENAME[k] + (lo.L ? ' L' + lo.L + '>' + (lo.L + 1) : ''), btn: lo.j ? 'BUILDING' : busy ? 'QUEUE FULL' : cstr(c), dis: !!lo.j || busy || !canPay(s, c), act: function () { if (k === 'hall' && !lo.L) doImprove(s, 'hall'); else orderUpgrade(s, lo); } }); }
       if (k !== 'hall') { var nc = newCostOf(s, k); items.push({ label: 'NEW ' + ENAME[k] + (bCount(s, k) ? ' #' + (bCount(s, k) + 1) : ''), btn: busy ? 'QUEUE FULL' : cstr(nc), dis: busy || !canPay(s, nc), act: function () { orderBuild(s, k); } }); }
@@ -3211,7 +3211,7 @@
       var own = terrOf(px, py), ok = !own || own === s;
       ordP.appendChild(el('h3', 'BUILD WHERE YOU STAND'));
       ordP.appendChild(row(own === s ? 'YOUR LAND' : own ? 'CLAIMED BY ' + (facOf(own) ? facOf(own).name : 'ANOTHER REALM') + ' - CANNOT BUILD' : 'UNCLAIMED LAND - BUILDING HERE CLAIMS IT'));
-      ['farm', 'lumber', 'quarry', 'house', 'well', 'outpost', 'stable', 'barracks', 'granary', 'bank', 'market'].forEach(function (k) { var c = newCostOf(s, k); ordP.appendChild(row(ENAME[k], btn(cstr(c), function () { var b = orderAt(s, k, px, py - 40); showToast(b ? ENAME[k] + ' ORDERED HERE' : 'TOO CLOSE TO ANOTHER BUILDING / NOT YOUR LAND'); }, !ok || !canPay(s, c) || s.jobs.length >= 3))); });
+      ['farm', 'lumber', 'quarry', 'house', 'well', 'outpost', 'stable', 'barracks', 'prison', 'granary', 'bank', 'market'].forEach(function (k) { var c = newCostOf(s, k); ordP.appendChild(row(ENAME[k], btn(cstr(c), function () { var b = orderAt(s, k, px, py - 40); showToast(b ? ENAME[k] + ' ORDERED HERE' : 'TOO CLOSE TO ANOTHER BUILDING / NOT YOUR LAND'); }, !ok || !canPay(s, c) || s.jobs.length >= 3))); });
     }
   }
   var _ur32 = typeof updateRes === 'function' ? updateRes : null;
@@ -4709,7 +4709,7 @@
     function sellSurplus(s) { var R = s.res, n = 0, fk = s.ppl.length * 8 + 20; if (R.food > fk + 5) { n += trade(s, 'food', Math.floor((R.food - fk) * 0.5), true) || 0; } ['wood', 'stone'].forEach(function (r) { if (R[r] > 45) n += trade(s, r, Math.floor((R[r] - 45) * 0.5), true) || 0; }); return n; }
     function acts(s, b) { var a = [], k = b.k;
       if (k === 'barracks') { a.push(['TRAIN 1 (4\ud83c\udf3e 3\ud83e\ude99)', function () { if (!trainSoldier(s, 's')) showToast('NEED FOOD, GOLD AND A FREE ADULT'); }]); a.push(['TRAIN 5', function () { var n = 0; for (var i = 0; i < 5; i++) if (trainSoldier(s, 's')) n++; showToast(n + ' SOLDIERS TRAINED'); }]); (function () { var hb = s.hb73 || 0, pr = 60 + 10 * hb, nk = units.filter(function (u) { return u.f === (s.f || s.id) && u.t === 'k' && u.hp > 0; }).length; a.push(['BUY HORSE ' + pr + '\ud83e\ude99 (\ud83d\udc0e' + nk + ')', function () { if ((s.res.gold || 0) < pr) { showToast('NEED ' + pr + ' GOLD'); return; } var me = (typeof steed !== 'undefined' && steed.st === 'lost'); var u = me ? null : units.filter(function (u) { return u.f === (s.f || s.id) && u.t === 's' && u.hp > 0; })[0]; if (!me && !u) { showToast('NO SOLDIER TO MOUNT'); return; } s.res.gold -= pr; s.hb73 = hb + 1; if (me) { steed = { st: 'ridden' }; saveHorse(); updateMountBtn(); showToast('NEW HORSE - MOUNTED'); } else { u.t = 'k'; u.hp += 8; showToast('SOLDIER NOW CAVALRY'); } try { updateRes(); } catch (e) {} }]); })(); }
-      if (k === 'prison') { var pn = PR75.n(s), pc = PR75.cap(s); a.push(['\u26d3 ' + pn + '/' + pc + ' (-' + (0.05 * pn * YEAR_SEC).toFixed(0) + '\ud83c\udf3e/YR) \ud83d\udc6e' + PR75.police(s).length, function () {}]); a.push(['TRAIN POLICE (4\ud83c\udf3e 4\ud83e\ude99)', function () { showToast(PR75.train(s) ? 'POLICE ON PATROL' : 'NEED FOOD, GOLD AND A FREE ADULT'); }]); if (pn) { a.push(['RELEASE 1', function () { s.pris75--; showToast('PRISONER RELEASED'); }]); a.push(['EXECUTE 1', function () { s.pris75--; showToast('PRISONER EXECUTED'); }]); } }
+      if (k === 'prison') { var pn = PR75.n(s), pc = PR75.cap(s); a.push(['\u26d3 ' + pn + '/' + pc + ' (-' + (0.05 * pn * YEAR_SEC).toFixed(0) + '\ud83c\udf3e/YR) \ud83d\udc6e' + PR75.police(s).length, function () {}]); a.push(['TRAIN POLICE (4\ud83c\udf3e 4\ud83e\ude99)', function () { showToast(PR75.train(s) ? 'POLICE ON PATROL' : 'NEED FOOD, GOLD AND A FREE ADULT'); }]); if (CAP75.some(function (c) { return c.S === s; })) a.push(['\u26d3 ROUND UP', function () { var n = roundUp75(s); showToast(n ? n + ' SENT TO ROUND UP CAPTIVES' : 'NO FREE POLICE OR SOLDIERS NEARBY'); }]); if (pn) { a.push(['RELEASE 1', function () { s.pris75--; showToast('PRISONER RELEASED'); }]); a.push(['EXECUTE 1', function () { s.pris75--; showToast('PRISONER EXECUTED'); }]); } }
       if (k === 'market') a.push(['SELL SURPLUS', function () { var g0 = s.res.gold; sellSurplus(s); showToast('+' + Math.round(s.res.gold - g0) + ' GOLD'); }]);
       if (k === 'hall') { a.push(['GOLD FOCUS', function () { if ((s.gcd60 || 0) > 0) return showToast('WORKERS REST ' + Math.ceil(s.gcd60) + 'S'); s.goldF60 = 60; s.gcd60 = 180; showToast('WORKERS PAN GOLD FOR 60S'); }]);
         var h = me && me.hallObj, L = h ? h.gateUp60 || 0 : 3; if (h && L < 3) { var gc = { stone: 40 + 40 * (L + 1), wood: 20 + 10 * (L + 1) }; a.push(['GATE L' + (L + 1) + ' (' + cstr(gc) + ')', function () { if (!canPay(s, gc)) return showToast('NEED ' + cstr(gc)); pay(s, gc); h.gateUp60 = L + 1; showToast('GATE REINFORCED'); }, !canPay(s, gc)]); } }
@@ -4824,15 +4824,43 @@
     train: function (s) { var c = { food: 4, gold: 4 }; if (!lvSum(s, 'prison') || !canPay(s, c)) return false; var pool = adults(s).filter(function (p) { return !p.sick; }); if (pool.length < 2) return false; pay(s, c); var p = pool[pool.length - 1]; p.sol = 's'; p.job = 'police'; spawnSoldier(s, p); if (p.u) { p.u.pol75 = true; return true; } return false; }
   };
   var _dd75 = dealDamage; dealDamage = function (src, t, dmg) {
-    var was = t && t.hp, r = _dd75.apply(this, arguments);
+    try { if (src && src.pol75 && t && !t.isPlayer && !t.hall && t.hp > 0) { var S0 = setOfF(src.f); if (S0 && land75(S0, t.x, t.y)) { t.mx75 = Math.max(t.mx75 || 0, t.hp); dmg = Math.max(dmg, t.mx75 * 0.3); } } } catch (e) {}
+    var was = t && t.hp, r = _dd75.call(this, src, t, dmg);
     try { if (src && t && !t.isPlayer && !t.hall && was > 0 && t.hp <= 0 && (t.t === 's' || t.t === 'k') && !t.pol75 && !t.cap75) {
       var sf = src.isPlayer ? 'me' : src.f, S = setOfF(sf);
-      if (S && t.f !== sf && land75(S, t.x, t.y) && PR75.n(S) < PR75.cap(S)) { t.cap75 = true; S.pris75 = PR75.n(S) + 1; if (sf === 'me') showToast('\u26d3 PRISONER TAKEN (' + S.pris75 + '/' + PR75.cap(S) + ')'); } } } catch (e) {}
+      if (S && t.f !== sf && land75(S, t.x, t.y) && PR75.n(S) + CAP75.filter(function (c) { return c.S === S; }).length < PR75.cap(S)) { t.cap75 = true; CAP75.push({ S: S, x: t.x, y: t.y, from: t.f, esc: null, idle: 0, lead: false, ph: 0 }); if (sf === 'me') showToast('\u26d3 CAPTIVE TAKEN - ESCORT TO PRISON'); } } } catch (e) {}
     return r;
   };
-  var pr75T = 0, _uu75 = updateUnits; updateUnits = function (dt) { _uu75(dt); try {
+  var CAP75 = [];
+  function prisonXY75(S) { var b = S.bld.filter(function (b) { return b.k === 'prison' && b.L > 0; })[0]; return b ? bldPos(S, b) : null; }
+  function freeEsc75(c, pool, maxD) { var best = null, bd = maxD; pool.forEach(function (u) { if (u.hp <= 0 || u.esc75) return; var d = Math.hypot(u.x - c.x, u.y - c.y); if (d < bd) { bd = d; best = u; } }); return best; }
+  function roundUp75(S) { var n = 0; CAP75.forEach(function (c) { if (c.S !== S || c.esc || !land75(S, c.x, c.y)) return; var u = freeEsc75(c, units.filter(function (u) { return u.f === S.f && (u.pol75 || u.t === 's' || u.t === 'k'); }), 2500); if (u) { c.esc = u; u.esc75 = c; n++; } }); return n; }
+  function capTick75(dt) {
+    for (var i = CAP75.length - 1; i >= 0; i--) { var c = CAP75[i], S = c.S, P = prisonXY75(S);
+      if (!P || !sAlive(S)) { CAP75.splice(i, 1); continue; }
+      c.ph += dt * 6;
+      if (c.esc && c.esc !== 'P' && c.esc.hp <= 0) { c.esc = null; if (c.lead) { c.lead = false; c.idle = 12; } }
+      if (c.esc === 'P' && (S !== ME_S || Math.hypot(px - c.x, py - c.y) > 400)) { c.esc = null; c.lead = false; }
+      if (!c.esc) { // police first, then a nearby soldier, then the player if they walk up
+        var u = freeEsc75(c, units.filter(function (u) { return u.f === S.f && u.pol75; }), 3000) || freeEsc75(c, units.filter(function (u) { return u.f === S.f && (u.t === 's' || u.t === 'k') && !u.order; }), 600);
+        if (u) { c.esc = u; u.esc75 = c; } else if (S === ME_S && Math.hypot(px - c.x, py - c.y) < 70) { c.esc = 'P'; c.lead = true; if (S === ME_S) showToast('\u26d3 LEADING CAPTIVE - WALK TO YOUR PRISON'); }
+      }
+      if (!c.esc) { c.idle += dt; if (c.idle > 25) { CAP75.splice(i, 1); if (S === ME_S) showToast('\u26d3 A CAPTIVE SLIPPED AWAY'); } continue; }
+      c.idle = 0;
+      var E = c.esc === 'P' ? { x: px, y: py } : c.esc;
+      if (!c.lead) { E.order = 'move'; E.tgt = null; E.tx = c.x; E.ty = c.y; if (Math.hypot(E.x - c.x, E.y - c.y) < 45) c.lead = true; continue; }
+      if (c.esc !== 'P') { E.order = 'move'; E.tgt = null; E.tx = P.x; E.ty = P.y + 60; }
+      var dx = E.x - c.x, dy = E.y - c.y, d = Math.hypot(dx, dy); if (d > 34) { c.x += dx * (1 - 34 / d); c.y += dy * (1 - 34 / d); }
+      if (Math.hypot(E.x - P.x, E.y - P.y - 60) < 110) { CAP75.splice(i, 1); S.pris75 = Math.min(PR75.cap(S), PR75.n(S) + 1); if (c.esc !== 'P') { c.esc.esc75 = null; c.esc.order = null; } if (S === ME_S) showToast('\u26d3 PRISONER JAILED (' + S.pris75 + '/' + PR75.cap(S) + ')'); }
+    }
+    units.forEach(function (u) { if (u.esc75 && CAP75.indexOf(u.esc75) < 0) { u.esc75 = null; u.order = null; } });
+    var mine = CAP75.filter(function (c) { return c.S === ME_S; }).length; rb75.style.display = mine && started ? 'block' : 'none'; if (mine) rb75.textContent = '\u26d3 ROUND UP (' + mine + ')';
+  }
+  var rb75 = document.createElement('button'); rb75.id = 'rb75'; rb75.style.cssText = 'position:fixed;right:12px;bottom:140px;z-index:30;display:none;font:bold 12px monospace;background:#fff;border:2px solid #000;padding:4px 8px';
+  rb75.addEventListener('click', function (e) { e.stopPropagation(); var n = roundUp75(ME_S); showToast(n ? n + ' SENT TO ROUND UP CAPTIVES' : 'NO FREE POLICE OR SOLDIERS NEARBY'); }); document.body.appendChild(rb75);
+  var pr75T = 0, _uu75 = updateUnits; updateUnits = function (dt) { _uu75(dt); try { capTick75(dt);
     // police: hunt intruders on home soil, never step outside it
-    units.forEach(function (u) { if (!u.pol75 || u.hp <= 0) return; var S = setOfF(u.f); if (!S) return; var h = homeXY(S);
+    units.forEach(function (u) { if (!u.pol75 || u.hp <= 0 || u.esc75) return; var S = setOfF(u.f); if (!S) return; var h = homeXY(S);
       if (!land75(S, u.x, u.y)) { u.tgt = null; u.order = 'move'; u.tx = h.x + (Math.random() - 0.5) * 200; u.ty = h.y + 200; return; }
       if (u.order === 'move' && Math.hypot(u.tx - u.x, u.ty - u.y) > 30) return; u.order = null;
       var best = null, bd = 1e9; units.forEach(function (e) { if (e.hp <= 0 || e.f === u.f || e.t === 'c' || !hostile(u.f, e.f)) return; var d = Math.hypot(e.x - u.x, e.y - u.y); if (d < bd && d < 900 && land75(S, e.x, e.y)) { bd = d; best = e; } });
@@ -4841,7 +4869,7 @@
     allS75().forEach(function (S) { if (!S.res || !sAlive(S)) return; var n = PR75.n(S);
       if (n) { var need = 0.05 * n; if (S.res.food >= need) S.res.food -= need; else if (Math.random() < 0.1) { S.pris75 = n - 1; if (S.f === 'me') showToast('\u26d3 A HUNGRY PRISONER ESCAPED'); } }
       if (S.pris75 > PR75.cap(S)) S.pris75 = PR75.cap(S);
-      if (S.f !== 'me' && Math.random() < 0.01) { if (!lvSum(S, 'prison') && lvSum(S, 'barracks') && (S.res.gold || 0) > 40) doImprove(S, 'prison'); else if (lvSum(S, 'prison') && PR75.police(S).length < 2) PR75.train(S); } });
+      if (S.f !== 'me' && Math.random() < (lvSum(S, 'prison') && !PR75.police(S).length ? 0.04 : 0.01)) { if (!lvSum(S, 'prison') && lvSum(S, 'barracks') && (S.res.gold || 0) > 40) doImprove(S, 'prison'); else if (lvSum(S, 'prison') && PR75.police(S).length < 2) PR75.train(S); } });
   } catch (e) {} };
   var _db75 = drawBld; drawBld = function (c, s, b, x, y, f) {
     if (b.k !== 'prison' || !(b.L > 0)) return _db75.apply(this, arguments);
@@ -4850,7 +4878,7 @@
     c.strokeStyle = '#bbb'; for (var i = -24; i <= 24; i += 8) { c.beginPath(); c.moveTo(x + i, y - 50); c.lineTo(x + i, y - 16); c.stroke(); }
     c.fillStyle = '#000'; c.font = 'bold 13px monospace'; c.textAlign = 'center'; c.fillText('PRISON \u26d3' + PR75.n(s) + '/' + PR75.cap(s), x, y + 18); c.restore();
   };
-  var _du75 = drawUnits; drawUnits = function (camX, camY) { var r = _du75.apply(this, arguments); try { ctx.save(); ctx.fillStyle = '#1e4fd8'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2; units.forEach(function (u) { if (!u.pol75 || u.hp <= 0) return; var X = u.x - camX, Y = u.y - camY; ctx.fillRect(X - 8, Y - 62, 16, 7); ctx.strokeRect(X - 8, Y - 62, 16, 7); }); ctx.restore(); } catch (e) {} return r; };
+  var _du75 = drawUnits; drawUnits = function (camX, camY) { var r = _du75.apply(this, arguments); try { ctx.save(); ctx.fillStyle = '#1e4fd8'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2; units.forEach(function (u) { if (!u.pol75 || u.hp <= 0) return; var X = u.x - camX, Y = u.y - camY; ctx.fillRect(X - 8, Y - 62, 16, 7); ctx.strokeRect(X - 8, Y - 62, 16, 7); }); CAP75.forEach(function (cp) { var X = cp.x - camX, Y = cp.y - camY, sw = cp.lead ? Math.sin(cp.ph) * 5 : 0; ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(X, Y - 40, 7, 0, 7); ctx.moveTo(X, Y - 33); ctx.lineTo(X, Y - 14); ctx.moveTo(X, Y - 14); ctx.lineTo(X - 5 + sw, Y); ctx.moveTo(X, Y - 14); ctx.lineTo(X + 5 - sw, Y); ctx.stroke(); ctx.strokeStyle = '#a0522d'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X - 6, Y - 26); ctx.lineTo(X + 6, Y - 22); ctx.moveTo(X - 6, Y - 22); ctx.lineTo(X + 6, Y - 26); if (cp.lead && cp.esc) { var E = cp.esc === 'P' ? { x: px, y: py } : cp.esc; ctx.moveTo(X, Y - 24); ctx.lineTo(E.x - camX, E.y - camY - 24); } ctx.stroke(); }); ctx.restore(); } catch (e) {} return r; };
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
     _uu36(dt); if (!BOUNDS) return;
