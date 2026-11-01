@@ -149,6 +149,8 @@
   #mountBtn.far { opacity: 0.45; }
   @media (max-width: 500px), (max-height: 420px) { :root { --mm: 92px; --joy: 112px; --atk: 82px; --pad: 10px; } #topHud > div { font-size: 11px !important; padding: 2px 6px; margin-bottom: 3px; } #rcol button { font-size: 11px; padding: 6px 4px; } }
   @media (max-width: 500px) { #cmdBar button { min-width: 44px !important; } }
+  /* v87: PC (no touch screen) moves with keys, so the on-screen joystick is hidden */
+  @media not all and (any-pointer: coarse) { #joy { visibility: hidden !important; } }
 </style>
 
   <style id="v45css">@media (max-width: 500px) { #topHud { max-width: calc(100vw - var(--mm) - var(--pad) * 3 - 74px - var(--sl) - var(--sr)) !important; } #lsBtn, #genBtn, #ordBtns button { max-width: 66px; overflow: hidden; white-space: nowrap; text-overflow: clip; } }</style>
