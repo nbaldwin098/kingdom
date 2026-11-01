@@ -1826,7 +1826,7 @@
     }
     // prosperous towns attract settlers
     s.migT -= dt;
-    if (s.migT <= 0) { s.migT = 20 + Math.random() * 10; if (beds(s) - pop >= 2 && s.inc.food >= 0 && R.food > pop * 4 && R.water > pop * 2 && Math.random() < migP(s)) { s.ppl.push(mkPerson(s, Math.random() < 0.5 ? 'm' : 'f', 17 + Math.floor(Math.random() * 12))); if (s.f === 'me') showToast('A SETTLER FAMILY MEMBER JOINED YOUR TOWN'); } }
+    if (s.migT <= 0) { s.migT = 20 + Math.random() * 10; if (beds(s) - pop >= 2 && s.inc.food >= 0 && R.food > pop * 4 && R.water > pop * 2 && Math.random() < migP(s)) { var np92 = mkPerson(s, Math.random() < 0.5 ? 'm' : 'f', 17 + Math.floor(Math.random() * 12)); s.ppl.push(np92); if (s.f === 'me') showToast(np92.n.toUpperCase() + ' JOINED YOUR TOWN'); } }
     // jobs for drawing
     var lab = ['water', 'food', 'build', 'wood', 'stone', 'gold'], amt = [wW, fW, bW, rest * s.want.wood / tw, rest * s.want.stone / tw, rest * s.want.gold / tw], k2 = 0;
     ws.forEach(function (p, i) { while (k2 < 5 && amt[k2] < 0.5) { if (k2 + 1 < 6) amt[k2 + 1] += Math.max(0, amt[k2]); k2++; } p.job = lab[k2]; amt[k2] -= 1; });
@@ -4525,7 +4525,7 @@
     var play57 = 0, warned57 = false, _uw57 = updateWolves; updateWolves = function (dt) { play57 += dt; if (play57 < 75) { wolves = []; wolfSpawnT = Math.max(wolfSpawnT, 1); return; }
       var n0 = wolves.length; _uw57(dt); if (!warned57 && wolves.length > n0) { warned57 = true; showToast('WOLVES! TAP ATTACK OR RIDE HOME'); } };
     // 2) minor news (masters, settlers) can't drown out important toasts: max one per 15 s, never over a fresh toast
-    var minorT57 = 0, lastT57 = 0, _st57 = showToast; showToast = function (t) { var n = performance.now() / 1000, minor = /IS NOW A MASTER|SETTLERS MOVED| WAS BORN/.test(t);
+    var minorT57 = 0, lastT57 = 0, _st57 = showToast; showToast = function (t) { var n = performance.now() / 1000, minor = /IS NOW A MASTER|SETTLERS MOVED| WAS BORN| JOINED YOUR TOWN/.test(t);
       if (minor && (n - minorT57 < 15 || (toastT > 0 && n - lastT57 < 2))) return; if (minor) minorT57 = n; lastT57 = n; _st57(t); };
     // 3) a house compass points to your own hall when it is off screen
     function home57() { if (!me || !me.hallObj || !me.alive) return; var h = me.hallObj, dx = h.x - px, dy = h.y - py, d = Math.hypot(dx, dy);
