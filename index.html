@@ -5042,7 +5042,7 @@
     var X = W / 2 + Math.cos(a) * t, Y = H / 2 + Math.sin(a) * t; window.__cc79 = { X: X, Y: Y, t: performance.now() }; c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
     c.translate(X, Y); c.fillStyle = '#fff'; c.strokeStyle = '#000'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 20, 0, 6.3); c.fill(); c.stroke();
     c.rotate(a); c.fillStyle = '#000'; c.beginPath(); c.moveTo(16, 0); c.lineTo(4, -8); c.lineTo(4, 8); c.closePath(); c.fill(); c.rotate(-a);
-    c.font = 'bold 13px monospace'; c.textAlign = 'center'; c.fillText('\u2605', -2, 5); c.font = 'bold 10px monospace'; c.fillText((d / 1000).toFixed(1) + 'K', 0, 33); c.restore();
+    c.font = 'bold 13px monospace'; c.textAlign = 'center'; c.fillText('\u2605', -2, 5); c.font = 'bold 10px monospace'; c.fillText('CAPITAL ' + (d / 1000).toFixed(1) + 'K', 0, 33); /* v90: say what the star compass points to, like HOME */ c.restore();
   }
   __w36.zone = function (x, y) { return zone(x, y); };
   window.__v37 = { ERA37: ERA37, eraTarget: eraTarget37, field: field37, compass: capCompass37 };
