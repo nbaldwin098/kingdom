@@ -4523,7 +4523,7 @@
     function home57() { if (!me || !me.hallObj || !me.alive) return; var h = me.hallObj, dx = h.x - px, dy = h.y - py, d = Math.hypot(dx, dy);
       var W2 = cv.width / (window.devicePixelRatio || 1), H2 = cv.height / (window.devicePixelRatio || 1); if (Math.abs(dx) < W2 / 2 + 60 && Math.abs(dy) < H2 / 2 + 60) return;
       var c = ctx, a = Math.atan2(dy, dx), rx = W2 / 2 - 46, ry = H2 < 500 ? H2 / 2 - 52 : H2 / 2 - 120, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
-      c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0); c.translate(W2 / 2 + Math.cos(a) * t, H2 / 2 + Math.sin(a) * t);
+      var X = W2 / 2 + Math.cos(a) * t, Y = H2 / 2 + Math.sin(a) * t, cc = window.__cc79; if (cc && performance.now() - cc.t < 120 && Math.hypot(X - cc.X, Y - cc.Y) < 64) { if (Math.abs(Math.sin(a)) > 0.6) X = cc.X + (X >= cc.X ? 64 : -64); else Y = cc.Y + (Y >= cc.Y ? 64 : -64); } c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0); c.translate(X, Y);
       c.fillStyle = '#000'; c.strokeStyle = '#fff'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 20, 0, 6.3); c.fill(); c.stroke(); c.rotate(a); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(18, 0); c.lineTo(8, -7); c.lineTo(8, 7); c.closePath(); c.fill(); c.rotate(-a);
       c.beginPath(); c.moveTo(-8, 0); c.lineTo(0, -8); c.lineTo(8, 0); c.closePath(); c.fill(); c.fillRect(-6, 0, 12, 7);
       c.fillStyle = '#000'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('HOME ' + (d / 1000).toFixed(1) + 'K', 0, 33); c.restore(); }
@@ -5031,7 +5031,7 @@
     if (!CAPX || !BOUNDS) return; var dx = CAPX.x - px, dy = CAPX.y - py, d = Math.hypot(dx, dy); if (d < CAPX.R + 400) return;
     var W = cv.width / (window.devicePixelRatio || 1), H = cv.height / (window.devicePixelRatio || 1);
     var c = ctx, a = Math.atan2(dy, dx), rx = W / 2 - 46, ry = H < 500 ? H / 2 - 75 : H / 2 - 70, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
-    var X = W / 2 + Math.cos(a) * t, Y = H / 2 + Math.sin(a) * t; c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+    var X = W / 2 + Math.cos(a) * t, Y = H / 2 + Math.sin(a) * t; window.__cc79 = { X: X, Y: Y, t: performance.now() }; c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
     c.translate(X, Y); c.fillStyle = '#fff'; c.strokeStyle = '#000'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 20, 0, 6.3); c.fill(); c.stroke();
     c.rotate(a); c.fillStyle = '#000'; c.beginPath(); c.moveTo(16, 0); c.lineTo(4, -8); c.lineTo(4, 8); c.closePath(); c.fill(); c.rotate(-a);
     c.font = 'bold 13px monospace'; c.textAlign = 'center'; c.fillText('\u2605', -2, 5); c.font = 'bold 10px monospace'; c.fillText((d / 1000).toFixed(1) + 'K', 0, 33); c.restore();
