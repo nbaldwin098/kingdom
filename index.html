@@ -1520,7 +1520,7 @@
   function saveHorse() { try { localStorage.setItem(HORSE_KEY, JSON.stringify({ st: steed.st, x: steed.x, y: steed.y, tx: steed.tx, ty: steed.ty, mode: MODE })); } catch (e) {} }
   function loadHorse() {
     try { var d = JSON.parse(localStorage.getItem(HORSE_KEY) || 'null'); steed = d && d.st ? d : { st: 'ridden' }; } catch (e) { steed = { st: 'ridden' }; }
-    if (steed.st === 'loose') steed.st = 'lost';
+    if (steed.st === 'loose' || steed.st === 'lost') steed = { st: 'ridden' };
     if (steed.st === 'tied' && steed.mode !== MODE) steed = { st: 'ridden' };
     steed.t = 0; updateMountBtn();
   }
@@ -4708,7 +4708,7 @@
     var flag64 = false, box = document.createElement('div'); box.id = 'near63'; document.body.appendChild(box); var cur = '', shown = null;
     function sellSurplus(s) { var R = s.res, n = 0, fk = s.ppl.length * 8 + 20; if (R.food > fk + 5) { n += trade(s, 'food', Math.floor((R.food - fk) * 0.5), true) || 0; } ['wood', 'stone'].forEach(function (r) { if (R[r] > 45) n += trade(s, r, Math.floor((R[r] - 45) * 0.5), true) || 0; }); return n; }
     function acts(s, b) { var a = [], k = b.k;
-      if (k === 'barracks') { a.push(['TRAIN 1 (4\ud83c\udf3e 3\ud83e\ude99)', function () { if (!trainSoldier(s, 's')) showToast('NEED FOOD, GOLD AND A FREE ADULT'); }]); a.push(['TRAIN 5', function () { var n = 0; for (var i = 0; i < 5; i++) if (trainSoldier(s, 's')) n++; showToast(n + ' SOLDIERS TRAINED'); }]); }
+      if (k === 'barracks') { a.push(['TRAIN 1 (4\ud83c\udf3e 3\ud83e\ude99)', function () { if (!trainSoldier(s, 's')) showToast('NEED FOOD, GOLD AND A FREE ADULT'); }]); a.push(['TRAIN 5', function () { var n = 0; for (var i = 0; i < 5; i++) if (trainSoldier(s, 's')) n++; showToast(n + ' SOLDIERS TRAINED'); }]); (function () { var hb = s.hb73 || 0, pr = 60 + 10 * hb, nk = units.filter(function (u) { return u.f === (s.f || s.id) && u.t === 'k' && u.hp > 0; }).length; a.push(['BUY HORSE ' + pr + '\ud83e\ude99 (\ud83d\udc0e' + nk + ')', function () { if ((s.res.gold || 0) < pr) { showToast('NEED ' + pr + ' GOLD'); return; } var me = (typeof steed !== 'undefined' && steed.st === 'lost'); var u = me ? null : units.filter(function (u) { return u.f === (s.f || s.id) && u.t === 's' && u.hp > 0; })[0]; if (!me && !u) { showToast('NO SOLDIER TO MOUNT'); return; } s.res.gold -= pr; s.hb73 = hb + 1; if (me) { steed = { st: 'ridden' }; saveHorse(); updateMountBtn(); showToast('NEW HORSE - MOUNTED'); } else { u.t = 'k'; u.hp += 8; showToast('SOLDIER NOW CAVALRY'); } try { updateRes(); } catch (e) {} }]); })(); }
       if (k === 'market') a.push(['SELL SURPLUS', function () { var g0 = s.res.gold; sellSurplus(s); showToast('+' + Math.round(s.res.gold - g0) + ' GOLD'); }]);
       if (k === 'hall') { a.push(['GOLD FOCUS', function () { if ((s.gcd60 || 0) > 0) return showToast('WORKERS REST ' + Math.ceil(s.gcd60) + 'S'); s.goldF60 = 60; s.gcd60 = 180; showToast('WORKERS PAN GOLD FOR 60S'); }]);
         var h = me && me.hallObj, L = h ? h.gateUp60 || 0 : 3; if (h && L < 3) { var gc = { stone: 40 + 40 * (L + 1), wood: 20 + 10 * (L + 1) }; a.push(['GATE L' + (L + 1) + ' (' + cstr(gc) + ')', function () { if (!canPay(s, gc)) return showToast('NEED ' + cstr(gc)); pay(s, gc); h.gateUp60 = L + 1; showToast('GATE REINFORCED'); }, !canPay(s, gc)]); } }
@@ -4784,6 +4784,32 @@
     var _st70 = showToast;
     showToast = function (t) { if (typeof t === 'string' && t.indexOf('GOAL DONE') === 0 && document.body.classList.contains('min63')) return; return _st70.apply(this, arguments); };
     setTimeout(preview, 50);
+  })();
+  // ---- v73: saving is optional - progress is held in memory during a run and only written when the player says YES at HOME
+  (function () {
+    var P = { 'kingdom-pop-v1': 1, 'kingdom-res-v1': 1, 'kingdom-conquered-v1': 1, 'kingdom-army-v1': 1, 'kingdom-horse-v1': 1, 'kingdom-econ-v1': 1, 'kingdom-save-v1': 1 };
+    var SP = Storage.prototype, _set = SP.setItem, _get = SP.getItem, _rm = SP.removeItem, BUF = null;
+    SP.setItem = function (k, v) { if (BUF && this === localStorage && P[k]) { BUF[k] = String(v); return; } return _set.apply(this, arguments); };
+    SP.getItem = function (k) { if (BUF && this === localStorage && P[k] && k in BUF) return BUF[k]; return _get.apply(this, arguments); };
+    SP.removeItem = function (k) { if (BUF && this === localStorage && P[k]) { BUF[k] = null; return; } return _rm.apply(this, arguments); };
+    function flush() { var b = BUF; BUF = null; if (!b) return; Object.keys(b).forEach(function (k) { try { if (b[k] === null) _rm.call(localStorage, k); else _set.call(localStorage, k, b[k]); } catch (e) {} }); }
+    var _bg73 = beginGame;
+    beginGame = function () { BUF = {}; return _bg73.apply(this, arguments); };
+    var home = document.getElementById('menuHome'), pass = false;
+    var box = document.createElement('div'); box.id = 'save73';
+    box.style.cssText = 'display:none;position:fixed;inset:0;z-index:100000;background:rgba(255,255,255,0.85);align-items:center;justify-content:center;font-family:monospace';
+    box.innerHTML = '<div style="background:#fff;border:3px solid #000;padding:18px 22px;text-align:center"><div style="font:bold 20px monospace;margin-bottom:14px">SAVE PROGRESS?</div><button id="save73y" style="font:bold 18px monospace;padding:10px 26px;margin:0 8px;background:#000;color:#fff;border:2px solid #000">YES</button><button id="save73n" style="font:bold 18px monospace;padding:10px 26px;margin:0 8px;background:#fff;color:#000;border:2px solid #000">NO</button></div>';
+    document.body.appendChild(box);
+    function go(yes) { box.style.display = 'none'; pass = true; try { home.click(); } finally { pass = false; } if (yes) flush(); else BUF = null; showToast(yes ? 'PROGRESS SAVED' : 'PROGRESS NOT SAVED'); }
+    document.getElementById('save73y').addEventListener('click', function () { go(true); });
+    document.getElementById('save73n').addEventListener('click', function () { go(false); });
+    document.addEventListener('click', function (e) { if (e.target !== home || pass || !BUF) return; e.stopImmediatePropagation(); e.preventDefault(); box.style.display = 'flex'; }, true);
+    window.__v73 = { buf: function () { return BUF; } };
+  })();
+  // ---- v73b: the player's own blows scale with enemy toughness (enemy troops grew stronger over the eras; 3-4 hits fell a soldier)
+  (function () {
+    var _dd73 = dealDamage;
+    dealDamage = function (src, t, dmg) { if (src && src.isPlayer && t && t.t && UT[t.t] && typeof uStat === 'function') { var mx = t.mx73 = Math.max(t.mx73 || 0, uStat(t, 'hp') || 10, t.hp); dmg = Math.max(dmg, mx * 0.15 * dmg); } return _dd73.call(this, src, t, dmg); };
   })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
