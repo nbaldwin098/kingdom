@@ -4665,7 +4665,7 @@
       if (!TAB || !secs.some(function (s) { return key(s) === TAB; })) TAB = key(secs[0]);
       var bar = document.createElement('div'); bar.id = 'ordTabs'; bar.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 6px';
       secs.forEach(function (s) { var k = key(s), on = k === TAB; s.n.forEach(function (n) { n.style.display = on ? '' : 'none'; });
-        var b = document.createElement('button'); b.textContent = k.length > 9 ? k.split(' ')[0] : k; b.title = s.k; b.style.cssText = 'flex:1 1 auto;padding:6px 4px;font:inherit;font-size:11px;border-radius:6px;border:1px solid #c9a24a;background:' + (on ? '#c9a24a;color:#221' : 'transparent;color:#f3e2b0');
+        var b = document.createElement('button'); b.textContent = k.length > 9 ? k.split(' ')[0] : k; b.title = s.k; b.style.cssText = 'flex:1 1 auto;padding:6px 4px;font:inherit;font-size:11px;border-radius:6px;border:2px solid #000;font-weight:bold;background:' + (on ? '#000;color:#fff' : '#fff;color:#000');
         b.onclick = function (e) { e.stopPropagation(); TAB = k; renderOrd(); }; bar.appendChild(b); });
       P.insertBefore(bar, kids.filter(function (n) { return n.tagName === 'H3'; })[0]); } catch (e) {} };
     // royal events: every 4-6 min each town gets an offer; the CPU decides by a fixed rule, I get a choice card
