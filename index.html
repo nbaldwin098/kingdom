@@ -2045,7 +2045,7 @@
         var t = p.tgt || h, mx = t.x - p.x, my = t.y - p.y, d = Math.hypot(mx, my), sp = (p.sick ? 25 : 55) * dt;
         if (d > 4) { p.x += mx / d * Math.min(d, sp); p.y += my / d * Math.min(d, sp); p.face = mx > 0 ? 1 : -1; p.st += dt * 0.6; }
         var w = { c: { name: p.n, role: p.age < 16 ? 'child' : JOBART[p.job] || 'villager', age: p.age }, face: p.face || 1, fid: s.f, hs: p.hs, job: p.age < 16 ? 'child' : p.job };
-        items.push({ y: p.y, x: p.x, y2: p.y, fn: function (sx, sy) { cityPerson(ctx, w, sx, sy); if (p.job && p.age >= 16) { ctx.font = '9px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#000'; ctx.fillText(p.mst49 && typeof TITLE49 !== 'undefined' && TITLE49[p.job] ? 'MASTER ' + TITLE49[p.job] : p.job.toUpperCase(), sx, sy + 12); if (p.mst49) { ctx.fillStyle = '#e0a800'; ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.beginPath(); for (var i50 = 0; i50 < 10; i50++) { var a50 = -Math.PI / 2 + i50 * Math.PI / 5, r50 = i50 % 2 ? 2.4 : 5.5; ctx.lineTo(sx + Math.cos(a50) * r50, sy - 40 + Math.sin(a50) * r50); } ctx.closePath(); ctx.fill(); ctx.stroke(); } } } });
+        items.push({ y: p.y, x: p.x, y2: p.y, fn: function (sx, sy) { cityPerson(ctx, w, sx, sy); if (p.job && p.age >= 16 && !w._lh84) { ctx.font = '9px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#000'; ctx.fillText(p.mst49 && typeof TITLE49 !== 'undefined' && TITLE49[p.job] ? 'MASTER ' + TITLE49[p.job] : p.job.toUpperCase(), sx, sy + 12); if (p.mst49) { ctx.fillStyle = '#e0a800'; ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.beginPath(); for (var i50 = 0; i50 < 10; i50++) { var a50 = -Math.PI / 2 + i50 * Math.PI / 5, r50 = i50 % 2 ? 2.4 : 5.5; ctx.lineTo(sx + Math.cos(a50) * r50, sy - 40 + Math.sin(a50) * r50); } ctx.closePath(); ctx.fill(); ctx.stroke(); } } } });
       });
     });
   }
@@ -2861,9 +2861,14 @@
     dspr(c, cv, x, y, sz, w.face);
     if (w.c.age >= 60) { c.fillStyle = '#000'; c.fillRect(x + w.face * 14, y - 30, 3, 30); }
     var top = y - sz * 0.92;
-    c.fillStyle = '#000'; c.font = '11px monospace'; c.textAlign = 'center'; if (zoom >= 0.7 || w === focusW) c.fillText(w.c.name.toUpperCase(), x, top);
+    // v84: when townsfolk crowd together, only the first one keeps its name/job labels so text never piles up
+    if (LB84.f !== window.__lf84) { LB84.f = window.__lf84; LB84.a = []; }
+    w._lh84 = false;
+    if (w !== focusW) { for (var i84 = 0; i84 < LB84.a.length; i84++) { var q84 = LB84.a[i84]; if (Math.abs(q84[0] - x) < 48 && Math.abs(q84[1] - y) < 26) { w._lh84 = true; break; } } if (!w._lh84) LB84.a.push([x, y]); }
+    c.fillStyle = '#000'; c.font = '11px monospace'; c.textAlign = 'center'; if (!w._lh84 && (zoom >= 0.7 || w === focusW)) c.fillText(w.c.name.toUpperCase(), x, top);
     if (w === focusW) { c.font = 'bold 11px monospace'; c.fillText('AGE ' + w.c.age + ' ' + stage(w.c), x, top - 13); }
   };
+  var LB84 = { f: -1, a: [] }; (function lf84() { window.__lf84 = (window.__lf84 || 0) + 1; requestAnimationFrame(lf84); })();
   // ---- soldiers: guard / archer / knight on a war horse / captains; white side = inverted with outline; faction pennant colour
   var _sa30 = soldierArt;
   soldierArt = function (c, u, x, y) {
