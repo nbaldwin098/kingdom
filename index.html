@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Kingdom</title>
@@ -4521,7 +4522,7 @@
     // 3) a house compass points to your own hall when it is off screen
     function home57() { if (!me || !me.hallObj || !me.alive) return; var h = me.hallObj, dx = h.x - px, dy = h.y - py, d = Math.hypot(dx, dy);
       var W2 = cv.width / (window.devicePixelRatio || 1), H2 = cv.height / (window.devicePixelRatio || 1); if (Math.abs(dx) < W2 / 2 + 60 && Math.abs(dy) < H2 / 2 + 60) return;
-      var c = ctx, a = Math.atan2(dy, dx), rx = W2 / 2 - 46, ry = H2 / 2 - 120, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
+      var c = ctx, a = Math.atan2(dy, dx), rx = W2 / 2 - 46, ry = H2 < 500 ? H2 / 2 - 52 : H2 / 2 - 120, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
       c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0); c.translate(W2 / 2 + Math.cos(a) * t, H2 / 2 + Math.sin(a) * t);
       c.fillStyle = '#000'; c.strokeStyle = '#fff'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 20, 0, 6.3); c.fill(); c.stroke(); c.rotate(a); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(18, 0); c.lineTo(8, -7); c.lineTo(8, 7); c.closePath(); c.fill(); c.rotate(-a);
       c.beginPath(); c.moveTo(-8, 0); c.lineTo(0, -8); c.lineTo(8, 0); c.closePath(); c.fill(); c.fillRect(-6, 0, 12, 7);
@@ -4531,7 +4532,7 @@
 
   // ===== v58: start at your hall, first-minute goals, rams batter the gate =====
   (function () {
-    var _bg58 = beginGame; beginGame = function (mode) { _bg58(mode); try { if (me && me.hallObj) { px = me.hallObj.x; py = me.hallObj.y + 260; } } catch (e) {} try { allSets().forEach(function (s) { if (!s || !s.res) return; s.res.wood = (s.res.wood || 0) + 40; s.res.food = (s.res.food || 0) + 25; s.res.stone = (s.res.stone || 0) + 20; s.res.water = (s.res.water || 0) + 15; }); updateRes(); } catch (e) {} goals58Start(); };
+    var _bg58 = beginGame; beginGame = function (mode) { _bg58(mode); try { if (me && me.hallObj) { px = me.hallObj.x; py = me.hallObj.y + ((cv.height / (window.devicePixelRatio || 1)) < 500 ? 130 : 260); } } catch (e) {} try { allSets().forEach(function (s) { if (!s || !s.res) return; s.res.wood = (s.res.wood || 0) + 40; s.res.food = (s.res.food || 0) + 25; s.res.stone = (s.res.stone || 0) + 20; s.res.water = (s.res.water || 0) + 15; }); updateRes(); } catch (e) {} goals58Start(); };
     // rams (siege t>10) batter the gate: gate hp = 40 + 30% of wall max; a broken gate lets attackers past the wall until the siege ends
     var _dd58 = dealDamage; dealDamage = function (src, t, dmg) { try { var S = t && t.hall && SIEGE51[t.fac && t.fac.id];
         if (S && S.t > 10 && src && S.by === src.f && !S.gateBroke58 && t.wall55 > 0) { if (S.gateHp58 == null) S.gateHp58 = 40 + 0.3 * (t.wallMax55 || 60); S.gateHp58 -= dmg * 0.5;
@@ -4557,7 +4558,7 @@
     orderUpgrade = (function (o) { return function (s, b) { var r = o(s, b); if (r && s && s.f === 'me' && performance.now() - lastTap58 < 1500) ordered = true; return r; }; })(_ou58);
     var _st58 = showToast; showToast = function (t) { if (/ORDERED/.test(t) && performance.now() - lastTap58 < 1500) ordered = true; _st58(t); };
     function myS() { return allSets().filter(function (q) { return q && q.f === 'me'; })[0]; }
-    var L = [['TAP \u2302 BUILD', function () { var e = document.getElementById('shop'), o = document.getElementById('ordP'); return (e && e.style.display === 'block') || (o && o.style.display && o.style.display !== 'none' && ORD.tab === 'build'); }],
+    var L = [['OPEN A BUILD MENU', function () { var e = document.getElementById('shop'), o = document.getElementById('ordP'); return (e && e.style.display === 'block') || (o && o.style.display && o.style.display !== 'none' && ORD.tab === 'build'); }],
       ['ORDER A BUILDING OR UPGRADE', function () { return ordered; }],
       ['BUILD A BARRACKS', function () { var s = myS(); return s && s.bld.some(function (b) { return b.k === 'barracks' && (b.L > 0 || b.j); }); }],
       ['RIDE 1K OUT TO EXPLORE', function () { return me && me.hallObj && Math.hypot(px - me.hallObj.x, py - me.hallObj.y) > 1000; }],
@@ -4697,7 +4698,7 @@
       '#near63 b{display:block;margin-bottom:4px}#near63 button{font:bold 12px monospace;margin:2px;padding:7px 9px;background:#000;color:#fff;border:0}#near63 button:disabled{background:#999}';
     document.head.appendChild(cs); document.body.classList.add('min63');
     var IC = { food: '\ud83c\udf3e', water: '\ud83d\udca7', wood: '\ud83e\udeb5', stone: '\ud83e\udea8', gold: '\ud83e\ude99' };
-    function resLine() { try { var r = ME_S && ME_S.res; if (!r) return; var t = ['food', 'water', 'wood', 'stone', 'gold'].filter(function (k) { return r[k] != null; }).map(function (k) { return IC[k] + Math.floor(r[k]); }).join(' ') + ' \ud83d\udc64' + ME_S.ppl.length; var e = document.getElementById('res'); if (e.textContent !== t) e.textContent = t; } catch (e) {} }
+    function resLine() { try { var r = ME_S && ME_S.res; if (!r) return; var t = ['food', 'water', 'wood', 'stone', 'gold'].filter(function (k) { return r[k] != null; }).map(function (k) { return IC[k] + Math.floor(r[k]); }).join(' ') + ' \ud83d\udc64' + ME_S.ppl.length + (coordsOn ? '  \ud83d\udccd' + Math.floor(px / 48) + ',' + Math.floor(py / 48) : ''); var e = document.getElementById('res'); if (e.textContent !== t) e.textContent = t; } catch (e) {} }
     var _ur = updateRes; updateRes = function () { _ur.apply(this, arguments); resLine(); };
     // rare things live in the menu
     var menu = document.getElementById('menu'); [['ORDERS', function () { ordOpen(true); }], ['MAP', function () { document.body.classList.toggle('map63'); }], ['FULL HUD', function () { document.body.classList.toggle('min63'); }]].forEach(function (d) {
@@ -4745,6 +4746,44 @@
     var _so = sqOrder; sqOrder = function (q, o) { var r = _so.apply(this, arguments); try { if (o === 'attack' && q && q.m) { q.m.forEach(function (u) { u.cry66 = T + 30; }); if (q.f === 'me') showToast('WAR CRY! +30% DAMAGE FOR 30S'); } } catch (e) {} return r; };
     var _dd = dealDamage; dealDamage = function (src, t, dmg) { if (src && src.cry66 > T) dmg *= 1.3; return _dd.call(this, src, t, dmg); };
     window.__v66 = { t: function () { return T; } };
+  })();
+  // ---- v69: the player's picks (ruler + horse) always show; front-page preview redraws as sprites load
+  (function () {
+    var RS = { king: 'v2captain_v2', queen: 'v2captain_v2', 'captain-v2': 'v2captain_v2' };
+    var HS = { runner: ['runner'], draft: ['draft'], courser: ['courser'], charger: ['charger'], scout: ['scout'], royal: ['royal'], 'royal-a': ['v2royal_v2-a_diamonds', 1], 'royal-b': ['v2royal_v2-b_star', 1] };
+    function rSpr(r) { return spr(RS[r] || r, null, false); }
+    function hDraw(c, x, y, v, phase, face) {
+      var h = HS[v], im = h && spr(h[0], null, false, !!h[1]);
+      if (im) { dspr(c, im, x, y + 4, 112, face, Math.sin(phase || 0) * 0.02); return; }
+      c.save(); c.translate(x, y - 36); c.scale(1.5, 1.5); _horse30(c, 0, 0, v, phase, face); c.restore();
+    }
+    horse = function (c, x, y, v, phase, face) { hDraw(c, x, y, v, phase, face || 1); };
+    var _dp69 = _dp30, _dw69 = _dw30;
+    drawPlayer = function (c, sx, sy, phase, face, bob) {
+      face = face || 1; var m = rSpr(picks.ruler);
+      hDraw(c, sx, sy, picks.horse, phase, face);
+      if (m) dspr(c, m, sx - face * 4, sy - 48 - (bob || 0), 84, face); else rider(c, sx, sy - 22, picks.ruler, picks.weapon, face, bob);
+      if (picks.ruler === 'king' || picks.ruler === 'queen') crown(c, sx, sy - CROWN_DY.ride, picks.ruler === 'queen', 1.2);
+    };
+    drawWalker = function (c, sx, sy, phase, face, moving) {
+      face = face || 1; var m = rSpr(picks.ruler); if (!m) return _dw69.apply(this, arguments);
+      dspr(c, m, sx, sy - (moving ? Math.abs(Math.sin(phase)) * 2 : 0), 70, face, moving ? Math.sin(phase) * 0.04 : 0);
+      if (picks.ruler === 'king' || picks.ruler === 'queen') crown(c, sx, sy - CROWN_DY.walk, picks.ruler === 'queen', 1.2);
+    };
+    var cr = document.getElementById('creator'), n = 0;
+    var iv = setInterval(function () { if (cr && cr.style.display !== 'none') preview(); if (++n > 40) clearInterval(iv); }, 150);
+    document.querySelectorAll('#creator .step button').forEach(function (b) { b.addEventListener('click', function () { setTimeout(preview, 60); setTimeout(preview, 300); }); });
+  })();
+  // ---- v70: weapon shows on the player; goal toasts only when the goals list is visible
+  (function () {
+    personArt.__w70 = [];
+    function wpn(c, sx, sy, face, bob) { c.save(); c.translate(sx - face * 14, sy + 10 - (bob || 0)); c.scale(1.8, 1.8); rider(c, 0, 0, '__w70', picks.weapon, face, 0); c.restore(); }
+    var _dp70 = drawPlayer, _dw70 = drawWalker;
+    drawPlayer = function (c, sx, sy, phase, face, bob) { _dp70.apply(this, arguments); wpn(c, sx, sy - 24, face || 1, bob); };
+    drawWalker = function (c, sx, sy, phase, face, moving) { _dw70.apply(this, arguments); wpn(c, sx, sy - 6, face || 1, moving ? Math.abs(Math.sin(phase)) * 2 : 0); };
+    var _st70 = showToast;
+    showToast = function (t) { if (typeof t === 'string' && t.indexOf('GOAL DONE') === 0 && document.body.classList.contains('min63')) return; return _st70.apply(this, arguments); };
+    setTimeout(preview, 50);
   })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
@@ -4897,7 +4936,7 @@
   function capCompass37() {
     if (!CAPX || !BOUNDS) return; var dx = CAPX.x - px, dy = CAPX.y - py, d = Math.hypot(dx, dy); if (d < CAPX.R + 400) return;
     var W = cv.width / (window.devicePixelRatio || 1), H = cv.height / (window.devicePixelRatio || 1);
-    var c = ctx, a = Math.atan2(dy, dx), rx = W / 2 - 46, ry = H / 2 - 70, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
+    var c = ctx, a = Math.atan2(dy, dx), rx = W / 2 - 46, ry = H < 500 ? H / 2 - 75 : H / 2 - 70, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
     var X = W / 2 + Math.cos(a) * t, Y = H / 2 + Math.sin(a) * t; c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
     c.translate(X, Y); c.fillStyle = '#fff'; c.strokeStyle = '#000'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 20, 0, 6.3); c.fill(); c.stroke();
     c.rotate(a); c.fillStyle = '#000'; c.beginPath(); c.moveTo(16, 0); c.lineTo(4, -8); c.lineTo(4, 8); c.closePath(); c.fill(); c.rotate(-a);
