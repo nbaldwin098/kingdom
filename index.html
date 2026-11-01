@@ -1729,7 +1729,8 @@
   // resources: the player's live in the old globals, so hitting trees still pays
   function meRes() { var r = { water: 0 }; Object.defineProperty(r, 'wood', { get: function () { return wood; }, set: function (v) { wood = v; } }); Object.defineProperty(r, 'stone', { get: function () { return stone; }, set: function (v) { stone = v; } }); Object.defineProperty(r, 'gold', { get: function () { return gold; }, set: function (v) { gold = v; } }); Object.defineProperty(r, 'food', { get: function () { return food; }, set: function (v) { food = v; } }); return r; }
   var PNAMES = NAMES.concat(['Ada', 'Bram', 'Cleo', 'Dov', 'Eli', 'Fern', 'Hal', 'Iris', 'Jon', 'Kira', 'Lev', 'Moss', 'Nia', 'Oto', 'Pia', 'Rex', 'Sia', 'Tov']);
-  function mkPerson(s, sx, age) { return { n: PNAMES[Math.floor(Math.random() * PNAMES.length)], sx: sx, age: age, sol: false, sick: 0, job: 'idle', x: s.x + (Math.random() - 0.5) * 160, y: s.y + 60 + Math.random() * 80, st: Math.random() * 3, go: 0, u: null }; }
+  function pickPN(a) { /* v89: avoid giving two living people the same name */ var u = {}; (a || []).forEach(function (p) { u[p.n] = 1; }); var f = PNAMES.filter(function (n) { return !u[n]; }); if (!f.length) f = PNAMES; return f[Math.floor(Math.random() * f.length)]; }
+  function mkPerson(s, sx, age) { return { n: pickPN(s.ppl), sx: sx, age: age, sol: false, sick: 0, job: 'idle', x: s.x + (Math.random() - 0.5) * 160, y: s.y + 60 + Math.random() * 80, st: Math.random() * 3, go: 0, u: null }; }
   function newS(f, x, y) {
     var s = { f: f, x: x, y: y, res: f === 'me' ? meRes() : { food: 0, water: 0, wood: 0, stone: 0, gold: 0 }, ppl: [], bld: [{ k: 'hall', L: 0, x: 0, y: -120 }], jobs: [], hunger: 0, thirst: 0, acc: 0, inc: {}, want: { wood: 0.55, stone: 0.3, gold: 0.15 }, wageDebt: 0, migT: 20, sickT: 10 };
     s.res.water = 0; s.ppl.push(mkPerson(s, 'm', 22 + Math.floor(Math.random() * 6))); s.ppl.push(mkPerson(s, 'f', 20 + Math.floor(Math.random() * 6)));
@@ -4038,7 +4039,7 @@
   }
   function capFamily(p, n) {
     var fam = ++CAP.fam; n = Math.min(n, PK.house.cap - p.res);
-    for (var i = 0; i < n; i++) { var kid = i >= 2, c = { n: PNAMES[Math.floor(Math.random() * PNAMES.length)], sx: i === 0 ? 'm' : i === 1 ? 'f' : (Math.random() < 0.5 ? 'm' : 'f'), age: kid ? 2 + Math.random() * 12 : 20 + Math.random() * 35, fam: fam, home: p, job: null, cash: 3 + Math.random() * 4, x: CAPX.x + p.x, y: CAPX.y + p.y + 30, tx: 0, ty: 0, go: 0, face: 1, ph: Math.random() * 6, poor: 0 };
+    for (var i = 0; i < n; i++) { var kid = i >= 2, c = { n: pickPN(CAP.cit), sx: i === 0 ? 'm' : i === 1 ? 'f' : (Math.random() < 0.5 ? 'm' : 'f'), age: kid ? 2 + Math.random() * 12 : 20 + Math.random() * 35, fam: fam, home: p, job: null, cash: 3 + Math.random() * 4, x: CAPX.x + p.x, y: CAPX.y + p.y + 30, tx: 0, ty: 0, go: 0, face: 1, ph: Math.random() * 6, poor: 0 };
       c.tx = c.x; c.ty = c.y; CAP.cit.push(c); p.res++; }
     return fam;
   }
@@ -4081,7 +4082,7 @@
     // families: births, old age, newcomers
     var fams = {}; C.cit.forEach(function (c) { (fams[c.fam] = fams[c.fam] || []).push(c); });
     Object.keys(fams).forEach(function (k) { var F = fams[k], m = F.some(function (c) { return c.sx === 'm' && c.age >= 18 && c.age < 46; }), f = F.some(function (c) { return c.sx === 'f' && c.age >= 18 && c.age < 46; }), home = F[0].home;
-      if (m && f && home.res < PK.house.cap && Math.random() < 0.012 * dt) { var b = { n: PNAMES[Math.floor(Math.random() * PNAMES.length)], sx: Math.random() < 0.5 ? 'm' : 'f', age: 0, fam: +k, home: home, job: null, cash: 0, x: F[0].x, y: F[0].y, tx: F[0].x, ty: F[0].y, go: 0, face: 1, ph: 0, poor: 0 }; C.cit.push(b); home.res++; } });
+      if (m && f && home.res < PK.house.cap && Math.random() < 0.012 * dt) { var b = { n: pickPN(CAP.cit), sx: Math.random() < 0.5 ? 'm' : 'f', age: 0, fam: +k, home: home, job: null, cash: 0, x: F[0].x, y: F[0].y, tx: F[0].x, ty: F[0].y, go: 0, face: 1, ph: 0, poor: 0 }; C.cit.push(b); home.res++; } });
     C.cit = C.cit.filter(function (c) { if (c.age > 70 && Math.random() < 0.02 * dt) { if (c.job) c.job.staff--; return false; } return true; });
     // poor + jobless adults move out; vacancies + open jobs pull settlers in
     var gone = {}; C.cit.forEach(function (c) { if (c.poor > 120 && !c.job && c.age >= 18) gone[c.fam] = 1; });
