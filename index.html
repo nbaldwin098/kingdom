@@ -1993,7 +1993,7 @@
   function campArt(c, x, y, name, ho) {
     c.fillStyle = '#000'; poly(c, [[x - 70, y], [x, y - 90], [x + 70, y]]); c.fillStyle = '#fff'; poly(c, [[x - 14, y], [x, y - 40], [x + 14, y]]);
     c.fillStyle = '#000'; c.fillRect(x + 90, y - 6, 24, 6); poly(c, [[x + 92, y - 6], [x + 102, y - 30], [x + 112, y - 6]]);
-    c.font = 'bold 18px monospace'; c.textAlign = 'center'; if (innerWidth < 600 && typeof city !== 'undefined' && name === city.name) return; c.fillText(name + ' CAMP', x, y - 105);
+    c.font = 'bold 18px monospace'; c.textAlign = 'center'; if (innerWidth < 600 && typeof city !== 'undefined' && name === city.name) return; c.fillText((typeof city !== 'undefined' && name === city.name) ? 'YOUR CAMP' : name + ' CAMP', x, y - 105);
     if (ho && ho.hp < ho.max && ho.hp > 0) { c.strokeStyle = '#000'; c.lineWidth = 2; c.strokeRect(x - 60, y - 135, 120, 10); c.fillRect(x - 60, y - 135, 120 * ho.hp / ho.max, 10); }
   }
   function extraArt(c, b, x, y) {
@@ -4588,7 +4588,7 @@
   // ===== v59 playtest: upgrade toasts throttled (one per 20 s, the rest go to the log) =====
   (function () { var last = -1e9, _st = showToast; showToast = function (t) { if (/UPGRADED TO L\d/.test(String(t))) { var n = performance.now(); if (n - last < 20000) { try { CAP.log.unshift(t); } catch (e) {} return; } last = n; } _st(t); }; })();
   // ===== v59: on phone my camp label is drawn in screen space and kept clear of the top bar / news banner =====
-  (function () { var _du = drawUnits; drawUnits = function (camX, camY, x0, x1, y0, y1) { _du(camX, camY, x0, x1, y0, y1); try { if (innerWidth >= 600 || !me || !me.hallObj) return; var h = me.hallObj, sx = h.x - camX, sy = h.y - camY - 105, lim = document.getElementById('topHud').getBoundingClientRect().bottom + 85; if (sy < lim) sy = h.y - camY + 30; ctx.save(); ctx.font = 'bold 15px monospace'; ctx.textAlign = 'center'; var t = city.name + ' CAMP', w = ctx.measureText(t).width + 10; ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fillRect(sx - w / 2, sy - 14, w, 19); ctx.fillStyle = '#000'; ctx.fillText(t, sx, sy); ctx.restore(); } catch (e) {} }; })();
+  (function () { var _du = drawUnits; drawUnits = function (camX, camY, x0, x1, y0, y1) { _du(camX, camY, x0, x1, y0, y1); try { if (innerWidth >= 600 || !me || !me.hallObj) return; var h = me.hallObj, sx = h.x - camX, sy = h.y - camY - 105, lim = document.getElementById('topHud').getBoundingClientRect().bottom + 85; if (sy < lim) sy = h.y - camY + 30; ctx.save(); ctx.font = 'bold 15px monospace'; ctx.textAlign = 'center'; var t = 'YOUR CAMP', w = ctx.measureText(t).width + 10; ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fillRect(sx - w / 2, sy - 14, w, 19); ctx.fillStyle = '#000'; ctx.fillText(t, sx, sy); ctx.restore(); } catch (e) {} }; })();
   // ===== v60: early gold made clear (sell surplus, gold focus), stronger gates, AI saves for its barracks =====
   (function () {
     function surplus(s) { var R = s.res, pop = s.ppl.length, o = {}; var fk = pop * 8 + 20; if (R.food > fk + 5) o.food = Math.floor((R.food - fk) * 0.5); ['wood', 'stone'].forEach(function (r) { if (R[r] > 45) o[r] = Math.floor((R[r] - 40) * 0.5); }); return o; }
