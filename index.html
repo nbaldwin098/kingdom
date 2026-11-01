@@ -4703,7 +4703,7 @@
       '#near63 b{display:block;margin-bottom:4px}#near63 button{font:bold 12px monospace;margin:2px;padding:7px 9px;background:#000;color:#fff;border:0}#near63 button:disabled{background:#999}';
     document.head.appendChild(cs); document.body.classList.add('min63');
     var IC = { food: '\ud83c\udf3e', water: '\ud83d\udca7', wood: '\ud83e\udeb5', stone: '\ud83e\udea8', gold: '\ud83e\ude99' };
-    function resLine() { try { var r = ME_S && ME_S.res; if (!r) return; var t = ['food', 'water', 'wood', 'stone', 'gold'].filter(function (k) { return r[k] != null; }).map(function (k) { return IC[k] + Math.floor(r[k]); }).join(' ') + ' \ud83d\udc64' + ME_S.ppl.length + (coordsOn ? '  \ud83d\udccd' + Math.floor(px / 48) + ',' + Math.floor(py / 48) : ''); var e = document.getElementById('res'); if (e.textContent !== t) e.textContent = t; } catch (e) {} }
+    function resLine() { try { var r = ME_S && ME_S.res; if (!r) return; var t = ['food', 'water', 'wood', 'stone', 'gold'].filter(function (k) { return r[k] != null; }).map(function (k) { return IC[k] + Math.floor(r[k]); }).join(' ') + ' \ud83d\udc64' + ME_S.ppl.length ; var e = document.getElementById('res'); if (e.textContent !== t) e.textContent = t; } catch (e) {} }
     var _ur = updateRes; updateRes = function () { _ur.apply(this, arguments); resLine(); };
     // rare things live in the menu
     var menu = document.getElementById('menu'); [['ORDERS', function () { ordOpen(true); }], ['MAP', function () { document.body.classList.toggle('map63'); }], ['FULL HUD', function () { document.body.classList.toggle('min63'); }]].forEach(function (d) {
