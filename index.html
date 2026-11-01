@@ -4648,6 +4648,47 @@
         else if (n.tagName === 'H2') hide = false; else if (hide) n.style.display = 'none'; }); } catch (e) {} };
     window.__v61 = { woodGuards: function () { return wg61; } };
   })();
+  // v63: CPU gate upgrades that actually fire, phone ORDERS tabs, royal events (same rules for everyone)
+  (function () {
+    // gate: once hall L2+, everyone tops up missing stone from the market if gold allows, with lower margins
+    var gu63 = 0, gt = 0, _e = econTick; econTick = function (dt) { _e(dt);
+      try { gt -= dt; if (gt > 0) return; gt = 3; var M = setMap55();
+        (me && factions.indexOf(me) < 0 ? factions.concat([me]) : factions).forEach(function (f) { var h = f.hallObj, st = M[f.id]; if (!h || !st || !f.alive || SIEGE51[f.id] || (f.isMe && !ME_S.autoGate60)) return;
+          var L = h.gateUp60 || 0, lv = hallL(st); if (L >= 3 || lv < 2 || st.ppl.length < 12) return;
+          var c = { stone: 40 + 40 * (L + 1), wood: 20 + 10 * (L + 1) }; if (st.res.wood < c.wood + 10) return;
+          var need = c.stone + 10 - st.res.stone; if (need > 0 && st.res.wood > c.wood + 120 + need * 3) trade(st, 'wood', Math.ceil(need * 3), true); if (need > 0 && st.res.gold > 20 + need) trade(st, 'stone', Math.ceil(need), false);
+          if (st.res.stone >= c.stone + 10) { pay(st, c); h.gateUp60 = L + 1; gu63++; } }); } catch (e) {} };
+    // phone tabs: one ORDERS section at a time
+    var TAB = null, _ro = renderOrd; renderOrd = function () { _ro(); try { if (innerWidth >= 600) return; var P = document.getElementById('ordP'); if (!P) return;
+      var kids = Array.prototype.slice.call(P.children), secs = [], cur = null; kids.forEach(function (n) { if (n.tagName === 'H3') { n.style.display = 'none'; cur = { k: n.textContent.replace(/^[\u25b8\u25be] /, ''), n: [] }; secs.push(cur); } else if (n.tagName === 'H2') cur = null; else if (cur) cur.n.push(n); });
+      if (secs.length < 2) return; var key = function (s) { return s.k.split(' (')[0].replace(/ L\d.*$/, '').trim(); };
+      if (!TAB || !secs.some(function (s) { return key(s) === TAB; })) TAB = key(secs[0]);
+      var bar = document.createElement('div'); bar.id = 'ordTabs'; bar.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 6px';
+      secs.forEach(function (s) { var k = key(s), on = k === TAB; s.n.forEach(function (n) { n.style.display = on ? '' : 'none'; });
+        var b = document.createElement('button'); b.textContent = k.length > 9 ? k.split(' ')[0] : k; b.title = s.k; b.style.cssText = 'flex:1 1 auto;padding:6px 4px;font:inherit;font-size:11px;border-radius:6px;border:1px solid #c9a24a;background:' + (on ? '#c9a24a;color:#221' : 'transparent;color:#f3e2b0');
+        b.onclick = function (e) { e.stopPropagation(); TAB = k; renderOrd(); }; bar.appendChild(b); });
+      P.insertBefore(bar, kids.filter(function (n) { return n.tagName === 'H3'; })[0]); } catch (e) {} };
+    // royal events: every 4-6 min each town gets an offer; the CPU decides by a fixed rule, I get a choice card
+    var EV = [
+      { t: 'A MERCHANT CARAVAN OFFERS 40 STONE FOR 12 GOLD', ok: function (s) { return s.res.gold >= 12; }, a: function (s) { s.res.gold -= 12; s.res.stone += 40; }, ai: function (s) { return s.res.stone < 60; } },
+      { t: 'A WANDERING HERO OFFERS TO JOIN WITH 3 SWORDSMEN FOR 20 GOLD', ok: function (s) { return s.res.gold >= 20; }, a: function (s, f) { s.res.gold -= 20; for (var i = 0; i < 3; i++) { if (f === me || s === ME_S) spawnMine('s', 1); else aiSpawn(f, 's'); } }, ai: function (s) { return s.res.gold > 50; } },
+      { t: 'BANDITS DEMAND 10 GOLD, OR THEY BURN 30 FOOD', ok: function (s) { return s.res.gold >= 10; }, a: function (s) { s.res.gold -= 10; }, no: function (s) { s.res.food = Math.max(0, s.res.food - 30); }, ai: function (s) { return s.res.food < 80; } },
+      { t: 'A BUMPER HARVEST! HOLD A FEAST (20 FOOD) FOR NEW SETTLERS?', ok: function (s) { return s.res.food >= 20; }, a: function (s) { s.res.food -= 20; s.res.wood += 15; s.res.gold += 8; }, ai: function (s) { return s.res.food > 80; } },
+      { t: 'FOREST SPIRITS BLESS YOUR WOODCUTTERS: +30 WOOD', ok: function () { return true; }, a: function (s) { s.res.wood += 30; }, ai: function () { return true; }, free: 1 }
+    ];
+    var log63 = { offers: 0, yes: 0 }, card = null;
+    function myCard(e) { if (card) card.remove(); card = document.createElement('div'); card.id = 'evCard';
+      card.style.cssText = 'position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:60;max-width:92vw;width:340px;background:#2a2013ee;border:2px solid #c9a24a;border-radius:10px;padding:10px;color:#f3e2b0;font:12px monospace;text-align:center;box-shadow:0 4px 18px #000a';
+      card.innerHTML = '<b>ROYAL EVENT</b><div style="margin:6px 0">' + e.t + '</div>'; var row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;justify-content:center';
+      var mk = function (txt, fn, dis) { var b = document.createElement('button'); b.textContent = txt; b.disabled = !!dis; b.style.cssText = 'flex:1;padding:8px;font:inherit;border-radius:6px;border:1px solid #c9a24a;background:#c9a24a;color:#221'; b.onclick = function (ev) { ev.stopPropagation(); fn(); card.remove(); card = null; updateRes(); }; row.appendChild(b); };
+      mk(e.free ? 'THANK THEM' : 'ACCEPT', function () { if (e.ok(ME_S)) { e.a(ME_S, me); log63.yes++; } }, !e.ok(ME_S)); if (!e.free) mk('DECLINE', function () { if (e.no) e.no(ME_S); });
+      card.appendChild(row); document.body.appendChild(card); var ref = card; setTimeout(function () { if (card === ref) { if (e.no) e.no(ME_S); ref.remove(); card = null; showToast('THE EVENT PASSED'); } }, 25000); }
+    var _e2 = econTick; econTick = function (dt) { _e2(dt); try { allSets().forEach(function (s) { if (!s || !s.res || s.ppl.length < 5) return; if (s.ev63 == null) s.ev63 = 180 + Math.random() * 120; s.ev63 -= dt; if (s.ev63 > 0) return; s.ev63 = 240 + Math.random() * 120;
+        var e = EV[Math.floor(Math.random() * EV.length)]; log63.offers++;
+        if (s === ME_S) { if (typeof document !== 'undefined' && document.body) myCard(e); else if (e.ok(s)) e.a(s, me); return; }
+        var f = facIndex[s.f]; if (!f) return; if (e.ok(s) && e.ai(s)) { e.a(s, f); log63.yes++; } else if (e.no) e.no(s); }); } catch (x) {} };
+    window.__v63 = { gateUps: function () { return gu63; }, events: function () { return log63; }, test: function (i) { myCard(EV[i || 0]); } };
+  })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
     _uu36(dt); if (!BOUNDS) return;
