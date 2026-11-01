@@ -4713,7 +4713,7 @@
       if (k === 'hall') { a.push(['GOLD FOCUS', function () { if ((s.gcd60 || 0) > 0) return showToast('WORKERS REST ' + Math.ceil(s.gcd60) + 'S'); s.goldF60 = 60; s.gcd60 = 180; showToast('WORKERS PAN GOLD FOR 60S'); }]);
         var h = me && me.hallObj, L = h ? h.gateUp60 || 0 : 3; if (h && L < 3) { var gc = { stone: 40 + 40 * (L + 1), wood: 20 + 10 * (L + 1) }; a.push(['GATE L' + (L + 1) + ' (' + cstr(gc) + ')', function () { if (!canPay(s, gc)) return showToast('NEED ' + cstr(gc)); pay(s, gc); h.gateUp60 = L + 1; showToast('GATE REINFORCED'); }, !canPay(s, gc)]); } }
       // any unit this building makes (dock ships, airport jets, garage tanks, ...): build it right here
-      Object.keys(AU).forEach(function (t) { var u = AU[t]; if (u.b !== k || !canUnit(s, t) || t === 'w' && k !== 'dock') return; a.push([(UT[t].name || t) + ' (' + cstr(u.c) + ')', function () { var nr = NOREDIR; NOREDIR = true; var ok = trainSoldier(s, t); NOREDIR = nr; showToast(ok ? UT[t].name + ' READY' : 'NEED ' + cstr(u.c) + ' AND A FREE ADULT'); }, !canPay(s, u.c)]); });
+      Object.keys(AU).filter(function (t) { return t !== 's' && AU[t].b === k && canUnit(s, t); }).slice(-3).forEach(function (t) { var u = AU[t]; a.push([(UT[t].name || t) + ' (' + cstr(u.c) + ')', function () { var nr = NOREDIR; NOREDIR = true; var ok = trainSoldier(s, t); NOREDIR = nr; showToast(ok ? UT[t].name + ' READY' : 'NEED ' + cstr(u.c) + ' AND A FREE ADULT'); }, !canPay(s, u.c)]); });
       if (k === 'barracks') { if (flag64) { a.length = 0; dests().filter(function (d) { return !/^GUARD|^RALLY/.test(d.n); }).slice(0, 5).forEach(function (d) { a.push([d.n, function () { ORD.n = 999; ORD.type = 'any'; dispatch(d); flag64 = false; }]); }); a.push(['\u2715 BACK', function () { flag64 = false; }]); return a; }
         a.push(['\u2691 WAR FLAG: SEND ARMY', function () { flag64 = true; }, !pool('any').length]); }
       if (k === 'bank') { a.info = 'SAFE ' + fmt(Math.floor(protectedGold(s))) + ' \u00b7 AT RISK ' + fmt(Math.floor(lootable(s))) + ' \u00b7 TAX ' + Math.round(myTax * 100) + '%';
@@ -4724,7 +4724,7 @@
     function near() { var s = ME_S; if (!s) return null; var best = null, bd = 150; s.bld.forEach(function (b) { if (!b.L && !b.j) return; var p = bldPos(s, b), d = Math.hypot(px - p.x, py - p.y); if (d < bd) { bd = d; best = b; } }); return best; }
     function tick() { try { resLine(); if (typeof NEWS38 !== 'undefined' && document.body.classList.contains('min63')) NEWS38.t = 0; var b = near(); if (!b) { box.style.display = 'none'; shown = null; flag64 = false; return; }
       var s = ME_S, a = acts(s, b), sig = b.k + b.L + (b.j ? 'j' : '') + (a.info || '') + a.map(function (x) { return x[0] + !!x[2]; }).join('|'); box.style.display = 'block'; if (sig === cur && shown === b) return; cur = sig; shown = b;
-      box.innerHTML = '<b>' + (NAME[b.k] || b.k.toUpperCase()) + (b.L ? ' L' + b.L : '') + (b.j ? ' \u2692 BUILDING' : '') + '</b>' + (a.info ? '<div>' + a.info + '</div>' : '');
+      box.innerHTML = '<b>' + (NAME[b.k] || (typeof ENAME !== 'undefined' && ENAME[b.k]) || b.k.toUpperCase()) + (b.L ? ' L' + b.L : '') + (b.j ? ' \u2692 BUILDING' : '') + '</b>' + (a.info ? '<div>' + a.info + '</div>' : '');
       a.forEach(function (x) { var bt = document.createElement('button'); bt.textContent = x[0]; bt.disabled = !!x[2]; bt.onclick = function (e) { e.stopPropagation(); x[1](); cur = ''; updateRes(); tick(); }; box.appendChild(bt); });
       if (!a.length) box.innerHTML += '<div>WORKING</div>'; } catch (e) {} }
     var _bu = bankUiTick; bankUiTick = function (dt) { if (document.body.classList.contains('min63')) { var nb = nearBank(); if (nb && nb.s === ME_S) { bankEl.style.display = 'none'; return; } } _bu(dt); };
@@ -4739,6 +4739,13 @@
       '#joy{transform:scale(.72);transform-origin:left bottom}#atk{transform:scale(.72);transform-origin:right bottom}#rcol{transform:scale(.8);transform-origin:right bottom}#evCard{top:8px!important;left:auto!important;right:70px!important;transform:none!important;width:250px!important;padding:5px!important}#ordP{max-height:80vh!important;overflow:auto!important}#menu{max-height:80vh;overflow:auto}}';
     document.head.appendChild(st); var d = document.createElement('div'); d.id = 'rot65'; d.innerHTML = '<div class="ph"></div><div>ROTATE YOUR PHONE</div><div style="font-size:12px">KINGDOM IS PLAYED SIDEWAYS</div>'; document.body.appendChild(d);
     try { if (screen.orientation && screen.orientation.lock) document.addEventListener('click', function f() { screen.orientation.lock('landscape').catch(function () {}); document.removeEventListener('click', f); }); } catch (e) {}
+  })();
+  // v66: WAR CRY. any squad ordered to attack (mine or CPU) fights at +30% damage for its first 30 s
+  (function () {
+    var T = 0, _ec = econTick; econTick = function (dt) { _ec(dt); T += dt; };
+    var _so = sqOrder; sqOrder = function (q, o) { var r = _so.apply(this, arguments); try { if (o === 'attack' && q && q.m) { q.m.forEach(function (u) { u.cry66 = T + 30; }); if (q.f === 'me') showToast('WAR CRY! +30% DAMAGE FOR 30S'); } } catch (e) {} return r; };
+    var _dd = dealDamage; dealDamage = function (src, t, dmg) { if (src && src.cry66 > T) dmg *= 1.3; return _dd.call(this, src, t, dmg); };
+    window.__v66 = { t: function () { return T; } };
   })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
