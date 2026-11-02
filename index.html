@@ -3224,7 +3224,7 @@
       var own = terrOf(px, py), ok = !own || own === s;
       ordP.appendChild(el('h3', 'BUILD WHERE YOU STAND'));
       ordP.appendChild(row(own === s ? 'YOUR LAND' : own ? 'CLAIMED BY ' + (facOf(own) ? facOf(own).name : 'ANOTHER REALM') + ' - CANNOT BUILD' : 'UNCLAIMED LAND - BUILDING HERE CLAIMS IT'));
-      ['farm', 'lumber', 'quarry', 'house', 'well', 'outpost', 'stable', 'barracks', 'prison', 'granary', 'bank', 'market', 'post', 'school'].forEach(function (k) { var c = newCostOf(s, k); ordP.appendChild(row(ENAME[k], btn(cstr(c), function () { var b = orderAt(s, k, px, py - 40); for (var rr = 1; !b && rr <= 4 && canPay(s, newCostOf(s, k)); rr++) for (var aa = 0; !b && aa < 8; aa++) { var ax = px + Math.cos(aa * 0.785 + rr) * rr * 70, ay = py - 40 + Math.sin(aa * 0.785 + rr) * rr * 70; if (!own || terrOf(ax, ay) === s) b = orderAt(s, k, ax, ay); } /* v124: nudge to the nearest free spot */ showToast(b ? ENAME[k] + ' ORDERED HERE' : 'NO ROOM HERE - RIDE A LITTLE AWAY'); }, !ok || !canPay(s, c) || s.jobs.length >= 3))); });
+      ['farm', 'lumber', 'quarry', 'house', 'well', 'outpost', 'stable', 'barracks', 'prison', 'granary', 'bank', 'market', 'post', 'school', 'mine', 'oilwell', 'refinery', 'smith', 'gunsmith', 'tailor'].forEach(function (k) { var c = newCostOf(s, k); ordP.appendChild(row(ENAME[k], btn(cstr(c), function () { var b = orderAt(s, k, px, py - 40); for (var rr = 1; !b && rr <= 4 && canPay(s, newCostOf(s, k)); rr++) for (var aa = 0; !b && aa < 8; aa++) { var ax = px + Math.cos(aa * 0.785 + rr) * rr * 70, ay = py - 40 + Math.sin(aa * 0.785 + rr) * rr * 70; if (!own || terrOf(ax, ay) === s) b = orderAt(s, k, ax, ay); } /* v124: nudge to the nearest free spot */ showToast(b ? ENAME[k] + ' ORDERED HERE' : 'NO ROOM HERE - RIDE A LITTLE AWAY'); }, !ok || !canPay(s, c) || s.jobs.length >= 3))); });
     }
   }
   var _ur32 = typeof updateRes === 'function' ? updateRes : null;
@@ -4912,9 +4912,9 @@
       if (c && c.k === key) return c.g;
       var h = bldPos(s, s.bld[0]), ry = h.y + 110, g = [[h.x, h.y + 40, h.x, ry]];
       /* v131: roads grow as a tree; each building's door (below its footprint) is routed on a grid around every footprint to the nearest road */
-      g.push([h.x - 130, ry, h.x + 130, ry]);
       var FPs = s.bld.map(function (b) { return !(b.hp <= 0) && b.k !== 'wall' ? FP131(s, b) : null; }).filter(Boolean), CS = 24, RW = 14;
       var hit = function (x, y) { for (var i = 0; i < FPs.length; i++) { var f = FPs[i]; if (x > f.x0 - RW && x < f.x1 + RW && y > f.y0 - RW && y < f.y1 + RW) return true; } return false; };
+      /* v132: the bar under the hall stops short of any building */ var bl = 0, br = 0; while (bl < 130 && !hit(h.x - bl - 12, ry)) bl += 12; while (br < 130 && !hit(h.x + br + 12, ry)) br += 12; if (bl + br > 0) g.push([h.x - bl, ry, h.x + br, ry]);
       var rc = new Set(), ck = function (x, y) { return Math.round((x - h.x) / CS) + ',' + Math.round((y - h.y) / CS); };
       var rast = function (G) { var n = Math.max(1, Math.ceil(Math.hypot(G[2] - G[0], G[3] - G[1]) / (CS / 2))); for (var i = 0; i <= n; i++) rc.add(ck(G[0] + (G[2] - G[0]) * i / n, G[1] + (G[3] - G[1]) * i / n)); };
       g.forEach(rast);
@@ -5022,6 +5022,11 @@
     var _si = shopItems;
     shopItems = function () { var it = _si.apply(this, arguments); try { var e = eraOf(ME_S), k = e >= 3 ? 4 : e >= 2 ? 2 : e >= 1 ? 1 : 0; var vk = VK[k]; it.push({ label: 'VEHICLE: ' + vk.n + (V.k >= 0 ? ' (YOU HAVE A ' + VK[V.k].n + ')' : ''), btn: V.k === k ? 'OWNED' : vk.c + ' GOLD', dis: V.k === k || gold < vk.c, act: function () { gold -= vk.c; V = { k: k, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + vk.n + ' - DRIVING' + (matchMedia('(pointer:coarse)').matches ? '' : ' (V TO EXIT)')); } }); [8, 9].forEach(function (k3) { var v3 = VK[k3]; it.push({ label: 'VEHICLE: ' + v3.n + (k3 === 8 ? ' (SAILS WITH THE WIND, EXPLORE ISLANDS)' : ' (FAST, CARRIES TROOPS + HORSE)'), btn: V.k === k3 ? 'OWNED' : v3.c + ' GOLD', dis: V.k === k3 || gold < v3.c, act: function () { gold -= v3.c; V = { k: k3, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + v3.n + ' - SAIL OUT TO THE ? ISLANDS' + (matchMedia('(pointer:coarse)').matches ? '' : ' (V TO EXIT)')); if (window.BOARD128) BOARD128(k3); } }); }); [5, 6, 7].forEach(function (k2) { var v2 = VK[k2]; if (!bCount(ME_S, v2.b)) return; it.push({ label: 'VEHICLE: ' + v2.n + ' (FROM YOUR ' + v2.b.toUpperCase() + ')', btn: V.k === k2 ? 'OWNED' : v2.c + ' GOLD', dis: V.k === k2 || gold < v2.c, act: function () { gold -= v2.c; V = { k: k2, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + v2.n + ' - V TO EXIT' + (k2 >= 6 ? ' (CROSSES WATER)' : '')); } }); }); it.push({ label: 'TRAIN MILITIA (UP TO 2 ADULTS, 6 FOOD, NO BARRACKS)', btn: '6 FOOD', dis: !window.MIL104 || !MIL104.ok(ME_S), act: function () { if (MIL104.raise(ME_S)) showToast('2 MILITIA RAISED'); } }); if (e >= 2) { var tc = 30; it.push({ label: 'HAUL TRUCK (HAULS GOODS ON ROADS)', btn: tc + ' GOLD', dis: gold < tc, act: function () { gold -= tc; ME_S.xtr102 = (ME_S.xtr102 || 0) + 1; showToast('TRUCK HAULING GOODS'); } }); } } catch (e) {} return it; };
   })();
+  (function(){ var NEWK=['mine','oilwell','refinery','smith','gunsmith','tailor'];
+  // build menus: add the new industries
+  var _si = shopItems; shopItems = function () { var it = _si.apply(this, arguments); try { var s = ME_S, busy = s.jobs.length >= 3; NEWK.forEach(function (k) { if (bCount(s, k) >= 3) return; var nc = newCostOf(s, k); it.push({ label: 'NEW ' + ENAME[k], btn: busy ? 'QUEUE FULL' : cstr(nc), dis: busy || !canPay(s, nc), act: function () { orderBuild(s, k); }, tab: 'GROW' }); }); } catch (e) {} return it; };
+  })();
+
   // v99: market split into small tabs, one visible at a time (compact for landscape phones)
   (function () {
     // v101: the long BUILD tab is split into GROW / TOWN / SEA, and cannons sit under ARMY
@@ -5448,6 +5453,109 @@
     c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = '#fff'; var L = 'ENEMY ' + (d / 1000).toFixed(1) + 'K'; c.strokeText(L, 0, 33); c.fillStyle = '#b00'; c.fillText(L, 0, 33); c.restore();
   }
   var _mw112 = drawMiniWorld; drawMiniWorld = function () { var r = _mw112.apply(this, arguments); try { foe112(); } catch (e) {} return r; };
+
+// ===== v131 ECONOMY: farming (wheat, cattle, spice), mining (iron, coal, gold), oil (crude -> refinery -> fuel), smith (tools), gunsmith (rifles). Same rules for every town; per-town supply/demand prices; carry goods in your saddlebags =====
+(function () {
+  var G = { wheat: { p: 2, c: 'FARM', n: 'WHEAT' }, corn: { p: 2, c: 'FARM', n: 'CORN' }, peas: { p: 3, c: 'FARM', n: 'PEAS' }, berries: { p: 5, c: 'FARM', n: 'BLUEBERRIES' }, cotton: { p: 4, c: 'FARM', n: 'COTTON' }, cattle: { p: 6, c: 'FARM', n: 'CATTLE' }, spice: { p: 9, c: 'FARM', n: 'SPICE' }, iron: { p: 5, c: 'MINE', n: 'IRON' }, coal: { p: 3, c: 'MINE', n: 'COAL' }, crude: { p: 4, c: 'OIL', n: 'CRUDE' }, fuel: { p: 10, c: 'OIL', n: 'FUEL' }, tools: { p: 12, c: 'MADE', n: 'TOOLS' }, metal: { p: 9, c: 'MADE', n: 'METAL' }, clothes: { p: 8, c: 'MADE', n: 'CLOTHES' }, armor: { p: 25, c: 'MADE', n: 'ARMOR' }, rifles: { p: 30, c: 'MADE', n: 'RIFLES' } };
+  var GK = Object.keys(G), CATS = ['FARM', 'MINE', 'OIL', 'MADE'];
+  // town types: what they make plenty of and what they crave
+  var TY = { farm: { n: 'FARM TOWN', sup: { wheat: 1, corn: 1, cotton: 1, cattle: 1, spice: 0.6 }, dem: { tools: 1.8, fuel: 1.6, iron: 1.2, metal: 1.4 } }, oil: { n: 'OIL TOWN', sup: { crude: 1, fuel: 0.5 }, dem: { wheat: 1.9, cattle: 1.8, tools: 1.3, clothes: 1.7, berries: 1.6 } }, gold: { n: 'BOOM TOWN', sup: { iron: 0.8, coal: 0.8 }, dem: { wheat: 1.6, tools: 1.8, rifles: 1.6, spice: 1.5, clothes: 1.8, armor: 1.4 } }, mixed: { n: 'TOWN', sup: { peas: 0.6, coal: 0.3, clothes: 0.4 }, dem: { spice: 1.4, rifles: 1.3, cotton: 1.3 } } };
+  // v132: wood costs cut ~90% (wood still needed)
+  Object.keys(EB).forEach(function (k) { if (EB[k].c && EB[k].c.wood) EB[k].c.wood = Math.max(1, Math.round(EB[k].c.wood * 0.1)); });
+  EB.tailor = { c: { wood: 3, stone: 15 }, w: 45 }; ENAME.tailor = 'TAILOR';
+  EB.mine = { c: { wood: 3, stone: 10 }, w: 50 }; ENAME.mine = 'MINE';
+  EB.oilwell = { c: { wood: 4, stone: 20, gold: 10 }, w: 60 }; ENAME.oilwell = 'OIL DERRICK';
+  EB.refinery = { c: { wood: 4, stone: 40, gold: 20 }, w: 80 }; ENAME.refinery = 'REFINERY';
+  EB.smith = { c: { wood: 3, stone: 20 }, w: 50 }; ENAME.smith = 'BLACKSMITH';
+  EB.gunsmith = { c: { wood: 3, stone: 30, gold: 15 }, w: 70 }; ENAME.gunsmith = 'GUNSMITH';
+  var NEWK = ['mine', 'oilwell', 'refinery', 'smith', 'gunsmith', 'tailor'];
+  function H(s) { var x = (s.x || 0) + (s.id ? String(s.id).length * 977 : 0), y = s.y || 0; return hash2(Math.floor(x / 97), Math.floor(y / 89)); }
+  function ty(s) { if (s === ME_S) return 'mixed'; if (!s.ty131) { var h = H(s); s.ty131 = h < 0.3 ? 'farm' : h < 0.55 ? 'oil' : h < 0.8 ? 'gold' : 'mixed'; } return s.ty131; }
+  function stock(s) { if (!s.g131) { s.g131 = {}; var t = TY[ty(s)]; GK.forEach(function (k, i) { var h = hash2(i * 31 + Math.floor(H(s) * 1000), 7); s.g131[k] = s === ME_S ? 0 : Math.round((t.sup[k] ? 40 + 40 * h : 4 + 14 * h) / (G[k].p > 20 ? 3 : 1)); }); } return s.g131; }
+  function dem(s, k) { var t = TY[ty(s)]; return (t.dem[k] || 1) / (t.sup[k] ? 1.8 : 1); }
+  function price(s, k) { var st = stock(s)[k] || 0, T = 30 * dem(s, k); return G[k].p * Math.max(0.3, Math.min(3, 2 * T / (T + st))); }
+  var CROPS = ['wheat', 'corn', 'peas', 'berries', 'cotton', 'spice', 'cattle'];
+  function crop(s, b) { if (!b.crop131) { var p = bldPos(s, b); b.crop131 = CROPS[Math.floor(hash2(Math.round(p.x / 7), Math.round(p.y / 7)) * CROPS.length) % CROPS.length]; } return b.crop131; }
+  function clothed(s) { var g = stock(s); return !(s.ppl && s.ppl.length > 2) || g.clothes >= 1; }
+  var _ho = happyOf; happyOf = function (s) { var h = _ho(s); try { if (s.g131 && !clothed(s)) h *= 0.7; } catch (e) {} return h; };
+  // METAL from the blacksmith is needed for better buildings (level 2+ upgrades)
+  function metalNeed(b) { return b.L >= 1 ? 2 * b.L : 0; }
+  var _ou = orderUpgrade; orderUpgrade = function (s, b) { var m = metalNeed(b), g = stock(s); if (m && g.metal < m) { if (s === ME_S && performance.now() - (window.mT132 || 0) > 2500) { window.mT132 = performance.now(); showToast('NEEDS ' + m + ' METAL - BUILD A BLACKSMITH'); } return false; } var ok = _ou.apply(this, arguments); if (ok && m) g.metal -= m; return ok; };
+  var CN = { wheat: '\ud83c\udf3e WHEAT', corn: '\ud83c\udf3d CORN', peas: '\ud83e\udedb PEAS', berries: '\ud83e\uded0 BLUEBERRIES', cotton: '\u2601 COTTON', spice: '\ud83c\udf36 SPICES', cattle: '\ud83d\udc04 CATTLE RANCH' };
+  var FL = document.createElement('div'); FL.id = 'crop132'; FL.style.cssText = 'position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:54;background:#f3e3c3;border:2px solid #3b2410;border-radius:6px;padding:3px 10px;font:bold 13px monospace;color:#2a1a0a;display:none;pointer-events:none'; document.body.appendChild(FL);
+  setInterval(function () { try { var best = null, bd = 95; allS75().forEach(function (s) { if (!s || !s.bld) return; s.bld.forEach(function (b) { if (b.k !== 'farm' || !(b.L > 0)) return; var p = bldPos(s, b), d = Math.hypot(px - p.x, py - (p.y - 30)); if (d < bd) { bd = d; best = [s, b]; } }); }); if (best) { var cc = crop(best[0], best[1]); FL.textContent = CN[cc] + (cc === 'cattle' ? '' : ' FIELD'); FL.style.display = 'block'; } else FL.style.display = 'none'; } catch (e) {} }, 300);
+  window.ECON131 = { crop: crop, clothed: clothed, G: G, stock: stock, price: price, ty: ty, TY: TY };
+  // ---- production chain, identical for every realm
+  var _es = econStep; econStep = function (s, dt) { _es(s, dt); try { chain(s, dt); } catch (e) {} };
+  function chain(s, dt) {
+    if (!s || !s.res || !(dt > 0)) return; var g = stock(s), R = s.res, L = function (k) { return lvSum(s, k); };
+    var hasT = g.tools > 0.5, fed = R.food > 2, fm = (fed ? 1 : 0.35) * (hasT ? 1 : 0.5);
+    var lf = L('farm'); if (lf) { var tf = (hasT ? 1.5 : 1) * (clothed(s) ? 1 : 0.8); s.bld.forEach(function (b) { if (b.k === 'farm' && b.L > 0) { var cr = crop(s, b); g[cr] += (cr === 'cattle' || cr === 'spice' ? 0.04 : 0.1) * b.L * tf * dt; } }); if (hasT) g.tools -= 0.001 * lf * dt; }
+    var lm = L('mine'); if (lm) { g.iron += 0.05 * lm * fm * dt; g.coal += 0.05 * lm * fm * dt; R.gold += 0.04 * lm * fm * dt; R.food = Math.max(0, R.food - 0.01 * lm * dt); if (hasT) g.tools -= 0.0015 * lm * dt; }
+    var lo = L('oilwell'); if (lo) { g.crude += 0.06 * lo * fm * dt; R.food = Math.max(0, R.food - 0.01 * lo * dt); if (hasT) g.tools -= 0.0015 * lo * dt; }
+    var lr = L('refinery'); if (lr) { var x = Math.min(g.crude, 0.05 * lr * dt); g.crude -= x; g.fuel += x * 0.8; }
+    var ls = L('smith'); if (ls) { var y = Math.min(g.iron, 0.06 * ls * dt); g.iron -= y; var nd = (g.tools < 8 ? 'tools' : g.metal < 15 ? 'metal' : g.armor < 6 ? 'armor' : ['tools', 'metal', 'armor'][Math.floor(performance.now() / 4000) % 3]); g[nd] += nd === 'armor' ? y * 0.5 : y; }
+    var lt = L('tailor'); if (lt) { var q = Math.min(g.cotton, 0.05 * lt * dt); g.cotton -= q; g.clothes += q; }
+    var pop2 = s.ppl ? s.ppl.length : 0; g.clothes = Math.max(0, g.clothes - pop2 * 0.0008 * dt);
+    var lg = L('gunsmith'); if (lg) { var z = Math.min(g.iron, g.coal, 0.03 * lg * dt); g.iron -= z; g.coal -= z; g.rifles += z * 0.5; }
+    // raw food: wheat and beef feed the town when the larder runs low
+    var pop = s.ppl ? s.ppl.length : 0; if (R.food < pop * 6) { var fd = 0; ['wheat', 'corn', 'peas', 'berries'].forEach(function (k) { var w = Math.min(g[k], 0.05 * dt); g[k] -= w; fd += w; }); var c = Math.min(g.cattle, 0.05 * dt); g.cattle -= c; R.food += fd + c * 3; }
+    // the wider frontier: towns you don't run trade with the world and drift back toward their own normal stock
+    if (s !== ME_S) { var t = TY[ty(s)]; GK.forEach(function (k) { var norm = (t.sup[k] ? 60 : 12) / (G[k].p > 20 ? 3 : 1); g[k] += (norm - g[k]) * 0.004 * dt; }); }
+    GK.forEach(function (k) { if (!(g[k] > 0)) g[k] = 0; });
+  }
+  // CPU realms build the new industries too (same costs)
+  var _pl = plan; plan = function (s) { _pl(s); try { if (s === ME_S || Math.random() > 0.08 || s.jobs.length) return; var t = ty(s), want = t === 'oil' ? ['oilwell', 'refinery', 'mine', 'smith', 'tailor'] : t === 'gold' ? ['mine', 'smith', 'gunsmith', 'tailor'] : ['mine', 'smith', 'tailor', 'oilwell', 'gunsmith', 'refinery']; for (var i = 0; i < want.length; i++) if (!bCount(s, want[i])) { if (canPay(s, newCostOf(s, want[i]))) orderBuild(s, want[i]); return; } } catch (e) {} };
+  // rifles: a soldier trained when the armory has a rifle carries it (tougher)
+  var _ts = trainSoldier; trainSoldier = function (s, t) { var ok = _ts.apply(this, arguments); try { var g = stock(s); if (ok && g.armor >= 1) { g.armor -= 1; for (var j = units.length - 1; j >= 0; j--) if (units[j].f === s.f) { units[j].hp = Math.round(units[j].hp * 1.3); units[j].armor132 = 1; break; } } if (ok && g.rifles >= 1) { g.rifles -= 1; for (var i = units.length - 1; i >= 0; i--) if (units[i].f === s.f) { units[i].hp = Math.round(units[i].hp * 1.4); units[i].rifle131 = 1; break; } } } catch (e) {} return ok; };
+  // fuel: engines burn fuel (cars, trucks, jeeps, tanks, planes), big ships burn coal; empty tank = crawl
+  var BURN = { 2: 'fuel', 3: 'fuel', 4: 'fuel', 5: 'fuel', 7: 'fuel', 9: 'coal' }, outT = 0;
+  var _sp = window.SP102; if (_sp) window.SP102 = function (base) { var v = _sp(base); try { var V = window.VEH130 && VEH130(); if (V && V.on && BURN[V.k] && ME_S) { var r = BURN[V.k], home = stock(ME_S); var src = (BAG[r] || 0) > 0 ? BAG : home; if ((src[r] || 0) > 0) src[r] = Math.max(0, src[r] - 0.0004); else { v *= 0.4; if (performance.now() - outT > 6000) { outT = performance.now(); showToast('OUT OF ' + r.toUpperCase() + ' - BUY SOME AT A TRADING POST'); } } } } catch (e) {} return v; };
+  // ---- saddlebags + saving
+  var BAG = {}, BK = function () { return 'kingdom-goods-v1:' + MODE; };
+  function cap() { var V = window.VEH130 && VEH130(); var k = V ? V.k : -1; return 10 + ({ 0: 20, 1: 30, 2: 15, 3: 50, 4: 20 }[k] || 0) + 5 * lvSum(ME_S, 'stable'); }
+  function bagN() { var n = 0; GK.forEach(function (k) { n += Math.floor(BAG[k] || 0); }); return n; }
+  var _eb = econBegin; econBegin = function () { _eb.apply(this, arguments); BAG = {}; try { if (MODE === 'free') { var sv = JSON.parse(localStorage.getItem(BK()) || 'null'); if (sv) { BAG = sv.bag || {}; ME_S.g131 = sv.home; } } } catch (e) {} };
+  setInterval(function () { try { if (MODE === 'free' && ME_S && ME_S.g131) localStorage.setItem(BK(), JSON.stringify({ bag: BAG, home: ME_S.g131 })); } catch (e) {} }, 5000);
+  // ---- trading post panel (tabs FARM / MINE / OIL / MADE)
+  var P = document.createElement('div'); P.id = 'tp131'; document.body.appendChild(P); var cat = 'FARM', town = null;
+  var css = document.createElement('style'); css.textContent = '#tp131{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:70;background:#f3e3c3;border:3px solid #3b2410;border-radius:8px;padding:6px 8px;font:bold 12px monospace;color:#2a1a0a;display:none;width:min(560px,92vw);max-height:88vh;overflow:auto}#tp131 .tb{display:flex;gap:4px;margin:4px 0}#tp131 .tb button{flex:1;font:bold 11px monospace;padding:5px 2px;background:#fff8e8;border:2px solid #3b2410;border-radius:5px}#tp131 .tb button.on{background:#7a4a1c;color:#ffe9b8}#tp131 .r{display:flex;align-items:center;gap:6px;padding:3px 0;border-top:1px dashed #b8996a}#tp131 .r span{flex:1}#tp131 .r button{font:bold 11px monospace;padding:5px 8px;background:#7a4a1c;color:#ffe9b8;border:2px solid #3b2410;border-radius:5px}#tp131 .r button:disabled{opacity:.35}#tp131 .x{float:right;font:bold 13px monospace;background:#3b2410;color:#fff;border:0;border-radius:4px;padding:3px 8px}#tpb131{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 150px);z-index:56;display:none;font:bold 15px monospace;padding:10px 16px;background:#7a4a1c;color:#ffe9b8;border:2px solid #3b2410;border-radius:8px;box-shadow:0 3px 0 #3b2410}@media (orientation:landscape) and (max-height:500px){#tpb131{bottom:8px}#tp131{font-size:11px}}';
+  document.head.appendChild(css);
+  function nameOf(s) { if (s === ME_S) return (typeof city !== 'undefined' && city.name) || 'YOUR TOWN'; var f = s.fac || (typeof facOf === 'function' && facOf(s)); return (f && f.name) || 'TOWN'; }
+  function render() { if (!town) return; var s = town, g = stock(s), mine = s === ME_S, gold = ME_S.res.gold;
+    P.innerHTML = ''; var x = document.createElement('button'); x.className = 'x'; x.textContent = '\u2715'; x.onclick = function (e) { e.stopPropagation(); close(); }; P.appendChild(x);
+    var hd = document.createElement('div'); hd.innerHTML = (mine ? '\ud83c\udfe0 ' + nameOf(s) + ' STOREHOUSE' : '\u2696 ' + nameOf(s) + ' TRADING POST \u00b7 ' + TY[ty(s)].n) + '<br>\ud83d\udcb0' + fmt(gold) + ' \u00b7 BAGS ' + bagN() + '/' + cap(); P.appendChild(hd);
+    var tb = document.createElement('div'); tb.className = 'tb'; CATS.forEach(function (c) { var b = document.createElement('button'); b.textContent = c; if (c === cat) b.className = 'on'; b.onclick = function (e) { e.stopPropagation(); cat = c; render(); }; tb.appendChild(b); }); P.appendChild(tb);
+    GK.filter(function (k) { return G[k].c === cat; }).forEach(function (k) { var r = document.createElement('div'); r.className = 'r'; var pr = price(s, k), bp = pr * 1.1, sp = pr * 0.9, have = Math.floor(BAG[k] || 0), tw = Math.floor(g[k] || 0);
+      var sp1 = document.createElement('span'); sp1.textContent = G[k].n + '  \ud83c\udf92' + have + '  \ud83c\udfea' + tw + (mine ? '' : '  $' + bp.toFixed(1) + '/' + sp.toFixed(1)); r.appendChild(sp1);
+      function bt(t, dis, fn) { var b = document.createElement('button'); b.textContent = t; b.disabled = dis; b.onclick = function (e) { e.stopPropagation(); fn(); render(); try { updateRes(); } catch (er) {} }; r.appendChild(b); }
+      if (mine) { bt('TAKE', tw < 1 || bagN() >= cap(), function () { g[k] -= 1; BAG[k] = (BAG[k] || 0) + 1; }); bt('STORE', have < 1, function () { BAG[k] -= 1; g[k] += 1; }); }
+      else { bt('BUY', tw < 1 || gold < bp || bagN() >= cap(), function () { ME_S.res.gold -= bp; g[k] -= 1; BAG[k] = (BAG[k] || 0) + 1; }); bt('SELL', have < 1, function () { ME_S.res.gold += sp; g[k] += 1; BAG[k] -= 1; }); bt('SELL ALL', have < 1, function () { var n = Math.floor(BAG[k]), t = 0; for (var i = 0; i < n; i++) { t += price(s, k) * 0.9; g[k] += 1; } BAG[k] -= n; ME_S.res.gold += t; showToast('SOLD ' + n + ' ' + G[k].n + ' +' + Math.round(t)); }); }
+      P.appendChild(r); });
+    if (cat === 'MADE' && mine) { var nt = document.createElement('div'); nt.style.marginTop = '4px'; nt.textContent = 'BLACKSMITH: IRON\u2192TOOLS/METAL/ARMOR \u00b7 TAILOR: COTTON\u2192CLOTHES \u00b7 GUNSMITH: IRON+COAL\u2192RIFLES \u00b7 REFINERY: CRUDE\u2192FUEL'; P.appendChild(nt); }
+  }
+  function open(s) { town = s; P.style.display = 'block'; render(); }
+  function close() { P.style.display = 'none'; town = null; }
+  window.TP131 = { open: open, close: close, bag: function () { return BAG; }, render: render };
+  // other towns: walk up to their hall -> tap OPEN TRADING POST
+  var TB = document.createElement('button'); TB.id = 'tpb131'; document.body.appendChild(TB); var nearT = null;
+  TB.onclick = function (e) { e.stopPropagation(); if (nearT) open(nearT); };
+  function nearTown() { if (typeof started !== 'undefined' && !started) return null; var best = null, bd = 260; allS75().forEach(function (s) { if (!s || s === ME_S || !s.bld || !s.bld[0]) return; var p = bldPos(s, s.bld[0]), d = Math.hypot(px - p.x, py - (p.y + 60)); if (d < bd) { bd = d; best = s; } }); return best; }
+  setInterval(function () { try { nearT = nearTown(); if (!nearT) { TB.style.display = 'none'; if (town && town !== ME_S) close(); return; } TB.textContent = 'OPEN ' + nameOf(nearT) + ' TRADING POST' + (matchMedia('(pointer:coarse)').matches ? '' : ' [E]'); TB.style.display = P.style.display === 'block' ? 'none' : 'block'; if (town === nearT) render(); } catch (e) {} }, 400);
+  addEventListener('keydown', function (e) { if (e.key === 'Escape' && town) close(); if ((e.key === 'e' || e.key === 'E') && nearT && !town) open(nearT); });
+  // own town: TRADE button at hall and market, info at the new buildings
+  var _a = window.ACT126; window.ACT126 = function (s, b, a) { if (_a) _a(s, b, a); try { var k = b.k, g = stock(s);
+      if (k === 'hall' || k === 'market') a.unshift(['\u2696 GOODS', function () { open(ME_S); }]);
+      var INF = { farm: CN[crop(s, b)] + ' ' + Math.floor(g[crop(s, b)]) + (g.tools > 0.5 ? ' \u00b7 TOOLS x1.5' : ' \u00b7 NEEDS TOOLS'), mine: 'IRON ' + Math.floor(g.iron) + ' \u00b7 COAL ' + Math.floor(g.coal) + (s.res.food > 2 ? '' : ' \u00b7 HUNGRY - SLOW') + (g.tools > 0.5 ? '' : ' \u00b7 NO TOOLS - SLOW'), oilwell: 'CRUDE ' + Math.floor(g.crude) + (g.tools > 0.5 ? '' : ' \u00b7 NO TOOLS - SLOW'), refinery: 'CRUDE ' + Math.floor(g.crude) + ' \u2192 FUEL ' + Math.floor(g.fuel), smith: 'IRON \u2192 TOOLS ' + Math.floor(g.tools) + ' \u00b7 METAL ' + Math.floor(g.metal) + ' \u00b7 ARMOR ' + Math.floor(g.armor), tailor: 'COTTON ' + Math.floor(g.cotton) + ' \u2192 CLOTHES ' + Math.floor(g.clothes) + (clothed(s) ? '' : ' \u00b7 TOWN UNHAPPY'), gunsmith: 'IRON+COAL \u2192 RIFLES ' + Math.floor(g.rifles) };
+      if (INF[k] && b.L > 0) a.info = (a.info ? a.info + ' \u00b7 ' : '') + INF[k]; } catch (e) {} };
+  // ---- art (western, B/W with a little wood colour)
+  var _cb = cityBuilding; cityBuilding = function (c, b, x, y) { var k = b.kind; if (NEWK.indexOf(k) < 0) return _cb.apply(this, arguments); c.save(); c.lineWidth = 3; c.strokeStyle = '#000'; c.fillStyle = '#000';
+    if (k === 'mine') { c.beginPath(); c.moveTo(x - 70, y); c.quadraticCurveTo(x, y - 140, x + 70, y); c.fill(); c.fillStyle = '#fff'; c.fillRect(x - 18, y - 46, 36, 46); c.fillStyle = '#7a4a1c'; c.fillRect(x - 24, y - 52, 48, 7); c.fillRect(x - 24, y - 52, 7, 52); c.fillRect(x + 17, y - 52, 7, 52); c.fillStyle = '#000'; c.fillRect(x - 6, y - 10, 30, 8); c.beginPath(); c.arc(x + 0, y - 1, 3, 0, 7); c.arc(x + 18, y - 1, 3, 0, 7); c.fill(); }
+    else if (k === 'oilwell') { c.beginPath(); c.moveTo(x - 32, y); c.lineTo(x, y - 120); c.lineTo(x + 32, y); c.stroke(); for (var i = 1; i < 5; i++) { var yy = y - i * 24, w = 32 * (1 - i * 24 / 120); c.beginPath(); c.moveTo(x - w, yy); c.lineTo(x + w, yy); c.stroke(); } c.fillRect(x - 40, y - 4, 80, 4); var a = Math.sin(performance.now() / 500) * 0.3; c.save(); c.translate(x + 48, y - 30); c.rotate(a); c.fillRect(-26, -3, 52, 6); c.restore(); c.fillRect(x + 45, y - 30, 6, 30); }
+    else if (k === 'refinery') { c.fillRect(x - 60, y - 60, 46, 60); c.fillRect(x + 4, y - 74, 46, 74); c.fillStyle = '#fff'; c.fillRect(x - 55, y - 40, 36, 4); c.fillRect(x + 9, y - 50, 36, 4); c.fillStyle = '#000'; c.fillRect(x + 54, y - 110, 10, 110); c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.arc(x + 64, y - 124, 12, 0, 7); c.arc(x + 78, y - 136, 9, 0, 7); c.fill(); }
+    else { c.fillRect(x - 55, y - 60, 110, 60); c.fillStyle = '#7a4a1c'; c.fillRect(x - 62, y - 92, 124, 34); c.fillStyle = '#ffe9b8'; c.font = 'bold 13px monospace'; c.textAlign = 'center'; c.fillText(k === 'smith' ? 'SMITHY' : k === 'tailor' ? 'TAILOR' : 'GUNS', x, y - 70); c.fillStyle = '#fff'; c.fillRect(x - 12, y - 34, 24, 34); if (k === 'smith') { c.fillStyle = '#000'; c.fillRect(x - 45, y - 18, 22, 8); c.fillRect(x - 38, y - 10, 8, 10); } }
+    c.restore(); c.fillStyle = '#000'; c.font = 'bold 13px monospace'; c.textAlign = 'center'; c.fillText(ENAME[k], x, y + 18); };
+})();
 
   requestAnimationFrame(frame);
 </script>
