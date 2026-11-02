@@ -4983,7 +4983,7 @@ window.B137 = (function () {
     function home57() { if (!me || !me.hallObj || !me.alive) return; var h = me.hallObj, dx = h.x - px, dy = h.y - py, d = Math.hypot(dx, dy);
       var W2 = cv.width / (window.devicePixelRatio || 1), H2 = cv.height / (window.devicePixelRatio || 1); if (Math.abs(dx) < W2 / 2 + 60 && Math.abs(dy) < H2 / 2 + 60) return;
       var c = ctx, a = Math.atan2(dy, dx), rx = W2 / 2 - 46, ry = H2 < 500 ? H2 / 2 - 52 : H2 / 2 - 120, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
-      var X = W2 / 2 + Math.cos(a) * t, Y = H2 / 2 + Math.sin(a) * t, cc = window.__cc79; if (cc && performance.now() - cc.t < 120 && Math.abs(X - cc.X) < 100 && Math.abs(Y - cc.Y) < 58) { if (Math.abs(Math.sin(a)) > 0.6) X = cc.X + (X >= cc.X ? 100 : -100); else Y = cc.Y + (Y >= cc.Y ? 60 : -60); } /* v91: HOME and CAPITAL arrows keep their labels apart */ try { var th83 = document.getElementById('topHud'), r83 = th83 && th83.getBoundingClientRect(); if (r83 && r83.width > 0 && X > r83.left - 22 && X < r83.right + 22 && Y - 22 < r83.bottom) Y = r83.bottom + 24; } catch (e) {} var tr86 = window.__tr86; if (tr86 && performance.now() - tr86.t < 200 && X > tr86.l - 22 && X < tr86.r + 22 && Y - 22 < tr86.b) Y = tr86.b + 24; /* v86: HOME compass steps below a toast instead of covering it */ c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0); c.translate(X, Y);
+      var X = W2 / 2 + Math.cos(a) * t, Y = H2 / 2 + Math.sin(a) * t, cc = window.__cc79; if (cc && performance.now() - cc.t < 120 && Math.abs(X - cc.X) < 100 && Math.abs(Y - cc.Y) < 58) { if (Math.abs(Math.sin(a)) > 0.6) X = cc.X + (X >= cc.X ? 100 : -100); else Y = cc.Y + (Y >= cc.Y ? 60 : -60); } var av = COMPAV151(X, Y); X = av[0]; Y = av[1]; /* v91: HOME and CAPITAL arrows keep their labels apart */ try { var th83 = document.getElementById('topHud'), r83 = th83 && th83.getBoundingClientRect(); if (r83 && r83.width > 0 && X > r83.left - 22 && X < r83.right + 22 && Y - 22 < r83.bottom) Y = r83.bottom + 24; } catch (e) {} var tr86 = window.__tr86; if (tr86 && performance.now() - tr86.t < 200 && X > tr86.l - 22 && X < tr86.r + 22 && Y - 22 < tr86.b) Y = tr86.b + 24; /* v86: HOME compass steps below a toast instead of covering it */ c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0); c.translate(X, Y);
       c.fillStyle = '#2a1a0a'; c.strokeStyle = '#fff'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 20, 0, 6.3); c.fill(); c.stroke(); c.rotate(a); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(18, 0); c.lineTo(8, -7); c.lineTo(8, 7); c.closePath(); c.fill(); c.rotate(-a);
       c.beginPath(); c.moveTo(-8, 0); c.lineTo(0, -8); c.lineTo(8, 0); c.closePath(); c.fill(); c.fillRect(-6, 0, 12, 7);
       c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('HOME ' + (d / 1000).toFixed(1) + 'K', 0, 33); c.restore(); }
@@ -5850,12 +5850,13 @@ window.B137 = (function () {
     _bc37(); CAP.props.forEach(function (p) { if (p.k === 'house' && Math.hypot(p.x, p.y) > (CAPX.R - 170) * 0.62 && hash2(p.x / 250 + 5, p.y / 230 + 3) < 0.5) { p.sz = 0.4; p.value *= 0.4; } });
   };
   function pName37(p) { return p.sz ? 'COTTAGE' : PK[p.k].n; }
+  function COMPAV151(X, Y) { /* v152: compasses never sit on buttons */ try { var ids = ['wpnBtn', 'mountBtn', 'vehBtn', 'atk', 'joy', 'rail136', 'open130', 'menuBtn', 'mapb136']; for (var pass = 0; pass < 3; pass++) { var moved = false; for (var i = 0; i < ids.length; i++) { var e = document.getElementById(ids[i]); if (!e || e.offsetParent === null) continue; var r = e.getBoundingClientRect(); if (!r.width) continue; if (X + 44 > r.left && X - 44 < r.right && Y + 40 > r.top && Y - 22 < r.bottom) { var up = r.top - 42, dn = r.bottom + 24; Y = (Y - up < dn - Y && up > 30) ? up : dn; moved = true; } } if (!moved) break; } } catch (e) {} return [X, Y]; }
   // ===== v37: capital compass (clarity: where is the market?) =====
   function capCompass37() {
     if (!CAPX || !BOUNDS) return; var dx = CAPX.x - px, dy = CAPX.y - py, d = Math.hypot(dx, dy); if (d < CAPX.R + 400) return;
     var W = cv.width / (window.devicePixelRatio || 1), H = cv.height / (window.devicePixelRatio || 1);
     var c = ctx, a = Math.atan2(dy, dx), rx = W / 2 - 46, ry = H < 500 ? H / 2 - 75 : H / 2 - 70, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
-    var X = W / 2 + Math.cos(a) * t, Y = H / 2 + Math.sin(a) * t; window.__cc79 = { X: X, Y: Y, t: performance.now() }; c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+    var X = W / 2 + Math.cos(a) * t, Y = H / 2 + Math.sin(a) * t; var av = COMPAV151(X, Y); X = av[0]; Y = av[1]; window.__cc79 = { X: X, Y: Y, t: performance.now() }; c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
     c.translate(X, Y); c.fillStyle = '#fff'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 20, 0, 6.3); c.fill(); c.stroke();
     c.rotate(a); c.fillStyle = '#2a1a0a'; c.beginPath(); c.moveTo(16, 0); c.lineTo(4, -8); c.lineTo(4, 8); c.closePath(); c.fill(); c.rotate(-a);
     c.font = 'bold 13px monospace'; c.textAlign = 'center'; c.fillText('\u2605', -2, 5); c.font = 'bold 10px monospace'; c.fillText('CAPITAL ' + (d / 1000).toFixed(1) + 'K', 0, 33); /* v90: say what the star compass points to, like HOME */ c.restore();
@@ -5914,7 +5915,7 @@ window.B137 = (function () {
     var W = cv.width / (window.devicePixelRatio || 1), H = cv.height / (window.devicePixelRatio || 1); if (Math.abs(dx * z) < W / 2 + 40 && Math.abs(dy * z) < H / 2 + 40) return;
     var a = Math.atan2(dy, dx), rx = W / 2 - 46, ry = H < 500 ? H / 2 - 64 : H / 2 - 95, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
     var X = W / 2 + Math.cos(a) * t, Y = H / 2 + Math.sin(a) * t, cc = window.__cc79;
-    if (cc && performance.now() - cc.t < 120 && Math.abs(X - cc.X) < 100 && Math.abs(Y - cc.Y) < 58) { if (Math.abs(Math.sin(a)) > 0.6) X = cc.X + (X >= cc.X ? 100 : -100); else Y = cc.Y + (Y >= cc.Y ? 60 : -60); }
+    if (cc && performance.now() - cc.t < 120 && Math.abs(X - cc.X) < 100 && Math.abs(Y - cc.Y) < 58) { if (Math.abs(Math.sin(a)) > 0.6) X = cc.X + (X >= cc.X ? 100 : -100); else Y = cc.Y + (Y >= cc.Y ? 60 : -60); } var av = COMPAV151(X, Y); X = av[0]; Y = av[1];
     var c = ctx; c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0); c.translate(X, Y);
     c.fillStyle = '#b00'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 20, 0, 6.3); c.fill(); c.stroke();
     c.rotate(a); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(18, 0); c.lineTo(8, -7); c.lineTo(8, 7); c.closePath(); c.fill(); c.rotate(-a);
@@ -6973,7 +6974,7 @@ window.B137 = (function () {
     function mount() { var sb = document.getElementById('sgBtn'); if (sb) { sb.style.display = 'none'; sb.parentNode.insertBefore(bt, sb); } else { var mb = document.getElementById('mountBtn'); if (mb) mb.parentNode.insertBefore(bt, mb); else document.body.appendChild(bt); } }
     mount();
     window.addEventListener('keydown', function (e) { if ((e.key === 'g' || e.key === 'G') && started && !(e.target && /INPUT|TEXTAREA/.test(e.target.tagName))) { e.stopImmediatePropagation(); cyc(); } }, true);
-    function use(n) { if (steel() < n) { W.cd = 0.4; try { sfx('click142', px, py, 1); } catch (e) {} showToast('*CLICK* OUT OF STEEL - FORGE SHELLS IN THE SHOP (BLACKSMITH)'); return false; } ME_S.steel142 -= n; lab(); return true; }
+    function use(n) { if (steel() < n) { W.cd = 0.4; try { sfx('click142', px, py, 1); } catch (e) {} var nn = performance.now(); if (!W.oos || nn - W.oos > 8000) { W.oos = nn; showToast('NO STEEL - USING KNIFE'); } if (veh() < 0 && typeof knife === 'function') { try { knife(); } catch (e) {} } return false; } ME_S.steel142 -= n; lab(); return true; }
     function hitAll(x, y, r, d) { var n = 0; try { if (playerHit(x, y, r, d, face)) n++; } catch (e) {} try { wolves.forEach(function (w) { if (w.hp > 0 && Math.hypot(w.x - x, w.y - y) < r + 20) { hitWolf(w, d); n++; } }); } catch (e) {} try { if (window.WILD141) n += WILD141.hitAt(x, y - 12, r + 20, r + 30, d); } catch (e) {} return n; }
     function rifle() { if (!use(1)) return; W.cd = 1.2; W.flash = 0.08; W.shots++; var mh = mounted() ? 46 : 30; W.bul.push({ x: px + face * 40, y: py - mh, vx: face * 2200, life: 0.75 }); try { sfx('boom142', px, py, 0.6); } catch (e) {} KICK46 = Math.max(KICK46 || 0, 0.06); }
     function knife() { W.cd = 0.28; W.slash = 0.15; W.shots++; hitAll(px + face * 55, py, 60, 2 + (typeof weaponBonus === 'function' ? weaponBonus() : 0)); try { sfx('click142', px, py, 0.4); } catch (e) {} }
@@ -7082,5 +7083,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --></body>
+<!-- v151-endless --><!-- v152-polish --></body>
 </html>
