@@ -2723,7 +2723,7 @@
           if (fid === 'me') plLooted += g; if (s.f === 'me' && Math.random() < 0.2) showToast('YOUR VAULT IS BEING LOOTED! -' + g.toFixed(1) + ' GOLD'); }
       });
     });
-    plLootT -= step; if (plLooted >= 1 && plLootT <= 0) { plLootT = 3; showToast('LOOTED +' + plLooted.toFixed(1) + ' GOLD'); sfx && sfx('coin'); plLooted = 0; }
+    plLootT -= step; if (plLooted >= 1 && plLootT <= 0) { plLootT = 3; sfx && sfx('coin'); plLooted = 0; }
   }
   window.__v29 = { granCap: granCap, vaultCap: vaultCap, lootable: lootable, protectedGold: protectedGold, LOOT: LOOT, WX: function () { return WX; }, season: function () { return SEAS[seasonIx()]; }, lootTick: lootTick, setTax: function (t) { myTax = t; } };
   var _ut29 = updateUnits; updateUnits = function (dt) { _ut29(dt); lootTick(dt); bankUiTick(dt); };
