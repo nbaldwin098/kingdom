@@ -6492,7 +6492,7 @@ window.B137 = (function () {
       if (added) { resetWater(); RAIL.key = ''; } }
     // crossroads saloon at the bend of a long road
     function saloonFor(t) { if (!t.link || t.d.mini || t.link.alt) return; var hh = homeP(); if (Math.hypot(t.link.nx - hh.x, t.y - hh.y) < 9500) return; var L = Math.abs(t.link.ny - t.y) + Math.abs(t.link.nx - t.link.ex); if (L < 12000 || Math.abs(t.link.nx - t.link.ex) < 3000) return;
-      var dir = t.link.ex > t.link.nx ? 1 : -1, ox = t.link.nx + dir * 1400; busy = true; try { TOWN133.add({ id: t.id + 'x', name: 'CROSSROADS SALOON', pop: 3, ty: 'mixed', mini: 1, noroad: 1, main: ['saloon', 'general'], edge: [] }, ox, t.y); } catch (e) {} busy = false; }
+      var dir = t.link.ex > t.link.nx ? 1 : -1, ox = t.link.nx + dir * 1400; busy = true; try { TOWN133.add({ id: t.id + 'x', name: t.name + ' CROSSROADS', pop: 3, ty: 'mixed', mini: 1, noroad: 1, main: ['saloon', 'general'], edge: [] }, ox, t.y); } catch (e) {} busy = false; }
     // lone ranches become tiny homesteads with a family (no road, just a trail)
     function ranchTowns() { var L = T(); if (!L.length) return; var I0 = Math.floor(px / CELL), J0 = Math.floor(py / CELL);
       for (var i = I0 - 3; i <= I0 + 3; i++) for (var j = J0 - 3; j <= J0 + 3; j++) { var f = feat(i, j); if (!f || f.k !== 'ranch' || f.done) continue; f.done = 1; var hh = homeP(); if (Math.hypot(f.x - hh.x, f.y - hh.y) < 9000) continue; busy = true; try { f.t = TOWN133.add({ id: 'r' + i + '_' + j, name: (LNm(i, j)) + ' RANCH', pop: 2, ty: 'farm', mini: 1, noroad: 1, main: ['home'], edge: ['ranch'] }, f.x, f.y); } catch (e) {} busy = false; } }
@@ -6893,7 +6893,7 @@ window.B137 = (function () {
     var G = function () { return { x: city.x - 420, y: city.y + 480 }; };
     var posts = new Map();
     function hash(s) { var h = 7; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 9973; return h; }
-    function postOf(t) { var p = posts.get(t.name); if (p) return p; var mx = -1e9, my = 0; (t.b || []).forEach(function (b) { if (b.x > mx) { mx = b.x; my = b.y; } }); p = { x: (mx > -1e9 ? mx : t.x) + 330, y: (mx > -1e9 ? my : t.y) + 40, h: hash(t.name), name: t.name }; posts.set(t.name, p); return p; }
+    function postOf(t) { fixName(t); var p = posts.get(t.name); if (p) return p; var mx = -1e9, my = 0; (t.b || []).forEach(function (b) { if (b.x > mx) { mx = b.x; my = b.y; } }); p = { x: (mx > -1e9 ? mx : t.x) + 330, y: (mx > -1e9 ? my : t.y) + 40, h: hash(t.name), name: t.name }; posts.set(t.name, p); return p; }
     function price(p) { var tm = Date.now() / 60000; return Math.max(2, Math.round(5 + (p.h % 5) - 2 + 2.5 * Math.sin(tm / 3 + p.h))); }
     function nearPost() { if (!window.TOWN133) return null; var best = null, bd = 220; TOWN133.towns().forEach(function (t) { var p = postOf(t), d = Math.hypot(p.x - px, p.y - py); if (d < bd) { bd = d; best = p; } }); return best; }
     var gT = 0;
@@ -6913,6 +6913,8 @@ window.B137 = (function () {
     function drawGarden(sx, sy) { var c = ctx; c.fillStyle = '#8a6a3a'; c.fillRect(sx - 90, sy - 40, 180, 50); var n = S.gL ? 6 + S.gL * 3 : 0; for (var i = 0; i < n; i++) { var x = sx - 80 + (i % 9) * 20, y = sy - 30 + Math.floor(i / 9) * 18; c.fillStyle = '#4a7a2a'; c.beginPath(); c.arc(x, y, 7, 0, 7); c.fill(); c.fillStyle = ['#c8402a', '#d4a017', '#e07a20'][i % 3]; c.beginPath(); c.arc(x + 2, y - 2, 3, 0, 7); c.fill(); } c.strokeStyle = '#5a3418'; c.lineWidth = 3; c.strokeRect(sx - 90, sy - 40, 180, 50); sign(c, sx, sy - 74, S.gL ? '\ud83c\udf36 SPICE GARDEN LV' + S.gL + ' \u00b7 ' + S.sp : '\ud83c\udf31 SPICE GARDEN SITE'); }
     var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); if (!started || !ME_S) return; var g = G(); if (Math.abs(g.x - px) < 1600 && Math.abs(g.y - py) < 1200) items.push({ y: g.y, x: g.x, y2: g.y, fn: function (sx, sy) { drawGarden(sx, sy); } }); if (window.TOWN133) TOWN133.towns().forEach(function (t) { var p = postOf(t); if (Math.abs(p.x - px) < 1600 && Math.abs(p.y - py) < 1200) items.push({ y: p.y, x: p.x, y2: p.y, fn: function (sx, sy) { drawPost(p, sx, sy); } }); }); };
     var _si = shopItems; shopItems = function () { var it = _si.apply(this, arguments); try { it.push({ label: '\ud83c\udf36 SPICE ' + S.sp + ' \u00b7 GARDEN LV' + S.gL + ' \u00b7 SELL AT ANY TOWN TRADING POST (PRICES DIFFER BY TOWN AND DRIFT)' }); } catch (e) {} return it; };
+    function fixName(t) { if (t && t.name === 'CROSSROADS SALOON' && typeof t.id === 'string' && /x$/.test(t.id)) { var par = (window.__tw146 || TOWN133.towns)().find(function (o) { return o.id === t.id.slice(0, -1); }); t.name = (par ? par.name : 'LONE') + ' CROSSROADS'; } }
+    try { var _tw = window.__tw146 = TOWN133.towns; TOWN133.towns = function () { var L = _tw.apply(this, arguments); for (var i = 0; i < L.length; i++) fixName(L[i]); return L; }; } catch (e) {}
     window.TRADE146 = { S: S, posts: posts, postOf: postOf, price: price, G: G, save: save };
   })();
 
@@ -6948,6 +6950,59 @@ window.B137 = (function () {
       if (window.STOR145) { var p = STOR145.sites().port; if (p && STOR145.S.built.port) for (var j = 0; j < Math.min(STOR145.S.b.length, 3); j++) { var bx = p.wx + (j - 1) * 50, by = p.wy + 20; if (W(bx, by)) out.push({ k: 'port-boat', x: bx, y: by }); } }
       out.forEach(function (b) { b.water = W(b.x, b.y); }); return out;
     };
+  })();
+
+  // ===== v149 WEAPONS: cycle SHOTGUN / RIFLE / KNIFE / MELEE (button or G); rifle = 1 steel, long single shot; TANK fires cannon shells, PLANE drops bombs (2 steel) =====
+  (function () {
+    var LIST = ['shotgun', 'rifle', 'knife', 'melee'], NM = { shotgun: '\ud83d\udd2b SHOTGUN', rifle: '\ud83c\udfaf RIFLE', knife: '\ud83d\udde1 KNIFE', melee: '\u2694 MELEE' };
+    var W = window.WPN149 = { cur: localStorage.getItem('kingdom-wpn149') || 'shotgun', cd: 0, flash: 0, slash: 0, bul: [], boom: [], shots: 0 };
+    if (LIST.indexOf(W.cur) < 0) W.cur = 'shotgun';
+    function SG() { return window.SG142; }
+    function steel() { return SG() ? SG().steel() : 0; }
+    function veh() { var v = window.VEH130 && VEH130(); return v && v.on ? v.k : -1; }
+    function sync() { if (SG()) SG().on = W.cur === 'shotgun' && veh() !== 5 && veh() !== 7; }
+    var bt = document.createElement('button'); bt.id = 'wpnBtn';
+    bt.style.cssText = 'font:bold 12px monospace;padding:6px 10px;background:#f2ead8;color:#2a1a0a;border:2px solid #6b4a26;border-radius:6px;margin-right:6px;pointer-events:auto';
+    function lab() { var k = veh(), n = k === 5 ? '\ud83d\udca5 TANK CANNON' : k === 7 ? '\ud83d\udca3 BOMBS' : NM[W.cur]; var ammo = (k === 5 || k === 7 || W.cur === 'shotgun' || W.cur === 'rifle') ? ' \u2699' + steel() : ''; bt.textContent = n + ammo + ' \u21bb'; bt.style.color = ammo && steel() < 1 ? '#b03020' : '#2a1a0a'; }
+    W.lab = lab; setInterval(function () { sync(); lab(); }, 500);
+    function cyc(e) { if (e) { e.preventDefault(); e.stopPropagation(); } W.cur = LIST[(LIST.indexOf(W.cur) + 1) % LIST.length]; try { localStorage.setItem('kingdom-wpn149', W.cur); } catch (x) {} sync(); lab();
+      showToast({ shotgun: 'SHOTGUN - 6 PELLETS, SHORT RANGE', rifle: 'RIFLE - LONG RANGE, 1 STEEL PER SHOT', knife: 'KNIFE - FAST CLOSE STABS, NO AMMO', melee: 'MELEE WEAPON OUT' }[W.cur]); }
+    W.cycle = cyc; bt.addEventListener('click', cyc); bt.addEventListener('touchstart', cyc, { passive: false });
+    function mount() { var sb = document.getElementById('sgBtn'); if (sb) { sb.style.display = 'none'; sb.parentNode.insertBefore(bt, sb); } else { var mb = document.getElementById('mountBtn'); if (mb) mb.parentNode.insertBefore(bt, mb); else document.body.appendChild(bt); } }
+    mount();
+    window.addEventListener('keydown', function (e) { if ((e.key === 'g' || e.key === 'G') && started && !(e.target && /INPUT|TEXTAREA/.test(e.target.tagName))) { e.stopImmediatePropagation(); cyc(); } }, true);
+    function use(n) { if (steel() < n) { W.cd = 0.4; try { sfx('click142', px, py, 1); } catch (e) {} showToast('*CLICK* OUT OF STEEL - FORGE SHELLS IN THE SHOP (BLACKSMITH)'); return false; } ME_S.steel142 -= n; lab(); return true; }
+    function hitAll(x, y, r, d) { var n = 0; try { if (playerHit(x, y, r, d, face)) n++; } catch (e) {} try { wolves.forEach(function (w) { if (w.hp > 0 && Math.hypot(w.x - x, w.y - y) < r + 20) { hitWolf(w, d); n++; } }); } catch (e) {} try { if (window.WILD141) n += WILD141.hitAt(x, y - 12, r + 20, r + 30, d); } catch (e) {} return n; }
+    function rifle() { if (!use(1)) return; W.cd = 1.2; W.flash = 0.08; W.shots++; var mh = mounted() ? 46 : 30; W.bul.push({ x: px + face * 40, y: py - mh, vx: face * 2200, life: 0.75 }); try { sfx('boom142', px, py, 0.6); } catch (e) {} KICK46 = Math.max(KICK46 || 0, 0.06); }
+    function knife() { W.cd = 0.28; W.slash = 0.15; W.shots++; hitAll(px + face * 55, py, 60, 2 + (typeof weaponBonus === 'function' ? weaponBonus() : 0)); try { sfx('click142', px, py, 0.4); } catch (e) {} }
+    function cannon() { if (!use(2)) return; W.cd = 1.5; W.flash = 0.12; W.shots++; W.bul.push({ x: px + face * 60, y: py - 30, vx: face * 1400, life: 0.8, big: 1 }); try { sfx('boom142', px, py, 1); } catch (e) {} KICK46 = Math.max(KICK46 || 0, 0.2); }
+    function bomb() { if (!use(2)) return; W.cd = 1.0; W.shots++; W.boom.push({ x: px, y: py, t: 0.6, fall: 1 }); }
+    function splash(x, y) { W.boom.push({ x: x, y: y, t: 0.4 }); hitAll(x, y, 140, 6); try { sfx('boom142', x, y, 1); } catch (e) {} }
+    var _at = attack; attack = function () { if (!started) return _at.apply(this, arguments); var k = veh(); sync();
+      if (k === 5 || k === 7) { if (W.cd <= 0) (k === 5 ? cannon : bomb)(); return; }
+      if (W.cur === 'rifle') { if (W.cd <= 0) rifle(); return; }
+      if (W.cur === 'knife') { if (W.cd <= 0) { knife(); _at.apply(this, arguments); } return; }
+      return _at.apply(this, arguments); };
+    var _uw = updateWolves; updateWolves = function (dt) { _uw.apply(this, arguments); try { if (W.cd > 0) W.cd -= dt; if (W.flash > 0) W.flash -= dt; if (W.slash > 0) W.slash -= dt;
+      W.bul = W.bul.filter(function (b) { b.life -= dt; b.x += b.vx * dt; if (b.life <= 0) { if (b.big) splash(b.x, b.y + 30); return false; }
+        var hit = b.big ? hitAll(b.x, b.y + 30, 40, 0) > 0 : hitAll(b.x, b.y + 30, 22, 4) > 0; if (hit && b.big) splash(b.x, b.y + 30); return !hit; });
+      W.boom = W.boom.filter(function (o) { o.t -= dt; if (o.fall && o.t <= 0) { o.fall = 0; o.t = 0.4; splash(o.x, o.y); return false; } return o.t > 0; }); } catch (e) { if (!window.E149) { window.E149 = 1; console.warn(e); } } };
+    function rifleArt(c, x, y) { c.save(); c.translate(x, y); c.scale(face * 1.6, 1.6); c.translate(W.cd > 1.05 ? -3 : 0, 0); c.strokeStyle = '#2a1a0a'; c.lineWidth = 1;
+      c.fillStyle = '#7a4a24'; c.beginPath(); c.moveTo(-16, -2); c.lineTo(4, -2); c.lineTo(4, 3); c.lineTo(-14, 6); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = '#4a4e56'; c.fillRect(4, -4, 9, 6); c.strokeRect(4, -4, 9, 6); c.fillStyle = '#d4a017'; c.fillRect(6, -6, 3, 2);
+      c.fillStyle = '#6a7078'; c.fillRect(13, -3, 38, 2.4); c.strokeRect(13, -3, 38, 2.4); c.fillStyle = '#8a5a2e'; c.fillRect(13, -0.6, 20, 3); c.strokeRect(13, -0.6, 20, 3);
+      c.fillStyle = '#2a2a30'; c.fillRect(20, -6, 8, 2); // scope
+      if (W.flash > 0) { c.fillStyle = '#fff2a0'; c.beginPath(); c.moveTo(51, -2); c.lineTo(66, -6); c.lineTo(62, -2); c.lineTo(66, 3); c.closePath(); c.fill(); }
+      c.restore(); }
+    function knifeArt(c, x, y) { c.save(); c.translate(x, y); c.scale(face * 1.6, 1.6); c.rotate(W.slash > 0 ? -0.9 + (0.15 - W.slash) * 10 : -0.3); c.strokeStyle = '#2a1a0a'; c.lineWidth = 1;
+      c.fillStyle = '#5a3418'; c.fillRect(-2, -2, 8, 4); c.strokeRect(-2, -2, 8, 4); c.fillStyle = '#d4a017'; c.fillRect(6, -3.5, 2, 7);
+      c.fillStyle = '#d8dde2'; c.beginPath(); c.moveTo(8, -2); c.lineTo(24, -1); c.lineTo(28, 1); c.lineTo(8, 2); c.closePath(); c.fill(); c.stroke(); c.restore();
+      if (W.slash > 0) { c.strokeStyle = 'rgba(255,255,255,.8)'; c.lineWidth = 3; c.beginPath(); c.arc(x + face * 30, y, 34, face > 0 ? -1.2 : 1.9, face > 0 ? 1.2 : 4.3); c.stroke(); } }
+    var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); try { if (!started) return; var k = veh();
+      if (k !== 5 && k !== 7 && (W.cur === 'rifle' || W.cur === 'knife')) items.push({ y: py + 0.5, x: px, y2: py, fn: function (sx, sy) { (W.cur === 'rifle' ? rifleArt : knifeArt)(ctx, sx + face * 8, sy - (mounted() ? 46 : 28)); } });
+      W.bul.forEach(function (b) { items.push({ y: b.y + 3000, x: b.x, y2: b.y, fn: function (sx, sy) { var Y = sy - 3000; if (b.big) { ctx.fillStyle = '#2a2a30'; ctx.beginPath(); ctx.arc(sx, Y, 7, 0, 7); ctx.fill(); } else { ctx.strokeStyle = 'rgba(255,220,140,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, Y); ctx.lineTo(sx - b.vx * 0.03, Y); ctx.stroke(); } } }); });
+      W.boom.forEach(function (o) { items.push({ y: o.y + 3001, x: o.x, y2: o.y, fn: function (sx, sy) { var Y = sy - 3001; if (o.fall) { ctx.fillStyle = '#2a2a30'; ctx.beginPath(); ctx.ellipse(sx, Y - o.t * 200, 6, 10, 0, 0, 7); ctx.fill(); return; } var r = 40 + (0.4 - o.t) * 260; ctx.fillStyle = 'rgba(255,160,40,' + (o.t * 2) + ')'; ctx.beginPath(); ctx.arc(sx, Y, r, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(120,110,100,' + o.t + ')'; ctx.beginPath(); ctx.arc(sx + 10, Y - 20, r * 0.6, 0, 7); ctx.fill(); } }); });
+    } catch (e) {} };
   })();
 
   requestAnimationFrame(frame);
@@ -6990,5 +7045,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v148-pond --></body>
+<!-- v149-weapons --></body>
 </html>
