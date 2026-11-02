@@ -4905,7 +4905,21 @@
       s.bld.forEach(function (b, i) { if (!i || b.hp <= 0) return; var p = bldPos(s, b), vx = Math.abs(p.x - h.x) < 130 ? h.x + (p.x < h.x ? -130 : 130) : p.x; g.push([h.x, ry, vx, ry]); g.push([vx, ry, vx, p.y + 24]); if (vx !== p.x) g.push([vx, p.y + 24, p.x, p.y + 24]); });
       RC.set(s, { k: key, g: g }); return g;
     }
-    function nearSegs(x, y, R) { var out = []; allS75().forEach(function (s) { if (!s.bld || !s.bld[0]) return; var h = bldPos(s, s.bld[0]); if (Math.abs(h.x - x) > R + 1500 || Math.abs(h.y - y) > R + 1500) return; segsOf(s).forEach(function (g) { out.push({ g: g, s: s }); }); }); return out; }
+    function nearSegs(x, y, R) { var out = []; allS75().forEach(function (s) { if (!s.bld || !s.bld[0]) return; var h = bldPos(s, s.bld[0]); if (Math.abs(h.x - x) > R + 1500 || Math.abs(h.y - y) > R + 1500) return; segsOf(s).forEach(function (g) { out.push({ g: g, s: s }); }); }); if (ME_S) hwOf(ME_S).forEach(function (g) { if (Math.min(g[0], g[2]) - R < x && Math.max(g[0], g[2]) + R > x && Math.min(g[1], g[3]) - R < y && Math.max(g[1], g[3]) + R > y) out.push({ g: g, s: ME_S }); }); return out; }
+    /* v113: a highway from your town to the neutral capital, so the long ride has a path to follow (and roads are 1.6x faster) */
+    var HW = { k: '', g: [] };
+    function hwOf(s) {
+      if (!CAPX || !s.bld || !s.bld[0]) return [];
+      var h = bldPos(s, s.bld[0]), k = Math.round(h.x) + ',' + Math.round(h.y) + ',' + Math.round(CAPX.x) + ',' + Math.round(CAPX.y);
+      if (HW.k === k) return HW.g;
+      HW.k = k; HW.g = [];
+      var S = { x: h.x, y: h.y + 110 }, d = Math.hypot(CAPX.x - S.x, CAPX.y - S.y); if (d < CAPX.R + 400) return HW.g;
+      var E = { x: CAPX.x + (S.x - CAPX.x) / d * (CAPX.R + 10), y: CAPX.y + (S.y - CAPX.y) / d * (CAPX.R + 10) };
+      function dry(a, b) { var L = Math.hypot(b.x - a.x, b.y - a.y), n = Math.ceil(L / 60); for (var i = 0; i <= n; i++) if (blockedWorld(a.x + (b.x - a.x) * i / n, a.y + (b.y - a.y) * i / n)) return false; return true; }
+      [{ x: E.x, y: S.y }, { x: S.x, y: E.y }].some(function (C) { if (dry(S, C) && dry(C, E)) { HW.g = [[S.x, S.y, C.x, C.y], [C.x, C.y, E.x, E.y]]; return true; } return false; });
+      return HW.g;
+    }
+    window.HW113 = function () { return ME_S ? hwOf(ME_S) : []; };
     function dSeg(x, y, g) { var dx = g[2] - g[0], dy = g[3] - g[1], L = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - g[0]) * dx + (y - g[1]) * dy) / L)); return Math.hypot(x - g[0] - t * dx, y - g[1] - t * dy); }
     var cache = { t: 0, l: [] };
     function onRoad(x, y) { var l = cache.l; for (var i = 0; i < l.length; i++) if (dSeg(x, y, l[i].g) < 20) return true; return false; }
