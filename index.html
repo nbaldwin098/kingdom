@@ -1091,8 +1091,8 @@
     c.beginPath(); c.moveTo(-24, 1); c.quadraticCurveTo(-18, -3, -12, 1); c.moveTo(12, 1); c.quadraticCurveTo(18, -3, 24, 1); c.stroke();
     c.restore();
   }
-  function wallHit(x, y) {
-    if (blockedWorld(x, y)) return true;
+  function wallHit(x, y, sw) {
+    if (sw ? (BOUNDS && (x < BOUNDS.x0 || x > BOUNDS.x1 || y < BOUNDS.y0 || y > BOUNDS.y1)) : blockedWorld(x, y)) return true;
     function inR(x1, y1, x2, y2) {
       return x >= x1 - 10 && x <= x2 + 10 && y >= y1 - 10 && y <= y2 + 10;
     }
@@ -1598,9 +1598,9 @@
           if (vx > 0.15) face = 1; else if (vx < -0.15) face = -1;
           phase += dt * (mounted() ? 9 : 7);
           var spd = (window.SP102 ? SP102(mounted() ? 260 * horseMul() : 130) : 130), stepX = vx * spd * dt, stepY = vy * spd * dt;
-          if (!wallHit(px + stepX, py + stepY)) { px += stepX; py += stepY; }
-          else if (!wallHit(px + stepX, py)) { px += stepX; }
-          else if (!wallHit(px, py + stepY)) { py += stepY; }
+          if (!wallHit(px + stepX, py + stepY, window.PW102 && PW102())) { px += stepX; py += stepY; }
+          else if (!wallHit(px + stepX, py, window.PW102 && PW102())) { px += stepX; }
+          else if (!wallHit(px, py + stepY, window.PW102 && PW102())) { py += stepY; }
         }
       }
       // The gap is 2750 wide now, so measure to the gap itself, not its center,
@@ -2489,6 +2489,7 @@
       if (!R.length) { if (f.alive || f.flee || f.lastStand) { var by = (f.roy[0] && f.roy[0].killer) || (f.roy[1] && f.roy[1].killer); f.lastStand = false; eliminate(f, by); } return; }
       if (R.length === 1 && f.roy.length === 2 && !R[0].last) { R[0].last = true; f.lastStand = true; f.flee = false; if (f.st) f.st.noKids = true; showToast(f.name + ' LOST A ROYAL - THE ' + (R[0].royal === 'K' ? 'KING' : 'QUEEN') + ' FIGHTS TO THE DEATH'); }
       R.forEach(function (u, i) {
+        if (u.raid104) { if (u.sq && u.sq.order === 'attack' && !f.flee && f.alive) return; u.raid104 = false; }
         u.goal = null; if (u.sq) sqDrop(u.sq, u);
         if (u.p && f.st && f.alive && f.st.ppl.indexOf(u.p) < 0) { u.hp = 0; return; }
         if (u.last) { u.order = 'attack'; if (!u.tgt) { var e = nearestEnemy(u, 900); if (e) u.tgt = e; } return; }
@@ -4944,7 +4945,7 @@
       }
       c.restore();
     }
-    var _bw = blockedWorld; blockedWorld = function (x, y) { if (V.on && (V.k === 6 || V.k === 7)) return !!BOUNDS && (x < BOUNDS.x0 || x > BOUNDS.x1 || y < BOUNDS.y0 || y > BOUNDS.y1); return _bw(x, y); };
+    var _bw = blockedWorld; window.PW102 = function () { return V.on && (V.k === 6 || V.k === 7); }; window.water102 = function (x, y) { return _bw(x, y); };
     window.DV102 = function (c, sx, sy, f, mv) { if (!V.on || V.k < 0) return false; vehArt(c, V.k, sx, sy + (mv ? Math.sin(performance.now() / 60) : 0), f); c.fillStyle = '#000'; c.beginPath(); c.arc(sx + f * (V.k <= 1 ? -2 : 3), sy - (V.k <= 1 ? 30 : 34), 5, 0, 7); c.fill(); return true; };
     // ---- villager / worker traffic on roads (every nation, same rule): trucks haul goods home
     var TR = new Map();
@@ -5002,7 +5003,7 @@
         if (MODE !== 'duel' && Math.hypot(me.x - f.x, me.y - f.y) > 9000) return;
        
         var free = function () { return units.filter(function (u) { return u.f === f.id && u.t !== 'c' && !u.goal && !u.royal && u.hp > 0; }); };
-        if (free().length < 2) MIL.raise(f.st); var rd = free(); if (rd.length < 2) { var g = units.filter(function (u) { return u.f === f.id && u.royal && !u.goal && u.hp > 0; }); while (rd.length < 2 && g.length > 1) rd.push(g.pop()); } if (rd.length < 2) return;
+        if (free().length < 2) MIL.raise(f.st); var rd = free(); var g = units.filter(function (u) { return u.f === f.id && u.royal && u.hp > 0 && !u.last; }); if (g.length > 1 && !f.flee) { var rg = g[Math.floor(Math.random() * g.length)]; rg.raid104 = true; rd.push(rg); } if (rd.length < 2) return;
         var q = newSquad(f.id); q.fresh = false; q.war = true; rd.forEach(function (u) { if (u.sq) sqDrop(u.sq, u); sqAdd(q, u); u.goal = me.hallObj; }); sqOrder(q, 'attack', 0, 0, me.hallObj); q.n0 = rd.length;
         RAID104.n++; RAID104.last = { f: f.name, n: rd.length }; showToast(f.name + ' RAIDERS (' + rd.length + ') ARE COMING!');
       });
