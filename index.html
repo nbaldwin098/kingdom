@@ -7203,7 +7203,7 @@ window.B137 = (function () {
     window.LIFE154 = { cell: cell, n: function () { return DEC.size; } };
     var TW = [], BZ = [], last = 0;
     var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); if (!started) return; try {
-      var vw = (cv.width / (window.devicePixelRatio || 1)) / 2 + 200, vh = (cv.height / (window.devicePixelRatio || 1)) / 2 + 200, Z = window.ZOOM || 1; vw /= Z; vh /= Z;
+      var vw = (cv.width / (window.devicePixelRatio || 1)) / 2 + 200, vh = (cv.height / (window.devicePixelRatio || 1)) / 2 + 200, Z = (typeof zoom !== 'undefined' && zoom > 0) ? zoom : 1; vw /= Z; vh /= Z;
       var i0 = Math.floor((px - vw) / CELL), i1 = Math.floor((px + vw) / CELL), j0 = Math.floor((py - vh) / CELL), j1 = Math.floor((py + vh + 120) / CELL), budget = 40;
       for (var i = i0; i <= i1; i++) for (var j = j0; j <= j1; j++) { var k = i * 1000003 + j; if (!DEC.has(k)) { if (budget-- <= 0) continue; } var d = cell(i, j); if (!d) continue; (function (d) { items.push({ y: d.y, x: d.x, y2: d.y, fn: function (sx, sy) { ART153.put(ctx, ART[d.k](d.v), sx, sy, d.f); } }); })(d); }
       // tumbleweeds: a few roll with the wind across open ground
@@ -7216,6 +7216,40 @@ window.B137 = (function () {
       BZ.forEach(function (z) { z.a += dt * (0.35 + z.r / 2000); var X = px + z.ox + Math.cos(z.a) * z.r, Y = py + z.oy + Math.sin(z.a) * z.r * 0.35;
         items.push({ y: py + 9999, x: X, y2: py + 9999, fn: function (sx, sy) { var c = ctx, Ysc = sy - (py + 9999 - Y), fl = Math.sin(now / 260 + z.r) * 3; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.beginPath(); c.moveTo(sx - 13, Ysc - 2 + fl); c.quadraticCurveTo(sx - 6, Ysc - 6, sx, Ysc); c.quadraticCurveTo(sx + 6, Ysc - 6, sx + 13, Ysc - 2 + fl); c.stroke(); c.fillStyle = 'rgba(40,25,10,.08)'; c.beginPath(); c.ellipse(sx, Ysc + 220, 9, 2.5, 0, 0, 7); c.fill(); } }); });
     } catch (e) { if (!window.E154) { window.E154 = 1; console.warn(e); } } };
+  })();
+
+  // v155: 1V1 can be won - the CPU no longer respawns forever; its fall ends the duel in victory
+  (function () {
+    var C = window.__comp; if (!C) return;
+    C.CAPN.duel = 0; var won = false, t0 = performance.now();
+    var _cw = checkWin;
+    checkWin = function () {
+      if (MODE === 'duel') { if (!won && me && me.alive && started && C.liveCount() === 0) { won = true; var m = Math.round((performance.now() - t0) / 60000);
+          endGame(true, 'THE CPU REALM HAS FALLEN' + (m > 0 ? ' - IN ' + m + ' MIN' : '')); } return; }
+      return _cw.apply(this, arguments);
+    };
+  })();
+  // v155: trail gallop - in 1V1 the CPU is ~28K away; on horseback with no foe near, the horse runs 2.2x until 4K out
+  (function () {
+    var _hm = horseMul, on = false, tip = 0;
+    horseMul = function () { var m = _hm.apply(this, arguments); on = false;
+      if (MODE === 'duel' && started && factions[0] && factions[0].alive && Math.hypot(factions[0].x - px, factions[0].y - py) > 4000) {
+        var foe = units.some(function (u) { return u.hp > 0 && me && u.f !== me.id && u.f !== 'me' && Math.abs(u.x - px) < 1800 && Math.abs(u.y - py) < 1800; });
+        if (!foe) { on = true; m *= 2.2; if (performance.now() - tip > 60000) { tip = performance.now(); showToast('TRAIL GALLOP - NO FOES NEAR'); } } }
+      return m; };
+    window.GALLOP155 = function () { return on; };
+  })();
+
+  // v155: hoof dust - galloping kicks up fading dust puffs (bigger on trail gallop)
+  (function () {
+    var D = [], acc = 0, lt = 0;
+    var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); if (!started) return; try {
+      var now = performance.now(), dt = Math.min(0.05, (now - (lt || now)) / 1000); lt = now;
+      if (moving && mounted()) { acc += dt * (window.GALLOP155 && GALLOP155() ? 26 : 12); while (acc > 1) { acc--; D.push({ x: px - face * 26 + (Math.random() - 0.5) * 22, y: py + 2 + Math.random() * 6, t: 0, r: 5 + Math.random() * 5 }); } }
+      for (var i = D.length - 1; i >= 0; i--) { var p = D[i]; p.t += dt; if (p.t > 0.9) D.splice(i, 1); }
+      if (D.length > 60) D.splice(0, D.length - 60);
+      D.forEach(function (p) { items.push({ y: p.y - 1, x: p.x, y2: p.y - 1, fn: function (sx, sy) { var k = p.t / 0.9; ctx.fillStyle = 'rgba(190,160,115,' + (0.45 * (1 - k)).toFixed(3) + ')'; ctx.beginPath(); ctx.arc(sx, sy - k * 10, p.r * (1 + k * 1.6), 0, 6.283); ctx.fill(); } }); });
+    } catch (e) { } };
   })();
 
   requestAnimationFrame(frame);
@@ -7258,5 +7292,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --></body>
 </html>
