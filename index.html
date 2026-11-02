@@ -2172,6 +2172,7 @@ window.B137 = (function () {
           if (!wallHit(px + stepX, py + stepY, window.PW102 && PW102())) { px += stepX; py += stepY; }
           else if (!wallHit(px + stepX, py, window.PW102 && PW102())) { px += stepX; }
           else if (!wallHit(px, py + stepY, window.PW102 && PW102())) { py += stepY; }
+          else { var pw157 = window.PW102 && PW102(), sd157 = window.SIDE157 || 1; for (var t157 = 0; t157 < 2; t157++) { var qx = -stepY * sd157, qy = stepX * sd157; if (!wallHit(px + qx, py + qy, pw157)) { px += qx; py += qy; window.SIDE157 = sd157; break; } sd157 = -sd157; } } // v157: walk around buildings when heading straight into them
         }
       }
       // The gap is 2750 wide now, so measure to the gap itself, not its center,
@@ -6798,7 +6799,7 @@ window.B137 = (function () {
     SYN.boom142 = function (o, t) { noise(o, t, 0.35, 1.2, 'lowpass', 900); tone(o, t, 'sine', 110, 40, 0.3, 0.9); noise(o, t + 0.45, 0.06, 0.35, 'highpass', 2500); noise(o, t + 0.6, 0.05, 0.35, 'highpass', 2200); return 0.7; };
     function steel() { return ME_S ? (ME_S.steel142 == null ? (ME_S.steel142 = 12) : ME_S.steel142) : 0; }
     SG.steel = steel; SYN.click142 = function (o, t) { tone(o, t, 'square', 2400, 2200, 0.03, 0.25); noise(o, t + 0.07, 0.03, 0.3, 'highpass', 3000); return 0.12; };
-    function fire() { if (SG.cd > 0) return; if (steel() < 1) { SG.cd = 0.35; var nn156 = performance.now(); if (!SG.oos156 || nn156 - SG.oos156 > 8000) { SG.oos156 = nn156; try { sfx('click142', px, py, 1); } catch (e) {} showToast('NO SHELLS - USING SABER (BLACKSMITH FORGES MORE)'); } try { _at(); } catch (e) {} return; } ME_S.steel142--; lab(); SG.cd = 0.9; SG.flash = 0.09; SG.shots++; var mh = mounted() ? 46 : 30, ox = px + face * 34, oy = py - mh, n = 5 + Math.floor(Math.random() * 3);
+    function fire() { if (SG.cd > 0) return; if (steel() < 1) { SG.cd = 0.35; var nn156 = performance.now(); if (!SG.oos156 || nn156 - SG.oos156 > 60000) { SG.oos156 = nn156; try { sfx('click142', px, py, 1); } catch (e) {} showToast('NO SHELLS - USING SABER (BLACKSMITH FORGES MORE)'); } try { _at(); } catch (e) {} return; } ME_S.steel142--; lab(); SG.cd = 0.9; SG.flash = 0.09; SG.shots++; var mh = mounted() ? 46 : 30, ox = px + face * 34, oy = py - mh, n = 5 + Math.floor(Math.random() * 3);
       for (var i = 0; i < n; i++) { var a = (Math.random() - 0.5) * 0.5, up = -0.25 * Math.random(); SG.pel.push({ x: ox, y: oy, vx: face * Math.cos(a) * 1100, vy: Math.sin(a) * 1100 + up * 900, life: 0.3, hit: {} }); }
       try { sfx('boom142', px, py, 1); } catch (e) {} KICK46 = Math.max(KICK46 || 0, 0.12);
       // close blast: heavy damage to anything right in front
@@ -7254,7 +7255,7 @@ window.B137 = (function () {
 
   // v156: scavenged shells - below 3 steel you find 1 every 25s, so you are never stuck clicking
   (function () { var t = 0, lt = 0; var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); try { var n = performance.now(), dt = Math.min(0.1, (n - (lt || n)) / 1000); lt = n;
-      if (!started || !ME_S || (ME_S.steel142 || 0) >= 3) { t = 0; return; } t += dt; if (t > 25) { t = 0; ME_S.steel142 = (ME_S.steel142 || 0) + 1; showToast('+1 SHELL SCAVENGED'); try { updateRes(); } catch (e) {} } } catch (e) {} }; })();
+      if (!started || !ME_S || (ME_S.steel142 || 0) >= 3) { t = 0; return; } t += dt; if (t > 25) { t = 0; ME_S.steel142 = (ME_S.steel142 || 0) + 1; if ((window.SCV157 = (window.SCV157 || 0) + 1) <= 2) showToast('+1 SHELL SCAVENGED (YOU FIND ONE EVERY 25s WHEN LOW)'); try { updateRes(); } catch (e) {} } } catch (e) {} }; })();
 
   // v156: auto-face - an attack turns you toward the nearest foe within 260px (they were often behind you, every swing and shot missed)
   (function () { var _a = attack; attack = function () { try { if (started) { var best = null, bd = 260; units.forEach(function (u) { if (u.hp > 0 && u.f !== 'me' && !u.g && (MODE === 'free' || u.f !== 'me')) { var d = Math.hypot(u.x - px, u.y - py); if (d < bd && (typeof hostile !== 'function' || hostile('me', u.f))) { bd = d; best = u; } } });
@@ -7266,10 +7267,10 @@ window.B137 = (function () {
       var f = factions[0]; if (f && f.alive && !f.posse156 && Math.hypot(f.x - px, f.y - py) < 2500) { f.posse156 = 1; for (var i = 0; i < 4; i++) { var u = spawnUnit(f.id, i < 2 ? 'k' : 's', f.x + (i - 1.5) * 60, f.y + 160); units.push(u); } showToast('THE CPU POSSE RIDES OUT TO MEET YOU'); }
     } catch (e) {} }; })();
 
-  // v156: bodyguards - in 1V1 a CPU royal shrugs off hero-scaled hits (max 3 per hit), and with 2+ of its soldiers within 220px takes only 25%; thin the guard first
+  // v156: bodyguards - in 1V1 a CPU royal shrugs off hero-scaled hits (max 3 per hit), and with 3+ of its soldiers within 220px takes 50% (not in a last stand); thin the guard first
   (function () { var _dd = dealDamage; dealDamage = function (src, t, dmg) { try { if (MODE === 'duel' && t && t.royal && t.f !== 'me' && src && (src.isPlayer || src.f === 'me')) {
         var g = 0; units.forEach(function (o) { if (o !== t && o.f === t.f && !o.royal && o.hp > 0 && Math.abs(o.x - t.x) < 220 && Math.abs(o.y - t.y) < 220) g++; });
-        dmg = Math.min(dmg, 3); if (g >= 2) { dmg *= 0.25; if (!t.gt156 || performance.now() - t.gt156 > 6000) { t.gt156 = performance.now(); showToast('THE ' + (t.royal === 'K' ? 'KING' : 'QUEEN') + ' IS GUARDED - CUT DOWN THE GUARDS FIRST'); } } var b0 = t.hp, r = _dd.call(this, src, t, dmg); if (t.hp < b0 - dmg) t.hp = b0 - dmg; return r; } } catch (e) {} return _dd.call(this, src, t, dmg); }; })();
+        dmg = Math.min(dmg, 3); if (g >= 3 && !t.last) { dmg *= 0.5; if (!t.gt156 || performance.now() - t.gt156 > 6000) { t.gt156 = performance.now(); showToast('THE ' + (t.royal === 'K' ? 'KING' : 'QUEEN') + ' IS GUARDED - CUT DOWN THE GUARDS FIRST'); } } var b0 = t.hp, r = _dd.call(this, src, t, dmg); if (t.hp < b0 - dmg) t.hp = b0 - dmg; return r; } } catch (e) {} return _dd.call(this, src, t, dmg); }; })();
 
   requestAnimationFrame(frame);
 </script>
@@ -7311,5 +7312,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --></body>
 </html>
