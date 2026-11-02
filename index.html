@@ -1185,7 +1185,7 @@
   function fmt(n) { n = Math.floor(n); var a = Math.abs(n); if (a < 1000) return '' + n; var u = ['K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'], i = -1; while (a >= 1000 && i < u.length - 1) { a /= 1000; i++; } return (n < 0 ? '-' : '') + (a < 10 ? a.toFixed(1).replace(/\.0$/, '') : Math.floor(a)) + u[i]; }
   function gain(l) { return Math.log2(1 + (l || 0)); } // endless, every level helps a little less
   function upCost(base, l) { return Math.ceil(base * Math.pow(1.15, l || 0)); }
-  var UPS = { satk: 'SOLDIER ATTACK', shp: 'SOLDIER HP', sspd: 'SOLDIER SPEED', katk: 'KNIGHT ATTACK', khp: 'KNIGHT HP', kspd: 'KNIGHT SPEED', farm: 'FARM YIELD', wall: 'HALL + WALLS HP', cart: 'CART SUPPLY', pop: 'POPULATION CAP' };
+  var UPS = { satk: 'SOLDIER ATTACK', shp: 'SOLDIER HP', sspd: 'SOLDIER SPEED', katk: 'KNIGHT ATTACK', khp: 'KNIGHT HP', kspd: 'KNIGHT SPEED', farm: 'FARM YIELD', wall: 'HALL HP', cart: 'CART SUPPLY', pop: 'POPULATION CAP' };
   var UPBASE = { satk: 12, shp: 12, sspd: 10, katk: 18, khp: 18, kspd: 14, farm: 15, wall: 20, cart: 12, pop: 16 };
   var BKINDS = ['house', 'farm', 'well', 'forge', 'barracks', 'stable', 'market'];
   var BBASE = { well: 15, house: 25, forge: 40, farm: 20, stable: 30, barracks: 35, market: 30 };
@@ -1970,7 +1970,7 @@
       items.push({ label: 'SELL 5 ' + r.toUpperCase() + ' @' + price(r).toFixed(2), btn: '+' + (5 * price(r) * mk).toFixed(1) + ' GOLD', dis: R[r] < 5, act: function () { trade(s, r, 5, true); } });
       items.push({ label: 'BUY 5 ' + r.toUpperCase() + ' @' + price(r).toFixed(2), btn: (5 * price(r) / mk).toFixed(1) + ' GOLD', dis: R.gold < 5 * price(r) / mk, act: function () { trade(s, r, 5, false); } });
     });
-    ['house', 'farm', 'well', 'lumber', 'quarry', 'granary', 'bank', 'market', 'barracks', 'prison', 'wall', 'hall'].forEach(function (k) {
+    ['house', 'farm', 'well', 'lumber', 'quarry', 'granary', 'bank', 'market', 'barracks', 'prison', 'hall'].forEach(function (k) {
       var lo = k === 'hall' ? s.bld[0] : lowest(s, k), busy = s.jobs.length >= 3;
       if (lo && (lo.L > 0 || k === 'hall')) { var c = lo.L ? upCostOf(lo) : EB.hall.c; items.push({ label: (lo.L ? 'UPGRADE ' : 'BUILD ') + ENAME[k] + (lo.L ? ' L' + lo.L + '>' + (lo.L + 1) : ''), btn: lo.j ? 'BUILDING' : busy ? 'QUEUE FULL' : cstr(c), dis: !!lo.j || busy || !canPay(s, c), act: function () { if (k === 'hall' && !lo.L) doImprove(s, 'hall'); else orderUpgrade(s, lo); } }); }
       if (k !== 'hall') { var nc = newCostOf(s, k); items.push({ label: 'NEW ' + ENAME[k] + (bCount(s, k) ? ' #' + (bCount(s, k) + 1) : ''), btn: busy ? 'QUEUE FULL' : cstr(nc), dis: busy || !canPay(s, nc), act: function () { orderBuild(s, k); } }); }
@@ -3612,7 +3612,7 @@
   BREQ.palisade = 0; BREQ.bunker = 2; BREQ.aagun = 3; BREQ.mdef = 4; MAXL.palisade = 4; MAXL.bunker = 5; MAXL.aagun = 5; MAXL.mdef = 4;
   UNL.palisade = ['', 'WOOD STAKES: STOPS RAIDERS', 'DITCH', 'GATEHOUSE', 'DOUBLE RING']; UNL.bunker = ['', 'MG NEST', 'CONCRETE', 'ANTI-TANK GUN', 'DEEP BUNKER', 'FORTRESS LINE'];
   UNL.aagun = ['', 'FLAK', 'RADAR FLAK', 'SAM BATTERY', 'MOBILE SAM', 'IRON DOME']; UNL.mdef = ['', 'INTERCEPTOR 35%', 'INTERCEPTOR 70%', 'INTERCEPTOR 90% + NUKE 30%', 'SHIELD: NUKE 50%'];
-  ['palisade', 'bunker', 'aagun'].forEach(function (k) { if (MILK.indexOf(k) < 0) MILK.push(k); });
+  ['bunker', 'aagun'].forEach(function (k) { if (MILK.indexOf(k) < 0) MILK.push(k); });
   // counter classes and the damage matrix (attacker -> defender)
   function cls(u) { if (!u) return 'swd'; if (u.isPlayer) return 'swd'; var t = u.t; return t === 's' ? (u.bow ? 'arc' : 'swd') : t === 'k' ? 'cav' : t === 'p' ? 'pik' : t === 'm' ? 'mus' : t === 'n' ? 'art' : t === 'q' ? 'rpg' : t === 'v' || t === 'r' ? 'arm' : t === 't' ? 'tnk' : t === 'h' ? 'hel' : t === 'j' ? 'jet' : UT[t] && UT[t].sea ? 'shp' : 'swd'; }
   var CN = { swd: 'SWORDS', arc: 'ARCHERS', cav: 'CAVALRY', pik: 'PIKES', mus: 'MUSKETS', art: 'CANNON', rpg: 'RPG', arm: 'ARMOR CARS', tnk: 'TANKS', hel: 'HELIS', jet: 'JETS', shp: 'SHIPS', aa: 'AA', bnk: 'BUNKERS', wal: 'WALLS', pal: 'PALISADES' };
@@ -3719,7 +3719,7 @@
     var items = _si35(); if (!AGES.on) return items; var byName = {}; Object.keys(UT).forEach(function (t) { byName[UT[t].name] = t; });
     items.forEach(function (it) { var m = /^TRAIN ([A-Z ]+?)( \(|$)/.exec(it.label); if (m && byName[m[1]] && AU[byName[m[1]]]) it.label += ' \u00b7 ' + strongWeak(tCls(byName[m[1]])); });
     var s = ME_S, add = [];
-    ['palisade', 'bunker', 'aagun', 'mdef'].forEach(function (k) { var lo = lowest(s, k), busy = s.jobs.length >= 3, tip = { palisade: 'STOPS RAIDERS \u00b7 WEAK: CANNON', bunker: 'SHOOTS INFANTRY \u00b7 WEAK: ARTILLERY, TANKS', aagun: 'SHOOTS AIRCRAFT \u00b7 WEAK: JETS', mdef: 'INTERCEPTS MISSILES' }[k];
+    ['bunker', 'aagun', 'mdef'].forEach(function (k) { var lo = lowest(s, k), busy = s.jobs.length >= 3, tip = { palisade: 'STOPS RAIDERS \u00b7 WEAK: CANNON', bunker: 'SHOOTS INFANTRY \u00b7 WEAK: ARTILLERY, TANKS', aagun: 'SHOOTS AIRCRAFT \u00b7 WEAK: JETS', mdef: 'INTERCEPTS MISSILES' }[k];
       if (!bldOK(s, k)) { add.push({ label: ENAME[k] + ' (LOCKED: ' + ERA_N[BREQ[k]] + ' AGE) \u00b7 ' + tip, btn: 'LOCKED', dis: true, act: function () {} }); return; }
       if (lo) { var c = upCostOf(lo), mx = lo.L >= MAXL[k]; add.push({ label: (mx ? ENAME[k] + ' L' + lo.L + ' (MAX)' : 'UPGRADE ' + ENAME[k] + ' L' + lo.L + '>' + (lo.L + 1) + ' : ' + unlockTxt(k, lo.L + 1)), btn: mx ? 'MAX' : lo.j ? 'BUILDING' : busy ? 'QUEUE FULL' : cstr(c), dis: mx || !!lo.j || busy || !canPay(s, c), act: function () { orderUpgrade(s, lo); } }); }
       var nc = newCostOf(s, k); add.push({ label: 'NEW ' + ENAME[k] + ' \u00b7 ' + tip, btn: busy ? 'QUEUE FULL' : cstr(nc), dis: busy || !canPay(s, nc), act: function () { orderBuild(s, k); } }); });
@@ -3740,7 +3740,7 @@
       d.style.display = 'block'; d.style.opacity = (Math.floor(performance.now() / 300) % 2) ? '1' : '0.35'; l.textContent = (nk ? '\u2622 INCOMING NUKE ' : '\u26a0 INCOMING MISSILE ') + Math.max(0, eta).toFixed(1) + 'S' + (maxLv(ME_S, 'mdef') ? '' : ' \u00b7 BUILD MISSILE DEFENSE'); sfx('alarm'); }, 150); })();
   // ---- tips + challenges (hamburger menu)
   var CH = [
-    { id: 'pal', n: 'BUILD A PALISADE', r: 40, ok: function () { return bCount(ME_S, 'palisade') > 0; } },
+    { id: 'pal', n: 'HIRE A 2ND GENERAL', r: 40, ok: function () { return !!(ME_S && ME_S.gen135 && ME_S.gen135.length > 1); } },
     { id: 'pik', n: 'TRAIN 3 PIKEMEN', r: 30, ok: function () { return units.filter(function (u) { return u.f === 'me' && u.t === 'p' && u.hp > 0; }).length >= 3; } },
     { id: 'cav', n: 'COUNTER CAVALRY: KILL 3 KNIGHTS WITH PIKES', r: 80, ok: function () { return KILLS.pikeCav >= 3; } },
     { id: 'raid', n: 'SURVIVE A RAID', r: 80, ok: function () { return RAID.survived; } },
@@ -5770,6 +5770,212 @@
     window.TOWN133.near = function () { return NEAR; };
     // the whole game: your houses use the new cached western home art
     var _cb = cityBuilding; cityBuilding = function (c, b, x, y) { if (b.kind === 'house') { var A = bart({ k: 'home', v: Math.abs(Math.round(x * 0 + (b.x || 0) / 50)) % 4, w: 130, h: 80, top: 50, i: 0 }, false); c.drawImage(A.c, x - A.ox, y - A.oy); c.fillStyle = '#000'; c.font = 'bold 13px monospace'; c.textAlign = 'center'; return; } return _cb.apply(this, arguments); };
+  })();
+  // ===== v135 CORE LOOP (GEN135): generals haul goods to the vault, every build needs a free general, goblins raid vaults, walls are gone =====
+  (function () {
+    var VW = 58, VT = 92, VB = 22, ARM = 9, SPD = 150, RAWG = ['iron', 'coal', 'crude', 'wheat', 'corn', 'cotton', 'cattle', 'spice', 'berries'];
+    var OUT = { farm: ['crop', 'food'], lumber: ['wood'], quarry: ['stone'], well: ['water'], mine: ['gold', 'iron', 'coal'], oilwell: ['crude'], ranch: ['food'] };
+    var LOAD = { food: 14, wood: 12, stone: 10, water: 14, gold: 5, iron: 6, coal: 6, crude: 6, crop: 6 };
+    var RN = { food: 'FOOD', wood: 'WOOD', stone: 'STONE', water: 'WATER', gold: 'GOLD', iron: 'IRON', coal: 'COAL', crude: 'CRUDE', crop: 'CROP' };
+    var STAT = { me: {}, cpu: {} }, GB = new WeakMap(), TV = [], ARROWS = [], warnT = 0, clock = 0;
+    function ov(a, c) { return a.x0 < c.x1 && a.x1 > c.x0 && a.y0 < c.y1 && a.y1 > c.y0; }
+    function vfp(x, y, m) { m = m || 0; return { x0: x - VW - m, x1: x + VW + m, y0: y - VT - m, y1: y + VB + m }; }
+    function segR(G, m) { return { x0: Math.min(G[0], G[2]) - m, x1: Math.max(G[0], G[2]) + m, y0: Math.min(G[1], G[3]) - m, y1: Math.max(G[1], G[3]) + m }; }
+    function sets() { try { return allS75().filter(function (s) { return s && s.bld && s.bld[0] && s.res; }); } catch (e) { return []; } }
+    function vpos(s) { var h = homeXY(s); return { x: h.x + s.v135.x, y: h.y + s.v135.y }; }
+    function nm(s) { return (s.name || (facOf(s) || {}).name || 'TOWN').toUpperCase(); }
+    function obst(s, x, y) { var out = [];
+      sets().forEach(function (q) { var h = homeXY(q); if (Math.abs(h.x - x) > 2600 || Math.abs(h.y - y) > 2600) return; q.bld.forEach(function (b) { if (!(b.hp <= 0)) out.push(FP131(q, b)); }); try { T102.segs(q).forEach(function (G) { out.push(segR(G, 16)); }); } catch (e) {} if (q !== s && q.v135 && q.v135.x != null) { var p = vpos(q); out.push(vfp(p.x, p.y, 10)); } });
+      if (window.TOWN133) try { TOWN133.fps().forEach(function (t) { out.push(t.f); }); TOWN133.segs().forEach(function (G) { out.push(segR(G, 16)); }); } catch (e) {}
+      TV.forEach(function (t) { out.push(vfp(t.x, t.y, 10)); }); return out; }
+    function okAt(x, y, O) { var f = vfp(x, y, 18); for (var i = 0; i < O.length; i++) if (ov(f, O[i])) return false; if (!isLand(x, y) || !isLand(f.x0, f.y0) || !isLand(f.x1, f.y1) || !isLand(f.x0, f.y1) || !isLand(f.x1, f.y0)) return false; try { if (wallHit(x, y) || wallHit(f.x0, f.y1) || wallHit(f.x1, f.y1)) return false; } catch (e) {} return true; }
+    function findSpot(s, cx, cy) { var O = obst(s, cx, cy); for (var r = 200; r < 1300; r += 45) for (var k = 0; k < 20; k++) { var a = -Math.PI / 2 + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * Math.PI / 10, x = cx + Math.cos(a) * r * 1.25, y = cy - 60 + Math.sin(a) * r; if (okAt(x, y, O)) return [x, y]; } return null; }
+    function vaultMax(s) { return 500 + 80 * Math.max(0, (s.bld[0].L || 1) - 1); }
+    function ensure(s) {
+      if (!s.v135 || s.v135.x == null) { var h = homeXY(s), p = findSpot(s, h.x, h.y); s.v135 = s.v135 || { hp: vaultMax(s), arm: ARM }; if (p) { s.v135.x = p[0] - h.x; s.v135.y = p[1] - h.y; } else { s.v135.x = null; return false; } }
+      s.v135.max = vaultMax(s); if (s.v135.hp > s.v135.max) s.v135.hp = s.v135.max;
+      if (!s.gen135) { var hv = vpos(s), n = s === ME_S ? 1 : Math.min(4, 1 + Math.floor(s.bld.length / 5)); s.gen135 = []; for (var i = 0; i < n; i++) s.gen135.push(newGen(hv)); }
+      return true; }
+    function newGen(p) { return { x: p.x + (Math.random() - 0.5) * 60, y: p.y + 40, ji: -1, st: 'idle', t: 0, c: 0, ck: '', o: '', face: 1, ph: 0 }; }
+    function jobB(s, g) { var b = GB.get(g); if (b && s.bld.indexOf(b) >= 0 && b.L > 0) { g.ji = s.bld.indexOf(b); return b; } b = g.ji >= 0 && s.bld[g.ji]; if (b && b.k === g.jk && b.L > 0 && OUT[b.k]) { GB.set(g, b); return b; } g.ji = -1; GB.delete(g); return null; }
+    function assign(s, g, b, o) { if (!b) { g.ji = -1; g.jk = ''; GB.delete(g); g.st = 'idle'; return; } GB.set(g, b); g.ji = s.bld.indexOf(b); g.jk = b.k; g.o = o || OUT[b.k][0]; g.st = 'out'; }
+    function hireCost(s) { return Math.round(300 * Math.pow(1.8, Math.max(0, (s.gen135 || []).length - 1))); }
+    function hire(s) { var c = hireCost(s); if (s.res.gold < c) { if (s === ME_S) showToast('HIRING A GENERAL COSTS ' + c + ' GOLD'); return false; } s.res.gold -= c; s.gen135.push(newGen(vpos(s))); if (s === ME_S) { showToast('NEW GENERAL HIRED (' + s.gen135.length + ')'); updateRes(); } return true; }
+    function moveTo(g, x, y, dt) { var dx = x - g.x, dy = y - g.y, d = Math.hypot(dx, dy); if (d < 8) return true; var st = Math.min(d, SPD * dt); g.x += dx / d * st; g.y += dy / d * st; g.face = dx > 0 ? 1 : -1; g.ph += dt * 10; return false; }
+    function free(s) { return s.gen135.filter(function (g) { return !jobB(s, g); }); }
+    function outOf(s, b, o) { if (o === 'crop') { try { return ECON131.crop(s, b); } catch (e) { return 'wheat'; } } return o; }
+    function deposit(s, g) { if (!g.c) return; var k = g.ck; if (s.res[k] != null && k !== 'crop') s.res[k] += g.c; else { s.g131 = s.g131 || {}; s.g131[k] = (s.g131[k] || 0) + g.c; } STAT[s === ME_S ? 'me' : 'cpu'][k] = (STAT[s === ME_S ? 'me' : 'cpu'][k] || 0) + g.c; g.pop = { t: 1.4, s: '+' + Math.round(g.c) + ' ' + (RN[k] || k.toUpperCase()) }; g.c = 0; if (s === ME_S) updateRes(); }
+    function genTick(s, dt) {
+      var v = s.v135, vp = vpos(s), job = s.jobs && s.jobs[0] && s.jobs[0].j ? s.jobs[0] : null, frees = free(s), builder = null;
+      if (job) { var jp = bldPos(s, job), bd = 1e9; frees.forEach(function (g) { var d = Math.hypot(g.x - jp.x, g.y - jp.y); if (d < bd) { bd = d; builder = g; } }); }
+      s.wait135 = job && !builder ? (s.wait135 || 0) + dt : 0;
+      var underAtk = v.hitT && clock - v.hitT < 5;
+      s.gen135.forEach(function (g) {
+        if (g.pop) { g.pop.t -= dt; if (g.pop.t <= 0) g.pop = null; }
+        var b = jobB(s, g);
+        if (!b) {
+          if (g === builder) { var p = bldPos(s, job); if (moveTo(g, p.x + 60, p.y + 30, dt)) { g.st = 'build'; g.ph += dt * 14; } else g.st = 'tobuild'; return; }
+          if (v.hp < v.max && !underAtk) { if (moveTo(g, vp.x + 70, vp.y + 20, dt)) { g.st = 'repair'; g.ph += dt * 12; v.hp = Math.min(v.max, v.hp + 12 * dt); } else g.st = 'torepair'; return; }
+          g.st = 'idle'; moveTo(g, vp.x - 80 + (s.gen135.indexOf(g) % 4) * 26, vp.y + 50, dt); return; }
+        var bp = bldPos(s, b);
+        if (g.st === 'idle' || g.st === 'build' || g.st === 'tobuild' || g.st === 'repair' || g.st === 'torepair') g.st = g.c ? 'home' : 'out';
+        if (g.st === 'out') { if (moveTo(g, bp.x + 40, bp.y + 34, dt)) { g.st = 'work'; g.t = 4; } }
+        else if (g.st === 'work') { g.t -= dt; g.ph += dt * 6; if (g.t <= 0) { g.ck = outOf(s, b, g.o); g.c = (LOAD[g.o] || 8) * (1 + 0.5 * Math.max(0, b.L - 1)); g.st = 'home'; } }
+        else if (g.st === 'home') { if (moveTo(g, vp.x, vp.y + 36, dt)) { deposit(s, g); g.st = 'out'; } }
+      });
+      if (s !== ME_S) cpuGen(s, dt, job, frees);
+    }
+    function cpuGen(s, dt, job, frees) {
+      s.cpuT135 = (s.cpuT135 || 0) - dt; if (s.cpuT135 > 0) return; s.cpuT135 = 3;
+      if (!frees.length && ((job && s.wait135 > 6) || s.v135.hp < s.v135.max * 0.7)) { var g = s.gen135[s.gen135.length - 1]; deposit(s, g); assign(s, g, null); }
+      if (s.gen135.length < 6 && s.res.gold > hireCost(s) * 1.3) hire(s);
+      var fr = free(s); if (!fr.length || (s.jobs && s.jobs.length && fr.length < 2)) return;
+      var have = {}; s.gen135.forEach(function (q) { var b = jobB(s, q); if (b) have[b.k] = (have[b.k] || 0) + 1; });
+      var pref = (s.res.food < 60 ? ['farm', 'ranch'] : []).concat(s.res.water < 40 ? ['well'] : []).concat(['lumber', 'quarry', 'mine', 'farm', 'oilwell', 'well']);
+      for (var i = 0; i < pref.length; i++) { var k = pref[i]; if (have[k]) continue; var bb = s.bld.filter(function (b) { return b.k === k && b.L > 0; })[0]; if (bb) { var o = OUT[k][Math.floor(Math.random() * OUT[k].length)]; assign(s, fr[0], bb, o); return; } }
+    }
+    function onSite(s, job) { return (s.gen135 || []).some(function (g) { return g.st === 'build' && !jobB(s, g); }); }
+    // build progress only while a general stands on site; raw output mostly comes from hauling now
+    var _es = econStep; econStep = function (s, dt) {
+      if (!s || !s.res || !s.bld) return _es(s, dt);
+      var job = s.jobs && s.jobs[0] && s.jobs[0].j ? s.jobs[0] : null, here = job && s.gen135 && onSite(s, job), need, done;
+      if (job && s.gen135 && !here) { need = job.j.need; done = job.j.done; job.j.need = Infinity; }
+      var r0 = { wood: s.res.wood, stone: s.res.stone }, g0 = {}; if (s.g131) RAWG.forEach(function (k) { g0[k] = s.g131[k]; });
+      try { _es(s, dt); } finally { if (job && job.j && need != null) { job.j.need = need; job.j.done = done; } }
+      ['wood', 'stone'].forEach(function (k) { var d = s.res[k] - r0[k]; if (d > 0) s.res[k] -= d * 0.7; });
+      if (s.g131) RAWG.forEach(function (k) { if (g0[k] == null) return; var d = s.g131[k] - g0[k]; if (d > 0) s.g131[k] -= d * 0.7; });
+      if (job && job.j && here && s.jobs[0] === job) { job.j.done += job.j.need * dt / 5; }
+    };
+    // ---- walls are gone
+    try { wallLv = function () { return 0; }; } catch (e) {}
+    try { wallMax55 = function () { return 0; }; } catch (e) {}
+    var NOWALL = /^(wall|palisade)$/;
+    var _ob = orderBuild; orderBuild = function (s, k) { if (NOWALL.test(k)) return false; return _ob(s, k); };
+    var _ou = orderUpgrade; orderUpgrade = function (s, b) { if (b && NOWALL.test(b.k)) return false; return _ou(s, b); };
+    var _io = improveOpt; improveOpt = function (s, k) { if (NOWALL.test(k)) return null; return _io(s, k); };
+    function stripWalls(s) { if (!s.jobs) return; for (var i = s.bld.length - 1; i > 0; i--) if (NOWALL.test(s.bld[i].k)) { var b = s.bld[i]; s.bld.splice(i, 1); var j = s.jobs.indexOf(b); if (j >= 0) s.jobs.splice(j, 1); } var f = facOf(s), h = f && f.hallObj; if (h) { h.wall55 = 0; h.wallMax55 = 0; } s.wallUp55 = 1e3; }
+    // ---- raids now break the vault: high HP + armor, a lone rider barely scratches it; loot only flows from a broken vault
+    vaultSpots = function (s) { return s.v135 && s.v135.x != null && s.v135.hp <= 0 ? [vpos(s)] : []; };
+    var hintT = 0;
+    function raidTick(s, dt) { var v = s.v135, p = vpos(s), att = 0, def = 0, by = null;
+      units.forEach(function (u) { if (u.hp <= 0 || u.t === 'c' || u.g) return; if (Math.abs(u.x - p.x) > 340 || Math.abs(u.y - p.y) > 340) return; if (u.f === s.f) def++; else { att++; by = u.f; } });
+      var pl = s !== ME_S && Math.hypot(px - p.x, py - p.y) < 200; if (pl) { att++; by = 'me'; }
+      var n = att - def, dps = Math.max(0, n * 6 - v.arm);
+      if (pl && dps <= 0 && hintT <= 0) { hintT = 6; showToast('VAULT ARMOR ' + v.arm + ' \u00b7 BRING 2+ TROOPS TO BREAK IT'); }
+      if (dps > 0 && v.hp > 0) { v.hp = Math.max(0, v.hp - dps * dt); v.hitT = clock; if (v.hp <= 0) { var to = setOfF(by); ['wood', 'stone', 'food'].forEach(function (k) { var g = s.res[k] * 0.2; s.res[k] -= g; if (to) to.res[k] += g; }); if (s === ME_S) showToast('YOUR VAULT WAS BROKEN! REPAIR IT'); else if (by === 'me') showToast('VAULT OF ' + nm(s) + ' BROKEN! LOOT THE GOLD'); } } }
+    // ---- goblins replace wolves: waves rush the vault, ignore people, grow over time
+    var GW = { t: 150, n: 0, warned: false };
+    function spawnWave(s) { var p = vpos(s), cnt = Math.min(36, 2 + Math.round(GW.n * 1.6)); GW.n++;
+      for (var i = 0, tries = 0; i < cnt && tries < 200; tries++) { var a = Math.random() * Math.PI * 2, r = 1100 + Math.random() * 300, x = p.x + Math.cos(a) * r, y = p.y + Math.sin(a) * r; if (!isLand(x, y)) continue; wolves.push({ gob: 1, x: x, y: y, hp: 3 + GW.n, hm: 3 + GW.n, face: 1, ph: Math.random() * 6, hitT: 0, cd: 0, loot: 0 }); i++; }
+      showToast('GOBLIN RAID #' + GW.n + '! ' + cnt + ' GOBLINS RUSH YOUR VAULT'); try { sfx && sfx('horn'); } catch (e) {} }
+    function cpuWaves(n) { sets().forEach(function (s) { if (s === ME_S || !s.v135 || s.v135.x == null) return; var dmg = Math.max(0, (2 + n * 1.6) * 22 - soldiers(s).length * 12 - lvSum(s, 'outpost') * 40 - 30); if (!dmg) return; var v = s.v135; v.hp = Math.max(0, v.hp - dmg); v.hitT = clock; if (v.hp <= 0) ['wood', 'stone', 'gold'].forEach(function (k) { s.res[k] *= 0.85; }); }); }
+    function hitG(w, d) { var was = w.hp; hitWolf(w, d); return was > 0 && w.hp <= 0; }
+    updateWolves = function (dt) {
+      var s = ME_S, v = s && s.v135 && s.v135.x != null ? s.v135 : null;
+      if (v) { GW.t -= dt; if (GW.t < 15 && !GW.warned) { GW.warned = true; showToast('GOBLINS SPOTTED! RAID IN 15s \u00b7 GUARD THE VAULT'); } if (GW.t <= 0) { spawnWave(s); cpuWaves(GW.n); GW.t = Math.max(70, 130 - GW.n * 4); GW.warned = false; } }
+      wolves = wolves.filter(function (w) { return w.gob && w.hp > 0 && !w.gone; });
+      if (v) { var p = vpos(s), towers = s.bld.filter(function (b) { return (b.L > 0 && b.k === 'outpost') || b.k === 'hall'; }), mine = units.filter(function (u) { return u.f === 'me' && u.hp > 0 && u.t !== 'c'; });
+        wolves.forEach(function (w) { w.hitT -= dt; w.cd -= dt;
+          var tx = p.x, ty = p.y + 10, flee = v.hp <= 0 || w.loot > 0; if (flee) { tx = w.x + (w.x - p.x); ty = w.y + (w.y - p.y); }
+          var dx = tx - w.x, dy = ty - w.y, d = Math.hypot(dx, dy) || 1;
+          if (!flee && d < 62) { w.ph += dt * 16; v.hp = Math.max(0, v.hp - Math.max(0.3, 2 - v.arm * 0.1) * dt); v.hitT = clock; if (v.hp <= 0 && !w.loot) { var g = Math.min(s.res.gold * 0.04, 25); s.res.gold -= g; ['wood', 'stone', 'food'].forEach(function (k) { s.res[k] = Math.max(0, s.res[k] * 0.97); }); w.loot = g + 1; if (warnT <= 0) { warnT = 3; showToast('GOBLINS BROKE YOUR VAULT AND ARE LOOTING!'); updateRes(); } } }
+          else { var sp = flee ? 170 : 125; w.x += dx / d * sp * dt; w.y += dy / d * sp * dt; w.face = dx > 0 ? 1 : -1; w.ph += dt * 12; if (flee && Math.hypot(w.x - p.x, w.y - p.y) > 1600) w.gone = true; }
+          towers.forEach(function (b) { var bp = bldPos(s, b), rng = b.k === 'hall' ? 480 : 650; if (Math.abs(bp.x - w.x) > rng || Math.abs(bp.y - w.y) > rng) return; w.tw = (w.tw || 0) + dt * (b.k === 'hall' ? 0.9 : 1.6 + 0.4 * b.L); if (Math.random() < dt * 2 && ARROWS.length < 30) ARROWS.push({ x1: bp.x, y1: bp.y - 110, x2: w.x, y2: w.y - 14, t: 0.25 }); });
+          mine.forEach(function (u) { if (Math.abs(u.x - w.x) < 120 && Math.abs(u.y - w.y) < 120) w.tw = (w.tw || 0) + dt * 2.2; });
+          if (w.tw >= 1) { var dmg = Math.floor(w.tw); w.tw -= dmg; if (hitG(w, dmg) && w.loot) { s.res.gold += w.loot - 1; showToast('LOOT RECOVERED +' + Math.round(w.loot - 1) + ' GOLD'); updateRes(); } }
+        });
+        mine.forEach(function (u) { var bw = null, bd = 520; wolves.forEach(function (w) { var d = Math.hypot(u.x - w.x, u.y - w.y); if (d < bd && Math.hypot(w.x - p.x, w.y - p.y) < 700) { bd = d; bw = w; } }); if (bw && bd > 40) { var k = Math.min(1, 140 * dt / bd); u.x += (bw.x - u.x) * k; u.y += (bw.y - u.y) * k; } });
+      }
+      ARROWS = ARROWS.filter(function (a) { a.t -= dt; return a.t > 0; }); if (warnT > 0) warnT -= dt; if (hintT > 0) hintT -= dt;
+      if (hp < HPMAX && wolves.length === 0) { hp = Math.min(HPMAX, hp + dt * 2); drawHp(); }
+      if (hp <= 0) { var lost = Math.floor(gold / 2); gold -= lost; hp = HPMAX; drawHp(); var sp2 = clearSpot(city.x, city.y + 120); px = sp2[0]; py = sp2[1]; moveId = null; showToast('YOU WERE KNOCKED OUT  -' + lost + ' GOLD'); updateRes(); }
+      if (hurtT > 0) hurtT -= dt; if (toastT > 0) toastT -= dt;
+    };
+    var _hw = hitWolf; hitWolf = function (w, power) { var was = w.hp; _hw(w, power); if (w.gob && was > 0 && w.hp <= 0 && w.loot > 1 && ME_S) { ME_S.res.gold += w.loot - 1; w.loot = 0; updateRes(); } };
+    wolfArt = function (c, x, y, f, ph, hit) { c.save(); c.translate(x, y); c.scale(f, 1); var l = Math.sin(ph) * 4;
+      c.fillStyle = 'rgba(0,0,0,0.25)'; c.beginPath(); c.ellipse(0, 0, 14, 4, 0, 0, 7); c.fill();
+      c.fillStyle = '#3d5a1e'; c.fillRect(-7, -12, 4, 12 + l); c.fillRect(3, -12, 4, 12 - l);
+      c.fillStyle = '#2a2016'; c.beginPath(); c.ellipse(0, -20, 10, 11, 0.15, 0, 7); c.fill();
+      c.fillStyle = '#6b8a2e'; c.beginPath(); c.arc(4, -36, 9, 0, 7); c.fill(); c.beginPath(); c.moveTo(-3, -40); c.lineTo(-15, -46); c.lineTo(-4, -34); c.fill(); c.beginPath(); c.moveTo(10, -40); c.lineTo(20, -48); c.lineTo(11, -33); c.fill();
+      c.fillStyle = '#ffde3a'; c.fillRect(5, -39, 3, 3); c.fillRect(10, -38, 2, 2); c.fillStyle = '#fff'; c.fillRect(6, -31, 6, 2);
+      c.fillStyle = '#6b8a2e'; c.fillRect(8, -24, 9, 4); c.save(); c.translate(17, -22); c.rotate(-0.8 + Math.sin(ph * 1.3) * 0.7); c.fillStyle = '#5a3a1a'; c.fillRect(-2, -18, 5, 20); c.fillStyle = '#3a2410'; c.beginPath(); c.arc(0, -18, 5, 0, 7); c.fill(); c.restore();
+      c.fillStyle = '#8a7a52'; c.beginPath(); c.ellipse(-10, -22, 6, 8, -0.3, 0, 7); c.fill();
+      if (hit > 0) { c.strokeStyle = '#c00'; c.lineWidth = 2; c.beginPath(); c.arc(0, -22, 26, 0, 7); c.stroke(); }
+      c.restore(); };
+    // ---- art: vault + generals
+    function vaultArt(c, x, y, v, label) { var br = v.hp <= 0, sh = v.hitT && clock - v.hitT < 0.3 ? (Math.random() - 0.5) * 4 : 0; c.save(); c.translate(x + sh, y);
+      c.fillStyle = 'rgba(0,0,0,0.22)'; c.beginPath(); c.ellipse(0, 12, 70, 12, 0, 0, 7); c.fill();
+      c.fillStyle = '#7d7468'; c.fillRect(-56, -78, 112, 90); c.fillStyle = '#958b7d'; for (var r = 0; r < 6; r++) for (var q = 0; q < 5; q++) { c.fillRect(-54 + q * 22 + (r % 2 ? 11 : 0), -76 + r * 15, 19, 12); }
+      c.fillStyle = '#4a443c'; c.fillRect(-62, -90, 124, 14); c.fillRect(-58, -96, 116, 7); c.fillStyle = '#2b2722'; c.fillRect(-62, -78, 124, 3);
+      c.fillStyle = '#e8d9a8'; c.font = 'bold 11px monospace'; c.textAlign = 'center'; c.fillText(label || 'VAULT', 0, -80);
+      c.fillStyle = '#26231f'; c.beginPath(); c.arc(0, -26, 28, 0, 7); c.fill(); c.fillStyle = br ? '#120f0c' : '#5c5f63'; c.beginPath(); c.arc(br ? -14 : 0, -26, 24, 0, 7); c.fill();
+      if (!br) { c.strokeStyle = '#c9a548'; c.lineWidth = 3; c.beginPath(); c.arc(0, -26, 9, 0, 7); c.stroke(); for (var a = 0; a < 6; a++) { c.beginPath(); c.moveTo(Math.cos(a) * 9, -26 + Math.sin(a) * 9); c.lineTo(Math.cos(a) * 16, -26 + Math.sin(a) * 16); c.stroke(); } c.fillStyle = '#2b2b2b'; for (var a2 = 0; a2 < 8; a2++) c.fillRect(Math.cos(a2 * 0.785) * 20 - 1.5, -27.5 + Math.sin(a2 * 0.785) * 20, 3, 3); }
+      else { c.fillStyle = '#c9a548'; for (var k = 0; k < 7; k++) c.fillRect(-8 + (k * 13) % 26, -14 - (k * 7) % 14, 5, 3); c.strokeStyle = '#1b1814'; c.lineWidth = 2; c.beginPath(); c.moveTo(-40, -70); c.lineTo(-30, -50); c.lineTo(-36, -40); c.moveTo(38, -60); c.lineTo(30, -44); c.stroke(); }
+      c.fillStyle = '#3b3631'; c.fillRect(-60, 6, 120, 8);
+      if (v.hp < v.max) { var w = 104, f = Math.max(0, v.hp / v.max); c.fillStyle = '#000'; c.fillRect(-w / 2 - 2, -112, w + 4, 11); c.fillStyle = f > 0.5 ? '#3c9a3c' : f > 0.2 ? '#d9a02c' : '#c23a2a'; c.fillRect(-w / 2, -110, w * f, 7); c.fillStyle = '#fff'; c.font = 'bold 10px monospace'; c.fillText(br ? 'BROKEN' : Math.ceil(v.hp) + '/' + v.max, 0, -116); }
+      c.restore(); }
+    function genArt(c, x, y, g) { var l = Math.sin(g.ph) * 3, work = g.st === 'work' || g.st === 'build' || g.st === 'repair'; c.save(); c.translate(x, y); c.scale(g.face || 1, 1);
+      c.fillStyle = 'rgba(0,0,0,0.25)'; c.beginPath(); c.ellipse(0, 0, 11, 3.5, 0, 0, 7); c.fill();
+      c.fillStyle = '#1d2433'; c.fillRect(-5, -16, 4, 16 + l); c.fillRect(1, -16, 4, 16 - l); c.fillStyle = '#111'; c.fillRect(-6, -2 + l, 6, 3); c.fillRect(1, -2 - l, 6, 3);
+      c.fillStyle = '#25324d'; c.fillRect(-8, -36, 16, 22); c.fillStyle = '#c9a548'; c.fillRect(-8, -36, 16, 3); c.fillRect(-1, -33, 2, 16); c.fillRect(-8, -36, 3, 4); c.fillRect(5, -36, 3, 4); c.beginPath(); c.arc(-4, -27, 1.8, 0, 7); c.fill();
+      c.fillStyle = '#e0b48a'; c.beginPath(); c.arc(0, -42, 6, 0, 7); c.fill(); c.fillStyle = '#6b4a2a'; c.fillRect(-3, -40, 7, 2);
+      c.fillStyle = '#1a1a1a'; c.fillRect(-10, -48, 20, 3); c.fillRect(-6, -55, 12, 8); c.fillStyle = '#c9a548'; c.fillRect(-6, -49, 12, 2);
+      if (work) { c.save(); c.translate(7, -30); c.rotate(-0.6 + Math.sin(g.ph) * 0.9); c.fillStyle = '#6b4a2a'; c.fillRect(-1.5, -16, 3, 18); c.fillStyle = '#888'; c.fillRect(-6, -18, 12, 4); c.restore(); }
+      if (g.c) { c.fillStyle = '#8a6a3a'; c.fillRect(-9, -64, 18, 12); c.strokeStyle = '#3a2410'; c.lineWidth = 1.5; c.strokeRect(-9, -64, 18, 12); c.beginPath(); c.moveTo(-9, -58); c.lineTo(9, -58); c.stroke(); }
+      c.restore(); if (g.pop) { c.save(); c.globalAlpha = Math.min(1, g.pop.t); c.font = 'bold 12px monospace'; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = '#000'; var yy = y - 70 - (1.4 - g.pop.t) * 20; c.strokeText(g.pop.s, x, yy); c.fillStyle = '#ffe27a'; c.fillText(g.pop.s, x, yy); c.restore(); } }
+    var _pf = pushFactionItems; pushFactionItems = function (items, R) { _pf.apply(this, arguments); try {
+      var r = (R || 1200) + 300;
+      sets().forEach(function (s) { if (!s.v135 || s.v135.x == null) return; var p = vpos(s); if (Math.abs(p.x - px) < r && Math.abs(p.y - py) < r) items.push({ y: p.y, x: p.x, y2: p.y, fn: function (sx, sy) { vaultArt(ctx, sx, sy, s.v135, s === ME_S ? 'YOUR VAULT' : 'VAULT'); } });
+        (s.gen135 || []).forEach(function (g) { if (Math.abs(g.x - px) < r && Math.abs(g.y - py) < r) items.push({ y: g.y, x: g.x, y2: g.y, fn: function (sx, sy) { genArt(ctx, sx, sy, g); } }); }); });
+      TV.forEach(function (t) { if (Math.abs(t.x - px) < r && Math.abs(t.y - py) < r) items.push({ y: t.y, x: t.x, y2: t.y, fn: function (sx, sy) { vaultArt(ctx, sx, sy, t, 'BANK VAULT'); } }); });
+      if (ARROWS.length) items.push({ y: 1e9, x: px, y2: py, fn: function (sx, sy) { ctx.save(); ctx.strokeStyle = '#2a1a0a'; ctx.lineWidth = 2; ARROWS.forEach(function (a) { var k = 1 - a.t / 0.25, x = a.x1 + (a.x2 - a.x1) * k, y = a.y1 + (a.y2 - a.y1) * k, d = Math.hypot(a.x2 - a.x1, a.y2 - a.y1) || 1; ctx.beginPath(); ctx.moveTo(sx + x - px - (a.x2 - a.x1) / d * 14, sy + y - py - (a.y2 - a.y1) / d * 14); ctx.lineTo(sx + x - px, sy + y - py); ctx.stroke(); }); ctx.restore(); } });
+    } catch (e) {} };
+    // keep the player out of vault walls; other placement keeps clear of vaults
+    var _bw = blockedWorld; blockedWorld = function (x, y) { if (_bw.apply(this, arguments)) return true; var l = sets(); for (var i = 0; i < l.length; i++) { var s = l[i]; if (!s.v135 || s.v135.x == null) continue; var p = vpos(s); if (x > p.x - 52 && x < p.x + 52 && y > p.y - 50 && y < p.y + 12) return true; } return false; };
+    var _fs = freeSpot32; freeSpot32 = function (s, x, y) { if (!_fs.apply(this, arguments)) return false; var l = sets(); for (var i = 0; i < l.length; i++) { var q = l[i]; if (!q.v135 || q.v135.x == null) continue; var p = vpos(q); if (Math.abs(p.x - x) < 200 && Math.abs(p.y - y) < 190) return false; } return true; };
+    function recheck(s) { if (!s.v135 || s.v135.x == null) return; var p = vpos(s), f = vfp(p.x, p.y, 4), O = obst(s, p.x, p.y); for (var i = 0; i < O.length; i++) if (ov(f, O[i])) { var h = homeXY(s), q = findSpot(s, h.x, h.y); if (q) { s.v135.x = q[0] - h.x; s.v135.y = q[1] - h.y; } return; } }
+    function townVaults() { if (TV.length || !window.TOWN133) return; try { var T = TOWN133.towns(); if (!T || !T.length) return; T.forEach(function (t) { var p = findSpot(null, t.x, t.y); if (p) TV.push({ x: p[0], y: p[1], hp: 900, max: 900, arm: 14, name: t.name }); }); } catch (e) {} }
+    var rk = 0;
+    function tickAll(dt) { clock += dt; var l = sets(); townVaults();
+      l.forEach(function (s) { stripWalls(s); if (!ensure(s)) return; genTick(s, dt); raidTick(s, dt); });
+      rk += dt; if (rk > 0.4 && l.length) { rk = 0; var i = Math.floor(clock * 2.5) % l.length; recheck(l[i]); } }
+    var _et = econTick; econTick = function (dt) { _et(dt); try { var d = Math.min(0.5, dt || 0); if (d > 0) tickAll(d); } catch (e) { if (!window.__genErr) { window.__genErr = 1; console.warn('GEN135', e); } } };
+    // ---- UI: hall actions, walk-up general / vault button, generals panel
+    var _act = window.ACT126; window.ACT126 = function (s, b, a) { if (_act) _act(s, b, a); try { if (b.k === 'hall' && s === ME_S && s.gen135) { var c = hireCost(s); a.push(['\ud83c\udf96 HIRE GENERAL (' + c + ' GOLD)', function () { hire(s); }, s.res.gold < c]); a.push(['\ud83c\udf96 GENERALS (' + s.gen135.length + ')', function () { panel('list'); }]); } } catch (e) {} };
+    var css = document.createElement('style'); css.textContent = '#gb135{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);transform:translateX(-50%);z-index:56;display:none;font:bold 15px monospace;padding:10px 16px;background:#25324d;color:#ffe9b8;border:2px solid #0e1420;border-radius:8px;box-shadow:0 3px 0 #0e1420;max-width:86vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#gp135{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:80;display:none;background:#f3e6c4;border:3px solid #3b2410;border-radius:10px;padding:10px 12px;font:bold 12px monospace;color:#2a1a0a;width:min(420px,92vw);max-height:84vh;overflow:auto;box-shadow:0 6px 0 rgba(0,0,0,.35)}#gp135 h3{margin:0 0 6px;font-size:14px}#gp135 button{display:block;width:100%;margin:4px 0;padding:8px;font:bold 12px monospace;background:#7a4a1c;color:#ffe9b8;border:2px solid #3b2410;border-radius:6px;text-align:left}#gp135 button.on{background:#25324d}#gp135 button:disabled{opacity:.45}#gp135 .x{position:absolute;right:8px;top:6px;width:auto;padding:2px 8px;text-align:center}@media (orientation:landscape) and (max-height:500px){#gb135{bottom:8px;padding:6px 10px;font-size:12px;max-width:52vw}#gp135{max-height:92vh;padding:6px 10px}#gp135 button{padding:5px 8px;margin:3px 0}}';
+    document.head.appendChild(css);
+    var btn = document.createElement('button'); btn.id = 'gb135'; document.body.appendChild(btn);
+    var pnl = document.createElement('div'); pnl.id = 'gp135'; document.body.appendChild(pnl);
+    var near = null, cur = '', openG = null;
+    function jobTxt(s, g) { var b = jobB(s, g); if (!b) return g.st === 'build' || g.st === 'tobuild' ? 'BUILDING ' + ((ENAME[(s.jobs[0] || {}).k] || '') + '').toUpperCase() : g.st === 'repair' || g.st === 'torepair' ? 'REPAIRING THE VAULT' : 'FREE \u00b7 BUILDS & REPAIRS'; var o = g.o === 'crop' ? (ECON131.CN ? (ECON131.CN()[outOf(s, b, 'crop')] || 'CROP') : 'CROP') : RN[g.o]; return (ENAME[b.k] || b.k).toUpperCase() + ' L' + b.L + ' \u2192 ' + String(o).toUpperCase() + (g.c ? ' \u00b7 HAULING ' + Math.round(g.c) : ''); }
+    function panel(kind, g) { var s = ME_S; if (!s || !s.gen135) return; openG = g || null; pnl.innerHTML = ''; pnl.style.display = 'block'; pnl.dataset.k = kind;
+      var x = document.createElement('button'); x.className = 'x'; x.textContent = '\u2715'; x.onclick = function (e) { e.stopPropagation(); pnl.style.display = 'none'; }; pnl.appendChild(x);
+      function add(t, fn, dis, on) { var b = document.createElement('button'); b.textContent = t; b.disabled = !!dis; if (on) b.className = 'on'; b.onclick = function (e) { e.stopPropagation(); fn(); }; pnl.appendChild(b); return b; }
+      function h(t, sub) { var d = document.createElement('h3'); d.textContent = t; pnl.appendChild(d); if (sub) { var q = document.createElement('div'); q.textContent = sub; q.style.marginBottom = '6px'; pnl.appendChild(q); } }
+      if (kind === 'gen') { var i = s.gen135.indexOf(g); h('\ud83c\udf96 GENERAL #' + (i + 1), 'JOB: ' + jobTxt(s, g)); var d = document.createElement('div'); d.textContent = 'REASSIGN TO:'; pnl.appendChild(d);
+        add('FREE \u2014 BUILDS NEW STUFF & REPAIRS THE VAULT', function () { deposit(s, g); assign(s, g, null); panel('gen', g); }, false, !jobB(s, g));
+        var gp = { x: g.x, y: g.y }; s.bld.filter(function (b) { return b.L > 0 && OUT[b.k]; }).sort(function (a, b) { var pa = bldPos(s, a), pb = bldPos(s, b); return Math.hypot(pa.x - gp.x, pa.y - gp.y) - Math.hypot(pb.x - gp.x, pb.y - gp.y); }).forEach(function (b) {
+          OUT[b.k].forEach(function (o) { var on = jobB(s, g) === b && g.o === o, ot = o === 'crop' ? String((ECON131.CN && ECON131.CN()[outOf(s, b, 'crop')]) || 'CROP').toUpperCase() : RN[o], busy = s.gen135.filter(function (q) { return q !== g && jobB(s, q) === b; }).length; add((ENAME[b.k] || b.k).toUpperCase() + ' L' + b.L + ' \u2192 ' + ot + (busy ? ' (' + busy + ' ALREADY)' : ''), function () { deposit(s, g); assign(s, g, b, o); showToast('GENERAL #' + (i + 1) + ': ' + (ENAME[b.k] || b.k).toUpperCase() + ' \u2192 ' + ot); panel('gen', g); }, false, on); }); });
+        add('\u2190 ALL GENERALS', function () { panel('list'); }); return; }
+      if (kind === 'vault') { var v = s.v135; h('\ud83c\udfe6 YOUR VAULT', 'HP ' + Math.ceil(v.hp) + '/' + v.max + ' \u00b7 ARMOR ' + v.arm + (v.hp <= 0 ? ' \u00b7 BROKEN: GOLD CAN BE LOOTED' : '') + ' \u00b7 HOLDS FOOD ' + fmt(s.res.food) + ' WATER ' + fmt(s.res.water) + ' WOOD ' + fmt(s.res.wood) + ' STONE ' + fmt(s.res.stone) + ' GOLD ' + fmt(s.res.gold) + ' \u00b7 NEXT GOBLIN RAID ' + Math.max(0, Math.ceil(GW.t)) + 's');
+        add('\ud83d\udd27 REPAIR +40% (20 WOOD 20 STONE)', function () { if (s.res.wood < 20 || s.res.stone < 20) return showToast('NEED 20 WOOD 20 STONE'); s.res.wood -= 20; s.res.stone -= 20; v.hp = Math.min(v.max, v.hp + v.max * 0.4); updateRes(); panel('vault'); }, v.hp >= v.max);
+        add('\ud83c\udf96 GENERALS (' + s.gen135.length + ')', function () { panel('list'); }); return; }
+      h('\ud83c\udf96 GENERALS', 'EACH GENERAL WORKS ONE JOB AND HAULS IT TO THE VAULT. FREE GENERALS BUILD & REPAIR.');
+      s.gen135.forEach(function (q, i) { add('#' + (i + 1) + ' ' + jobTxt(s, q) + '  \u25b8 REASSIGN', function () { panel('gen', q); }); });
+      var c = hireCost(s); add('+ HIRE GENERAL (' + c + ' GOLD)', function () { hire(s); panel('list'); }, s.res.gold < c);
+    }
+    pnl.addEventListener('pointerdown', function (e) { e.stopPropagation(); }); pnl.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+    btn.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+    btn.onclick = function (e) { e.stopPropagation(); if (!near) return; if (near.g) panel('gen', near.g); else panel('vault'); };
+    setInterval(function () { try { var s = ME_S; if (!s || !s.gen135 || !s.v135 || s.v135.x == null) { btn.style.display = 'none'; return; }
+      var nb = document.getElementById('near63'), nbv = nb && nb.style.display === 'block', busy = pnl.style.display === 'block'; near = null; btn.style.bottom = nbv ? Math.round(innerHeight - nb.getBoundingClientRect().top + 8) + 'px' : '';
+      if (!busy) { var bd = 100; s.gen135.forEach(function (g) { var d = Math.hypot(px - g.x, py - (g.y - 10)); if (d < bd) { bd = d; near = { g: g }; } }); if (!near) { var p = vpos(s); if (Math.hypot(px - p.x, py - (p.y + 20)) < 130) near = { v: 1 }; } }
+      if (!near) { btn.style.display = 'none'; cur = ''; } else { var t = near.g ? '\ud83c\udf96 GENERAL #' + (s.gen135.indexOf(near.g) + 1) + ': ' + jobTxt(s, near.g) : '\ud83c\udfe6 VAULT ' + Math.ceil(s.v135.hp) + '/' + s.v135.max + ' \u00b7 REPAIR / GENERALS'; if (t !== cur) { cur = t; btn.textContent = t; } btn.style.display = 'block'; }
+      if (pnl.style.display === 'block' && pnl.dataset.k === 'gen' && openG && s.gen135.indexOf(openG) < 0) pnl.style.display = 'none';
+      if (s.wait135 > 2 && !s.gen135.some(function (g) { return !jobB(s, g); }) && (!s.nfT135 || clock - s.nfT135 > 20)) { s.nfT135 = clock; showToast('BUILD WAITING: NEED A FREE GENERAL (REASSIGN ONE OR HIRE AT THE HALL)'); }
+      if (!s.tip135 && clock > 4) { s.tip135 = 1; showToast('WALK UP TO YOUR GENERAL AND GIVE HIM A JOB'); }
+    } catch (e) {} }, 250);
+    window.GEN135 = { STAT: STAT, sets: sets, vpos: vpos, vfp: vfp, TV: TV, hire: hire, hireCost: hireCost, assign: assign, job: jobB, OUT: OUT, wave: function () { GW.t = 0.01; }, GW: GW, panel: panel, tick: tickAll };
   })();
   requestAnimationFrame(frame);
 </script>
