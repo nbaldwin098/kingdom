@@ -4741,7 +4741,7 @@
       return a; }
     function near() { var s = ME_S; if (!s) return null; var best = null, bd = 150; s.bld.forEach(function (b) { if (!b.L && !b.j && b.k !== 'hall') return; var p = bldPos(s, b), d = Math.hypot(px - p.x, py - p.y); if (d < bd) { bd = d; best = b; } }); return best; }
     function tick() { try { resLine(); if (typeof NEWS38 !== 'undefined' && document.body.classList.contains('min63')) NEWS38.t = 0; var b = near(); if (!b) { box.style.display = 'none'; shown = null; flag64 = false; open130 = null; return; }
-      if (open130 !== b) { var nm130 = (NAME[b.k] || (typeof ENAME !== 'undefined' && ENAME[b.k]) || b.k.toUpperCase()); box.style.display = 'block'; box.classList.add('tap130'); if (cur === 'tap' + nm130 && shown === b) return; cur = 'tap' + nm130; shown = b; box.innerHTML = ''; var ob = document.createElement('button'); ob.id = 'open130'; ob.textContent = 'OPEN ' + nm130 + (innerWidth > 700 ? ' [E]' : ''); ob.onclick = function (e) { e.stopPropagation(); openNear130(); }; box.appendChild(ob); return; }
+      if (open130 !== b) { var nm130 = (NAME[b.k] || (typeof ENAME !== 'undefined' && ENAME[b.k]) || b.k.toUpperCase()); box.style.display = 'block'; box.classList.add('tap130'); if (cur === 'tap' + nm130 && shown === b) return; cur = 'tap' + nm130; shown = b; box.innerHTML = ''; var ob = document.createElement('button'); ob.id = 'open130'; ob.textContent = 'OPEN ' + nm130 + (matchMedia('(pointer:coarse)').matches ? '' : ' [E]'); ob.onclick = function (e) { e.stopPropagation(); openNear130(); }; box.appendChild(ob); return; }
       box.classList.remove('tap130');
       var s = ME_S, a = acts(s, b), sig = b.k + b.L + (b.j ? 'j' : '') + (a.info || '') + a.map(function (x) { return x[0] + !!x[2]; }).join('|'); box.style.display = 'block'; if (sig === cur && shown === b) return; cur = sig; shown = b;
       box.innerHTML = '<b>' + (NAME[b.k] || (typeof ENAME !== 'undefined' && ENAME[b.k]) || b.k.toUpperCase()) + (b.L ? ' L' + b.L : '') + (b.j ? ' \u2692 BUILDING' : '') + '</b>' + (a.info ? '<div>' + a.info + '</div>' : '');
@@ -4947,6 +4947,13 @@
     function nearV() { return V.k >= 0 && !V.on && Math.hypot(V.x - px, V.y - py) < 90; }
     function vUi() { var show = V.k >= 0 && (V.on || nearV()); vb.style.display = show ? '' : 'none'; vb.textContent = V.on ? 'EXIT ' + VK[V.k].n : 'DRIVE ' + VK[V.k].n; if (mountBtn) mountBtn.style.display = V.on ? 'none' : ''; }
     function toggleV() { if (V.k < 0) return; if (V.on) { if (_bw(px, py)) { showToast('LAND FIRST - CAN\'T STEP OUT OVER WATER'); return; } V.on = false; V.x = px + face * 40; V.y = py; showToast(VK[V.k].n + ' PARKED'); if (window.LAND128) LAND128(V.k); } else if (nearV()) { V.on = true; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; steed.face = face; saveHorse(); } showToast((V.k >= 8 ? 'SAILING THE ' : 'DRIVING THE ') + VK[V.k].n + (V.k >= 8 ? ' - FIND THE ? ISLANDS' : onRoad(px, py) ? '' : ' - ROADS ARE FASTER')); if (window.BOARD128) BOARD128(V.k); } saveV(); vUi(); }
+    /* v130: boats always sit in water - snap a parked boat to the nearest water */
+    function boatK(k) { return k === 6 || k === 8 || k === 9; }
+    function wat130(x, y) { return zone(x, y) >= 1 || !isLand(x, y); }
+    function water130(x, y) { var _bw = wat130; if (_bw(x, y)) return { x: x, y: y }; for (var r = 30; r <= 16000; r += (r < 900 ? 30 : r < 3000 ? 120 : 300)) for (var a = 0; a < 48; a++) { var qx = x + Math.cos(a * 0.1309) * r, qy = y + Math.sin(a * 0.1309) * r; if (_bw(qx, qy) && _bw(qx + 20, qy) && _bw(qx - 20, qy)) return { x: qx, y: qy }; } return null; }
+    function snap130() { if (V.k >= 0 && boatK(V.k) && !V.on && V.x < 1e6 && !wat130(V.x, V.y)) { if (V.x > 1e6) return; var w = water130(V.x, V.y); if (w) { V.x = w.x; V.y = w.y; } else { V.x = V.y = 2e6; try { showToast('NO WATER NEAR - BOAT SENT TO PORT'); } catch (e) {} } saveV(); } }
+    var _tv130 = toggleV; toggleV = function () { var was = V.on; _tv130(); if (was && !V.on) snap130(); };
+    setInterval(snap130, 1000); window.VEH130 = function () { return V; }; window.BW130 = function (x, y) { return wat130(x, y); };
     vb.addEventListener('click', function (e) { e.stopPropagation(); toggleV(); });
     addEventListener('keydown', function (e) { if ((e.key === 'v' || e.key === 'V') && started) toggleV(); });
     // ---- art (era-appropriate, B/W)
