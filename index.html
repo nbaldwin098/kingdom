@@ -957,7 +957,7 @@ window.B137 = (function () {
     battleaxe: [["l",50,12,50,88,"#000",4],["d",[["M",50,18],["Q",78,18,78,44],["Q",62,40,50,40],["Z"]],"#000",null,null,null],["r",46,84,8,4,"#000"]]
   };
   function horse(c, x, y, variant, phase, face) {
-    c.save(); c.translate(x, y); c.scale(face, 1);
+    c.save(); c.translate(x, y); c.scale(face * 1.6, 1.6);
     var ha = horseArt[variant];
     if (ha) { c.translate(-50, -56); drawArt(c, ha); c.restore(); return; }
     c.fillStyle = '#000';
@@ -6659,6 +6659,44 @@ window.B137 = (function () {
     var _at2 = attack; attack = function () { _at2.apply(this, arguments); try { if (!window.MAP136) return; MAP136.FT.forEach(function (f) { if (f && f.k === 'camp' && Math.hypot(f.x - px, f.y - py) < 220) { f.hits141 = (f.hits141 || 0) + 1; if (f.hits141 >= 8) { f.k = 'ash'; f.burned141 = 1; gold += 40; updateRes(); showToast('GOBLIN CAMP BURNED +40 GOLD - NO MORE RAIDS FROM IT'); } else showToast('BURNING THE GOBLIN CAMP ' + f.hits141 + '/8'); } }); } catch (e) {} };
   })();
 
+  // ===== v142: SHOTGUN — 6-pellet cone, short range, big close damage, downs flying birds/ducks; muzzle flash, boom, 0.9s reload; G key / tap button swaps with your melee weapon =====
+  (function () {
+    var SG = window.SG142 = { on: true, cd: 0, flash: 0, pel: [], shots: 0 };
+    SYN.boom142 = function (o, t) { noise(o, t, 0.35, 1.2, 'lowpass', 900); tone(o, t, 'sine', 110, 40, 0.3, 0.9); noise(o, t + 0.45, 0.06, 0.35, 'highpass', 2500); noise(o, t + 0.6, 0.05, 0.35, 'highpass', 2200); return 0.7; };
+    function fire() { if (SG.cd > 0) return; SG.cd = 0.9; SG.flash = 0.09; SG.shots++; var mh = mounted() ? 46 : 30, ox = px + face * 34, oy = py - mh, n = 5 + Math.floor(Math.random() * 3);
+      for (var i = 0; i < n; i++) { var a = (Math.random() - 0.5) * 0.5, up = -0.25 * Math.random(); SG.pel.push({ x: ox, y: oy, vx: face * Math.cos(a) * 1100, vy: Math.sin(a) * 1100 + up * 900, life: 0.3, hit: {} }); }
+      try { sfx('boom142', px, py, 1); } catch (e) {} KICK46 = Math.max(KICK46 || 0, 0.12);
+      // close blast: heavy damage to anything right in front
+      try { playerHit(px + face * 70, py, 90, 3 + weaponBonus(), face); wolves.forEach(function (w) { var dx = w.x - px; if (dx * face > -10 && Math.abs(dx) < 170 && Math.abs(w.y - py) < 70) hitWolf(w, 3 + weaponBonus()); }); } catch (e) {} }
+    var _at = attack; attack = function () { if (SG.on && started) { fire(); try { if (window.MAP136) MAP136.FT.forEach(function (f) { if (f && f.k === 'camp' && Math.hypot(f.x - px, f.y - py) < 220) { /* camps still burn via the original */ } }); } catch (e) {} return; } return _at.apply(this, arguments); };
+    // when shotgun is on the original melee swing still runs (camps, features); pellets do the ranged work
+    var _uw = updateWolves; updateWolves = function (dt) { _uw.apply(this, arguments); try { if (SG.cd > 0) SG.cd -= dt; if (SG.flash > 0) SG.flash -= dt;
+        SG.pel = SG.pel.filter(function (p) { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.life <= 0) return false; var used = false;
+          if (window.WILD141) WILD141.A.forEach(function (a) { if (used || a.dead) return; var R = WILD141.SP[a.k].r * 1.35 + 8; if (Math.abs(a.x - p.x) < R && Math.abs((a.y - a.z - 12) - p.y) < R + 25) { used = WILD141.hitAt(a.x, a.y - a.z, 4, 4, 2) > 0 || true; } });
+          if (!used) wolves.forEach(function (w) { if (!used && w.hp > 0 && Math.abs(w.x - p.x) < 22 && Math.abs(w.y - 20 - p.y) < 30) { hitWolf(w, 1.5); used = true; } });
+          if (!used) { try { used = playerHit(p.x, p.y + (mounted() ? 46 : 30), 18, 1, 0); } catch (e) {} }
+          return !used; }); } catch (e) { if (!window.E142) { window.E142 = 1; console.warn(e); } } };
+    function gunArt(c, x, y) { c.save(); c.translate(x, y); c.scale(face * 1.6, 1.6); var kick = SG.cd > 0.75 ? -4 : 0; c.translate(kick, 0); c.rotate(SG.cd > 0.75 ? -0.18 : 0); c.lineJoin = 'round'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 1;
+      c.fillStyle = '#7a4a24'; c.beginPath(); c.moveTo(-14, -2); c.lineTo(2, -3); c.lineTo(4, 3); c.lineTo(-12, 6); c.lineTo(-16, 4); c.closePath(); c.fill(); c.stroke(); // stock
+      c.fillStyle = '#a06a34'; c.fillRect(-12, -1, 10, 2); // grain
+      c.fillStyle = '#4a4e56'; c.fillRect(2, -4, 10, 6); c.strokeRect(2, -4, 10, 6); // receiver
+      c.fillStyle = '#d4a017'; c.fillRect(5, -2, 4, 2); // brass plate
+      c.fillStyle = '#6a7078'; c.fillRect(12, -4, 26, 2.2); c.fillRect(12, -1.6, 26, 2.2); c.strokeRect(12, -4, 26, 4.4); // twin barrels
+      c.fillStyle = '#8a5a2e'; c.fillRect(12, 0.8, 12, 3); c.strokeRect(12, 0.8, 12, 3); // forend
+      c.fillStyle = '#2a2a30'; c.beginPath(); c.arc(6, 3, 2.2, 0, 3.2); c.stroke(); // trigger guard
+      if (SG.flash > 0) { var r = 10 + Math.random() * 6; c.fillStyle = '#fff2a0'; c.beginPath(); c.moveTo(38, -2); c.lineTo(38 + r * 2.2, -9); c.lineTo(38 + r * 1.4, -2); c.lineTo(38 + r * 2.4, 5); c.closePath(); c.fill(); c.fillStyle = '#ff9a2a'; c.beginPath(); c.arc(40, -1.5, r * 0.6, 0, 7); c.fill(); c.fillStyle = 'rgba(200,190,170,.5)'; c.beginPath(); c.arc(48 + r, -6, r * 0.8, 0, 7); c.fill(); }
+      c.restore(); }
+    var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); try { if (!started) return; if (SG.on) items.push({ y: py + 0.5, x: px, y2: py, fn: function (sx, sy) { gunArt(ctx, sx + face * 8, sy - (mounted() ? 46 : 28)); } });
+        SG.pel.forEach(function (p) { items.push({ y: p.y + 3000, x: p.x, y2: p.y, fn: function (sx, sy) { ctx.fillStyle = '#3a2a1a'; ctx.fillRect(sx - 2, sy - 3000 - 2, 4, 4); ctx.strokeStyle = 'rgba(255,220,140,.6)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(sx, sy - 3000); ctx.lineTo(sx - p.vx * 0.02, sy - 3000 - p.vy * 0.02); ctx.stroke(); } }); }); } catch (e) {} };
+    // toggle: tap button + G key
+    var bt = document.createElement('button'); bt.id = 'sgBtn'; function lab() { bt.textContent = SG.on ? '\ud83d\udd2b SHOTGUN' : '\u2694 MELEE'; } lab();
+    bt.style.cssText = 'font:bold 12px monospace;padding:6px 10px;background:#f2ead8;color:#2a1a0a;border:2px solid #6b4a26;border-radius:6px;margin-right:6px;pointer-events:auto';
+    function tog(e) { if (e) { e.preventDefault(); e.stopPropagation(); } SG.on = !SG.on; lab(); showToast(SG.on ? 'SHOTGUN OUT - 6 PELLETS, SHORT RANGE, SHOOTS BIRDS' : 'MELEE WEAPON OUT'); }
+    bt.addEventListener('click', tog); bt.addEventListener('touchstart', tog, { passive: false });
+    try { var mb = document.getElementById('mountBtn'); mb.parentNode.insertBefore(bt, mb); } catch (e) { document.body.appendChild(bt); }
+    document.addEventListener('keydown', function (e) { if ((e.key === 'g' || e.key === 'G') && started && !(e.target && /INPUT|TEXTAREA/.test(e.target.tagName))) tog(); });
+  })();
+
   requestAnimationFrame(frame);
 </script>
 
@@ -6699,5 +6737,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v141-wild --></body>
+<!-- v142-shotgun --></body>
 </html>
