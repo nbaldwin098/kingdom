@@ -2962,7 +2962,7 @@
   function sAlive(s) { var f = facOf(s); return f && f.alive !== false; }
   // territory = union of discs around every standing building
   function terrOf(x, y, skip) {
-    for (var i = 0; i < SETS.length; i++) { var s = SETS[i]; if (s === skip || !sAlive(s)) continue; var h = homeXY(s); if (Math.abs(h.x - x) > 7000 || Math.abs(h.y - y) > 7000) continue;
+    var SL = allSets(); /* v124: SETS was empty after a restart, so no land was ever claimed */ for (var i = 0; i < SL.length; i++) { var s = SL[i]; if (!s || s === skip || !sAlive(s)) continue; var h = homeXY(s); if (Math.abs(h.x - x) > 7000 || Math.abs(h.y - y) > 7000) continue;
       for (var j = 0; j < s.bld.length; j++) { var b = s.bld[j]; if (!(b.L > 0) && b.k !== 'hall') continue; var dx = h.x + b.x - x, dy = h.y + b.y - y, r = terrR(b); if (dx * dx + dy * dy < r * r) return s; } }
     return null;
   }
@@ -3223,7 +3223,7 @@
       var own = terrOf(px, py), ok = !own || own === s;
       ordP.appendChild(el('h3', 'BUILD WHERE YOU STAND'));
       ordP.appendChild(row(own === s ? 'YOUR LAND' : own ? 'CLAIMED BY ' + (facOf(own) ? facOf(own).name : 'ANOTHER REALM') + ' - CANNOT BUILD' : 'UNCLAIMED LAND - BUILDING HERE CLAIMS IT'));
-      ['farm', 'lumber', 'quarry', 'house', 'well', 'outpost', 'stable', 'barracks', 'prison', 'granary', 'bank', 'market'].forEach(function (k) { var c = newCostOf(s, k); ordP.appendChild(row(ENAME[k], btn(cstr(c), function () { var b = orderAt(s, k, px, py - 40); showToast(b ? ENAME[k] + ' ORDERED HERE' : 'TOO CLOSE TO ANOTHER BUILDING / NOT YOUR LAND'); }, !ok || !canPay(s, c) || s.jobs.length >= 3))); });
+      ['farm', 'lumber', 'quarry', 'house', 'well', 'outpost', 'stable', 'barracks', 'prison', 'granary', 'bank', 'market'].forEach(function (k) { var c = newCostOf(s, k); ordP.appendChild(row(ENAME[k], btn(cstr(c), function () { var b = orderAt(s, k, px, py - 40); for (var rr = 1; !b && rr <= 4 && canPay(s, newCostOf(s, k)); rr++) for (var aa = 0; !b && aa < 8; aa++) { var ax = px + Math.cos(aa * 0.785 + rr) * rr * 70, ay = py - 40 + Math.sin(aa * 0.785 + rr) * rr * 70; if (!own || terrOf(ax, ay) === s) b = orderAt(s, k, ax, ay); } /* v124: nudge to the nearest free spot */ showToast(b ? ENAME[k] + ' ORDERED HERE' : 'NO ROOM HERE - RIDE A LITTLE AWAY'); }, !ok || !canPay(s, c) || s.jobs.length >= 3))); });
     }
   }
   var _ur32 = typeof updateRes === 'function' ? updateRes : null;
