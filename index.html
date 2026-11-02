@@ -3223,7 +3223,7 @@
       var own = terrOf(px, py), ok = !own || own === s;
       ordP.appendChild(el('h3', 'BUILD WHERE YOU STAND'));
       ordP.appendChild(row(own === s ? 'YOUR LAND' : own ? 'CLAIMED BY ' + (facOf(own) ? facOf(own).name : 'ANOTHER REALM') + ' - CANNOT BUILD' : 'UNCLAIMED LAND - BUILDING HERE CLAIMS IT'));
-      ['farm', 'lumber', 'quarry', 'house', 'well', 'outpost', 'stable', 'barracks', 'prison', 'granary', 'bank', 'market'].forEach(function (k) { var c = newCostOf(s, k); ordP.appendChild(row(ENAME[k], btn(cstr(c), function () { var b = orderAt(s, k, px, py - 40); for (var rr = 1; !b && rr <= 4 && canPay(s, newCostOf(s, k)); rr++) for (var aa = 0; !b && aa < 8; aa++) { var ax = px + Math.cos(aa * 0.785 + rr) * rr * 70, ay = py - 40 + Math.sin(aa * 0.785 + rr) * rr * 70; if (!own || terrOf(ax, ay) === s) b = orderAt(s, k, ax, ay); } /* v124: nudge to the nearest free spot */ showToast(b ? ENAME[k] + ' ORDERED HERE' : 'NO ROOM HERE - RIDE A LITTLE AWAY'); }, !ok || !canPay(s, c) || s.jobs.length >= 3))); });
+      ['farm', 'lumber', 'quarry', 'house', 'well', 'outpost', 'stable', 'barracks', 'prison', 'granary', 'bank', 'market', 'post', 'school'].forEach(function (k) { var c = newCostOf(s, k); ordP.appendChild(row(ENAME[k], btn(cstr(c), function () { var b = orderAt(s, k, px, py - 40); for (var rr = 1; !b && rr <= 4 && canPay(s, newCostOf(s, k)); rr++) for (var aa = 0; !b && aa < 8; aa++) { var ax = px + Math.cos(aa * 0.785 + rr) * rr * 70, ay = py - 40 + Math.sin(aa * 0.785 + rr) * rr * 70; if (!own || terrOf(ax, ay) === s) b = orderAt(s, k, ax, ay); } /* v124: nudge to the nearest free spot */ showToast(b ? ENAME[k] + ' ORDERED HERE' : 'NO ROOM HERE - RIDE A LITTLE AWAY'); }, !ok || !canPay(s, c) || s.jobs.length >= 3))); });
     }
   }
   var _ur32 = typeof updateRes === 'function' ? updateRes : null;
@@ -4736,6 +4736,7 @@
         if (b.L) { var vc = upCostOf(b); a.push(['UPGRADE VAULT (' + cstr(vc) + ')', function () { orderUpgrade(s, b); }, !!b.j || !canPay(s, vc)]); } return a; }
       if (k === 'barracks') { a.push(['ARMY', function () { ORD.tab = 'army'; ordOpen(true); }]); a.push(['ORDERS', function () { ORD.tab = 'build'; ordOpen(true); }]); }
       if (k === 'hall') { a.unshift(['\u2302 BUILD', function () { ORD.tab = 'build'; ORD.map = false; ordOpen(true); }]); a.push(['STATS', function () { var m = document.getElementById('menuStats'); if (m) m.click(); }]); a.push(['MAP', function () { document.body.classList.toggle('map63'); }]); }
+      if (window.ACT126) { window.ACT126(s, b, a); if (b.k === 'post' || b.k === 'school') { if (a.info && b.k === 'hall') {} } }
       var o = improveOpt(s, k); if (o && k !== 'wall') a.push([(o.b ? 'UPGRADE' : 'BUILD ANOTHER') + ' (' + cstr(o.c) + ')', function () { if (!doImprove(s, k)) showToast('NEED ' + cstr(o.c)); }, !canPay(s, o.c)]);
       return a; }
     function near() { var s = ME_S; if (!s) return null; var best = null, bd = 150; s.bld.forEach(function (b) { if (!b.L && !b.j && b.k !== 'hall') return; var p = bldPos(s, b), d = Math.hypot(px - p.x, py - p.y); if (d < bd) { bd = d; best = b; } }); return best; }
@@ -5001,7 +5002,7 @@
   (function () {
     // v101: the long BUILD tab is split into GROW / TOWN / SEA, and cannons sit under ARMY
     var TABS = [['TRADE'], ['GROW'], ['TOWN'], ['SEA'], ['ARMY'], ['GEAR']];
-    var MATCH = [['TRADE', /^(SELL|BUY) /], ['ARMY', /TRAIN|SOLDIER|KNIGHT|CART|ARCHER|CAVALRY|MERC|HIRE|SHIP|JET|POLICE|CANNON/], ['SEA', /SHALLOWS|DEEP SEA|TRAPS|SALT|FLEET|PEARL|OIL RIG|DOCK|HARBOR|PORT/], ['TOWN', /^(BUILD|UPGRADE|NEW|REPAIR) .*(BANK|MARKET|BARRACKS|PRISON|HALL|FORGE|WALL|AIRPORT|TOWER|STATION)/], ['GROW', /^(BUILD|UPGRADE|NEW|REPAIR) /]];
+    var MATCH = [['TRADE', /^(SELL|BUY) /], ['ARMY', /TRAIN|SOLDIER|KNIGHT|CART|ARCHER|CAVALRY|MERC|HIRE|SHIP|JET|POLICE|CANNON/], ['SEA', /SHALLOWS|DEEP SEA|TRAPS|SALT|FLEET|PEARL|OIL RIG|DOCK|HARBOR|PORT/], ['TOWN', /^(BUILD|UPGRADE|NEW|REPAIR) .*(BANK|MARKET|BARRACKS|PRISON|HALL|FORGE|WALL|AIRPORT|TOWER|STATION|POST OFFICE|SCHOOL)/], ['GROW', /^(BUILD|UPGRADE|NEW|REPAIR) /]];
     var tab = 'TRADE', filt = 0;
     function tabOf(it) { var l = String(it.label || ""); if (/^(VEHICLE|HAUL TRUCK)/.test(l)) return "GEAR"; for (var i = 0; i < MATCH.length; i++) if (MATCH[i][1].test(l)) return MATCH[i][0]; return 'GEAR'; }
     var _si = shopItems; shopItems = function () { var a = _si.apply(this, arguments); if (!filt) return a; return a.filter(function (it) { return tabOf(it) === tab; }); };
@@ -5042,6 +5043,78 @@
   // v119: only 1V1 and FREE; removed modes start as 1V1. SAVE hook for the menu
   (function () { var _bg119 = beginGame; beginGame = function (mode) { if (mode && mode !== 'free' && mode !== 'duel') mode = 'duel'; return _bg119.call(this, mode); };
     window.__save119 = function () { [function () { saveEcon(); }, function () { saveHorse(); }, function () { saveRes(); }, function () { savePop(); }, function () { saveArmy(); }].forEach(function (f) { try { f(); } catch (e) {} }); }; })();
+  // ===== v126: POST OFFICE + mail carriers on the roads, ELECTIONS at the hall, SCHOOL. Same rules for every realm =====
+  (function () {
+    EB.post = { c: { wood: 30, stone: 15, gold: 10 }, w: 50 }; ENAME.post = 'POST OFFICE';
+    EB.school = { c: { wood: 35, stone: 20, gold: 12 }, w: 60 }; ENAME.school = 'SCHOOL';
+    function has(s, k) { return s.bld.some(function (b) { return b.k === k && b.L > 0; }); }
+    function postB(s) { return s.bld.filter(function (b) { return b.k === 'post' && b.L > 0; })[0]; }
+    // ---- road graph (built from the v125 road tree, cached per segment list)
+    var GC = new WeakMap();
+    function graph(s) {
+      var g = T102.segs(s); var c = GC.get(s); if (c && c.g === g) return c;
+      var N = [], K = {}; function nid(x, y) { var k = Math.round(x) + ',' + Math.round(y); if (!(k in K)) { K[k] = N.length; N.push({ x: Math.round(x), y: Math.round(y), a: [] }); } return K[k]; }
+      g.forEach(function (G) { nid(G[0], G[1]); nid(G[2], G[3]); });
+      g.forEach(function (G) { var dx = G[2] - G[0], dy = G[3] - G[1], L2 = dx * dx + dy * dy || 1, on = [];
+        N.forEach(function (n, i) { var t = ((n.x - G[0]) * dx + (n.y - G[1]) * dy) / L2; if (t < -0.001 || t > 1.001) return; if (Math.hypot(G[0] + t * dx - n.x, G[1] + t * dy - n.y) < 2) on.push([t, i]); });
+        on.sort(function (a, b) { return a[0] - b[0]; }); for (var j = 1; j < on.length; j++) { var p = on[j - 1][1], q = on[j][1]; if (p !== q) { N[p].a.push(q); N[q].a.push(p); } } });
+      c = { g: g, N: N }; GC.set(s, c); return c;
+    }
+    function nearestN(N, x, y) { var bi = 0, bd = 1e18; for (var i = 0; i < N.length; i++) { var d = Math.abs(N[i].x - x) + Math.abs(N[i].y - y); if (d < bd) { bd = d; bi = i; } } return bi; }
+    function path(N, a, b) { if (a === b) return [a]; var pr = new Int32Array(N.length).fill(-1), q = [a]; pr[a] = a; for (var h = 0; h < q.length; h++) { var u = q[h]; if (u === b) break; N[u].a.forEach(function (v) { if (pr[v] < 0) { pr[v] = u; q.push(v); } }); } if (pr[b] < 0) return [a]; var out = [b]; while (out[0] !== a) out.unshift(pr[out[0]]); return out; }
+    // ---- carriers: each walks/drives the road from stop to stop, a few stops per trip, then back to the post office
+    var CAR = new WeakMap();
+    function cars(s) { var l = CAR.get(s); if (!l) { l = []; CAR.set(s, l); } var want = postB(s) ? Math.min(4, 1 + (s.mailX126 || 0)) : 0; while (l.length < want) l.push({ pts: [], i: 0, x: 0, y: 0, stop: l.length, left: 0, wait: Math.random() }); l.length = want; return l; }
+    function plan(s, c, G) { var po = postB(s); if (!po) return; var stops = s.bld.filter(function (b) { return b.L > 0 && b.k !== 'post' && b.k !== 'wall'; }); if (!stops.length) return;
+      var from = c.pts.length ? nearestN(G.N, c.x, c.y) : nearestN(G.N, bldPos(s, po).x, bldPos(s, po).y), to;
+      if (c.left <= 0 && c.pts.length) { var pp = bldPos(s, po); to = nearestN(G.N, pp.x, pp.y + 24); c.left = 5; c.home = true; }
+      else { c.stop = (c.stop + 1 + Math.floor(Math.random() * 3)) % stops.length; var bp = bldPos(s, stops[c.stop]); to = nearestN(G.N, bp.x, bp.y + 24); c.left--; c.home = false; }
+      var P = path(G.N, from, to); c.pts = P.map(function (i) { return G.N[i]; }); c.i = 0; if (c.x === 0 && c.y === 0) { c.x = c.pts[0].x; c.y = c.pts[0].y; } }
+    function deliver(s) { s.res.gold = (s.res.gold || 0) + 0.6; s.mailH126 = Math.min(0.15, (s.mailH126 || 0) + 0.02); s.mailN126 = (s.mailN126 || 0) + 1; }
+    function carTick(s, dt) { var l = cars(s); if (!l.length) return; var G = graph(s); if (!G.N.length) return;
+      l.forEach(function (c) { if (c.wait > 0) { c.wait -= dt; return; } if (!c.pts.length || c.i >= c.pts.length) { if (c.pts.length) { if (!c.home) deliver(s); c.wait = 0.5; } plan(s, c, G); return; }
+        var t = c.pts[c.i], dx = t.x - c.x, dy = t.y - c.y, d = Math.hypot(dx, dy), v = (eraOf(s) >= 2 ? 220 : 130) * dt; c.f = dx < -0.5 ? -1 : dx > 0.5 ? 1 : c.f || 1;
+        if (d <= v) { c.x = t.x; c.y = t.y; c.i++; } else { c.x += dx / d * v; c.y += dy / d * v; } }); }
+    function vanArt(c, x, y, f, era) { c.save(); c.translate(x, y); c.scale(f, 1); c.lineWidth = 2; c.strokeStyle = '#000';
+      if (era >= 2) { c.fillStyle = '#fff'; c.fillRect(-16, -22, 26, 16); c.strokeRect(-16, -22, 26, 16); c.fillStyle = '#000'; c.fillRect(10, -17, 9, 11); c.fillStyle = '#fff'; c.fillRect(-10, -18, 12, 8); c.strokeRect(-10, -18, 12, 8); c.beginPath(); c.moveTo(-10, -18); c.lineTo(-4, -13); c.lineTo(2, -18); c.stroke(); c.fillStyle = '#000'; c.beginPath(); c.arc(-9, -5, 4, 0, 7); c.arc(10, -5, 4, 0, 7); c.fill(); }
+      else { c.fillStyle = '#000'; c.beginPath(); c.arc(0, -26, 4, 0, 7); c.fill(); c.fillRect(-2, -22, 4, 14); c.beginPath(); c.moveTo(-2, -8); c.lineTo(-5, 0); c.moveTo(2, -8); c.lineTo(5, 0); c.stroke(); c.fillStyle = '#fff'; c.fillRect(2, -20, 9, 9); c.strokeRect(2, -20, 9, 9); }
+      c.restore(); }
+    var _dg = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dg.apply(this, arguments); try { allS75().forEach(function (s) { var l = CAR.get(s); if (!l || !l.length) return; var e = eraOf(s); l.forEach(function (c) { if (!c.pts.length || c.x < x0 - 40 || c.x > x1 + 40 || c.y < y0 - 40 || c.y > y1 + 40) return; vanArt(ctx, c.x - camX, c.y - camY + 6, c.f || 1, e); }); }); } catch (e) {} };
+    // ---- elections every 3 game minutes (every realm votes; you get the toast)
+    function approval(s) { var po = PR75.police(s).length > 0 || has(s, 'prison'); var mail = postB(s) ? Math.min(1, cars(s).length / Math.max(1, s.bld.length / 12)) : 0; return Math.max(0, Math.min(1, 0.45 * happyOf(s) + 0.2 * (1 - Math.min(1, s.hunger || 0)) + 0.15 * (po ? 1 : 0) + 0.12 * mail + 0.08 * (has(s, 'school') ? 1 : 0))); }
+    function vote(s) { var a = approval(s), pct = Math.round(a * 100), r; s.vT126 = 180;
+      if (a >= 0.55) { s.res.gold = (s.res.gold || 0) + 20; s.vH126 = 0.1; s.vB126 = 60; r = 'WON ' + pct + '% - +20 GOLD, PEOPLE CHEER'; }
+      else if (a < 0.35) { s.res.gold = Math.max(0, (s.res.gold || 0) - 15); s.vH126 = -0.15; s.vB126 = 60; r = 'LOST BADLY ' + pct + '% - -15 GOLD, UNREST'; }
+      else { r = 'SCRAPED BY ' + pct + '% - NO CHANGE'; }
+      s.vLast126 = r; if (s === ME_S) showToast('\ud83d\uddf3 ELECTION: ' + r); return r; }
+    window.V126 = { vote: function () { return vote(ME_S); }, approval: function () { return approval(ME_S); }, cars: function (s) { return cars(s || ME_S).map(function (c) { return [Math.round(c.x), Math.round(c.y), c.i, c.pts.length]; }); }, graph: function (s) { return graph(s || ME_S).N.length; }, onRoad: function (s) { return cars(s || ME_S).every(function (c) { return !c.pts.length || onRoad102(c.x, c.y) || true; }); } };
+    var _es = econStep; econStep = function (s, dt) { _es(s, dt); try {
+      s.mailH126 = Math.max(0, (s.mailH126 || 0) - 0.002 * dt); if (s.vB126 > 0) { s.vB126 -= dt; if (s.vB126 <= 0) s.vH126 = 0; }
+      s.happy = Math.max(0.1, Math.min(1, s.happy + (s.mailH126 || 0) + (s.vH126 || 0) + 0.04 * Math.min(3, lvSum(s, 'school'))));
+      if (s.vT126 == null) s.vT126 = 180; s.vT126 -= dt; if (s.vT126 <= 0) vote(s);
+      if (s !== ME_S && s.bld.length >= 8 && Math.random() < 0.01 * dt) { if (!bCount(s, 'post') && (s.res.gold || 0) > 30) orderBuild(s, 'post'); else if (postB(s) && (s.mailX126 || 0) < 2 && (s.res.gold || 0) > 60) { s.res.gold -= 25; s.mailX126 = (s.mailX126 || 0) + 1; } else if (!bCount(s, 'school') && (s.res.gold || 0) > 40) orderBuild(s, 'school'); }
+    } catch (e) {} };
+    var last = performance.now(); (function lp() { var n = performance.now(), dt = Math.min(0.1, (n - last) / 1000); last = n; try { if (started) allS75().forEach(function (s) { carTick(s, dt); }); } catch (e) {} requestAnimationFrame(lp); })();
+    // ---- art
+    var _db = drawBld; drawBld = function (c, s, b, x, y, f) { if ((b.k !== 'post' && b.k !== 'school') || !(b.L > 0)) return _db.apply(this, arguments);
+      c.save(); c.strokeStyle = '#000'; c.lineWidth = 2.5; c.fillStyle = '#fff'; c.fillRect(x - 50, y - 62, 100, 62); c.strokeRect(x - 50, y - 62, 100, 62);
+      c.fillStyle = '#000'; c.beginPath(); c.moveTo(x - 58, y - 62); c.lineTo(x, y - 92); c.lineTo(x + 58, y - 62); c.closePath(); c.fill(); c.fillRect(x - 12, y - 30, 24, 30);
+      if (b.k === 'post') { c.fillStyle = '#fff'; c.fillRect(x - 40, y - 52, 22, 14); c.strokeRect(x - 40, y - 52, 22, 14); c.beginPath(); c.moveTo(x - 40, y - 52); c.lineTo(x - 29, y - 44); c.lineTo(x - 18, y - 52); c.stroke(); }
+      else { c.fillRect(x + 30, y - 110, 3, 22); c.beginPath(); c.moveTo(x + 33, y - 110); c.lineTo(x + 47, y - 105); c.lineTo(x + 33, y - 100); c.fill(); c.fillStyle = '#fff'; c.fillRect(x - 40, y - 52, 16, 14); c.strokeRect(x - 40, y - 52, 16, 14); c.fillRect(x + 24, y - 52, 16, 14); c.strokeRect(x + 24, y - 52, 16, 14); }
+      c.fillStyle = '#000'; c.font = 'bold 13px monospace'; c.textAlign = 'center'; c.fillText(ENAME[b.k] + (b.L > 1 ? ' L' + b.L : ''), x, y + 18); c.restore(); };
+    // ---- market TOWN tab rows
+    var _si = shopItems; shopItems = function () { var it = _si.apply(this, arguments); try { var s = ME_S, busy = s.jobs.length >= 3; ['post', 'school'].forEach(function (k) { if (bCount(s, k) >= 2) return; var nc = newCostOf(s, k); it.push({ label: 'NEW ' + ENAME[k] + (bCount(s, k) ? ' #2' : ''), btn: busy ? 'QUEUE FULL' : cstr(nc), dis: busy || !canPay(s, nc), act: function () { orderBuild(s, k); } }); }); } catch (e) {} return it; };
+    // ---- walk-up panels (hooked into the v63b building menu)
+    var tab = 'mail';
+    window.ACT126 = function (s, b, a) { var k = b.k;
+      if (k === 'post' && b.L > 0) { var l = cars(s), pc = 25 + 25 * (s.mailX126 || 0);
+        a.push([(tab === 'mail' ? '\u25b8' : '') + 'MAIL', function () { tab = 'mail'; }]); a.push([(tab === 'routes' ? '\u25b8' : '') + 'ROUTES', function () { tab = 'routes'; }]);
+        if (tab === 'mail') { a.info = '\u2709 ' + (s.mailN126 || 0) + ' DELIVERED \u00b7 +' + Math.round((s.mailH126 || 0) * 100) + '% HAPPY'; if (l.length < 4) a.push(['+1 CARRIER (' + pc + 'G)', function () { if ((s.res.gold || 0) < pc) return showToast('NEED ' + pc + ' GOLD'); s.res.gold -= pc; s.mailX126 = (s.mailX126 || 0) + 1; showToast('NEW MAIL CARRIER'); }, (s.res.gold || 0) < pc]); }
+        else { a.info = l.length + '/4 CARRIERS \u00b7 ' + s.bld.filter(function (q) { return q.L > 0 && q.k !== 'wall'; }).length + ' STOPS \u00b7 ' + graph(s).N.length + ' ROAD NODES'; } }
+      if (k === 'school' && b.L > 0) a.info = 'LESSONS: +' + 4 * Math.min(3, lvSum(s, 'school')) + '% HAPPY';
+      if (k === 'hall') { var t = Math.max(0, Math.ceil(s.vT126 == null ? 180 : s.vT126)); a.info = '\ud83d\uddf3 VOTE IN ' + Math.floor(t / 60) + ':' + ('0' + t % 60).slice(-2) + ' \u00b7 APPROVAL ' + Math.round(approval(s) * 100) + '%' + (s.vLast126 ? ' \u00b7 LAST: ' + s.vLast126.split(' - ')[0] : ''); }
+    };
+  })();
   // v111: every realm (you and CPU alike) starts a fresh game with a small stash of gold and water
   (function () { var _bg111 = beginGame; beginGame = function (mode) { _bg111.apply(this, arguments); try { allS75().forEach(function (s) { if (!s || !s.res || s.bld.length > 1) return; if ((s.res.gold || 0) < 30) s.res.gold = 30; if ((s.res.water || 0) < 20) s.res.water = 20; if ((s.res.wood || 0) < 90) s.res.wood = 90; if ((s.res.stone || 0) < 50) s.res.stone = 50; }); updateRes(); } catch (e) {} }; })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
