@@ -2630,7 +2630,7 @@
   EB.granary = { c: { wood: 25, stone: 10 }, w: 45 }; ENAME.granary = 'GRANARY';
   EB.bank = { c: { wood: 30, stone: 40, gold: 10 }, w: 70 }; ENAME.bank = 'BANK';
   JOBART.tax = 'villager';
-  var SEAS = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'], SFARM = [0.7, 1.2, 1.5, 0.15], SFOR = [0.9, 1.1, 1.1, 0.4];
+  var SEAS = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'], SFARM = [1, 1, 1, 1], SFOR = [1, 1, 1, 1] /* v117: seasons cut */;
   var WX = { k: 'NORMAL', m: 1 }, WXT = [['GOOD HARVEST', 1.25, 0.2], ['NORMAL', 1, 0.55], ['BAD HARVEST', 0.75, 0.17], ['DROUGHT', 0.5, 0.08]];
   var TAX_KEY = 'kingdom-tax-v1', myTax = 0.10; try { var _t = parseFloat(localStorage.getItem(TAX_KEY)); if (_t >= 0 && _t <= 0.6) myTax = _t; } catch (e) {}
   function seasonIx() { return Math.min(3, Math.floor((yearT / YEAR_SEC) * 4)); }
@@ -2667,8 +2667,7 @@
     s.skA = {}; for (var j in sum) s.skA[j] = sum[j] / cnt[j];
     if (s.jobs[0] && s.jobs[0].j && nb) s.jobs[0].j.done += nb * dt * 0.6 * skAvg(s, 'build') * 0.5;
     // food spoils; storage over the granary cap rots fast; winter cold slows rot
-    var cap = granCap(s), rot = (si === 3 ? 0.0004 : si === 1 ? 0.0015 : 0.001) * R.food * dt;
-    if (R.food > cap) rot += (R.food - cap) * 0.04 * dt; R.food = Math.max(0, R.food - rot); s.spoil = rot / dt;
+    var cap = granCap(s), rot = 0; /* v117: spoilage cut */ R.food = Math.max(0, R.food - rot); s.spoil = rot / dt;
     // taxes: workers earn ~0.05 gold/s privately; collectors bring the state its share
     var ad = adults(s).filter(function (p) { return !p.sick; }), tax = taxOf(s);
     var nCol = s.ppl.length >= 4 && tax > 0 ? Math.max(1, Math.ceil(ad.length / 12)) : 0;
@@ -3947,7 +3946,7 @@
     s.bld.forEach(function (b) { if (b.L > 0 && UPK[b.k]) gU += UPK[b.k] * b.L; });
     units.forEach(function (u) { if (u.f === s.f && u.hp > 0 && MUP[u.t]) { oU += MUP[u.t]; gU += MUP[u.t] * 1.5; } });
     var g = gU * dt; if (R.gold >= g) R.gold -= g; else { R.gold = 0; var need = g * 2; if (R.stone >= need) R.stone -= need; else s.bld.forEach(function (b) { if (b.L > 0 && UPK[b.k]) { if (b.hp == null) b.hp = bMax(b); b.hp = Math.max(1, b.hp - bMax(b) * 0.01 * dt); } }); }
-    var o = oU * dt; s.noOil = R.oil < o && oU > 0; R.oil = Math.max(0, R.oil - o); st.upG = gU; st.upO = oU;
+    oU = 0; var o = oU * dt; s.noOil = R.oil < o && oU > 0; R.oil = Math.max(0, R.oil - o); st.upG = gU; st.upO = oU;
   }
   var _us36 = uStat; uStat = function (u, k) { var v = _us36(u, k); if (MUP[u.t] && (k === 'spd' || k === 'dmg')) { var s = setOfF(u.f); if (s && s.noOil) v *= k === 'spd' ? 0.35 : 0.5; } return v; };
   // generals are paid while they serve
@@ -3990,7 +3989,7 @@
     var items = _si36(), s = ME_S; if (!s) return items; wres(s); var R = s.res, add = [];
     WRES.forEach(function (r) { var p = price(r); if (R[r] >= 1) add.push({ label: 'SELL ' + Math.min(10, Math.floor(R[r])) + ' ' + r.toUpperCase() + ' @' + p.toFixed(2) + ' (HAVE ' + fmt(R[r]) + ')', btn: '+' + (Math.min(10, Math.floor(R[r])) * p).toFixed(1) + 'G', dis: false, act: function () { trade(s, r, Math.min(10, Math.floor(R[r])), true); updateRes(); } });
       if (r === 'oil' || r === 'fish') add.push({ label: 'BUY 10 ' + r.toUpperCase() + ' @' + p.toFixed(2), btn: (10 * p).toFixed(1) + 'G', dis: R.gold < 10 * p * 1.4, act: function () { trade(s, r, 10, false); updateRes(); } }); });
-    Object.keys(WK).forEach(function (k) { var K = WK[k], lo = lowest(s, k), busy = s.jobs.length >= 3, ok = wUnlocked(s, k);
+    [].forEach(function (k) { var K = WK[k], lo = lowest(s, k), busy = s.jobs.length >= 3, ok = wUnlocked(s, k);
       if (lo) { var c = upCostOf(lo); add.push({ label: 'UPGRADE ' + K.n + ' L' + lo.L + '>' + (lo.L + 1), btn: lo.j ? 'BUILDING' : busy ? 'QUEUE FULL' : cstr(c), dis: !!lo.j || busy || !canPay(s, c) || lo.L >= 5, act: function () { orderUpgrade(s, lo); } }); }
       var nc = newCostOf(s, k), z = K.z === 2 ? 'DEEP SEA' : 'SHALLOWS';
       add.push({ label: 'NEW ' + K.n + ' (' + z + ', ' + K.r.toUpperCase() + ')' + (ok ? '' : ' NEEDS ' + (AGES.on && K.era ? ERA_N[K.era] + ' AGE' : 'HALL L' + K.hl)), btn: !ok ? 'LOCKED' : busy ? 'QUEUE FULL' : cstr(nc), dis: !ok || busy || !canPay(s, nc), act: function () { if (!orderBuild(s, k)) showToast('NO ' + z + ' WITHIN REACH OF YOUR TOWN'); } }); });
@@ -4104,7 +4103,7 @@
   }
   function capPropsOf(fid) { return CAP.props.filter(function (p) { return p.owner === fid; }); }
   function canLoan37(s, p) { return p && p.sz && !p.owner && !CAP.props.some(function (q) { return q.owner === s.f && q.loan > 0; }) && s.res.gold >= Math.max(8, p.value * 0.2); }
-  function capBuy(s, p) { if (!p || p.fixed || p.owner) return false; var ln = 0; if (s.res.gold < p.value) { if (!canLoan37(s, p)) return false; ln = p.value - Math.max(8, p.value * 0.2); } s.res.gold -= p.value - ln; CAP.tres += p.value - ln; p.owner = s.f; p.paid = p.value; p.loan = ln; CAP.log.unshift((s.f === 'me' ? 'YOU' : facOf(s).name) + ' BOUGHT ' + pName37(p) + ' #' + p.id); return true; }
+  function capBuy(s, p) { if (!p || p.fixed || p.owner) return false; var ln = 0; if (s.res.gold < p.value) { return false; /* v117: mortgages cut */ ln = p.value - Math.max(8, p.value * 0.2); } s.res.gold -= p.value - ln; CAP.tres += p.value - ln; p.owner = s.f; p.paid = p.value; p.loan = ln; CAP.log.unshift((s.f === 'me' ? 'YOU' : facOf(s).name) + ' BOUGHT ' + pName37(p) + ' #' + p.id); return true; }
   function capSell(s, p) { if (!p || p.owner !== s.f) return false; var g = p.value * 0.9 - (p.loan || 0); p.loan = 0; s.res.gold += g; CAP.tres -= g; p.owner = null; CAP.log.unshift((s.f === 'me' ? 'YOU' : facOf(s).name) + ' SOLD ' + pName37(p) + ' #' + p.id); return true; }
   function capCPU(s) { if (s.f === 'me' || !CAPX) return; var R = s.res, mine = capPropsOf(s.f);
     mine = mine.filter(function (q) { return !(q.loan > 0) || true; }); var sellable = mine.filter(function (q) { return !(q.loan > 0); });
@@ -4316,7 +4315,7 @@
       // take over this vote: tally with the extra motions
       C.vote.t = 1e9; _tt46(dt); C.vote.t = 0; vote46(); return; }
     if (C.fest46 > 0) { C.fest46 -= dt; var save = C.ptax; C.ptax = 0; _tt46(dt); if (C.ptax === 0) C.ptax = save; return; } _tt46(dt); };
-  function vote46() { var C = CAP, V = C.vote; V.t = 240; var tally = { works: 0, district: 0, down: 0, up: 0, dividend: 0, bounty: 0, festival: 0 }, voters = {};
+  function vote46() { var C = CAP, V = C.vote; if (V) V.t = 1e9; return; /* v117: council votes cut */ V.t = 240; var tally = { works: 0, district: 0, down: 0, up: 0, dividend: 0, bounty: 0, festival: 0 }, voters = {};
     C.props.forEach(function (p) { if (p.owner && !p.fixed) voters[p.owner] = (voters[p.owner] || 0) + 1; });
     var L = C.props.filter(function (p) { return PK[p.k]; }), freeF = L.filter(function (p) { return !p.owner; }).length / L.length, cost = 1200 + 400 * (C.pw || 0);
     Object.keys(voters).forEach(function (f) { var s = setOfF(f), c, h = hash2(voters[f] + C.ptax * 3, f.length + (C.pw || 0) + Math.floor(performance.now() / 1e5)); if (!s) return;
@@ -5031,6 +5030,8 @@
   (function () { var _es114 = econStep; econStep = function (s, dt) { _es114(s, dt); try { if (!s || !s.jobs || !s.jobs[0] || !s.jobs[0].j || !(dt > 0)) return; var fin = s.bld.filter(function (b) { return b.L > 0; }).length; if (fin < 8) s.jobs[0].j.done += 3 * dt; } catch (e) {} }; })();
   // v115: cut nukes, missiles, silos, missile defense and aircraft carriers (simpler game)
   (function () { try { delete AU.w; } catch (e) {} var _ob115 = orderBuild; orderBuild = function (s, k) { if (k === 'silo' || k === 'mdef') return false; return _ob115.apply(this, arguments); }; launch = function () { return false; }; var _cu115 = canUnit; canUnit = function (s, t) { return t !== 'w' && _cu115(s, t); }; })();
+  // v117: cut sea goods (crab, salt, fish, pearls, oil) - nobody builds them; hidden from the HUD
+  (function () { var SEA117 = { crabtrap: 1, saltpan: 1, fishery: 1, pearlbed: 1, oilrig: 1 }; var _ob117 = orderBuild; orderBuild = function (s, k) { if (SEA117[k]) return false; return _ob117.apply(this, arguments); }; })();
   // v111: every realm (you and CPU alike) starts a fresh game with a small stash of gold and water
   (function () { var _bg111 = beginGame; beginGame = function (mode) { _bg111.apply(this, arguments); try { allS75().forEach(function (s) { if (!s || !s.res || s.bld.length > 1) return; if ((s.res.gold || 0) < 30) s.res.gold = 30; if ((s.res.water || 0) < 20) s.res.water = 20; if ((s.res.wood || 0) < 90) s.res.wood = 90; if ((s.res.stone || 0) < 50) s.res.stone = 50; }); updateRes(); } catch (e) {} }; })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
@@ -5204,7 +5205,7 @@
     if (NEWS38.t > 0) NEWS38.t -= dt;
   }
   function drawNews38() {
-    if (NEWS38.t <= 0 || !NEWS38.msg || document.body.classList.contains('min63')) return; /* v81: minimal mode never flashes the news bar; v97: this comment used to swallow the line below */ var dpr = window.devicePixelRatio || 1, W = cv.width / dpr, H = cv.height / dpr, c = ctx;
+    if (true || NEWS38.t <= 0 || !NEWS38.msg || document.body.classList.contains('min63')) return; /* v81: minimal mode never flashes the news bar; v97: this comment used to swallow the line below */ var dpr = window.devicePixelRatio || 1, W = cv.width / dpr, H = cv.height / dpr, c = ctx;
     c.save(); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.globalAlpha = Math.min(1, NEWS38.t); c.font = 'bold ' + (W < 480 ? 10 : 12) + 'px monospace';
     var txt = '\u2605 CAPITAL NEWS: ' + NEWS38.msg, w = Math.min(W - 20, c.measureText(txt).width + 20), x = (W - w) / 2, y = W < 480 ? 150 : 118;
     if (H < 500) { var hr81 = document.getElementById('topHud').getBoundingClientRect(), mb81 = document.getElementById('menuBtn').getBoundingClientRect(); txt = '\u2605 ' + NEWS38.msg; x = hr81.right + 8; w = Math.min(Math.max(120, mb81.left - 8 - x), c.measureText(txt).width + 20); y = hr81.top + 4; } // v81: on phones news sits beside the top bar, off the hero
