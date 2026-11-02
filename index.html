@@ -3342,7 +3342,7 @@
   // ---- mode setup: AGES = 50 NATIONS rules + the era layer
   var _sm33 = setupMode;
   setupMode = function (mode) { AGES.on = mode === 'ages'; AGES.strikes = []; AGES.booms = []; AGES.used = {}; AGES.cd = {}; SBF = {}; _sm33(AGES.on ? 'nations' : mode); var el = document.getElementById('eraHud'); if (el) el.style.display = AGES.on ? 'block' : 'none'; };
-  (function () { var g = document.getElementById('mgrid'); if (!g || document.querySelector('.mode[data-mode=ages]')) return; var b = document.createElement('button'); b.className = 'mode'; b.dataset.mode = 'ages'; b.innerHTML = '<b>AGES</b><small>50 nations race from horses and swords to cannons, rail, tanks, fighter jets and nukes. Every building level unlocks something new.</small>'; b.addEventListener('click', function () { document.getElementById('modes').style.display = 'none'; beginGame('ages'); }); g.appendChild(b); })();
+  (function () { var g = document.getElementById('mgrid'); if (!g || document.querySelector('.mode[data-mode=ages]')) return; var b = document.createElement('button'); b.className = 'mode'; b.dataset.mode = 'ages'; b.innerHTML = '<b>AGES</b><small>50 nations race from horses and swords to cannons, rail, tanks, and fighter jets. Every building level unlocks something new.</small>'; b.addEventListener('click', function () { document.getElementById('modes').style.display = 'none'; beginGame('ages'); }); g.appendChild(b); })();
   // ---- shop: in AGES every row shows what the next level unlocks; max levels; era buildings; train new units; strikes
   var _si33 = shopItems;
   shopItems = function () {
@@ -5270,6 +5270,15 @@
   addEventListener('popstate', function () { closeTop(); });
   window.__p114 = big;
 })();
+</script>
+<script>
+(function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
+var d=q('duel'),f=q('free');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
+f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
+var big=['islands','nations','ages'].map(q);big.forEach(function(b){b.style.display='none'});
+var t=document.createElement('button');t.className='mode';t.id='bigMapBtn';t.innerHTML='<b>BIG MAP ▸</b><small>Optional: Islands, 50 Nations or Ages.</small>';
+t.onclick=function(){var o=big[0].style.display==='none';big.forEach(function(b){b.style.display=o?'':'none'});t.querySelector('b').textContent=o?'BIG MAP ▾':'BIG MAP ▸'};g.insertBefore(t,f.nextSibling);t.after(big[0]);big[0].after(big[1]);big[1].after(big[2]);}
+go();})();
 </script>
 </body>
 </html>
