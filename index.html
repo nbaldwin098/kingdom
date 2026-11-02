@@ -1366,6 +1366,7 @@ window.B137 = (function () {
   // ================= WORLD FORMULA + MODES + FACTIONS (v10) =================
   // Nothing about the land is stored: every tuft, island and faction city comes from hash2/noise of its coordinates.
   var MODE = 'free', BOUNDS = null, FREE_SEED = 20261101;
+  function OUTB(x, y) { /* v151: FREE has no world edge */ if (MODE === 'free') return false; return x < BOUNDS.x0 || x > BOUNDS.x1 || y < BOUNDS.y0 || y > BOUNDS.y1; }
   var MODE_NAMES = { free: 'FREE WORLD', islands: 'ISLANDS', nations: '50 NATIONS', duel: '1V1 VS CPU' };
   function vnoise(x, y, salt) {
     var ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy;
@@ -1392,7 +1393,7 @@ window.B137 = (function () {
     landCache.set(k, v); return v;
   }
   function blockedWorld(x, y) {
-    if (BOUNDS && (x < BOUNDS.x0 || x > BOUNDS.x1 || y < BOUNDS.y0 || y > BOUNDS.y1)) return true;
+    if (BOUNDS && (OUTB(x, y))) return true;
     return !!BOUNDS && !isLand(x, y);
   }
   var SYL = ['ar', 'bel', 'cor', 'dun', 'el', 'fen', 'gar', 'hol', 'is', 'jor', 'kel', 'lun', 'mor', 'nor', 'ost', 'pel', 'quen', 'ros', 'sil', 'tor', 'ul', 'val', 'wyn', 'yr', 'zan', 'ash', 'brin', 'cal', 'dra', 'eth'];
@@ -1514,7 +1515,7 @@ window.B137 = (function () {
   var CASTLE_X = 0, CASTLE_Y = -5332, gateTarget = 0, gateOpen = 0; // castle at 25x: 15000 by 10000, south wall outer edge still at y -7 so spawn stays put
   // v16 BOATS: in ISLANDS troops embark automatically when they reach water and sail at 60% speed
   function unitHit(x, y) {
-    if (BOUNDS && (x < BOUNDS.x0 || x > BOUNDS.x1 || y < BOUNDS.y0 || y > BOUNDS.y1)) return true;
+    if (BOUNDS && (OUTB(x, y))) return true;
     if (BOUNDS && !isLand(x, y)) return false;
     return wallHit(x, y);
   }
@@ -1531,7 +1532,7 @@ window.B137 = (function () {
     c.restore();
   }
   function wallHit(x, y, sw) {
-    if (sw ? (BOUNDS && (x < BOUNDS.x0 || x > BOUNDS.x1 || y < BOUNDS.y0 || y > BOUNDS.y1)) : blockedWorld(x, y)) return true;
+    if (sw ? (BOUNDS && (OUTB(x, y))) : blockedWorld(x, y)) return true;
     function inR(x1, y1, x2, y2) {
       return x >= x1 - 10 && x <= x2 + 10 && y >= y1 - 10 && y <= y2 + 10;
     }
@@ -4279,7 +4280,8 @@ window.B137 = (function () {
   // Same rules for the player and every CPU nation. All modes: land ~80%, a shallow band hugs every coast, deep ocean beyond.
   var ISL = { key: '' }, ZC = new Map(), CAPX = null, WSPOT = new Map();
   function v36home(x, y) { return homeDist(x, y) < 700; }
-  function islM(x, y) { var dx = (x - ISL.cx) / (ISL.W * ISL.k), dy = (y - ISL.cy) / (ISL.H * ISL.k); return Math.pow(Math.pow(Math.abs(dx), 3) + Math.pow(Math.abs(dy), 3), 1 / 3) + (fbm(x / 4200, y / 4200, ISL.salt) - 0.5) * 0.34; }
+  function FOLD151(v) { /* v151: endless frontier - mirror the land past 85% of the old continent so it never ends; inside, unchanged */ var F = 0.85, t = (v + F) % (4 * F); if (t < 0) t += 4 * F; return t < 2 * F ? t - F : 3 * F - t; }
+  function islM(x, y) { var dx = (x - ISL.cx) / (ISL.W * ISL.k), dy = (y - ISL.cy) / (ISL.H * ISL.k); if (MODE === 'free') { dx = FOLD151(dx); dy = FOLD151(dy); } return Math.pow(Math.pow(Math.abs(dx), 3) + Math.pow(Math.abs(dy), 3), 1 / 3) + (fbm(x / 4200, y / 4200, ISL.salt) - 0.5) * 0.34; }
   function islCal() {
     if (!BOUNDS) return; var B = BOUNDS, key = MODE + ':' + seed + ':' + B.x0 + ',' + B.y1; if (ISL.key === key) return;
     ISL.key = key; ISL.cx = (B.x0 + B.x1) / 2; ISL.cy = (B.y0 + B.y1) / 2; ISL.W = (B.x1 - B.x0) / 2; ISL.H = (B.y1 - B.y0) / 2; ISL.salt = 500 + seed % 997; ZC.clear(); WSPOT.clear(); CAPX = null;
@@ -4289,7 +4291,7 @@ window.B137 = (function () {
   // zone: 0 land, 1 shallow (coastal band), 2 deep ocean
   function zone(x, y) {
     if (!BOUNDS) return 0; islCal();
-    if (x < BOUNDS.x0 || x > BOUNDS.x1 || y < BOUNDS.y0 || y > BOUNDS.y1) return 2;
+    if (OUTB(x, y)) return 2;
     var kx = Math.floor(x / 64), ky = Math.floor(y / 64), k = kx * 100003 + ky, v = ZC.get(k); if (v !== undefined) return v;
     var wx = kx * 64 + 32, wy = ky * 64 + 32;
     if (MODE === 'islands') { if (_il36(wx, wy)) v = 0; else { v = 2; for (var a = 0; a < 8; a++) if (_il36(wx + Math.cos(a * 0.785) * 750, wy + Math.sin(a * 0.785) * 750)) { v = 1; break; } } }
@@ -5579,7 +5581,7 @@ window.B137 = (function () {
       c.restore(); }
     var _dg = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dg.apply(this, arguments); try { allS75().forEach(function (s) { var l = CAR.get(s); if (!l || !l.length) return; var e = eraOf(s); l.forEach(function (c) { if (!c.pts.length || c.x < x0 - 40 || c.x > x1 + 40 || c.y < y0 - 40 || c.y > y1 + 40) return; vanArt(ctx, c.x - camX, c.y - camY + 6, c.f || 1, e); }); }); } catch (e) {} };
     // ---- elections every 3 game minutes (every realm votes; you get the toast)
-    function approval(s) { var po = PR75.police(s).length > 0 || has(s, 'prison'); var mail = postB(s) ? Math.min(1, cars(s).length / Math.max(1, s.bld.length / 12)) : 0; return Math.max(0, Math.min(1, 0.45 * happyOf(s) + 0.2 * (1 - Math.min(1, s.hunger || 0)) + 0.15 * (po ? 1 : 0) + 0.12 * mail + 0.08 * (has(s, 'school') ? 1 : 0))); }
+    function approval(s) { var po = PR75.police(s).length > 0 || has(s, 'prison'); var mail = postB(s) ? Math.min(1, cars(s).length / Math.max(1, s.bld.length / 12)) : 0; return (function(v){return isFinite(v)?v:0.5})(Math.max(0, Math.min(1, 0.45 * happyOf(s) + 0.2 * (1 - Math.min(1, s.hunger || 0)) + 0.15 * (po ? 1 : 0) + 0.12 * mail + 0.08 * (has(s, 'school') ? 1 : 0)))); }
     function vote(s) { var a = approval(s), pct = Math.round(a * 100), r; s.vT126 = 180;
       if (a >= 0.55) { s.res.gold = (s.res.gold || 0) + 20; s.vH126 = 0.1; s.vB126 = 60; r = 'WON ' + pct + '% - +20 GOLD, PEOPLE CHEER'; }
       else if (a < 0.35) { s.res.gold = Math.max(0, (s.res.gold || 0) - 15); s.vH126 = -0.15; s.vB126 = 60; r = 'LOST BADLY ' + pct + '% - -15 GOLD, UNREST'; }
@@ -5780,7 +5782,7 @@ window.B137 = (function () {
     // ===== v37: smooth coastline (marching squares on the island field) =====
   function field37(x, y) { // 0 land ... 1 coast ... deep beyond (continuous outside islands mode)
     if (MODE === 'islands') return zone(x, y);
-    if (x < BOUNDS.x0 || x > BOUNDS.x1 || y < BOUNDS.y0 || y > BOUNDS.y1) return 9;
+    if (OUTB(x, y)) return 9;
     return v36home(x, y) ? Math.min(0.9, islM(x, y)) : islM(x, y);
   }
   function msFill37(F, t, col, x0, x1, y0, y1, camX, camY, C) {
@@ -6085,7 +6087,7 @@ window.B137 = (function () {
           if (r.x0 < hb.x1 && r.x1 > hb.x0 && r.y0 < hb.y1 && r.y1 > hb.y0) return true;
           try { var R = allS75(); for (var q = 0; q < R.length; q++) { var hs = R[q].hallObj || R[q]; if (hs && hs.x != null && r.x0 < hs.x + 1100 && r.x1 > hs.x - 1100 && r.y0 < hs.y + 1100 && r.y1 > hs.y - 1100) return true; } } catch (e) {}
           for (var j = 0; j < L.length; j++) { var o = L[j]; if (o === t) continue; for (var k = 0; k < o.b.length; k++) { var f = o.b[k].fp; if (r.x0 < f.x1 && r.x1 > f.x0 && r.y0 < f.y1 && r.y1 > f.y0) return true; } } } return false; }
-      var S = !hits(A) ? A : !hits(B) ? B : null; if (!S) { if (t.d.proc) return false; S = A; } S.forEach(function (g) { G.push(g); });
+      var S = !hits(A) ? A : !hits(B) ? B : null; if (!S) { /* v151: try Z-shaped detours, then build the road anyway so every town is linked */ for (var zf = 0.2; zf <= 0.81 && !S; zf += 0.15) { var mx = n.x + (ex - n.x) * zf, Z = []; Z.push([Math.min(n.x, mx), n.y, Math.max(n.x, mx), n.y]); if (Math.abs(n.y - t.y) > 1) Z.push([mx, Math.min(n.y, t.y), mx, Math.max(n.y, t.y)]); Z.push([Math.min(mx, ex), t.y, Math.max(mx, ex), t.y]); if (!hits(Z)) S = Z; } if (!S) S = A; } S.forEach(function (g) { G.push(g); });
       t.link = { nx: n.x, ny: n.y, ex: ex, alt: S === B }; NODES.push({ x: ex, y: t.y, t: t }); return true; }
     // v136: add a town later (procedural chunks); returns it or null
     function addTown(d, ox, oy) { var T = build(); if (!T.length) return null; var c = layout(d, ox, oy); if (!okTown(c)) return null;
@@ -6466,7 +6468,7 @@ window.B137 = (function () {
     // ---- wilderness features per 8k cell (pure function of the cell + current road network)
     function feat(i, j) { var k = i + ',' + j, f = FT.get(k); if (f !== undefined) return f; f = null;
       var h = homeP(), cx = (i + 0.5) * CELL + (H(i, j, 2) - 0.5) * CELL * 0.6, cy = (j + 0.5) * CELL + (H(i, j, 3) - 0.5) * CELL * 0.6, r = H(i, j, 1);
-      if (Math.hypot(cx - h.x, cy - h.y) > 9000 && !(BOUNDS && (cx < BOUNDS.x0 + 9000 || cx > BOUNDS.x1 - 9000 || cy < BOUNDS.y0 + 9000 || cy > BOUNDS.y1 - 9000))) {
+      if (Math.hypot(cx - h.x, cy - h.y) > 9000 && !(BOUNDS && MODE !== 'free' && (cx < BOUNDS.x0 + 9000 || cx > BOUNDS.x1 - 9000 || cy < BOUNDS.y0 + 9000 || cy > BOUNDS.y1 - 9000))) {
         if (r < 0.11) f = { k: 'lake', x: cx, y: cy, rx: 420 + H(i, j, 4) * 380 }; else if (r < 0.19) f = { k: 'camp', x: cx, y: cy }; else if (r < 0.27) f = { k: 'ranch', x: cx, y: cy }; else if (r < 0.42) f = { k: 'cattle', x: cx, y: cy };
         if (f) { f.ry = f.rx ? f.rx * 0.62 : 0; var pad = f.k === 'lake' ? f.rx + 400 : 900, L = T(); if (!L.length && !busy) f = null; else if (nearTown(f.x, f.y, pad + 1200, L) || TOWN133.nearRoad(f.x, f.y, pad)) f = null; } }
       FT.set(k, f); return f; }
@@ -6487,7 +6489,7 @@ window.B137 = (function () {
     function grow() { if (!free()) return; var L = T(); if (!L.length) return; var h = homeP(), I0 = Math.floor(px / TC), J0 = Math.floor(py / TC), added = 0;
       for (var I = I0 - 2; I <= I0 + 2; I++) for (var J = J0 - 2; J <= J0 + 2; J++) { var k = I + ',' + J; if (TRIED[k]) continue; var cx = (I + 0.5) * TC, cy = (J + 0.5) * TC; if (Math.hypot(cx - px, cy - py) > 45000) continue; TRIED[k] = 1;
         if (Math.hypot(cx - h.x, cy - h.y) < 52000 || H(I, J, 8) < 0.15) continue;
-        var n = H(I, J, 14) < 0.3 ? 2 : 1; for (var q = 0; q < n; q++) { var ox = cx + (H(I, J, 15 + q) - 0.5) * TC * 0.6 + q * 9000, oy = cy + (H(I, J, 16 + q) - 0.5) * TC * 0.6 + q * 2500; if (BOUNDS && (ox < BOUNDS.x0 + 6000 || ox > BOUNDS.x1 - 6000 || oy < BOUNDS.y0 + 6000 || oy > BOUNDS.y1 - 6000)) continue;
+        var n = H(I, J, 14) < 0.3 ? 2 : 1; for (var q = 0; q < n; q++) { var ox = cx + (H(I, J, 15 + q) - 0.5) * TC * 0.6 + q * 9000, oy = cy + (H(I, J, 16 + q) - 0.5) * TC * 0.6 + q * 2500; if (BOUNDS && MODE !== 'free' && (ox < BOUNDS.x0 + 6000 || ox > BOUNDS.x1 - 6000 || oy < BOUNDS.y0 + 6000 || oy > BOUNDS.y1 - 6000)) continue;
           if (Math.hypot(ox - h.x, oy - h.y) < 50000) continue; busy = true; var t = null; try { t = TOWN133.add(townDef(I, J, q), ox, oy); } catch (e) { console.warn(e); } busy = false; if (t) { added++; saloonFor(t); } } }
       if (added) { resetWater(); RAIL.key = ''; } }
     // crossroads saloon at the bend of a long road
@@ -6500,7 +6502,7 @@ window.B137 = (function () {
     // ---- rail: home halt + every depot town, each linked to the nearest station already on the line
     function rail() { var L = T(); if (!L.length) return RAIL; var key = L.length + ':' + city.x; if (RAIL.key === key) return RAIL; RAIL.key = key;
       var J = L.J, st = [{ x: J.x + 380, y: J.y + 70, name: 'HOMESTEAD HALT', home: 1 }];
-      L.filter(function (t) { return t.d.main.indexOf('depot') >= 0; }).sort(function (a, b) { return Math.hypot(a.x - J.x, a.y - J.y) - Math.hypot(b.x - J.x, b.y - J.y); }).forEach(function (t) { var d = t.b.filter(function (b) { return b.k === 'depot'; })[0]; st.push({ x: t.rail ? t.rail[2] : d.x + 300, y: (t.rail ? t.rail[1] : d.y) , dx: d.x, dy: d.y + 40, name: t.name, t: t }); });
+      L.filter(function (t) { return !t.d.mini; }).sort(function (a, b) { return Math.hypot(a.x - J.x, a.y - J.y) - Math.hypot(b.x - J.x, b.y - J.y); }).forEach(function (t) { var d = t.b.filter(function (b) { return b.k === 'depot'; })[0] || { x: t.box.x1 + 120, y: t.box.y0 + 200, halt: 1 }; st.push({ halt: d.halt, x: t.rail ? t.rail[2] : d.x + 300, y: (t.rail ? t.rail[1] : d.y) , dx: d.x, dy: d.y + 40, name: t.name, t: t }); });
       var seg = []; for (var i = 1; i < st.length; i++) { var bi = 0, bd = 1e18; for (var j = 0; j < i; j++) { var d2 = Math.hypot(st[i].x - st[j].x, st[i].y - st[j].y); if (d2 < bd) { bd = d2; bi = j; } } seg.push([st[bi].x, st[bi].y, st[i].x, st[i].y]); }
       RAIL.st = st; RAIL.seg = seg; return RAIL; }
     // ---- ground art: rails, lakes are drawn by the water art (zone), camps + cattle as items
@@ -6510,7 +6512,7 @@ window.B137 = (function () {
         var t0 = 0, t1 = L; [[ux, G[0], x0 - 60, x1 + 60], [uy, G[1], y0 - 60, y1 + 60]].forEach(function (A) { if (Math.abs(A[0]) < 1e-9) { if (A[1] < A[2] || A[1] > A[3]) { t0 = 1; t1 = 0; } return; } var a = (A[2] - A[1]) / A[0], b = (A[3] - A[1]) / A[0]; t0 = Math.max(t0, Math.min(a, b)); t1 = Math.min(t1, Math.max(a, b)); }); if (t1 <= t0) return;
         c.strokeStyle = '#6b4520'; c.lineWidth = 6; c.beginPath(); for (var t = Math.ceil(t0 / 18) * 18; t < t1; t += 18) { var X = G[0] + ux * t - camX, Y = G[1] + uy * t - camY; c.moveTo(X - nx * 11, Y - ny * 11); c.lineTo(X + nx * 11, Y + ny * 11); } c.stroke();
         c.strokeStyle = '#4a4a4a'; c.lineWidth = 3; [-6, 6].forEach(function (o) { c.beginPath(); c.moveTo(G[0] + ux * t0 + nx * o - camX, G[1] + uy * t0 + ny * o - camY); c.lineTo(G[0] + ux * t1 + nx * o - camX, G[1] + uy * t1 + ny * o - camY); c.stroke(); }); });
-      R.st.forEach(function (S) { if (!S.home || S.x < x0 - 200 || S.x > x1 + 200 || S.y < y0 - 200 || S.y > y1 + 200) return; c.fillStyle = '#8a5a2e'; c.fillRect(S.x - 70 - camX, S.y - 34 - camY, 140, 22); c.fillStyle = '#5a3818'; c.fillRect(S.x - 60 - camX, S.y - 80 - camY, 6, 48); c.fillRect(S.x + 54 - camX, S.y - 80 - camY, 6, 48); c.fillStyle = '#f3e3c3'; c.fillRect(S.x - 64 - camX, S.y - 96 - camY, 128, 18); c.strokeStyle = '#3b2410'; c.lineWidth = 2; c.strokeRect(S.x - 64 - camX, S.y - 96 - camY, 128, 18); c.fillStyle = '#3b2410'; c.font = 'bold 11px Georgia,serif'; c.textAlign = 'center'; c.fillText('HOMESTEAD HALT', S.x - camX, S.y - 83 - camY); c.textAlign = 'left'; });
+      R.st.forEach(function (S) { if (!(S.home || S.halt) || S.x < x0 - 200 || S.x > x1 + 200 || S.y < y0 - 200 || S.y > y1 + 200) return; c.fillStyle = '#8a5a2e'; c.fillRect(S.x - 70 - camX, S.y - 34 - camY, 140, 22); c.fillStyle = '#5a3818'; c.fillRect(S.x - 60 - camX, S.y - 80 - camY, 6, 48); c.fillRect(S.x + 54 - camX, S.y - 80 - camY, 6, 48); c.fillStyle = '#f3e3c3'; c.fillRect(S.x - 64 - camX, S.y - 96 - camY, 128, 18); c.strokeStyle = '#3b2410'; c.lineWidth = 2; c.strokeRect(S.x - 64 - camX, S.y - 96 - camY, 128, 18); c.fillStyle = '#3b2410'; c.font = 'bold ' + (S.home ? 11 : 9) + 'px Georgia,serif'; c.textAlign = 'center'; c.fillText(S.home ? 'HOMESTEAD HALT' : (S.name.length > 14 ? S.name.slice(0, 13) + '.' : S.name) + ' HALT', S.x - camX, S.y - 83 - camY); c.textAlign = 'left'; });
     } catch (e) { if (!window.E136) { window.E136 = 1; console.warn(e); } } };
     function campArt(c, x, y, f) { var T2 = performance.now() / 1000; for (var i = 0; i < 3; i++) { var tx = x - 90 + i * 80, ty = y - 30 + (i % 2) * 40; c.fillStyle = ['#6b5a3a', '#5a4a2a', '#7a6040'][i]; c.beginPath(); c.moveTo(tx - 34, ty); c.lineTo(tx, ty - 46); c.lineTo(tx + 34, ty); c.closePath(); c.fill(); c.fillStyle = '#1a1208'; c.beginPath(); c.moveTo(tx - 8, ty); c.lineTo(tx, ty - 22); c.lineTo(tx + 8, ty); c.fill(); c.strokeStyle = '#3b2410'; c.lineWidth = 2; c.beginPath(); c.moveTo(tx - 4, ty - 52); c.lineTo(tx, ty - 44); c.lineTo(tx + 5, ty - 54); c.stroke(); }
       c.fillStyle = '#555'; for (var s = 0; s < 6; s++) { c.beginPath(); c.arc(x + Math.cos(s) * 16, y + 30 + Math.sin(s) * 8, 4, 0, 7); c.fill(); } var fl = 10 + Math.sin(T2 * 9) * 3; c.fillStyle = '#e8641a'; c.beginPath(); c.moveTo(x - 9, y + 30); c.quadraticCurveTo(x, y + 30 - fl * 2.4, x + 9, y + 30); c.fill(); c.fillStyle = '#ffd040'; c.beginPath(); c.moveTo(x - 4, y + 30); c.quadraticCurveTo(x, y + 30 - fl * 1.2, x + 4, y + 30); c.fill();
@@ -6534,7 +6536,7 @@ window.B137 = (function () {
     var FADE = document.createElement('div'); FADE.style.cssText = 'position:fixed;inset:0;z-index:90;background:#1a1208;color:#f3e3c3;font:bold 20px Georgia,serif;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .35s'; document.body.appendChild(FADE);
     var STN = null, MAPR = 60000;
     function fare(a, b) { return Math.max(2, Math.round(Math.hypot(a.x - b.x, a.y - b.y) / 1500)); }
-    function stPos(S) { return S.home ? { x: S.x, y: S.y + 30 } : { x: S.dx, y: S.dy + 30 }; }
+    function stPos(S) { return (S.home || S.halt) ? { x: S.x, y: S.y + 30 } : { x: S.dx, y: S.dy + 30 }; }
     function ride(S) { var g = ME_S && ME_S.res ? ME_S.res.gold : 0, f = fare(stPos(STN), stPos(S)); if (g < f) { showToast('THE TICKET COSTS ' + f + ' GOLD'); return false; } ME_S.res.gold -= f; RP.style.display = 'none';
       FADE.textContent = '\ud83d\ude82 RIDING THE RAIL TO ' + S.name + '\u2026'; FADE.style.display = 'flex'; requestAnimationFrame(function () { FADE.style.opacity = '1'; });
       setTimeout(function () { var p = stPos(S); px = p.x; py = p.y; try { var V = VEH130(); if (V && V.on) { V.x = px; V.y = py; } } catch (e) {} try { if (typeof steed !== 'undefined' && steed.x != null) { steed.x = px; steed.y = py; } } catch (e) {} window.RIDES136 = (window.RIDES136 || 0) + 1; grow(); FADE.style.opacity = '0'; setTimeout(function () { FADE.style.display = 'none'; }, 400); showToast('WELCOME TO ' + S.name); }, 900); return true; }
@@ -6750,7 +6752,7 @@ window.B137 = (function () {
     // melee also disperses rioters / fights sheriffs
     var _at = attack; attack = function () { var r = _at.apply(this, arguments); try { if (!(window.SG142 && SG142.on)) [L.riot, L.law].forEach(function (list) { list.forEach(function (s) { if (Math.abs(s.x - px) < 110 && Math.abs(s.y - py) < 60) { s.hp -= 1.5; s.hitT = 0.2; } }); }); } catch (e) {} return r; };
     // shop: calm riot, smithy info
-    var _si = shopItems; shopItems = function () { var it = _si.apply(this, arguments); try { if (L.riot.length) it.push({ label: '\ud83d\udd25 RIOT AT THE HALL (' + L.riot.length + ' FOLK) - HAND OUT RELIEF TO CALM THEM', btn: '20 GOLD', dis: gold < 20, act: function () { gold -= 20; L.riot = []; updateRes(); showToast('THE CROWD GOES HOME'); } }); var ap = 0; try { ap = V126.approval(); } catch (e) {} it.push({ label: '\ud83d\uddf3 VOTING POST: APPROVAL ' + Math.round(ap * 100) + '% (RIOTS BELOW 35%) \u00b7 WANTED ' + Math.ceil(L.wanted) + '\u2605 \u00b7 SMITHIES MAKE 1 STEEL FROM 2 STONE / 15s' }); } catch (e) {} return it; };
+    var _si = shopItems; shopItems = function () { var it = _si.apply(this, arguments); try { if (L.riot.length) it.push({ label: '\ud83d\udd25 RIOT AT THE HALL (' + L.riot.length + ' FOLK) - HAND OUT RELIEF TO CALM THEM', btn: '20 GOLD', dis: gold < 20, act: function () { gold -= 20; L.riot = []; updateRes(); showToast('THE CROWD GOES HOME'); } }); var ap = 0; try { ap = V126.approval(); if (!isFinite(ap)) ap = 0.5; } catch (e) {} it.push({ label: '\ud83d\uddf3 VOTING POST: APPROVAL ' + Math.round(ap * 100) + '% (RIOTS BELOW 35%) \u00b7 WANTED ' + Math.ceil(L.wanted) + '\u2605 \u00b7 SMITHIES MAKE 1 STEEL FROM 2 STONE / 15s' }); } catch (e) {} return it; };
     // --- drawing
     function torch(c, x, y) { c.fillStyle = '#6b4a26'; c.fillRect(x - 1.5, y - 30, 3, 30); var fl = 6 + Math.random() * 3; c.fillStyle = '#ff9a2a'; c.beginPath(); c.arc(x, y - 33, fl * 0.7, 0, 7); c.fill(); c.fillStyle = '#fff2a0'; c.beginPath(); c.arc(x, y - 33, fl * 0.35, 0, 7); c.fill(); }
     function fork(c, x, y) { c.strokeStyle = '#6b4a26'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(x, y); c.lineTo(x, y - 36); c.stroke(); c.strokeStyle = '#8a8f96'; c.lineWidth = 1.6; c.beginPath(); for (var i = -1; i <= 1; i++) { c.moveTo(x + i * 4, y - 36); c.lineTo(x + i * 4, y - 46); } c.moveTo(x - 4, y - 36); c.lineTo(x + 4, y - 36); c.stroke(); }
@@ -6893,7 +6895,7 @@ window.B137 = (function () {
     var G = function () { return { x: city.x - 420, y: city.y + 480 }; };
     var posts = new Map();
     function hash(s) { var h = 7; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 9973; return h; }
-    function postOf(t) { fixName(t); var p = posts.get(t.name); if (p) return p; var mx = -1e9, my = 0; (t.b || []).forEach(function (b) { if (b.x > mx) { mx = b.x; my = b.y; } }); p = { x: (mx > -1e9 ? mx : t.x) + 330, y: (mx > -1e9 ? my : t.y) + 40, h: hash(t.name), name: t.name }; posts.set(t.name, p); return p; }
+    function postOf(t) { fixName(t); var p = posts.get(t.name); if (p) return p; var mx = -1e9, my = 0; (t.b || []).forEach(function (b) { if (b.x > mx) { mx = b.x; my = b.y; } }); p = { x: (mx > -1e9 ? mx : t.x) + 330, y: (mx > -1e9 ? my : t.y) + 40, h: hash(t.name), name: t.name }; if (t.rail && p.x > t.rail[0] - 200 && p.x < t.rail[2] + 200 && Math.abs(p.y - t.rail[1]) < 140) p.y = t.rail[1] - 60; /* v151: keep the post off the tracks */ posts.set(t.name, p); return p; }
     function price(p) { var tm = Date.now() / 60000; return Math.max(2, Math.round(5 + (p.h % 5) - 2 + 2.5 * Math.sin(tm / 3 + p.h))); }
     function nearPost() { if (!window.TOWN133) return null; var best = null, bd = 220; TOWN133.towns().forEach(function (t) { var p = postOf(t), d = Math.hypot(p.x - px, p.y - py); if (d < bd) { bd = d; best = p; } }); return best; }
     var gT = 0;
@@ -7016,11 +7018,12 @@ window.B137 = (function () {
     var _si = shopItems; shopItems = function () { var it = _si.apply(this, arguments); try { DEF.forEach(function (d) { var L = U[d[0]], mx = L >= d[3], c = cost(d); it.push({ label: d[1] + ' L' + L + '/' + d[3] + ' \u00b7 ' + d[2], btn: mx ? 'MAX' : c + ' GOLD', dis: mx || gold < c, act: function () { if (U[d[0]] >= d[3] || gold < c) return; gold -= c; U[d[0]]++; save(); apply(); if (d[0] === 'hh') { hp = HPMAX; drawHp(); } updateRes(); showToast(d[1] + ' NOW L' + U[d[0]]); } }); }); } catch (e) {} return it; };
     var lastHp = null, gT = 0;
     var _uw = updateWolves; updateWolves = function (dt) { var h0 = hp; _uw.apply(this, arguments); try { if (!started) { lastHp = null; return; } apply();
-      if (hp < h0 && hp > 0) { var red = 0.12 * U.ha + (mounted() ? 0.10 * U.hb : 0); if (red > 0) { hp = Math.min(h0, hp + (h0 - hp) * Math.min(0.75, red)); drawHp(); } }
+      cut(h0); if (0) { var red = 0.12 * U.ha + (mounted() ? 0.10 * U.hb : 0); if (red > 0) { hp = Math.min(h0, hp + (h0 - hp) * Math.min(0.75, red)); drawHp(); } }
       if (U.hg && hp < HPMAX && hp > 0) { gT += dt; if (gT > 8 / U.hg) { gT = 0; hp = Math.min(HPMAX, hp + 1); drawHp(); } }
       if (U.hs && mounted() && typeof keys !== 'undefined') { /* extra stride: nudge along current motion */ var dx = px - (window.__px150 == null ? px : __px150), dy = py - (window.__py150 == null ? py : __py150); var k = 0.06 * U.hs; if (Math.hypot(dx, dy) > 0.5 && Math.hypot(dx, dy) < 60) { var nx = px + dx * k, ny = py + dy * k; try { if (!wallHit(nx, ny) && isLand(nx, ny)) { px = nx; py = ny; } } catch (e) {} } }
       window.__px150 = px; window.__py150 = py; } catch (e) { if (!window.E150) { window.E150 = 1; console.warn(e); } } };
-    window.UP150 = { U: U, DEF: DEF, cost: cost, save: save, apply: apply };
+    function cut(h0) { if (hp < h0 && hp > 0) { var red = 0.12 * U.ha + (mounted() ? 0.10 * U.hb : 0); if (red > 0) { hp = Math.min(h0, hp + (h0 - hp) * Math.min(0.75, red)); drawHp(); } } }
+    window.UP150 = { cut: function (h0) { cut(h0); }, U: U, DEF: DEF, cost: cost, save: save, apply: apply };
     // ---- art: hero badge + duster tails, horse blanket / barding
     function heroArt(c, sx, sy) { var m = mounted(), hy = sy - (m ? 50 : 32); c.save();
       var tot = U.hh + U.ha + U.hg; if (tot > 0) { c.fillStyle = '#d4a017'; c.strokeStyle = '#6a4a10'; c.lineWidth = 1; c.beginPath(); for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 2.4 : 5.5; c.lineTo(sx - face * 3 + Math.cos(a) * r, hy + Math.sin(a) * r); } c.closePath(); c.fill(); c.stroke(); }
@@ -7079,5 +7082,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v150-upgrades --></body>
+<!-- v151-endless --></body>
 </html>
