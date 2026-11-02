@@ -5219,6 +5219,22 @@
       ctx.restore(); } } catch (e) {} return r; };
   window.__v47 = { DMG: function () { return DMG47; }, HS: function () { return HS47; } };
 
+  // ===== v112: 1V1 foe compass - points to the CPU town hall you must destroy =====
+  function foe112() {
+    if (MODE !== 'duel' || !me || !me.alive) return; var f = factions.filter(function (q) { return q !== me && q.alive && q.hallObj && q.hallObj.hp > 0; })[0]; if (!f) return;
+    var h = f.hallObj, dx = h.x - px, dy = h.y - py, d = Math.hypot(dx, dy), z = (typeof zoom === 'number' && zoom > 0) ? zoom : 1;
+    var W = cv.width / (window.devicePixelRatio || 1), H = cv.height / (window.devicePixelRatio || 1); if (Math.abs(dx * z) < W / 2 + 40 && Math.abs(dy * z) < H / 2 + 40) return;
+    var a = Math.atan2(dy, dx), rx = W / 2 - 46, ry = H < 500 ? H / 2 - 64 : H / 2 - 95, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
+    var X = W / 2 + Math.cos(a) * t, Y = H / 2 + Math.sin(a) * t, cc = window.__cc79;
+    if (cc && performance.now() - cc.t < 120 && Math.abs(X - cc.X) < 100 && Math.abs(Y - cc.Y) < 58) { if (Math.abs(Math.sin(a)) > 0.6) X = cc.X + (X >= cc.X ? 100 : -100); else Y = cc.Y + (Y >= cc.Y ? 60 : -60); }
+    var c = ctx; c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0); c.translate(X, Y);
+    c.fillStyle = '#b00'; c.strokeStyle = '#000'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 20, 0, 6.3); c.fill(); c.stroke();
+    c.rotate(a); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(18, 0); c.lineTo(8, -7); c.lineTo(8, 7); c.closePath(); c.fill(); c.rotate(-a);
+    c.strokeStyle = '#fff'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-7, -7); c.lineTo(7, 7); c.moveTo(7, -7); c.lineTo(-7, 7); c.stroke();
+    c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = '#fff'; var L = 'ENEMY ' + (d / 1000).toFixed(1) + 'K'; c.strokeText(L, 0, 33); c.fillStyle = '#b00'; c.fillText(L, 0, 33); c.restore();
+  }
+  var _mw112 = drawMiniWorld; drawMiniWorld = function () { var r = _mw112.apply(this, arguments); try { foe112(); } catch (e) {} return r; };
+
   requestAnimationFrame(frame);
 </script>
 </body>
