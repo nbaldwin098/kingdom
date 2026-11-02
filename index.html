@@ -4893,15 +4893,17 @@
 
   // v99: market split into small tabs, one visible at a time (compact for landscape phones)
   (function () {
-    var TABS = [['TRADE', /^(SELL|BUY) /], ['BUILD', /^(BUILD|UPGRADE|NEW|REPAIR) /], ['ARMY', /TRAIN|SOLDIER|KNIGHT|CART|ARCHER|CAVALRY|MERC|HIRE|SHIP|JET|POLICE/], ['GEAR', null]];
+    // v101: the long BUILD tab is split into GROW / TOWN / SEA, and cannons sit under ARMY
+    var TABS = [['TRADE'], ['GROW'], ['TOWN'], ['SEA'], ['ARMY'], ['GEAR']];
+    var MATCH = [['TRADE', /^(SELL|BUY) /], ['ARMY', /TRAIN|SOLDIER|KNIGHT|CART|ARCHER|CAVALRY|MERC|HIRE|SHIP|JET|POLICE|CANNON/], ['SEA', /SHALLOWS|DEEP SEA|TRAPS|SALT|FLEET|PEARL|OIL RIG|DOCK|HARBOR|PORT/], ['TOWN', /^(BUILD|UPGRADE|NEW|REPAIR) .*(BANK|MARKET|BARRACKS|PRISON|HALL|FORGE|WALL|AIRPORT|TOWER|STATION)/], ['GROW', /^(BUILD|UPGRADE|NEW|REPAIR) /]];
     var tab = 'TRADE', filt = 0;
-    function tabOf(it) { var l = String(it.label || ''); for (var i = 0; i < TABS.length - 1; i++) if (TABS[i][1].test(l)) return TABS[i][0]; return 'GEAR'; }
+    function tabOf(it) { var l = String(it.label || ''); for (var i = 0; i < MATCH.length; i++) if (MATCH[i][1].test(l)) return MATCH[i][0]; return 'GEAR'; }
     var _si = shopItems; shopItems = function () { var a = _si.apply(this, arguments); if (!filt) return a; return a.filter(function (it) { return tabOf(it) === tab; }); };
     var bar = document.createElement('div'); bar.id = 'shopTabs99'; var rows = document.getElementById('shopRows'); rows.parentNode.insertBefore(bar, rows);
-    function drawBar() { bar.innerHTML = ''; var all = (filt = 0, _si()); TABS.forEach(function (T) { var n = all.filter(function (it) { return tabOf(it) === T[0]; }).length; if (!n) return; var b = document.createElement('button'); b.textContent = T[0]; if (T[0] === tab) b.className = 'on'; b.addEventListener('click', function (e) { e.stopPropagation(); tab = T[0]; renderShop(); }); bar.appendChild(b); }); }
+    function drawBar() { bar.innerHTML = ''; var all = (filt = 0, _si()); if (!all.some(function (it) { return tabOf(it) === tab; })) { for (var q = 0; q < TABS.length; q++) if (all.some(function (it) { return tabOf(it) === TABS[q][0]; })) { tab = TABS[q][0]; break; } } TABS.forEach(function (T) { var n = all.filter(function (it) { return tabOf(it) === T[0]; }).length; if (!n) return; var b = document.createElement('button'); b.textContent = T[0]; if (T[0] === tab) b.className = 'on'; b.addEventListener('click', function (e) { e.stopPropagation(); tab = T[0]; renderShop(); }); bar.appendChild(b); }); }
     var _rs = renderShop; renderShop = function () { drawBar(); filt = 1; try { return _rs.apply(this, arguments); } finally { filt = 0; } };
     var _rss = renderShopSoft; renderShopSoft = function () { filt = 1; try { return _rss.apply(this, arguments); } finally { filt = 0; } };
-    var st = document.createElement('style'); st.textContent = '#shopTabs99{display:flex;gap:4px;margin:4px 0}#shopTabs99 button{flex:1;font:bold 12px monospace;padding:5px 2px;background:#fff;border:2px solid #000}#shopTabs99 button.on{background:#000;color:#fff}@media (max-height:500px){#shop{max-height:92vh;overflow:auto;padding:6px 8px!important}#shop h2{margin:0 0 2px;font-size:16px}#shopRows .row{padding:2px 0}#shopRows .row button{padding:3px 6px}}';
+    var st = document.createElement('style'); st.textContent = '#shopTabs99{display:flex;gap:4px;margin:4px 0}#shopTabs99 button{flex:1;min-width:0;font:bold 11px monospace;padding:5px 1px;background:#fff;border:2px solid #000}#shopTabs99 button.on{background:#000;color:#fff}@media (max-height:500px){#shop{max-height:92vh;overflow:auto;padding:6px 8px!important}#shop h2{margin:0 0 2px;font-size:16px}#shopRows .row{padding:2px 0}#shopRows .row button{padding:3px 6px}}';
     document.head.appendChild(st);
   })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
