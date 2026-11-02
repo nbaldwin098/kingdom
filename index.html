@@ -6795,7 +6795,7 @@ window.B137 = (function () {
       W.train.forEach(function (c) { if (!c.robbed && Math.hypot(c.x - px, c.y - py) < 180) best = { t: 'hold', go: function () { robTrain(c); }, label: '\ud83d\ude82 HOLD UP THE TRAIN' }; });
       if (best && !L.fish) { L.ctx = best; var cb = document.getElementById('ctx143'); if (cb) { cb.style.display = 'inline-block'; cb.textContent = best.label + (matchMedia('(pointer:coarse)').matches ? '' : ' (R)'); } }
       // rioters left alone damage the hall: steal from treasury, set it alight, knock a level off
-      if (L.riot.length) { var at = L.riot.filter(function (r) { return Math.hypot(r.x - city.x, r.y - (city.y - 40)) < 150; }).length; if (at) { RT += dt; L.hallFire = RT; if (Math.random() < dt * at * 0.4 && gold > 0) { gold = Math.max(0, gold - 1); updateRes(); } if (RT > 40) { RT = 0; var h = ME_S.bld.find(function (b) { return b.k === 'hall'; }); if (h && h.L > 1) { h.L--; showToast('RIOTERS BURNED PART OF THE HALL - HALL LEVEL ' + h.L); } else { gold = Math.max(0, gold - 15); updateRes(); showToast('RIOTERS TORCHED THE HALL - LOST 15 GOLD'); } } } } else { RT = 0; L.hallFire = 0; }
+      if (L.riot.length) { var at = L.riot.filter(function (r) { return Math.hypot(r.x - city.x, r.y - (city.y - 40)) < 150; }).length; if (at) { RT += dt; L.hallFire = RT; if (Math.random() < dt * at * 0.15 && gold > 0) { gold = Math.max(0, gold - 1); updateRes(); } if (RT > 40) { RT = 0; var h = ME_S.bld.find(function (b) { return b.k === 'hall'; }); if (h && h.L > 1) { h.L--; showToast('RIOTERS BURNED PART OF THE HALL - HALL LEVEL ' + h.L); } else { gold = Math.max(0, gold - 15); updateRes(); showToast('RIOTERS TORCHED THE HALL - LOST 15 GOLD'); } } } } else { RT = 0; L.hallFire = 0; }
       // voters walk to the post in the 25 s before an election
       var vt = ME_S.vT126; if (vt != null && vt < 25 && ME_S.ppl.length) { if (!VT.length) { var n = Math.min(8, ME_S.ppl.length); for (var i = 0; i < n; i++) { var a = Math.random() * 6.28; VT.push({ x0: city.x + Math.cos(a) * 600, y0: city.y + 200 + Math.sin(a) * 400, i: i, r: ['villager', 'farmer', 'woman', 'merchant'][i % 4] }); } } } else VT = [];
       W.vote = VT.length; W.vt = vt;
@@ -6823,6 +6823,66 @@ window.B137 = (function () {
       if (L.hallFire > 0) items.push({ y: city.y - 110, x: city.x, y2: city.y - 110, fn: function (sx, sy) { var c = ctx; for (var i = 0; i < 4; i++) { var fx = sx - 90 + i * 60, h = 18 + Math.min(40, L.hallFire) + Math.random() * 10; c.fillStyle = 'rgba(255,140,40,.85)'; c.beginPath(); c.moveTo(fx - 10, sy - 60); c.quadraticCurveTo(fx, sy - 60 - h * 2, fx + 10, sy - 60); c.fill(); c.fillStyle = 'rgba(255,240,160,.9)'; c.beginPath(); c.arc(fx, sy - 66, 4, 0, 7); c.fill(); } } });
       if (VT.length) { var pr = Math.max(0, Math.min(1, (25 - (ME_S.vT126 || 0)) / 22)); VT.forEach(function (v) { var tx = city.x + 230 + (v.i % 4 - 1.5) * 26, ty = city.y + 80 + Math.floor(v.i / 4) * 24, x = v.x0 + (tx - v.x0) * pr, y = v.y0 + (ty - v.y0) * pr; items.push({ y: y, x: x, y2: y, fn: function (sx, sy) { var m = spr(v.r, null, false); if (m) dsprA(ctx, m, sx, sy, 56, tx > v.x0 ? 1 : -1); } }); }); }
     } catch (e) {} };
+  })();
+
+  // ===== v145 STORAGE (STOR145): stables, garages and ports by your hall keep spare horses, wagons/cars and boats =====
+  (function () {
+    var KEY = 'kingdom-stor145', S = { built: {}, h: 0, v: [], b: [] };
+    try { var d = JSON.parse(localStorage.getItem(KEY) || 'null'); if (d) S = Object.assign(S, d); } catch (e) {}
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+    var VN = ['CART', 'WAGON', 'CAR', 'TRUCK', 'JEEP', 'TANK', 'BOAT', 'PLANE', 'SHIP', 'WARSHIP'];
+    function boatK(k) { return k === 6 || k === 8 || k === 9; }
+    var COST = { stable: [30, 10, 0], garage: [40, 25, 10], port: [50, 20, 15] }, NAME = { stable: 'STABLE', garage: 'GARAGE', port: 'PORT' };
+    var portP = null, portT = 0;
+    function sites() {
+      if (!portP && window.BW130 && performance.now() - portT > 5000) { portT = performance.now(); for (var r = 300; r <= 4000 && !portP; r += 100) for (var a = 0; a < 32; a++) { var x = city.x + Math.cos(a * 0.196) * r, y = city.y + Math.sin(a * 0.196) * r; if (BW130(x, y)) { var x2 = city.x + Math.cos(a * 0.196) * (r - 120), y2 = city.y + Math.sin(a * 0.196) * (r - 120); portP = { x: x2, y: y2, wx: x, wy: y }; break; } } }
+      var o = { stable: { x: city.x - 380, y: city.y + 140 }, garage: { x: city.x + 400, y: city.y + 160 } }; if (portP) o.port = portP; return o;
+    }
+    function V() { return window.VEH130 ? VEH130() : null; }
+    function saveV() { try { localStorage.setItem('kingdom-veh-v1', JSON.stringify(V())); } catch (e) {} }
+    function act(k, p) {
+      var v = V();
+      if (!S.built[k]) { var c = COST[k]; return { label: '\ud83d\udd28 BUILD ' + NAME[k] + ' (' + c[0] + '\ud83e\udeb5 ' + c[1] + '\ud83e\udea8' + (c[2] ? ' ' + c[2] + '\ud83e\ude99' : '') + ')', go: function () { if (wood < c[0] || stone < c[1] || gold < c[2]) { showToast('NEED ' + c[0] + ' WOOD, ' + c[1] + ' STONE' + (c[2] ? ', ' + c[2] + ' GOLD' : '')); return; } wood -= c[0]; stone -= c[1]; gold -= c[2]; S.built[k] = 1; save(); updateRes(); showToast(NAME[k] + ' BUILT'); try { sfx('build', px, py, 1); } catch (e) {} } }; }
+      if (k === 'stable') {
+        if (mounted() && !(v && v.on)) return { label: '\ud83d\udc0e STABLE YOUR HORSE (' + S.h + '/6)', go: function () { if (S.h >= 6) { showToast('STABLE FULL'); return; } S.h++; steed = { st: 'lost' }; saveHorse(); updateMountBtn(); save(); showToast('HORSE STABLED - ' + S.h + ' IN THE STABLE'); } };
+        if (!mounted() && S.h > 0 && !(v && v.on)) return { label: '\ud83d\udc0e TAKE A HORSE (' + S.h + ')', go: function () { S.h--; steed = { st: 'ridden' }; saveHorse(); updateMountBtn(); save(); showToast('SADDLED UP - ' + S.h + ' LEFT IN THE STABLE'); } };
+        return { label: '\ud83d\udc0e BUY A HORSE FOR THE STABLE (20\ud83e\ude99)', go: function () { if (S.h >= 6) { showToast('STABLE FULL'); return; } if (gold < 20) { showToast('NEED 20 GOLD'); return; } gold -= 20; S.h++; save(); updateRes(); showToast('NEW HORSE IN THE STABLE (' + S.h + ')'); } };
+      }
+      var wantBoat = k === 'port', list = wantBoat ? S.b : S.v, cap = 4;
+      if (v && v.on && v.k >= 0 && boatK(v.k) === wantBoat) return { label: (wantBoat ? '\u2693 DOCK ' : '\ud83d\ude97 PARK ') + VN[v.k] + ' (' + list.length + '/' + cap + ')', go: function () { if (list.length >= cap) { showToast(NAME[k] + ' FULL'); return; } list.push(v.k); v.on = false; v.k = -1; saveV(); save(); var mb = document.getElementById('vehBtn'); if (mb) mb.style.display = 'none'; var m2 = document.getElementById('mountBtn'); if (m2) m2.style.display = ''; showToast(NAME[k] + ': ' + list.map(function (q) { return VN[q]; }).join(', ')); } };
+      if (list.length && !(v && v.on)) { var nk = list[list.length - 1]; return { label: (wantBoat ? '\u2693 LAUNCH ' : '\ud83d\ude97 TAKE OUT ') + VN[nk] + ' (' + list.length + ')', go: function () { list.pop(); if (v.k >= 0 && boatK(v.k) === wantBoat && list.length < cap) list.push(v.k); v.k = nk; v.on = false; v.x = wantBoat ? p.wx : p.x + 120; v.y = wantBoat ? p.wy : p.y + 60; saveV(); save(); showToast(VN[nk] + (wantBoat ? ' AT THE PIER' : ' OUTSIDE THE GARAGE') + ' - WALK UP AND DRIVE (V)'); } }; }
+      return null;
+    }
+    var _uw = updateWolves; updateWolves = function (dt) {
+      _uw.apply(this, arguments); if (!started || !ME_S || !window.LIFE143) return; var L = LIFE143; if (L.fish) return;
+      var st = sites(), best = null, bd = 1e9; for (var k in st) { var p = st[k], dd = Math.hypot(p.x - px, p.y - py); if (dd < 170 && dd < bd) { var a = act(k, p); if (a) { best = a; bd = dd; } } }
+      if (best) { best.t = 'stor'; L.ctx = best; var cb = document.getElementById('ctx143'); if (cb) { cb.style.display = 'inline-block'; cb.textContent = best.label + (matchMedia('(pointer:coarse)').matches ? '' : ' (R)'); } }
+    };
+    function sign(c, sx, sy, t) { c.font = 'bold 13px monospace'; var w = c.measureText(t).width + 14; c.fillStyle = '#f2ead8'; c.strokeStyle = '#5a3418'; c.lineWidth = 2; c.fillRect(sx - w / 2, sy, w, 20); c.strokeRect(sx - w / 2, sy, w, 20); c.fillStyle = '#5a3418'; c.textAlign = 'center'; c.fillText(t, sx, sy + 15); c.textAlign = 'left'; }
+    function horse(c, x, y, i) { c.fillStyle = ['#7a4a22', '#5a3a1e', '#a87a4a', '#d8c8a8'][i % 4]; c.fillRect(x - 14, y - 22, 28, 12); c.fillRect(x + 10, y - 32, 8, 14); c.fillRect(x + 14, y - 34, 10, 7); c.fillStyle = '#3b2410'; [-12, -4, 6, 12].forEach(function (l) { c.fillRect(x + l, y - 10, 3, 10); }); c.fillRect(x - 18, y - 22, 5, 10); }
+    function draw(k, p, sx, sy) {
+      var c = ctx, b = S.built[k];
+      c.fillStyle = 'rgba(60,40,20,.18)'; c.beginPath(); c.ellipse(sx, sy + 4, 110, 22, 0, 0, 7); c.fill();
+      if (!b) { c.strokeStyle = '#8a6a3a'; c.setLineDash([8, 6]); c.lineWidth = 2; c.strokeRect(sx - 90, sy - 70, 180, 74); c.setLineDash([]); sign(c, sx, sy - 100, NAME[k] + ' SITE'); return; }
+      if (k === 'stable') {
+        c.fillStyle = '#9a5a2a'; c.fillRect(sx - 90, sy - 70, 120, 72); c.fillStyle = '#7a3a1e'; c.beginPath(); c.moveTo(sx - 100, sy - 68); c.lineTo(sx - 30, sy - 110); c.lineTo(sx + 40, sy - 68); c.fill();
+        c.fillStyle = '#efe0c0'; c.fillRect(sx - 60, sy - 44, 40, 46); c.strokeStyle = '#7a3a1e'; c.lineWidth = 3; c.beginPath(); c.moveTo(sx - 60, sy - 44); c.lineTo(sx - 20, sy + 2); c.moveTo(sx - 20, sy - 44); c.lineTo(sx - 60, sy + 2); c.stroke();
+        c.strokeStyle = '#8a6a3a'; c.lineWidth = 3; for (var r = 0; r < 2; r++) { c.beginPath(); c.moveTo(sx + 30, sy - 30 + r * 16); c.lineTo(sx + 120, sy - 30 + r * 16); c.stroke(); } for (var q = 0; q < 4; q++) c.fillRect(sx + 30 + q * 30, sy - 38, 4, 40);
+        for (var i = 0; i < Math.min(S.h, 3); i++) horse(c, sx + 50 + i * 28, sy, i);
+        sign(c, sx - 30, sy - 140, '\ud83d\udc0e STABLE ' + S.h + '/6');
+      } else if (k === 'garage') {
+        c.fillStyle = '#b8a890'; c.fillRect(sx - 90, sy - 76, 180, 78); c.fillStyle = '#6a5a4a'; c.fillRect(sx - 96, sy - 84, 192, 12);
+        for (var d = 0; d < 2; d++) { c.fillStyle = S.v.length > d ? '#5a7a9a' : '#8a7a62'; c.fillRect(sx - 76 + d * 82, sy - 58, 70, 60); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1; for (var l = 0; l < 5; l++) { c.beginPath(); c.moveTo(sx - 76 + d * 82, sy - 50 + l * 12); c.lineTo(sx - 6 + d * 82, sy - 50 + l * 12); c.stroke(); } }
+        sign(c, sx, sy - 112, '\ud83d\ude97 GARAGE ' + S.v.length + '/4' + (S.v.length ? ': ' + S.v.map(function (q) { return VN[q]; }).join(',') : ''));
+      } else {
+        var wx = (p.wx - p.x), wy = (p.wy - p.y); c.strokeStyle = '#7a4a22'; c.lineWidth = 14; c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + wx, sy + wy); c.stroke(); c.lineWidth = 2; c.strokeStyle = '#5a3418'; for (var t = 0; t <= 1; t += 0.1) { c.beginPath(); c.arc(sx + wx * t, sy + wy * t, 3, 0, 7); c.stroke(); }
+        c.fillStyle = '#a8784a'; c.fillRect(sx - 50, sy - 56, 100, 56); c.fillStyle = '#6a3a1e'; c.fillRect(sx - 56, sy - 64, 112, 10); c.fillStyle = '#efe0c0'; c.fillRect(sx - 12, sy - 34, 24, 34);
+        for (var j = 0; j < Math.min(S.b.length, 3); j++) { var bx = sx + wx + (j - 1) * 50, by = sy + wy + 20; c.fillStyle = '#8a5a2a'; c.beginPath(); c.moveTo(bx - 22, by - 8); c.lineTo(bx + 22, by - 8); c.lineTo(bx + 14, by + 4); c.lineTo(bx - 14, by + 4); c.fill(); c.fillStyle = '#f2ead8'; c.fillRect(bx - 1, by - 30, 3, 22); c.beginPath(); c.moveTo(bx + 2, by - 30); c.lineTo(bx + 16, by - 12); c.lineTo(bx + 2, by - 12); c.fill(); }
+        sign(c, sx, sy - 96, '\u2693 PORT ' + S.b.length + '/4');
+      }
+    }
+    var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); if (!started || !ME_S) return; var st = sites(); Object.keys(st).forEach(function (k) { var p = st[k]; if (Math.abs(p.x - px) > 1600 || Math.abs(p.y - py) > 1200) return; items.push({ y: p.y, x: p.x, y2: p.y, fn: function (sx, sy) { draw(k, p, sx, sy); } }); }); };
+    window.STOR145 = { S: S, sites: sites, save: save };
   })();
 
   requestAnimationFrame(frame);
@@ -6865,5 +6925,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v144-outlaw --></body>
+<!-- v145-storage --></body>
 </html>
