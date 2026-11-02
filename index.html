@@ -912,7 +912,7 @@
   // Desktop controls: WASD / arrows ride, SPACE attacks, mouse wheel zooms.
   var keys = {};
   document.addEventListener('keydown', function (e) {
-    if (!started || shopEl.style.display === 'block' || settingsEl.style.display === 'block') return;
+    if (!started || settingsEl.style.display === 'block' || (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName))) return;
     var k = e.key.toLowerCase(); keys[k] = true;
     if (k === ' ' && !e.repeat) { e.preventDefault(); attack(); }
     if (k.indexOf('arrow') === 0) e.preventDefault();
@@ -1597,7 +1597,7 @@
           vx = dx / d; vy = dy / d;
           if (vx > 0.15) face = 1; else if (vx < -0.15) face = -1;
           phase += dt * (mounted() ? 9 : 7);
-          var spd = mounted() ? 260 * horseMul() : 130, stepX = vx * spd * dt, stepY = vy * spd * dt;
+          var spd = (window.SP102 ? SP102(mounted() ? 260 * horseMul() : 130) : 130), stepX = vx * spd * dt, stepY = vy * spd * dt;
           if (!wallHit(px + stepX, py + stepY)) { px += stepX; py += stepY; }
           else if (!wallHit(px + stepX, py)) { px += stepX; }
           else if (!wallHit(px, py + stepY)) { py += stepY; }
@@ -1662,7 +1662,7 @@
       pushFactionItems(items, Math.max(W, H) / zoom);
       wolves.forEach(function (w) { items.push({ y: w.y, x: w.x, y2: w.y, fn: function (sx, sy) { wolfArt(ctx, sx, sy, w.face, w.ph, w.hitT); } }); });
       drawSteed(items);
-      items.push({ y: py, fn: function (sx, sy) { if (mounted()) drawPlayer(ctx, sx, sy, phase, face, moving ? Math.abs(Math.sin(phase)) * 2 : 0); else drawWalker(ctx, sx, sy, phase, face, moving); }, x: px, y2: py, player: true });
+      items.push({ y: py, fn: function (sx, sy) { if (window.DV102 && DV102(ctx, sx, sy, face, moving)) {} else if (mounted()) drawPlayer(ctx, sx, sy, phase, face, moving ? Math.abs(Math.sin(phase)) * 2 : 0); else drawWalker(ctx, sx, sy, phase, face, moving); }, x: px, y2: py, player: true });
       items.sort(function (a, b) { return a.y - b.y; });
       items.forEach(function (it) { it.fn(it.x - camX, it.y2 - camY); });
       if (swingT > 0) {
@@ -4891,13 +4891,91 @@
   };
   var _du75 = drawUnits; drawUnits = function (camX, camY) { var r = _du75.apply(this, arguments); try { ctx.save(); ctx.fillStyle = '#1e4fd8'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2; units.forEach(function (u) { if (!u.pol75 || u.hp <= 0) return; var X = u.x - camX, Y = u.y - camY; ctx.fillRect(X - 8, Y - 62, 16, 7); ctx.strokeRect(X - 8, Y - 62, 16, 7); }); CAP75.forEach(function (cp) { var X = cp.x - camX, Y = cp.y - camY, sw = cp.lead ? Math.sin(cp.ph) * 5 : 0; ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(X, Y - 40, 7, 0, 7); ctx.moveTo(X, Y - 33); ctx.lineTo(X, Y - 14); ctx.moveTo(X, Y - 14); ctx.lineTo(X - 5 + sw, Y); ctx.moveTo(X, Y - 14); ctx.lineTo(X + 5 - sw, Y); ctx.stroke(); ctx.strokeStyle = '#a0522d'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X - 6, Y - 26); ctx.lineTo(X + 6, Y - 22); ctx.moveTo(X - 6, Y - 22); ctx.lineTo(X + 6, Y - 26); if (cp.lead && cp.esc) { var E = cp.esc === 'P' ? { x: px, y: py } : cp.esc; ctx.moveTo(X, Y - 24); ctx.lineTo(E.x - camX, E.y - camY - 24); } ctx.stroke(); }); ctx.restore(); } catch (e) {} return r; };
 
+  // ===== v102 ROADS + VEHICLES: auto roads from every building to its hall; faster travel on roads; buy/drive a cart, wagon, car or truck; villager traffic; trucks haul goods =====
+  (function () {
+    var RC = new Map(), RT = 0;
+    function segsOf(s) {
+      if (!s || !s.bld || !s.bld[0]) return [];
+      var c = RC.get(s), key = s.bld.length + ':' + Math.round(homeXY(s).x);
+      if (c && c.k === key) return c.g;
+      var h = bldPos(s, s.bld[0]), ry = h.y + 34, g = [];
+      s.bld.forEach(function (b, i) { if (!i || b.hp <= 0) return; var p = bldPos(s, b); g.push([h.x, ry, p.x, ry]); g.push([p.x, ry, p.x, p.y + 24]); });
+      RC.set(s, { k: key, g: g }); return g;
+    }
+    function nearSegs(x, y, R) { var out = []; allS75().forEach(function (s) { if (!s.bld || !s.bld[0]) return; var h = bldPos(s, s.bld[0]); if (Math.abs(h.x - x) > R + 1500 || Math.abs(h.y - y) > R + 1500) return; segsOf(s).forEach(function (g) { out.push({ g: g, s: s }); }); }); return out; }
+    function dSeg(x, y, g) { var dx = g[2] - g[0], dy = g[3] - g[1], L = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - g[0]) * dx + (y - g[1]) * dy) / L)); return Math.hypot(x - g[0] - t * dx, y - g[1] - t * dy); }
+    var cache = { t: 0, l: [] };
+    function onRoad(x, y) { var l = cache.l; for (var i = 0; i < l.length; i++) if (dSeg(x, y, l[i].g) < 20) return true; return false; }
+    window.onRoad102 = onRoad;
+    // ---- player vehicle (same walk-up / enter / exit idea as the horse)
+    var VK = [{ n: 'CART', c: 12, m: 2.1 }, { n: 'WAGON', c: 20, m: 2.3 }, { n: 'CAR', c: 40, m: 3 }, { n: 'TRUCK', c: 60, m: 2.6 }, { n: 'JEEP', c: 80, m: 3.4 }];
+    var V = { k: -1, on: false, x: 0, y: 0 };
+    try { var sv = JSON.parse(localStorage.getItem('kingdom-veh-v1') || 'null'); if (sv && sv.k >= 0) V = sv; } catch (e) {}
+    function saveV() { try { localStorage.setItem('kingdom-veh-v1', JSON.stringify(V)); } catch (e) {} }
+    window.SP102 = function (base) { var m = V.on && V.k >= 0 ? (130 * VK[V.k].m) / base : 1; if (V.on && V.k >= 0) base = 130 * VK[V.k].m; return base * (onRoad(px, py) ? 1.6 : 1); };
+    var vb = document.createElement('button'); vb.id = 'vehBtn'; vb.style.display = 'none'; var row = mountBtn && mountBtn.parentNode; if (row) row.appendChild(vb);
+    function nearV() { return V.k >= 0 && !V.on && Math.hypot(V.x - px, V.y - py) < 90; }
+    function vUi() { var show = V.k >= 0 && (V.on || nearV()); vb.style.display = show ? '' : 'none'; vb.textContent = V.on ? 'EXIT ' + VK[V.k].n : 'DRIVE ' + VK[V.k].n; if (mountBtn) mountBtn.style.display = V.on ? 'none' : ''; }
+    function toggleV() { if (V.k < 0) return; if (V.on) { V.on = false; V.x = px + face * 40; V.y = py; showToast(VK[V.k].n + ' PARKED'); } else if (nearV()) { V.on = true; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; steed.face = face; saveHorse(); } showToast('DRIVING THE ' + VK[V.k].n + (onRoad(px, py) ? '' : ' - ROADS ARE FASTER')); } saveV(); vUi(); }
+    vb.addEventListener('click', function (e) { e.stopPropagation(); toggleV(); });
+    addEventListener('keydown', function (e) { if ((e.key === 'v' || e.key === 'V') && started) toggleV(); });
+    // ---- art (era-appropriate, B/W)
+    function wheel(c, x, y, r) { c.fillStyle = '#000'; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(x, y, r * 0.4, 0, 7); c.fill(); }
+    function vehArt(c, k, x, y, f, load, inv) {
+      var bg = inv ? '#000' : '#fff', fg = inv ? '#fff' : '#000';
+      c.save(); c.translate(x, y); c.scale(f || 1, 1); c.lineWidth = 2.5; c.strokeStyle = '#000';
+      if (k <= 1) { // cart / wagon + ox-less shafts
+        c.fillStyle = bg; c.fillRect(-22, -22, 40, 12); c.strokeRect(-22, -22, 40, 12);
+        if (k === 1) { c.beginPath(); c.arc(-2, -22, 20, Math.PI, 0); c.fillStyle = '#fff'; c.fill(); c.stroke(); }
+        c.beginPath(); c.moveTo(18, -14); c.lineTo(34, -8); c.stroke(); wheel(c, -12, -6, 7); wheel(c, 8, -6, 7);
+      } else if (k === 3) { // truck
+        c.fillStyle = bg; c.fillRect(-28, -30, 34, 22); c.strokeRect(-28, -30, 34, 22);
+        c.fillStyle = '#000'; c.fillRect(6, -24, 18, 16); c.fillStyle = '#fff'; c.fillRect(12, -21, 9, 6);
+        if (load) { c.fillStyle = fg; c.fillRect(-24, -38, 10, 8); c.fillRect(-12, -38, 10, 8); }
+        wheel(c, -18, -6, 6); wheel(c, 14, -6, 6);
+      } else { // car / jeep
+        c.fillStyle = '#000'; c.beginPath(); c.moveTo(-26, -8); c.lineTo(-26, -18); c.lineTo(-12, -20); c.lineTo(-6, -30); c.lineTo(10, -30); c.lineTo(16, -20); c.lineTo(26, -18); c.lineTo(26, -8); c.closePath(); c.fill();
+        c.fillStyle = '#fff'; c.fillRect(-4, -27, 6, 6); c.fillRect(5, -27, 6, 6); if (k === 4) { c.fillRect(-26, -14, 52, 2); }
+        wheel(c, -15, -6, 6); wheel(c, 15, -6, 6);
+      }
+      c.restore();
+    }
+    window.DV102 = function (c, sx, sy, f, mv) { if (!V.on || V.k < 0) return false; vehArt(c, V.k, sx, sy + (mv ? Math.sin(performance.now() / 60) : 0), f); c.fillStyle = '#000'; c.beginPath(); c.arc(sx + f * (V.k <= 1 ? -2 : 3), sy - (V.k <= 1 ? 30 : 34), 5, 0, 7); c.fill(); return true; };
+    // ---- villager / worker traffic on roads (every nation, same rule): trucks haul goods home
+    var TR = new Map();
+    function trafficOf(s) { var g = segsOf(s), t = TR.get(s); if (!t) { t = []; TR.set(s, t); } var want = Math.min(6 + (s.xtr102 || 0), Math.floor(g.length / 3)) + (s.xtr102 || 0); while (t.length < want) t.push({ i: Math.floor(Math.random() * Math.max(1, g.length)), p: Math.random(), d: 1, tk: t.length >= 6 ? 1 : t.length % 2 }); t.length = want; return t; }
+    function eraK(s, tk) { var e = typeof eraOf === 'function' ? eraOf(s) : 0; return tk ? (e >= 2 ? 3 : 1) : (e >= 3 ? 4 : e >= 2 ? 2 : 0); }
+    function tick(dt) {
+      cache.t -= dt; if (cache.t <= 0) { cache.t = 0.5; cache.l = nearSegs(px, py, 2500); }
+      allS75().forEach(function (s) { var g = segsOf(s); if (!g.length) return; trafficOf(s).forEach(function (v) { var sg = g[v.i % g.length]; if (!sg) return; var L = Math.hypot(sg[2] - sg[0], sg[3] - sg[1]) || 1; v.p += v.d * dt * (eraK(s, v.tk) >= 2 ? 140 : 70) / L; if (v.p > 1 || v.p < 0) { v.p = Math.max(0, Math.min(1, v.p)); v.d = -v.d; if (v.tk && v.d < 0) { if (s === ME_S) gold += 0.4; else if (s.fac) s.fac.gold = (s.fac.gold || 0) + 0.4; } if (v.d > 0) v.i = Math.floor(Math.random() * g.length); } }); });
+      if (V.k >= 0 && !V.on && Math.random() < 0.05) vUi(); else if (V.on && Math.random() < 0.02) vUi();
+    }
+    var last = performance.now(); (function lp() { var n = performance.now(), dt = Math.min(0.1, (n - last) / 1000); last = n; try { if (started) tick(dt); } catch (e) {} requestAnimationFrame(lp); })();
+    var _dg = drawGround;
+    drawGround = function (x0, x1, y0, y1, camX, camY) {
+      _dg(x0, x1, y0, y1, camX, camY);
+      var c = ctx, l = cache.l; if (!l.length) return;
+      c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+      [[30, '#000'], [24, '#fff']].forEach(function (w) { c.strokeStyle = w[1]; c.lineWidth = w[0]; c.beginPath(); l.forEach(function (o) { var g = o.g; c.moveTo(g[0] - camX, g[1] - camY); c.lineTo(g[2] - camX, g[3] - camY); }); c.stroke(); });
+      c.strokeStyle = '#000'; c.lineWidth = 2; c.setLineDash([8, 10]); c.beginPath(); l.forEach(function (o) { var g = o.g; c.moveTo(g[0] - camX, g[1] - camY); c.lineTo(g[2] - camX, g[3] - camY); }); c.stroke(); c.setLineDash([]);
+      var seen = new Set(); l.forEach(function (o) { if (seen.has(o.s)) return; seen.add(o.s); var g = segsOf(o.s); trafficOf(o.s).forEach(function (v) { var sg = g[v.i % g.length]; if (!sg) return; var x = sg[0] + (sg[2] - sg[0]) * v.p, y = sg[1] + (sg[3] - sg[1]) * v.p; if (x < x0 - 60 || x > x1 + 60 || y < y0 - 60 || y > y1 + 60) return; var dx = (sg[2] - sg[0]) * v.d; vehArt(c, eraK(o.s, v.tk), x - camX, y - camY + 8, dx < 0 ? -1 : 1, v.tk && v.d > 0 ? 0 : 1, o.s !== ME_S); }); });
+      if (V.k >= 0 && !V.on) vehArt(c, V.k, V.x - camX, V.y - camY, 1);
+      c.restore();
+    };
+    // ---- units move faster on roads (player and CPU alike)
+    var _uu = updateUnits;
+    updateUnits = function (dt) { var b = units.map(function (u) { return [u.x, u.y]; }); _uu(dt); for (var i = 0; i < b.length && i < units.length; i++) { var u = units[i]; if (u.hp > 0 && (u.x !== b[i][0] || u.y !== b[i][1]) && onRoad(u.x, u.y)) { u.x += (u.x - b[i][0]) * 0.5; u.y += (u.y - b[i][1]) * 0.5; } } };
+    // ---- buy a vehicle at the market (GEAR tab)
+    var _si = shopItems;
+    shopItems = function () { var it = _si.apply(this, arguments); try { var e = eraOf(ME_S), k = e >= 3 ? 4 : e >= 2 ? 2 : e >= 1 ? 1 : 0; var vk = VK[k]; it.push({ label: 'VEHICLE: ' + vk.n + (V.k >= 0 ? ' (YOU HAVE A ' + VK[V.k].n + ')' : ''), btn: V.k === k ? 'OWNED' : vk.c + ' GOLD', dis: V.k === k || gold < vk.c, act: function () { gold -= vk.c; V = { k: k, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + vk.n + ' - DRIVING (V TO EXIT)'); } }); if (e >= 2) { var tc = 30; it.push({ label: 'HAUL TRUCK (HAULS GOODS ON ROADS)', btn: tc + ' GOLD', dis: gold < tc, act: function () { gold -= tc; ME_S.xtr102 = (ME_S.xtr102 || 0) + 1; showToast('TRUCK HAULING GOODS'); } }); } } catch (e) {} return it; };
+  })();
   // v99: market split into small tabs, one visible at a time (compact for landscape phones)
   (function () {
     // v101: the long BUILD tab is split into GROW / TOWN / SEA, and cannons sit under ARMY
     var TABS = [['TRADE'], ['GROW'], ['TOWN'], ['SEA'], ['ARMY'], ['GEAR']];
     var MATCH = [['TRADE', /^(SELL|BUY) /], ['ARMY', /TRAIN|SOLDIER|KNIGHT|CART|ARCHER|CAVALRY|MERC|HIRE|SHIP|JET|POLICE|CANNON/], ['SEA', /SHALLOWS|DEEP SEA|TRAPS|SALT|FLEET|PEARL|OIL RIG|DOCK|HARBOR|PORT/], ['TOWN', /^(BUILD|UPGRADE|NEW|REPAIR) .*(BANK|MARKET|BARRACKS|PRISON|HALL|FORGE|WALL|AIRPORT|TOWER|STATION)/], ['GROW', /^(BUILD|UPGRADE|NEW|REPAIR) /]];
     var tab = 'TRADE', filt = 0;
-    function tabOf(it) { var l = String(it.label || ''); for (var i = 0; i < MATCH.length; i++) if (MATCH[i][1].test(l)) return MATCH[i][0]; return 'GEAR'; }
+    function tabOf(it) { var l = String(it.label || ""); if (/^(VEHICLE|HAUL TRUCK)/.test(l)) return "GEAR"; for (var i = 0; i < MATCH.length; i++) if (MATCH[i][1].test(l)) return MATCH[i][0]; return 'GEAR'; }
     var _si = shopItems; shopItems = function () { var a = _si.apply(this, arguments); if (!filt) return a; return a.filter(function (it) { return tabOf(it) === tab; }); };
     var bar = document.createElement('div'); bar.id = 'shopTabs99'; var rows = document.getElementById('shopRows'); rows.parentNode.insertBefore(bar, rows);
     function drawBar() { bar.innerHTML = ''; var all = (filt = 0, _si()); if (!all.some(function (it) { return tabOf(it) === tab; })) { for (var q = 0; q < TABS.length; q++) if (all.some(function (it) { return tabOf(it) === TABS[q][0]; })) { tab = TABS[q][0]; break; } } TABS.forEach(function (T) { var n = all.filter(function (it) { return tabOf(it) === T[0]; }).length; if (!n) return; var b = document.createElement('button'); b.textContent = T[0]; if (T[0] === tab) b.className = 'on'; b.addEventListener('click', function (e) { e.stopPropagation(); tab = T[0]; renderShop(); }); bar.appendChild(b); }); }
