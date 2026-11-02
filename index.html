@@ -1701,7 +1701,7 @@
       ctx.restore();
       drawBox();
       if (hurtT > 0) { ctx.strokeStyle = '#000'; ctx.lineWidth = 12; ctx.strokeRect(6, 6, W - 12, H - 12); }
-      if (toastT > 0) { ctx.font = 'bold 18px monospace'; ctx.textAlign = 'center'; var tw = ctx.measureText(toast).width; ctx.fillStyle = '#000'; var thb = document.getElementById('topHud').getBoundingClientRect().bottom; var ty = Math.round((H < 500 ? thb + 6 : W < 600 ? thb + 100 : thb + 12)) /* v88: PC toasts sit under the top bar, not over the hero */; var TL = [toast], lh = 30; if (tw + 20 > W - 20) { ctx.font = 'bold 13px monospace'; lh = 20; TL = []; var cur = ''; toast.split(' ').forEach(function (w) { var t2 = cur ? cur + ' ' + w : w; if (cur && ctx.measureText(t2).width > W - 50) { TL.push(cur); cur = w; } else cur = t2; }); if (cur) TL.push(cur); tw = 0; TL.forEach(function (l) { tw = Math.max(tw, ctx.measureText(l).width); }); } ctx.fillRect(W / 2 - tw / 2 - 10, ty, tw + 20, TL.length > 1 ? TL.length * lh + 10 : 30); window.__tr86 = { l: W / 2 - tw / 2 - 10, r: W / 2 + tw / 2 + 10, b: ty + (TL.length > 1 ? TL.length * lh + 10 : 30), t: performance.now() }; ctx.fillStyle = '#fff'; TL.forEach(function (l, i) { ctx.fillText(l, W / 2, ty + (TL.length > 1 ? 20 + i * lh : 21)); }); }
+      if (toastT > 0) { ctx.font = 'bold 18px monospace'; ctx.textAlign = 'center'; var tw = ctx.measureText(toast).width; ctx.fillStyle = '#000'; var thb = document.getElementById('topHud').getBoundingClientRect().bottom; var ty = Math.round((H < 500 ? Math.round(H / 2 + 46) /* v111: phone toasts under the hero, not over the hall */ : W < 600 ? thb + 100 : thb + 12)) /* v88: PC toasts sit under the top bar, not over the hero */; var TL = [toast], lh = 30; if (tw + 20 > W - 20) { ctx.font = 'bold 13px monospace'; lh = 20; TL = []; var cur = ''; toast.split(' ').forEach(function (w) { var t2 = cur ? cur + ' ' + w : w; if (cur && ctx.measureText(t2).width > W - 50) { TL.push(cur); cur = w; } else cur = t2; }); if (cur) TL.push(cur); tw = 0; TL.forEach(function (l) { tw = Math.max(tw, ctx.measureText(l).width); }); } ctx.fillRect(W / 2 - tw / 2 - 10, ty, tw + 20, TL.length > 1 ? TL.length * lh + 10 : 30); window.__tr86 = { l: W / 2 - tw / 2 - 10, r: W / 2 + tw / 2 + 10, b: ty + (TL.length > 1 ? TL.length * lh + 10 : 30), t: performance.now() }; ctx.fillStyle = '#fff'; TL.forEach(function (l, i) { ctx.fillText(l, W / 2, ty + (TL.length > 1 ? 20 + i * lh : 21)); }); }
       drawMinimap();
       var nm = nearMarket();
       if (nm && !wasAtMarket) setShop(true);
@@ -4463,7 +4463,7 @@
       try { factions.concat(me && factions.indexOf(me) < 0 ? [me] : []).forEach(function (f) { var h = f && f.alive && f.hallObj; if (!h || !h.wallMax55) return;
         var sx = h.x - camX, sy = h.y - camY, r = 95 + 6 * Math.min(10, h.wallMax55 / 25); if (sx < -r || sy < -r || sx > W + r || sy > H + r) return;
         var k = Math.max(0, h.wall55) / h.wallMax55, n = 28; ctx.save(); ctx.lineWidth = 7; ctx.lineCap = 'butt';
-        for (var i = 0; i < n; i++) { if ((i * 7919 % 100) / 100 > k + 0.02) continue; var a0 = i / n * Math.PI * 2, a1 = (i + 0.8) / n * Math.PI * 2;
+        for (var i = 0; i < n; i++) { if ((i * 7919 % 100) / 100 > k + 0.02) continue; var a0 = i / n * Math.PI * 2, a1 = (i + 0.8) / n * Math.PI * 2; var am = (a0 + a1) / 2, hx0 = sx + Math.cos(am) * r - (px - camX), hy0 = sy + Math.sin(am) * r * 0.55 - (py - camY); if (Math.sin(am) > 0 && Math.abs(hx0) < 38 && hy0 > -80 && hy0 < 14) continue; /* v111: don't paint the front wall over the hero */
           ctx.strokeStyle = k > 0.5 ? '#8a8378' : k > 0.25 ? '#9a7a5a' : '#a35a3a'; ctx.beginPath(); ctx.ellipse(sx, sy, r, r * 0.55, 0, a0, a1); ctx.stroke();
           ctx.fillStyle = '#5d574e'; var mx = sx + Math.cos(a0) * r, my = sy + Math.sin(a0) * r * 0.55; ctx.fillRect(mx - 4, my - 7, 8, 7); }
         var S = SIEGE51[f.id]; if (S && S.tower55 && S.tPos56) { var tx = S.tPos56.x - camX, ty = S.tPos56.y - camY, q = S.towerHp56 / 100;
@@ -4709,8 +4709,10 @@
       '#near63{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);transform:translateX(-50%);z-index:55;background:#fff;border:3px solid #000;padding:6px 8px;font:bold 12px monospace;text-align:center;display:none;max-width:86vw}' +
       '#near63 b{display:block;margin-bottom:4px}#near63 button{font:bold 12px monospace;margin:2px;padding:7px 9px;background:#000;color:#fff;border:0}#near63 button:disabled{background:#999}';
     document.head.appendChild(cs); document.body.classList.add('min63');
+    /* v111: gold + water icons drawn in CSS so every phone shows a yellow coin and a blue drop (iOS's coin emoji is grey) */
+    var HI = { gold: '<i style="display:inline-block;width:.85em;height:.85em;border-radius:50%;background:#f5c518;border:2px solid #9a7400;box-sizing:border-box;vertical-align:-1px;margin-right:2px"></i>', water: '<i style="display:inline-block;width:.7em;height:.7em;background:#1e88ff;border-radius:0 50% 50% 50%;transform:rotate(45deg);vertical-align:0;margin:0 3px 0 2px"></i>' };
     var IC = { food: '\ud83c\udf3e', water: '\ud83d\udca7', wood: '\ud83e\udeb5', stone: '\ud83e\udea8', gold: '\ud83e\ude99' };
-    function resLine() { try { var r = ME_S && ME_S.res; if (!r) return; var t = ['food', 'water', 'wood', 'stone', 'gold'].filter(function (k) { return r[k] != null; }).map(function (k) { return IC[k] + Math.floor(r[k]); }).join(' ') + ' \ud83d\udc64' + ME_S.ppl.length ; var e = document.getElementById('res'); if (e.textContent !== t) e.textContent = t; } catch (e) {} }
+    function resLine() { try { var r = ME_S && ME_S.res; if (!r) return; var t = ['food', 'water', 'wood', 'stone', 'gold'].filter(function (k) { return r[k] != null; }).map(function (k) { return (HI[k] || IC[k]) + Math.floor(r[k]); }).join(' ') + ' \ud83d\udc64' + ME_S.ppl.length ; var e = document.getElementById('res'); e.innerHTML = t; } catch (e) {} }
     var _ur = updateRes; updateRes = function () { _ur.apply(this, arguments); resLine(); };
     // rare things live in the menu
     var menu = document.getElementById('menu'); [['ORDERS', function () { ordOpen(true); }], ['MAP', function () { document.body.classList.toggle('map63'); }], ['FULL HUD', function () { document.body.classList.toggle('min63'); }]].forEach(function (d) {
@@ -5009,6 +5011,8 @@
       });
     }, 1000);
   })();
+  // v111: every realm (you and CPU alike) starts a fresh game with a small stash of gold and water
+  (function () { var _bg111 = beginGame; beginGame = function (mode) { _bg111.apply(this, arguments); try { allS75().forEach(function (s) { if (!s || !s.res || s.bld.length > 1) return; if ((s.res.gold || 0) < 30) s.res.gold = 30; if ((s.res.water || 0) < 20) s.res.water = 20; }); updateRes(); } catch (e) {} }; })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
     _uu36(dt); if (!BOUNDS) return;
