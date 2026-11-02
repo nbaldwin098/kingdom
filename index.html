@@ -5060,7 +5060,7 @@
     if (NEWS38.t > 0) NEWS38.t -= dt;
   }
   function drawNews38() {
-    if (NEWS38.t <= 0 || !NEWS38.msg || document.body.classList.contains('min63')) return; // v81: minimal mode never flashes the news bar var dpr = window.devicePixelRatio || 1, W = cv.width / dpr, H = cv.height / dpr, c = ctx;
+    if (NEWS38.t <= 0 || !NEWS38.msg || document.body.classList.contains('min63')) return; /* v81: minimal mode never flashes the news bar; v97: this comment used to swallow the line below */ var dpr = window.devicePixelRatio || 1, W = cv.width / dpr, H = cv.height / dpr, c = ctx;
     c.save(); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.globalAlpha = Math.min(1, NEWS38.t); c.font = 'bold ' + (W < 480 ? 10 : 12) + 'px monospace';
     var txt = '\u2605 CAPITAL NEWS: ' + NEWS38.msg, w = Math.min(W - 20, c.measureText(txt).width + 20), x = (W - w) / 2, y = W < 480 ? 150 : 118;
     if (H < 500) { var hr81 = document.getElementById('topHud').getBoundingClientRect(), mb81 = document.getElementById('menuBtn').getBoundingClientRect(); txt = '\u2605 ' + NEWS38.msg; x = hr81.right + 8; w = Math.min(Math.max(120, mb81.left - 8 - x), c.measureText(txt).width + 20); y = hr81.top + 4; } // v81: on phones news sits beside the top bar, off the hero
