@@ -3329,7 +3329,7 @@
       if (hall.L < 10 && pop >= 6 + hall.L * 3 && canPay(s, upCostOf(hall))) want.push('hall');
       if (e >= 1 && maxLv(s, 'barracks') < 3 && pop >= 12) want.push('barracks');
       if (e >= 2 && !bCount(s, 'factory')) want.push('factory'); if (e >= 2 && !bCount(s, 'garage')) want.push('garage');
-      if (e >= 3 && !bCount(s, 'airport')) want.push('airport'); if (e >= 4 && !bCount(s, 'silo')) want.push('silo');
+      if (e >= 3 && !bCount(s, 'airport')) want.push('airport'); 
       if (e >= 3 && maxLv(s, 'garage') < 3) want.push('garage'); if (e >= 3 && maxLv(s, 'airport') < 3 && bCount(s, 'airport')) want.push('airport');
       if (e >= 4 && maxLv(s, 'silo') < 3 && bCount(s, 'silo')) want.push('silo');
       if (Math.random() < 0.2) want.push(['factory', 'garage', 'airport', 'barracks'][Math.floor(Math.random() * 4)]);
@@ -3351,18 +3351,18 @@
     items = items.filter(function (it) { return !/^TRAIN (SOLDIER|KNIGHT)/.test(it.label); });
     items.forEach(function (it) { var m = /^UPGRADE (.+) L(\d+)>/.exec(it.label); if (!m) return; var k = null; for (var kk in ENAME) if (ENAME[kk] === m[1]) k = kk; if (!k) return; var L = +m[2]; if (L >= (MAXL[k] || 8)) { it.label = ENAME[k] + ' L' + L + ' (MAX)'; it.btn = 'MAX'; it.dis = true; } else it.label += ' : ' + unlockTxt(k, L + 1); });
     var head = [{ label: 'ERA: ' + ERA_N[e] + ' (TOWN HALL L' + s.bld[0].L + '/10)', btn: e < 4 ? 'NEXT: HALL L' + [3, 5, 7, 9][e] : 'FINAL ERA', dis: true, act: function () {} }];
-    ['factory', 'garage', 'airport', 'silo'].forEach(function (k) {
+    ['factory', 'garage', 'airport'].forEach(function (k) {
       var lo = lowest(s, k), busy = s.jobs.length >= 3;
       if (!bldOK(s, k)) { head.push({ label: ENAME[k] + ' (LOCKED: ' + ERA_N[BREQ[k]] + ' AGE)', btn: 'LOCKED', dis: true, act: function () {} }); return; }
       if (lo) { var c = upCostOf(lo), mx = lo.L >= MAXL[k]; head.push({ label: mx ? ENAME[k] + ' L' + lo.L + ' (MAX)' : 'UPGRADE ' + ENAME[k] + ' L' + lo.L + '>' + (lo.L + 1) + ' : ' + unlockTxt(k, lo.L + 1), btn: mx ? 'MAX' : lo.j ? 'BUILDING' : busy ? 'QUEUE FULL' : cstr(c), dis: mx || !!lo.j || busy || !canPay(s, c), act: function () { orderUpgrade(s, lo); } }); }
       if (!(k === 'silo' && bCount(s, 'silo'))) { var nc = newCostOf(s, k); head.push({ label: 'NEW ' + ENAME[k] + ' : ' + unlockTxt(k, 1), btn: busy ? 'QUEUE FULL' : cstr(nc), dis: busy || !canPay(s, nc), act: function () { orderBuild(s, k); } }); }
     });
     Object.keys(AU).forEach(function (t) { var a = AU[t], ok = canUnit(s, t); head.push({ label: 'TRAIN ' + UT[t].name + (ok ? '' : ' (NEEDS ' + ENAME[a.b] + ' L' + a.L + (a.e ? ', ' + ERA_N[a.e] + ' AGE' : '') + ')'), btn: ok ? cstr(a.c) + (a.c.food ? ' ' + a.c.food + 'F' : '') : 'LOCKED', dis: !ok || !canPay(s, a.c) || adults(s).length < 2, act: function () { if (t === 's' || t === 'k') _ts33(s, t); else trainSoldier(s, t); } }); });
-    ['missile', 'nuke'].forEach(function (k) { var d = STRK[k], key = 'me' + k, tg = strikeTargets(s)[0], lock = eraOf(s) < d.e || maxLv(s, d.b) < d.L;
+    [].forEach(function (k) { var d = STRK[k], key = 'me' + k, tg = strikeTargets(s)[0], lock = eraOf(s) < d.e || maxLv(s, d.b) < d.L;
       head.push({ label: (k === 'nuke' ? '\u2622 NUKE' : 'MISSILE') + (tg ? ' \u2192 ' + tg.name : '') + (lock ? ' (NEEDS SILO L' + d.L + ', LATE AGE)' : AGES.cd[key] > 0 ? ' (RELOAD ' + Math.ceil(AGES.cd[key]) + 'S)' : '') + (d.max ? ' [' + (AGES.used[key] || 0) + '/' + d.max + ' USED]' : ''), btn: lock ? 'LOCKED' : cstr(d.c), dis: !tg || !strikeOK(s, k), act: function () { launch(s, k, tg); } }); });
     return head.concat(items);
   };
-  if (typeof MILK !== 'undefined') ['factory', 'garage', 'airport', 'silo'].forEach(function (k) { if (MILK.indexOf(k) < 0) MILK.push(k); });
+  if (typeof MILK !== 'undefined') ['factory', 'garage', 'airport'].forEach(function (k) { if (MILK.indexOf(k) < 0) MILK.push(k); });
   var _ec33 = econTick; econTick = function (dt) { _ec33(dt); if (AGES.on) agesTick(dt); };
   // ---- ERA HUD
   (function () { var d = document.createElement('div'); d.id = 'eraHud'; d.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 8px);background:#fff;border:3px solid #000;font:bold 12px monospace;letter-spacing:2px;padding:4px 10px;z-index:20;display:none;pointer-events:none'; document.body.appendChild(d);
@@ -3570,7 +3570,7 @@
   function pickStrike(k) { STK.k = k; STK.tg = null; var sh = document.getElementById('shop'); if (sh) sh.style.display = 'none'; ORD.tab = 'army'; ORD.map = true; ordOpen(true); }
   var _rO34 = renderOrd;
   renderOrd = function () {
-    _rO34(); if (!AGES.on || ORD.tab !== 'army') return; var s = ME_S, h3 = el('h3', 'STRIKES'), cv = document.getElementById('ordMap');
+    _rO34(); if (true) return; /* v115: strikes cut */ var s = ME_S, h3 = el('h3', 'STRIKES'), cv = document.getElementById('ordMap');
     var box = document.createElement('div'); box.appendChild(h3);
     box.appendChild(row(btn('MISSILE', function () { STK.k = STK.k === 'missile' ? null : 'missile'; STK.tg = null; ORD.map = true; }, eraOf(s) < 4, STK.k === 'missile'), btn('\u2622 NUKE', function () { STK.k = STK.k === 'nuke' ? null : 'nuke'; STK.tg = null; ORD.map = true; }, maxLv(s, 'silo') < 3, STK.k === 'nuke')));
     if (STK.k) { var d = STRK[STK.k], key = 'me' + STK.k;
@@ -3611,7 +3611,7 @@
   BREQ.palisade = 0; BREQ.bunker = 2; BREQ.aagun = 3; BREQ.mdef = 4; MAXL.palisade = 4; MAXL.bunker = 5; MAXL.aagun = 5; MAXL.mdef = 4;
   UNL.palisade = ['', 'WOOD STAKES: STOPS RAIDERS', 'DITCH', 'GATEHOUSE', 'DOUBLE RING']; UNL.bunker = ['', 'MG NEST', 'CONCRETE', 'ANTI-TANK GUN', 'DEEP BUNKER', 'FORTRESS LINE'];
   UNL.aagun = ['', 'FLAK', 'RADAR FLAK', 'SAM BATTERY', 'MOBILE SAM', 'IRON DOME']; UNL.mdef = ['', 'INTERCEPTOR 35%', 'INTERCEPTOR 70%', 'INTERCEPTOR 90% + NUKE 30%', 'SHIELD: NUKE 50%'];
-  ['palisade', 'bunker', 'aagun', 'mdef'].forEach(function (k) { if (MILK.indexOf(k) < 0) MILK.push(k); });
+  ['palisade', 'bunker', 'aagun'].forEach(function (k) { if (MILK.indexOf(k) < 0) MILK.push(k); });
   // counter classes and the damage matrix (attacker -> defender)
   function cls(u) { if (!u) return 'swd'; if (u.isPlayer) return 'swd'; var t = u.t; return t === 's' ? (u.bow ? 'arc' : 'swd') : t === 'k' ? 'cav' : t === 'p' ? 'pik' : t === 'm' ? 'mus' : t === 'n' ? 'art' : t === 'q' ? 'rpg' : t === 'v' || t === 'r' ? 'arm' : t === 't' ? 'tnk' : t === 'h' ? 'hel' : t === 'j' ? 'jet' : UT[t] && UT[t].sea ? 'shp' : 'swd'; }
   var CN = { swd: 'SWORDS', arc: 'ARCHERS', cav: 'CAVALRY', pik: 'PIKES', mus: 'MUSKETS', art: 'CANNON', rpg: 'RPG', arm: 'ARMOR CARS', tnk: 'TANKS', hel: 'HELIS', jet: 'JETS', shp: 'SHIPS', aa: 'AA', bnk: 'BUNKERS', wal: 'WALLS', pal: 'PALISADES' };
@@ -5029,6 +5029,8 @@
   (function () { var _es112 = econStep; econStep = function (s, dt) { _es112(s, dt); try { if (!s || !s.res || !s.ppl || !(dt > 0)) return; var lv = function (k) { var n = 0; s.bld.forEach(function (b) { if (b.k === k && b.L > 0) n += b.L; }); return n; }; var tx = 0.12 + 0.015 * Math.min(12, s.ppl.length) + 0.06 * Math.min(4, lv('quarry')) + 0.1 * Math.min(4, lv('market')) + 0.12 * Math.min(4, lv('bank')); s.res.gold = (s.res.gold || 0) + tx * dt; s.tax112 = tx; } catch (e) {} }; })();
   // v114: settlers' rush - every realm (player and CPU alike) builds fast until it has 8 finished buildings
   (function () { var _es114 = econStep; econStep = function (s, dt) { _es114(s, dt); try { if (!s || !s.jobs || !s.jobs[0] || !s.jobs[0].j || !(dt > 0)) return; var fin = s.bld.filter(function (b) { return b.L > 0; }).length; if (fin < 8) s.jobs[0].j.done += 3 * dt; } catch (e) {} }; })();
+  // v115: cut nukes, missiles, silos, missile defense and aircraft carriers (simpler game)
+  (function () { try { delete AU.w; } catch (e) {} var _ob115 = orderBuild; orderBuild = function (s, k) { if (k === 'silo' || k === 'mdef') return false; return _ob115.apply(this, arguments); }; launch = function () { return false; }; var _cu115 = canUnit; canUnit = function (s, t) { return t !== 'w' && _cu115(s, t); }; })();
   // v111: every realm (you and CPU alike) starts a fresh game with a small stash of gold and water
   (function () { var _bg111 = beginGame; beginGame = function (mode) { _bg111.apply(this, arguments); try { allS75().forEach(function (s) { if (!s || !s.res || s.bld.length > 1) return; if ((s.res.gold || 0) < 30) s.res.gold = 30; if ((s.res.water || 0) < 20) s.res.water = 20; if ((s.res.wood || 0) < 90) s.res.wood = 90; if ((s.res.stone || 0) < 50) s.res.stone = 50; }); updateRes(); } catch (e) {} }; })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
