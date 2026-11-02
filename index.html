@@ -5538,7 +5538,7 @@ window.B137 = (function () {
   (function () { var _bg119 = beginGame; beginGame = function (mode) { if (mode && mode !== 'free' && mode !== 'duel') mode = 'duel'; return _bg119.call(this, mode); };
     window.__save119 = function () { [function () { saveEcon(); }, function () { saveHorse(); }, function () { saveRes(); }, function () { savePop(); }, function () { saveArmy(); }].forEach(function (f) { try { f(); } catch (e) {} }); }; })();
   // v131: a lake near home in FREE so boats have water (B/W sea art reused)
-  (function () { function lake(x, y) { if (MODE !== 'free' || typeof city === 'undefined') return false; var dx = x - (city.x + 1700), dy = (y - (city.y + 250)) * 1.4; return dx * dx + dy * dy < 420 * 420; }
+  (function () { function lake(x, y) { if ((MODE !== 'free' && MODE !== 'duel') || typeof city === 'undefined' || !city) return false; var dx = x - (city.x + 1700), dy = (y - (city.y + 250)) * 1.4; return dx * dx + dy * dy < 420 * 420; }
     var _z = zone; zone = function (x, y) { if (lake(x, y)) return 1; return _z(x, y); }; var _il = isLand; isLand = function (x, y) { if (lake(x, y)) return false; return _il(x, y); }; window.LAKE131 = lake; })();
   // ===== v126: POST OFFICE + mail carriers on the roads, ELECTIONS at the hall, SCHOOL. Same rules for every realm =====
   (function () {
@@ -6834,7 +6834,7 @@ window.B137 = (function () {
     var COST = { stable: [30, 10, 0], garage: [40, 25, 10], port: [50, 20, 15] }, NAME = { stable: 'STABLE', garage: 'GARAGE', port: 'PORT' };
     var portP = null, portT = 0, portT2 = 0;
     function sites() {
-      if (!portP && window.BW130 && performance.now() - portT > 5000) { portT = performance.now(); for (var r = 300; r <= 4000 && !portP; r += 100) for (var a = 0; a < 32; a++) { var x = city.x + Math.cos(a * 0.196) * r, y = city.y + Math.sin(a * 0.196) * r; if (BW130(x, y)) { var x2 = city.x + Math.cos(a * 0.196) * (r - 120), y2 = city.y + Math.sin(a * 0.196) * (r - 120); portP = { x: x2, y: y2, wx: x, wy: y }; break; } } }
+      if (!portP && window.BW130 && performance.now() - portT > 5000) { portT = performance.now(); for (var r = 300; r <= 4000 && !portP; r += 100) for (var a = 0; a < 32; a++) { var x = city.x + Math.cos(a * 0.196) * r, y = city.y + Math.sin(a * 0.196) * r; if (BW130(x, y)) { var x2 = city.x + Math.cos(a * 0.196) * (r - 120), y2 = city.y + Math.sin(a * 0.196) * (r - 120); portP = { x: x2, y: y2, wx: city.x + Math.cos(a * 0.196) * (r + 110), wy: city.y + Math.sin(a * 0.196) * (r + 110) }; break; } } }
       if (!portP && window.MAP136 && MAP136.feat && performance.now() - (portT2 || 0) > 5000) { portT2 = performance.now(); try { var Cc = MAP136.cell, ci = Math.floor(city.x / Cc), cj = Math.floor(city.y / Cc), bl = null, bd = 1e12; for (var ii = ci - 4; ii <= ci + 4; ii++) for (var jj = cj - 4; jj <= cj + 4; jj++) { var f = MAP136.feat(ii, jj); if (f && f.k === 'lake') { var d = Math.hypot(f.x - city.x, f.y - city.y); if (d < bd) { bd = d; bl = f; } } } if (bl) { var ang = Math.atan2(city.y - bl.y, city.x - bl.x), ex = Math.cos(ang), ey = Math.sin(ang), wx = bl.x + ex * bl.rx * 0.7, wy = bl.y + ey * bl.ry * 0.7; portP = { x: bl.x + ex * (bl.rx + 150), y: bl.y + ey * (bl.ry + 120), wx: wx, wy: wy, lake: 1 }; } } catch (e) {} }
       var o = { stable: { x: city.x - 380, y: city.y + 140 }, garage: { x: city.x + 400, y: city.y + 160 } }; if (portP) o.port = portP; return o;
     }
@@ -6919,8 +6919,12 @@ window.B137 = (function () {
   // ===== v147 BOATS ON WATER ONLY (W147): one water test; every boat/ship is snapped to water or not drawn =====
   (function () {
     function lake(x, y) { if (!window.MAP136 || !MAP136.FT) return false; var hit = false; MAP136.FT.forEach(function (f) { if (!hit && f && f.k === 'lake') { var dx = (x - f.x) / f.rx, dy = (y - f.y) / (f.ry || f.rx * 0.62); if (dx * dx + dy * dy < 0.85) hit = true; } }); return hit; }
-    function W(x, y) { /* v147b: VISIBLE water only - what the ground painter fills blue (field37 shallows+) or a drawn lake; invisible zone water no longer counts */ try { if (BOUNDS && field37(x, y) >= (MODE === 'islands' ? 0.5 : 1)) return true; } catch (e) {} return lake(x, y); }
+    function W(x, y) { /* v147b: VISIBLE water only - what the ground painter fills blue (field37 shallows+) or a drawn lake; invisible zone water no longer counts */ try { if (BOUNDS && field37(x, y) >= (MODE === 'islands' ? 0.5 : 1)) return true; } catch (e) {} if (window.LAKE131 && typeof city !== 'undefined' && city) { var hx = (x - (city.x + 1700)) / 420, hy = (y - (city.y + 250)) * 1.4 / 420; if (hx * hx + hy * hy < 0.85) return true; } return lake(x, y); }
     window.W147 = W;
+    // v148: the home pond (LAKE131) is now PAINTED, so it is real visible water and a port fits near home in FREE and 1V1
+    var _dgP = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dgP.apply(this, arguments); try { if (!started || typeof city === 'undefined' || !city || (MODE !== 'free' && MODE !== 'duel')) return; var cx = city.x + 1700, cy = city.y + 250, rx = 420, ry = 300; if (cx + rx + 60 < x0 || cx - rx - 60 > x1 || cy + ry + 60 < y0 || cy - ry - 60 > y1) return; var c = ctx, X = cx - camX, Y = cy - camY, t = performance.now() / 1000;
+      c.fillStyle = '#d9c48c'; c.beginPath(); c.ellipse(X, Y, rx + 26, ry + 18, 0, 0, 7); c.fill(); c.fillStyle = '#7fb4c6'; c.beginPath(); c.ellipse(X, Y, rx, ry, 0, 0, 7); c.fill(); c.fillStyle = '#4f8aa8'; c.beginPath(); c.ellipse(X + 10, Y + 6, rx * 0.7, ry * 0.62, 0, 0, 7); c.fill();
+      c.strokeStyle = 'rgba(240,250,255,.6)'; c.lineWidth = 2; c.beginPath(); for (var q = 0; q < 6; q++) { var wx = X + Math.cos(q * 2.1) * rx * 0.55, wy = Y + Math.sin(q * 1.7) * ry * 0.5 + Math.sin(t + q) * 3; c.moveTo(wx - 18, wy); c.quadraticCurveTo(wx - 9, wy - 5, wx, wy); c.quadraticCurveTo(wx + 9, wy + 5, wx + 18, wy); } c.stroke(); } catch (e) {} };
     function NW(x, y, maxR) { if (W(x, y)) return { x: x, y: y }; for (var r = 40; r <= (maxR || 3000); r += (r < 600 ? 40 : 120)) { var n = Math.max(12, Math.floor(r / 40)); for (var a = 0; a < n; a++) { var t = a / n * 6.2832, qx = x + Math.cos(t) * r, qy = y + Math.sin(t) * r; if (W(qx, qy)) return { x: qx, y: qy }; } } return null; }
     window.NW147 = NW;
     function isBoatU(u) { return u && (u.sea || (typeof UT !== 'undefined' && UT[u.t] && UT[u.t].sea)); }
@@ -6986,5 +6990,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v147-boats --></body>
+<!-- v148-pond --></body>
 </html>
