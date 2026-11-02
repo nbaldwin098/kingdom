@@ -5011,6 +5011,8 @@
       });
     }, 1000);
   })();
+  // v112: steady taxes for every realm (player and CPU alike): ~0.15-0.3 gold/s early, more with quarry, market and bank
+  (function () { var _es112 = econStep; econStep = function (s, dt) { _es112(s, dt); try { if (!s || !s.res || !s.ppl || !(dt > 0)) return; var lv = function (k) { var n = 0; s.bld.forEach(function (b) { if (b.k === k && b.L > 0) n += b.L; }); return n; }; var tx = 0.12 + 0.015 * Math.min(12, s.ppl.length) + 0.06 * Math.min(4, lv('quarry')) + 0.1 * Math.min(4, lv('market')) + 0.12 * Math.min(4, lv('bank')); s.res.gold = (s.res.gold || 0) + tx * dt; s.tax112 = tx; } catch (e) {} }; })();
   // v111: every realm (you and CPU alike) starts a fresh game with a small stash of gold and water
   (function () { var _bg111 = beginGame; beginGame = function (mode) { _bg111.apply(this, arguments); try { allS75().forEach(function (s) { if (!s || !s.res || s.bld.length > 1) return; if ((s.res.gold || 0) < 30) s.res.gold = 30; if ((s.res.water || 0) < 20) s.res.water = 20; }); updateRes(); } catch (e) {} }; })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
