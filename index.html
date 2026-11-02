@@ -6663,7 +6663,9 @@ window.B137 = (function () {
   (function () {
     var SG = window.SG142 = { on: true, cd: 0, flash: 0, pel: [], shots: 0 };
     SYN.boom142 = function (o, t) { noise(o, t, 0.35, 1.2, 'lowpass', 900); tone(o, t, 'sine', 110, 40, 0.3, 0.9); noise(o, t + 0.45, 0.06, 0.35, 'highpass', 2500); noise(o, t + 0.6, 0.05, 0.35, 'highpass', 2200); return 0.7; };
-    function fire() { if (SG.cd > 0) return; SG.cd = 0.9; SG.flash = 0.09; SG.shots++; var mh = mounted() ? 46 : 30, ox = px + face * 34, oy = py - mh, n = 5 + Math.floor(Math.random() * 3);
+    function steel() { return ME_S ? (ME_S.steel142 == null ? (ME_S.steel142 = 12) : ME_S.steel142) : 0; }
+    SG.steel = steel; SYN.click142 = function (o, t) { tone(o, t, 'square', 2400, 2200, 0.03, 0.25); noise(o, t + 0.07, 0.03, 0.3, 'highpass', 3000); return 0.12; };
+    function fire() { if (SG.cd > 0) return; if (steel() < 1) { SG.cd = 0.4; try { sfx('click142', px, py, 1); } catch (e) {} showToast('*CLICK* OUT OF STEEL - FORGE SHELLS IN THE SHOP (BLACKSMITH)'); return; } ME_S.steel142--; lab(); SG.cd = 0.9; SG.flash = 0.09; SG.shots++; var mh = mounted() ? 46 : 30, ox = px + face * 34, oy = py - mh, n = 5 + Math.floor(Math.random() * 3);
       for (var i = 0; i < n; i++) { var a = (Math.random() - 0.5) * 0.5, up = -0.25 * Math.random(); SG.pel.push({ x: ox, y: oy, vx: face * Math.cos(a) * 1100, vy: Math.sin(a) * 1100 + up * 900, life: 0.3, hit: {} }); }
       try { sfx('boom142', px, py, 1); } catch (e) {} KICK46 = Math.max(KICK46 || 0, 0.12);
       // close blast: heavy damage to anything right in front
@@ -6689,7 +6691,8 @@ window.B137 = (function () {
     var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); try { if (!started) return; if (SG.on) items.push({ y: py + 0.5, x: px, y2: py, fn: function (sx, sy) { gunArt(ctx, sx + face * 8, sy - (mounted() ? 46 : 28)); } });
         SG.pel.forEach(function (p) { items.push({ y: p.y + 3000, x: p.x, y2: p.y, fn: function (sx, sy) { ctx.fillStyle = '#3a2a1a'; ctx.fillRect(sx - 2, sy - 3000 - 2, 4, 4); ctx.strokeStyle = 'rgba(255,220,140,.6)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(sx, sy - 3000); ctx.lineTo(sx - p.vx * 0.02, sy - 3000 - p.vy * 0.02); ctx.stroke(); } }); }); } catch (e) {} };
     // toggle: tap button + G key
-    var bt = document.createElement('button'); bt.id = 'sgBtn'; function lab() { bt.textContent = SG.on ? '\ud83d\udd2b SHOTGUN' : '\u2694 MELEE'; } lab();
+    var bt = document.createElement('button'); bt.id = 'sgBtn'; function lab() { bt.textContent = (SG.on ? '\ud83d\udd2b SHOTGUN' : '\u2694 MELEE') + ' \u2699' + steel(); bt.style.color = steel() < 1 ? '#b03020' : '#2a1a0a'; } SG.lab = lab; setInterval(lab, 1000);
+    var _si142 = shopItems; shopItems = function () { var it = _si142.apply(this, arguments); try { it.push({ label: '\u2699 BLACKSMITH: FORGE 6 STEEL SHELLS (1 STEEL = 1 SHOTGUN SHOT) \u00b7 HAVE ' + steel(), btn: '6 STONE 3 GOLD', dis: stone < 6 || gold < 3, act: function () { stone -= 6; gold -= 3; ME_S.steel142 = steel() + 6; lab(); updateRes(); showToast('+6 STEEL SHELLS'); } }); } catch (e) {} return it; };
     bt.style.cssText = 'font:bold 12px monospace;padding:6px 10px;background:#f2ead8;color:#2a1a0a;border:2px solid #6b4a26;border-radius:6px;margin-right:6px;pointer-events:auto';
     function tog(e) { if (e) { e.preventDefault(); e.stopPropagation(); } SG.on = !SG.on; lab(); showToast(SG.on ? 'SHOTGUN OUT - 6 PELLETS, SHORT RANGE, SHOOTS BIRDS' : 'MELEE WEAPON OUT'); }
     bt.addEventListener('click', tog); bt.addEventListener('touchstart', tog, { passive: false });
