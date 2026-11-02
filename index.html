@@ -2554,14 +2554,14 @@
       // war: only with a clear edge AND a reason, after the economy is up
       f.waveT -= step; if (f.waveT > 0) return;
       f.waveT = P.cd[0] + Math.random() * (P.cd[1] - P.cd[0]);
-      if (simT - (f.born || 0) < 90 || s.ppl.length < P.minPop) return;
+      if (simT - (f.born || 0) < 90 || s.ppl.length < Math.min(P.minPop, 5)) return;
       var mine = units.filter(function (u) { return u.f === f.id && u.t !== 'c' && !u.goal && !u.royal; }), myS = fStr(f.id), sendS = myS * (1 - P.guard);
       var best = null, bs = 0;
       [me].concat(factions).forEach(function (o) {
-        if (o === f || !o.alive || (MODE === 'duel' && !o.isMe)) return; var d = Math.hypot(o.x - f.x, o.y - f.y); if (d > 7000) return;
-        var os = fStr(o.id, o.x, o.y, 1500) + Math.min(o.hallObj.hp || 0, 400) * 0.5 + (o.isMe ? 300 : 0), os2 = o.isMe ? ME_S : o.st;
+        if (o === f || !o.alive || (MODE === 'duel' && !o.isMe)) return; var d = Math.hypot(o.x - f.x, o.y - f.y); if (d > (o.isMe ? 12000 : 7000)) return;
+        var os = fStr(o.id, o.x, o.y, 1500) + Math.min(o.hallObj.hp || 0, 400) * 0.5 + (o.isMe ? 60 : 0), os2 = o.isMe ? ME_S : o.st;
         if (sendS < os * P.ratio) return; // no hopeless attacks
-        var reason = (f.grudge[o.id] || 0) * 3 + (os2 ? os2.res.gold / 20 + os2.ppl.length / 4 + (window.__v29 ? __v29.lootable(os2) / 8 : 0) : 0) + (os < myS * 0.3 ? 10 : 0);
+        var reason = (f.grudge[o.id] || 0) * 3 + (os2 ? os2.res.gold / 20 + os2.ppl.length / 4 + (window.__v29 ? __v29.lootable(os2) / 8 : 0) : 0) + (os < myS * 0.3 ? 10 : 0) + (o.isMe ? 4 : 0);
         if (reason < 4) return; var sc = reason / (1 + d / 3000); if (sc > bs) { bs = sc; best = o; }
       });
       if (!best) return;
@@ -4898,8 +4898,8 @@
       if (!s || !s.bld || !s.bld[0]) return [];
       var c = RC.get(s), key = s.bld.length + ':' + Math.round(homeXY(s).x);
       if (c && c.k === key) return c.g;
-      var h = bldPos(s, s.bld[0]), ry = h.y + 34, g = [];
-      s.bld.forEach(function (b, i) { if (!i || b.hp <= 0) return; var p = bldPos(s, b); g.push([h.x, ry, p.x, ry]); g.push([p.x, ry, p.x, p.y + 24]); });
+      var h = bldPos(s, s.bld[0]), ry = h.y + 110, g = [[h.x, h.y + 40, h.x, ry]];
+      s.bld.forEach(function (b, i) { if (!i || b.hp <= 0) return; var p = bldPos(s, b), vx = Math.abs(p.x - h.x) < 130 ? h.x + (p.x < h.x ? -130 : 130) : p.x; g.push([h.x, ry, vx, ry]); g.push([vx, ry, vx, p.y + 24]); if (vx !== p.x) g.push([vx, p.y + 24, p.x, p.y + 24]); });
       RC.set(s, { k: key, g: g }); return g;
     }
     function nearSegs(x, y, R) { var out = []; allS75().forEach(function (s) { if (!s.bld || !s.bld[0]) return; var h = bldPos(s, s.bld[0]); if (Math.abs(h.x - x) > R + 1500 || Math.abs(h.y - y) > R + 1500) return; segsOf(s).forEach(function (g) { out.push({ g: g, s: s }); }); }); return out; }
@@ -4907,16 +4907,17 @@
     var cache = { t: 0, l: [] };
     function onRoad(x, y) { var l = cache.l; for (var i = 0; i < l.length; i++) if (dSeg(x, y, l[i].g) < 20) return true; return false; }
     window.onRoad102 = onRoad;
+    window.T102 = { traffic: function (s) { return trafficOf(s); }, segs: function (s) { return segsOf(s); } };
     // ---- player vehicle (same walk-up / enter / exit idea as the horse)
-    var VK = [{ n: 'CART', c: 12, m: 2.5 }, { n: 'WAGON', c: 20, m: 2.8 }, { n: 'CAR', c: 40, m: 3.6 }, { n: 'TRUCK', c: 60, m: 3.2 }, { n: 'JEEP', c: 80, m: 4 }]; // v104: every vehicle now clearly beats the starting horse (260)
+    var VK = [{ n: 'CART', c: 12, m: 2.5 }, { n: 'WAGON', c: 20, m: 2.8 }, { n: 'CAR', c: 40, m: 3.6 }, { n: 'TRUCK', c: 60, m: 3.2 }, { n: 'JEEP', c: 80, m: 4 }, { n: 'TANK', c: 150, m: 2.6, b: 'garage' }, { n: 'BOAT', c: 60, m: 3.2, b: 'dock' }, { n: 'PLANE', c: 300, m: 5.5, b: 'airport' }];
     var V = { k: -1, on: false, x: 0, y: 0 };
     try { var sv = JSON.parse(localStorage.getItem('kingdom-veh-v1') || 'null'); if (sv && sv.k >= 0) V = sv; } catch (e) {}
     function saveV() { try { localStorage.setItem('kingdom-veh-v1', JSON.stringify(V)); } catch (e) {} }
-    window.SP102 = function (base) { var m = V.on && V.k >= 0 ? (130 * VK[V.k].m) / base : 1; if (V.on && V.k >= 0) base = 130 * VK[V.k].m; return base * (onRoad(px, py) ? 1.6 : 1); };
+    window.SP102 = function (base) { var m = V.on && V.k >= 0 ? (130 * VK[V.k].m) / base : 1; if (V.on && V.k >= 0) base = 130 * VK[V.k].m; return base * (onRoad(px, py) && V.k !== 7 && V.k !== 6 ? 1.6 : 1); };
     var vb = document.createElement('button'); vb.id = 'vehBtn'; vb.style.display = 'none'; var row = mountBtn && mountBtn.parentNode; if (row) row.appendChild(vb);
     function nearV() { return V.k >= 0 && !V.on && Math.hypot(V.x - px, V.y - py) < 90; }
     function vUi() { var show = V.k >= 0 && (V.on || nearV()); vb.style.display = show ? '' : 'none'; vb.textContent = V.on ? 'EXIT ' + VK[V.k].n : 'DRIVE ' + VK[V.k].n; if (mountBtn) mountBtn.style.display = V.on ? 'none' : ''; }
-    function toggleV() { if (V.k < 0) return; if (V.on) { V.on = false; V.x = px + face * 40; V.y = py; showToast(VK[V.k].n + ' PARKED'); } else if (nearV()) { V.on = true; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; steed.face = face; saveHorse(); } showToast('DRIVING THE ' + VK[V.k].n + (onRoad(px, py) ? '' : ' - ROADS ARE FASTER')); } saveV(); vUi(); }
+    function toggleV() { if (V.k < 0) return; if (V.on) { if (_bw(px, py)) { showToast('LAND FIRST - CAN\'T STEP OUT OVER WATER'); return; } V.on = false; V.x = px + face * 40; V.y = py; showToast(VK[V.k].n + ' PARKED'); } else if (nearV()) { V.on = true; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; steed.face = face; saveHorse(); } showToast('DRIVING THE ' + VK[V.k].n + (onRoad(px, py) ? '' : ' - ROADS ARE FASTER')); } saveV(); vUi(); }
     vb.addEventListener('click', function (e) { e.stopPropagation(); toggleV(); });
     addEventListener('keydown', function (e) { if ((e.key === 'v' || e.key === 'V') && started) toggleV(); });
     // ---- art (era-appropriate, B/W)
@@ -4933,6 +4934,9 @@
         c.fillStyle = '#000'; c.fillRect(6, -24, 18, 16); c.fillStyle = '#fff'; c.fillRect(12, -21, 9, 6);
         if (load) { c.fillStyle = fg; c.fillRect(-24, -38, 10, 8); c.fillRect(-12, -38, 10, 8); }
         wheel(c, -18, -6, 6); wheel(c, 14, -6, 6);
+      } else if (k === 5) { c.fillStyle = '#000'; c.fillRect(-26, -20, 52, 14); c.fillRect(-12, -30, 22, 10); c.fillRect(8, -27, 26, 4); c.fillStyle = '#fff'; for (var w = -20; w <= 20; w += 10) { c.beginPath(); c.arc(w, -8, 3, 0, 7); c.fill(); }
+      } else if (k === 6) { c.fillStyle = '#000'; c.beginPath(); c.moveTo(-28, -16); c.lineTo(30, -16); c.lineTo(20, -4); c.lineTo(-22, -4); c.closePath(); c.fill(); c.fillRect(-8, -28, 4, 12); c.fillStyle = '#fff'; c.fillRect(-14, -13, 6, 4); c.fillRect(0, -13, 6, 4);
+      } else if (k === 7) { c.fillStyle = '#000'; c.beginPath(); c.moveTo(-30, -26); c.lineTo(28, -26); c.lineTo(34, -22); c.lineTo(28, -18); c.lineTo(-30, -18); c.closePath(); c.fill(); c.beginPath(); c.moveTo(-6, -22); c.lineTo(-16, -6); c.lineTo(-8, -6); c.lineTo(8, -22); c.fill(); c.beginPath(); c.moveTo(-30, -26); c.lineTo(-36, -36); c.lineTo(-24, -26); c.fill(); c.fillStyle = 'rgba(0,0,0,0.2)'; c.beginPath(); c.ellipse(0, 0, 24, 4, 0, 0, 7); c.fill();
       } else { // car / jeep
         c.fillStyle = '#000'; c.beginPath(); c.moveTo(-26, -8); c.lineTo(-26, -18); c.lineTo(-12, -20); c.lineTo(-6, -30); c.lineTo(10, -30); c.lineTo(16, -20); c.lineTo(26, -18); c.lineTo(26, -8); c.closePath(); c.fill();
         c.fillStyle = '#fff'; c.fillRect(-4, -27, 6, 6); c.fillRect(5, -27, 6, 6); if (k === 4) { c.fillRect(-26, -14, 52, 2); }
@@ -4940,6 +4944,7 @@
       }
       c.restore();
     }
+    var _bw = blockedWorld; blockedWorld = function (x, y) { if (V.on && (V.k === 6 || V.k === 7)) return !!BOUNDS && (x < BOUNDS.x0 || x > BOUNDS.x1 || y < BOUNDS.y0 || y > BOUNDS.y1); return _bw(x, y); };
     window.DV102 = function (c, sx, sy, f, mv) { if (!V.on || V.k < 0) return false; vehArt(c, V.k, sx, sy + (mv ? Math.sin(performance.now() / 60) : 0), f); c.fillStyle = '#000'; c.beginPath(); c.arc(sx + f * (V.k <= 1 ? -2 : 3), sy - (V.k <= 1 ? 30 : 34), 5, 0, 7); c.fill(); return true; };
     // ---- villager / worker traffic on roads (every nation, same rule): trucks haul goods home
     var TR = new Map();
@@ -4967,7 +4972,7 @@
     updateUnits = function (dt) { var b = units.map(function (u) { return [u.x, u.y]; }); _uu(dt); for (var i = 0; i < b.length && i < units.length; i++) { var u = units[i]; if (u.hp > 0 && (u.x !== b[i][0] || u.y !== b[i][1]) && onRoad(u.x, u.y)) { u.x += (u.x - b[i][0]) * 0.5; u.y += (u.y - b[i][1]) * 0.5; } } };
     // ---- buy a vehicle at the market (GEAR tab)
     var _si = shopItems;
-    shopItems = function () { var it = _si.apply(this, arguments); try { var e = eraOf(ME_S), k = e >= 3 ? 4 : e >= 2 ? 2 : e >= 1 ? 1 : 0; var vk = VK[k]; it.push({ label: 'VEHICLE: ' + vk.n + (V.k >= 0 ? ' (YOU HAVE A ' + VK[V.k].n + ')' : ''), btn: V.k === k ? 'OWNED' : vk.c + ' GOLD', dis: V.k === k || gold < vk.c, act: function () { gold -= vk.c; V = { k: k, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + vk.n + ' - DRIVING' + (matchMedia('(pointer:coarse)').matches ? '' : ' (V TO EXIT)')); } }); if (e >= 2) { var tc = 30; it.push({ label: 'HAUL TRUCK (HAULS GOODS ON ROADS)', btn: tc + ' GOLD', dis: gold < tc, act: function () { gold -= tc; ME_S.xtr102 = (ME_S.xtr102 || 0) + 1; showToast('TRUCK HAULING GOODS'); } }); } } catch (e) {} return it; };
+    shopItems = function () { var it = _si.apply(this, arguments); try { var e = eraOf(ME_S), k = e >= 3 ? 4 : e >= 2 ? 2 : e >= 1 ? 1 : 0; var vk = VK[k]; it.push({ label: 'VEHICLE: ' + vk.n + (V.k >= 0 ? ' (YOU HAVE A ' + VK[V.k].n + ')' : ''), btn: V.k === k ? 'OWNED' : vk.c + ' GOLD', dis: V.k === k || gold < vk.c, act: function () { gold -= vk.c; V = { k: k, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + vk.n + ' - DRIVING' + (matchMedia('(pointer:coarse)').matches ? '' : ' (V TO EXIT)')); } }); [5, 6, 7].forEach(function (k2) { var v2 = VK[k2]; if (!bCount(ME_S, v2.b)) return; it.push({ label: 'VEHICLE: ' + v2.n + ' (FROM YOUR ' + v2.b.toUpperCase() + ')', btn: V.k === k2 ? 'OWNED' : v2.c + ' GOLD', dis: V.k === k2 || gold < v2.c, act: function () { gold -= v2.c; V = { k: k2, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + v2.n + ' - V TO EXIT' + (k2 >= 6 ? ' (CROSSES WATER)' : '')); } }); }); it.push({ label: 'TRAIN MILITIA (UP TO 2 ADULTS, 6 FOOD, NO BARRACKS)', btn: '6 FOOD', dis: !window.MIL104 || !MIL104.ok(ME_S), act: function () { if (MIL104.raise(ME_S)) showToast('2 MILITIA RAISED'); } }); if (e >= 2) { var tc = 30; it.push({ label: 'HAUL TRUCK (HAULS GOODS ON ROADS)', btn: tc + ' GOLD', dis: gold < tc, act: function () { gold -= tc; ME_S.xtr102 = (ME_S.xtr102 || 0) + 1; showToast('TRUCK HAULING GOODS'); } }); } } catch (e) {} return it; };
   })();
   // v99: market split into small tabs, one visible at a time (compact for landscape phones)
   (function () {
@@ -4983,6 +4988,25 @@
     var _rss = renderShopSoft; renderShopSoft = function () { filt = 1; try { return _rss.apply(this, arguments); } finally { filt = 0; } };
     var st = document.createElement('style'); st.textContent = '#shopTabs99{display:flex;gap:4px;margin:4px 0}#shopTabs99 button{flex:1;min-width:0;font:bold 11px monospace;padding:5px 1px;background:#fff;border:2px solid #000}#shopTabs99 button.on{background:#000;color:#fff}@media (max-height:500px){#shop{max-height:92vh;overflow:auto;padding:6px 8px!important}#shop h2{margin:0 0 2px;font-size:16px}#shopRows .row{padding:2px 0}#shopRows .row button{padding:3px 6px}}';
     document.head.appendChild(st);
+  })();
+  // v104 militia + raids: any realm (player or CPU, same rule) can arm 2 adults as militia for 6 food; CPU realms raid the player on a timer
+  (function () {
+    function pool(s) { return adults(s).filter(function (p) { return !p.sick; }); }
+    var MIL = { ok: function (s) { return s && pool(s).length >= 2 && canPay(s, { food: 6 }); }, raise: function (s) { if (!MIL.ok(s)) return false; pay(s, { food: 6 }); var pl = pool(s); for (var i = 0; i < Math.min(2, pl.length - 1); i++) { var p = pl[pl.length - 1 - i]; p.sol = 's'; p.job = 'soldier'; spawnSoldier(s, p); } if (s === ME_S) { try { updatePop(); } catch (e) {} } return true; } };
+    window.MIL104 = MIL; window.RAID104 = { n: 0, last: null };
+    setInterval(function () {
+      if (!started || MODE === 'free' || !me || !me.hallObj) return;
+      factions.forEach(function (f) {
+        if (!f.alive || !f.st) return; if (f.rt104 === undefined) f.rt104 = (MODE === 'duel' ? 140 : 200) + Math.random() * 60;
+        f.rt104 -= 1; if (f.rt104 > 0) return; f.rt104 = (MODE === 'duel' ? 150 : 220) + Math.random() * 80;
+        if (MODE !== 'duel' && Math.hypot(me.x - f.x, me.y - f.y) > 9000) return;
+       
+        var free = function () { return units.filter(function (u) { return u.f === f.id && u.t !== 'c' && !u.goal && !u.royal && u.hp > 0; }); };
+        if (free().length < 2) MIL.raise(f.st); var rd = free(); if (rd.length < 2) { var g = units.filter(function (u) { return u.f === f.id && u.royal && !u.goal && u.hp > 0; }); while (rd.length < 2 && g.length > 1) rd.push(g.pop()); } if (rd.length < 2) return;
+        var q = newSquad(f.id); q.fresh = false; q.war = true; rd.forEach(function (u) { if (u.sq) sqDrop(u.sq, u); sqAdd(q, u); u.goal = me.hallObj; }); sqOrder(q, 'attack', 0, 0, me.hallObj); q.n0 = rd.length;
+        RAID104.n++; RAID104.last = { f: f.name, n: rd.length }; showToast(f.name + ' RAIDERS (' + rd.length + ') ARE COMING!');
+      });
+    }, 1000);
   })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
