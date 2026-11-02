@@ -1704,7 +1704,7 @@
       if (toastT > 0) { ctx.font = 'bold 18px monospace'; ctx.textAlign = 'center'; var tw = ctx.measureText(toast).width; ctx.fillStyle = '#000'; var thb = document.getElementById('topHud').getBoundingClientRect().bottom; var ty = Math.round((H < 500 ? Math.round(H / 2 + 46) /* v111: phone toasts under the hero, not over the hall */ : W < 600 ? thb + 100 : thb + 12)) /* v88: PC toasts sit under the top bar, not over the hero */; var TL = [toast], lh = 30; if (tw + 20 > W - 20) { ctx.font = 'bold 13px monospace'; lh = 20; TL = []; var cur = ''; toast.split(' ').forEach(function (w) { var t2 = cur ? cur + ' ' + w : w; if (cur && ctx.measureText(t2).width > W - 50) { TL.push(cur); cur = w; } else cur = t2; }); if (cur) TL.push(cur); tw = 0; TL.forEach(function (l) { tw = Math.max(tw, ctx.measureText(l).width); }); } ctx.fillRect(W / 2 - tw / 2 - 10, ty, tw + 20, TL.length > 1 ? TL.length * lh + 10 : 30); window.__tr86 = { l: W / 2 - tw / 2 - 10, r: W / 2 + tw / 2 + 10, b: ty + (TL.length > 1 ? TL.length * lh + 10 : 30), t: performance.now() }; ctx.fillStyle = '#fff'; TL.forEach(function (l, i) { ctx.fillText(l, W / 2, ty + (TL.length > 1 ? 20 + i * lh : 21)); }); }
       drawMinimap();
       var nm = nearMarket();
-      if (nm && !wasAtMarket) setShop(true);
+      /* v130: no auto-open, tap OPEN MARKET */
       if (!nm && shopEl.style.display === 'block') setShop(false);
       wasAtMarket = nm;
       var nf = nearestFaction();
@@ -4740,13 +4740,18 @@
       var o = improveOpt(s, k); if (o && k !== 'wall') a.push([(o.b ? 'UPGRADE' : 'BUILD ANOTHER') + ' (' + cstr(o.c) + ')', function () { if (!doImprove(s, k)) showToast('NEED ' + cstr(o.c)); }, !canPay(s, o.c)]);
       return a; }
     function near() { var s = ME_S; if (!s) return null; var best = null, bd = 150; s.bld.forEach(function (b) { if (!b.L && !b.j && b.k !== 'hall') return; var p = bldPos(s, b), d = Math.hypot(px - p.x, py - p.y); if (d < bd) { bd = d; best = b; } }); return best; }
-    function tick() { try { resLine(); if (typeof NEWS38 !== 'undefined' && document.body.classList.contains('min63')) NEWS38.t = 0; var b = near(); if (!b) { box.style.display = 'none'; shown = null; flag64 = false; return; }
+    function tick() { try { resLine(); if (typeof NEWS38 !== 'undefined' && document.body.classList.contains('min63')) NEWS38.t = 0; var b = near(); if (!b) { box.style.display = 'none'; shown = null; flag64 = false; open130 = null; return; }
+      if (open130 !== b) { var nm130 = (NAME[b.k] || (typeof ENAME !== 'undefined' && ENAME[b.k]) || b.k.toUpperCase()); box.style.display = 'block'; box.classList.add('tap130'); if (cur === 'tap' + nm130 && shown === b) return; cur = 'tap' + nm130; shown = b; box.innerHTML = ''; var ob = document.createElement('button'); ob.id = 'open130'; ob.textContent = 'OPEN ' + nm130 + (innerWidth > 700 ? ' [E]' : ''); ob.onclick = function (e) { e.stopPropagation(); openNear130(); }; box.appendChild(ob); return; }
+      box.classList.remove('tap130');
       var s = ME_S, a = acts(s, b), sig = b.k + b.L + (b.j ? 'j' : '') + (a.info || '') + a.map(function (x) { return x[0] + !!x[2]; }).join('|'); box.style.display = 'block'; if (sig === cur && shown === b) return; cur = sig; shown = b;
       box.innerHTML = '<b>' + (NAME[b.k] || (typeof ENAME !== 'undefined' && ENAME[b.k]) || b.k.toUpperCase()) + (b.L ? ' L' + b.L : '') + (b.j ? ' \u2692 BUILDING' : '') + '</b>' + (a.info ? '<div>' + a.info + '</div>' : '');
       a.forEach(function (x) { var bt = document.createElement('button'); bt.textContent = x[0]; bt.disabled = !!x[2]; bt.onclick = function (e) { e.stopPropagation(); x[1](); cur = ''; updateRes(); tick(); }; box.appendChild(bt); });
       if (!a.length) box.innerHTML += '<div>WORKING</div>'; } catch (e) {} }
     var _bu = bankUiTick; bankUiTick = function (dt) { if (document.body.classList.contains('min63')) { var nb = nearBank(); if (nb && nb.s === ME_S) { bankEl.style.display = 'none'; return; } } _bu(dt); };
-    setInterval(tick, 300); window.__v63b = { near: function () { var b = near(); return b && b.k; }, tick: tick };
+    var open130 = null; function openNear130() { var b = near(); if (!b) return; open130 = b; cur = ''; if (b.k === 'market' && typeof setShop === 'function') setShop(true); tick(); }
+    addEventListener('keydown', function (e) { if ((e.key === 'e' || e.key === 'E' || e.key === 'Enter') && !/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) { var b = near(); if (b && open130 !== b) { e.preventDefault(); openNear130(); } } });
+    var st130 = document.createElement('style'); st130.textContent = '#near63.tap130{background:none!important;border:none!important;box-shadow:none!important;padding:0!important}#open130{font:bold 15px monospace;padding:10px 16px;background:#7a4a1c;color:#ffe9b8;border:2px solid #3b2410;border-radius:8px;box-shadow:0 3px 0 #3b2410}'; document.head.appendChild(st130);
+    setInterval(tick, 300); window.__v63b = { near: function () { var b = near(); return b && b.k; }, tick: tick, open: openNear130 };
   })();
   // v65: landscape game. portrait phones get a rotate screen; short landscape screens get a compact HUD
   (function () {
@@ -5202,7 +5207,7 @@
     var _sm = setupMode; setupMode = function (m) { IS.key = ''; IS.l = []; SHIPS = []; CARGO = []; HORSE = false; _sm(m); isles(); ZC.clear(); };
   })();
   // v111: every realm (you and CPU alike) starts a fresh game with a small stash of gold and water
-  (function () { var _bg111 = beginGame; beginGame = function (mode) { _bg111.apply(this, arguments); try { allS75().forEach(function (s) { if (!s || !s.res || s.bld.length > 1) return; if ((s.res.gold || 0) < 30) s.res.gold = 30; if ((s.res.water || 0) < 20) s.res.water = 20; if ((s.res.wood || 0) < 90) s.res.wood = 90; if ((s.res.stone || 0) < 50) s.res.stone = 50; }); updateRes(); } catch (e) {} }; })();
+  (function () { var _bg111 = beginGame; beginGame = function (mode) { _bg111.apply(this, arguments); try { allS75().forEach(function (s) { if (!s || !s.res || s.bld.length > 1) return; /* v130: start with almost nothing */ s.res.gold = 5; s.res.water = 10; s.res.wood = 40; s.res.stone = 10; s.res.food = Math.min(s.res.food || 0, 10); }); updateRes(); var clr130 = function () { try { var mf = ME_S && (ME_S.f || ME_S.id); for (var i = units.length - 1; i >= 0; i--) if (units[i].f === mf && units[i].t !== 'police') units.splice(i, 1); } catch (e) {} }; clr130(); setTimeout(clr130, 50); } catch (e) {} }; })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
     _uu36(dt); if (!BOUNDS) return;
