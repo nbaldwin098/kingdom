@@ -4735,7 +4735,7 @@
         a.push(['TAX -', function () { myTax = Math.max(0, Math.round((myTax - 0.02) * 100) / 100); try { localStorage.setItem(TAX_KEY, myTax); } catch (e) {} }]); a.push(['TAX +', function () { myTax = Math.min(0.6, Math.round((myTax + 0.02) * 100) / 100); try { localStorage.setItem(TAX_KEY, myTax); } catch (e) {} }]);
         if (b.L) { var vc = upCostOf(b); a.push(['UPGRADE VAULT (' + cstr(vc) + ')', function () { orderUpgrade(s, b); }, !!b.j || !canPay(s, vc)]); } return a; }
       if (k === 'barracks') { a.push(['ARMY', function () { ORD.tab = 'army'; ordOpen(true); }]); a.push(['ORDERS', function () { ORD.tab = 'build'; ordOpen(true); }]); }
-      if (k === 'hall') { a.push(['STATS', function () { var m = document.getElementById('menuStats'); if (m) m.click(); }]); a.push(['MAP', function () { document.body.classList.toggle('map63'); }]); }
+      if (k === 'hall') { a.unshift(['\u2302 BUILD', function () { ORD.tab = 'build'; ORD.map = false; ordOpen(true); }]); a.push(['STATS', function () { var m = document.getElementById('menuStats'); if (m) m.click(); }]); a.push(['MAP', function () { document.body.classList.toggle('map63'); }]); }
       var o = improveOpt(s, k); if (o && k !== 'wall') a.push([(o.b ? 'UPGRADE' : 'BUILD ANOTHER') + ' (' + cstr(o.c) + ')', function () { if (!doImprove(s, k)) showToast('NEED ' + cstr(o.c)); }, !canPay(s, o.c)]);
       return a; }
     function near() { var s = ME_S; if (!s) return null; var best = null, bd = 150; s.bld.forEach(function (b) { if (!b.L && !b.j && b.k !== 'hall') return; var p = bldPos(s, b), d = Math.hypot(px - p.x, py - p.y); if (d < bd) { bd = d; best = b; } }); return best; }
@@ -5286,7 +5286,7 @@ go();})();
 </script>
 <script>
 /* v119: menu = settings, save, home. goals become a one-line hint */
-(function(){var GN=['OPEN A BUILD MENU','ORDER A BUILDING OR UPGRADE','BUILD A BARRACKS','RIDE 1K OUT TO EXPLORE','GROW TO 10 PEOPLE'];
+(function(){var GN=['RIDE TO YOUR CAMP, TAP BUILD','ORDER A BUILDING OR UPGRADE','BUILD A BARRACKS','RIDE 1K OUT TO EXPLORE','GROW TO 10 PEOPLE'];
 function fix(){var m=document.getElementById('menu');if(!m)return;['menuStats','menuCh'].forEach(function(i){var e=document.getElementById(i);if(e)e.style.display='none'});
 if(!document.getElementById('menuSave')){var b=document.createElement('button');b.id='menuSave';b.textContent='SAVE';b.onclick=function(e){e.stopPropagation();try{window.__save119()}catch(x){}showToast118('SAVED');m.style.display='none'};m.insertBefore(b,document.getElementById('menuHome'))}}
 function showToast118(t){var d=document.createElement('div');d.textContent=t;d.style.cssText='position:fixed;left:50%;top:40%;transform:translateX(-50%);background:#000;color:#fff;font:bold 13px monospace;padding:6px 10px;z-index:99';document.body.appendChild(d);setTimeout(function(){d.remove()},1200)}
