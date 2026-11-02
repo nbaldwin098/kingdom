@@ -1003,12 +1003,12 @@
   function setupMode(mode) {
     MODE = mode || 'free';
     seed = MODE === 'free' ? FREE_SEED : Math.floor(Math.random() * 1000000);
-    BOUNDS = MODE === 'islands' ? { x0: -16000, x1: 16000, y0: -14000, y1: 16000 } : MODE === 'nations' ? { x0: -24000, x1: 24000, y0: -15000, y1: 27000 } : MODE === 'duel' ? { x0: -11000, x1: 11000, y0: -12000, y1: 9500 } : null;
+    BOUNDS = MODE === 'islands' ? { x0: -16000, x1: 16000, y0: -14000, y1: 16000 } : MODE === 'nations' ? { x0: -24000, x1: 24000, y0: -15000, y1: 27000 } : MODE === 'duel' ? { x0: -12000, x1: 12000, y0: -12000, y1: 36000 } : null;
     landCache.clear(); facCache.clear(); facIndex = {}; factions = []; conquered = {};
     if (MODE === 'free') { try { conquered = JSON.parse(localStorage.getItem(CONQ_KEY) || '{}') || {}; } catch (e) {} }
     if (MODE === 'islands') factions = placeFactions(10, 5, 7);
     if (MODE === 'nations') factions = placeFactions(50, 11, 2.4);
-    if (MODE === 'duel') { var cpu = makeFaction('cpu', 0, 6400, 0.99, 0.4, 0.3); cpu.name = 'CPU KINGDOM'; cpu.hallObj.hp = cpu.hallObj.max = 220; factions = [cpu]; }
+    if (MODE === 'duel') { var cpu = makeFaction('cpu', 0, 30000, 0.99, 0.4, 0.3); cpu.name = 'CPU KINGDOM'; cpu.hallObj.hp = cpu.hallObj.max = 220; factions = [cpu]; }
     // @setup-hook
   }
   function drawGround(x0, x1, y0, y1, camX, camY) {
@@ -3858,7 +3858,7 @@
     var best = null, bd = 1e12, B = BOUNDS;
     for (var i = 0; i <= 30; i++) for (var j = 0; j <= 30; j++) {
       var x = B.x0 + 2500 + i * (B.x1 - B.x0 - 5000) / 30, y = B.y0 + 2500 + j * (B.y1 - B.y0 - 5000) / 30;
-      if (homeDist(x, y) < 3600 || Math.hypot(x - city.x, y - city.y) < 6500 || (MODE === 'duel' && Math.hypot(x, y - 6400) < 4600)) continue;
+      if (homeDist(x, y) < 3600 || Math.hypot(x - city.x, y - city.y) < 6500 || (MODE === 'duel' && Math.hypot(x, y - 30000) < 4600)) continue;
       for (var rr = 2300; rr >= 900; rr -= 700) { var ok = true; for (var a = 0; a < 9 && ok; a++) { var r = a ? rr : 0; if (zone(x + Math.cos(a * 0.785) * r, y + Math.sin(a * 0.785) * r) !== 0) ok = false; } if (ok) break; } if (!ok) continue;
       var d = Math.hypot(x - ISL.cx, y - ISL.cy) - rr * 20; if (d < bd) { bd = d; best = { x: x, y: y, R: Math.max(900, rr - 600) }; }
     }
@@ -3869,7 +3869,7 @@
   // free world is now one huge island too (no more endless land)
   var _sm36w = setupMode; setupMode = function (m) {
     var _B = null; _sm36w(m);
-    if (MODE === 'free' && !BOUNDS) { BOUNDS = { x0: -30000, x1: 30000, y0: -26000, y1: 30000 }; facCache.clear(); }
+    if (MODE === 'free' && !BOUNDS) { BOUNDS = { x0: -240000, x1: 240000, y0: -240000, y1: 240000 }; facCache.clear(); }
     WRES.forEach(function (r) { press[r] = 0; }); ISL.key = ''; islCal(); if (_seas36) _seas36().length = 0; // the ocean replaces the old circle seas
     WRK = {}; if (typeof chunkCache !== 'undefined') chunkCache.clear();
   };
@@ -5381,7 +5381,7 @@
     var best = null, bs = -1e12; // tolerate some water: the capital reclaims it (harbour fill)
     for (var i = 0; i <= 24; i++) for (var j = 0; j <= 24; j++) {
       var x = B.x0 + 2000 + i * (B.x1 - B.x0 - 4000) / 24, y = B.y0 + 2000 + j * (B.y1 - B.y0 - 4000) / 24;
-      if (homeDist(x, y) < want + 1500 || Math.hypot(x - city.x, y - city.y) < want + 3200 || (MODE === 'duel' && Math.hypot(x, y - 6400) < want + 2600)) continue;
+      if (homeDist(x, y) < want + 1500 || Math.hypot(x - city.x, y - city.y) < want + 3200 || (MODE === 'duel' && Math.hypot(x, y - 30000) < want + 2600)) continue;
       var land = 0; for (var r = 0; r <= want; r += want / 3) for (var a = 0; a < 8; a++) if (zone(x + Math.cos(a * 0.785) * r, y + Math.sin(a * 0.785) * r) === 0) land++;
       var sc = land * 1000 - Math.hypot(x - ISL.cx, y - ISL.cy) * 0.05; if (land >= 14 && sc > bs) { bs = sc; best = { x: x, y: y }; }
     }
@@ -5484,7 +5484,7 @@
   function ty(s) { if (s === ME_S) return 'mixed'; if (!s.ty131) { var h = H(s); s.ty131 = h < 0.3 ? 'farm' : h < 0.55 ? 'oil' : h < 0.8 ? 'gold' : 'mixed'; } return s.ty131; }
   function stock(s) { if (!s.g131) { s.g131 = {}; var t = TY[ty(s)]; GK.forEach(function (k, i) { var h = hash2(i * 31 + Math.floor(H(s) * 1000), 7); s.g131[k] = s === ME_S ? 0 : Math.round((t.sup[k] ? 40 + 40 * h : 4 + 14 * h) / (G[k].p > 20 ? 3 : 1)); }); } return s.g131; }
   function dem(s, k) { var t = TY[ty(s)]; return (t.dem[k] || 1) / (t.sup[k] ? 1.8 : 1); }
-  function price(s, k) { var st = stock(s)[k] || 0, T = 30 * dem(s, k); return G[k].p * Math.max(0.3, Math.min(3, 2 * T / (T + st))); }
+  function price(s, k) { var st = stock(s)[k] || 0, T = 30 * dem(s, k); return G[k].p * Math.max(0.3, Math.min(3, 2 * T / (T + st))) * (s && s.city136 ? 1.3 : 1); }
   var CROPS = ['wheat', 'corn', 'peas', 'berries', 'cotton', 'spice', 'cattle'];
   function crop(s, b) { if (!b.crop131) { var p = bldPos(s, b); b.crop131 = CROPS[Math.floor(hash2(Math.round(p.x / 7), Math.round(p.y / 7)) * CROPS.length) % CROPS.length]; } return b.crop131; }
   function clothed(s) { var g = stock(s); return !(s.ppl && s.ppl.length > 2) || g.clothes >= 1; }
@@ -5577,16 +5577,18 @@
   (function () {
     var FN = ['JEB', 'ELIZA', 'SILAS', 'MAE', 'AMOS', 'CORA', 'EZRA', 'HATTIE', 'WYATT', 'ADA', 'CALEB', 'NELL', 'JESSE', 'OPAL', 'LUKE', 'IDA', 'HANK', 'PEARL', 'CLAY', 'ROSE', 'GUS', 'LOTTIE', 'ABE', 'FERN', 'BUCK', 'ETTA', 'OTIS', 'MINNIE', 'COLE', 'BEULAH', 'VIRGIL', 'DOLLY', 'ROY', 'IRENE', 'NED', 'GRACE', 'TEX', 'LILA', 'ZEKE', 'MAGGIE'];
     var LN = ['HOLLIS', 'MCCOY', 'BRANNIGAN', 'TATE', 'WHITLOCK', 'GRAVES', 'DALTON', 'PRUITT', 'COBB', 'HARLAN', 'SUTTER', 'BOONE', 'CROCKETT', 'MAVERICK', 'STRAND', 'KINCAID', 'RHODES', 'LANE', 'BARLOW', 'CASSIDY', 'MERRITT', 'DUNCAN', 'HASKELL', 'WEBB'];
-    var JOBS = { saloon: ['BARKEEP', 'PIANO PLAYER', 'COOK', 'GAMBLER'], general: ['SHOPKEEPER', 'CLERK'], sheriff: ['SHERIFF', 'DEPUTY', 'DEPUTY'], bank: ['BANKER', 'TELLER'], church: ['PREACHER'], hotel: ['HOTEL KEEPER', 'MAID'], livery: ['LIVERY OWNER', 'STABLE HAND'], smith: ['BLACKSMITH', 'APPRENTICE'], tailor: ['TAILOR', 'SEAMSTRESS'], depot: ['STATION MASTER', 'PORTER'], farm: ['FARMER', 'FARMHAND'], ranch: ['RANCHER', 'COWBOY', 'COWBOY'], oilwell: ['OIL DRILLER', 'ROUGHNECK'], refinery: ['REFINERY HAND', 'ENGINEER'], mine: ['MINER', 'MINER', 'PROSPECTOR'], assay: ['ASSAYER'], school: ['SCHOOLTEACHER'] };
+    var JOBS = { dock: ['FERRYMAN', 'FISHERMAN'], saloon: ['BARKEEP', 'PIANO PLAYER', 'COOK', 'GAMBLER'], general: ['SHOPKEEPER', 'CLERK'], sheriff: ['SHERIFF', 'DEPUTY', 'DEPUTY'], bank: ['BANKER', 'TELLER'], church: ['PREACHER'], hotel: ['HOTEL KEEPER', 'MAID'], livery: ['LIVERY OWNER', 'STABLE HAND'], smith: ['BLACKSMITH', 'APPRENTICE'], tailor: ['TAILOR', 'SEAMSTRESS'], depot: ['STATION MASTER', 'PORTER'], farm: ['FARMER', 'FARMHAND'], ranch: ['RANCHER', 'COWBOY', 'COWBOY'], oilwell: ['OIL DRILLER', 'ROUGHNECK'], refinery: ['REFINERY HAND', 'ENGINEER'], mine: ['MINER', 'MINER', 'PROSPECTOR'], assay: ['ASSAYER'], school: ['SCHOOLTEACHER'] };
     var OUTJOB = { SHERIFF: 1, DEPUTY: 1, FARMER: 1, FARMHAND: 1, RANCHER: 1, COWBOY: 1, 'STABLE HAND': 1, PORTER: 1, PROSPECTOR: 1, ROUGHNECK: 1 };
-    var SIGN = { saloon: 'SALOON', general: 'GENERAL STORE', sheriff: 'SHERIFF', bank: 'BANK', church: '', hotel: 'HOTEL', livery: 'LIVERY', smith: 'BLACKSMITH', tailor: 'TAILOR', depot: 'DEPOT', assay: 'ASSAY OFFICE', school: 'SCHOOL', refinery: 'REFINERY', mine: 'MINE', oilwell: '', farm: '', ranch: 'RANCH', home: '' };
+    var SIGN = { dock: 'DOCK', saloon: 'SALOON', general: 'GENERAL STORE', sheriff: 'SHERIFF', bank: 'BANK', church: '', hotel: 'HOTEL', livery: 'LIVERY', smith: 'BLACKSMITH', tailor: 'TAILOR', depot: 'DEPOT', assay: 'ASSAY OFFICE', school: 'SCHOOL', refinery: 'REFINERY', mine: 'MINE', oilwell: '', farm: '', ranch: 'RANCH', home: '' };
     // size: w, body height h, top extra (false front / steeple)
-    var SZ = { saloon: [200, 140, 40], general: [180, 110, 34], sheriff: [190, 105, 30], bank: [170, 120, 30], church: [150, 110, 110], hotel: [200, 165, 30], livery: [200, 125, 30], smith: [170, 100, 50], tailor: [150, 100, 30], depot: [210, 95, 30], assay: [170, 110, 30], school: [170, 100, 60], home: [130, 80, 50], farm: [220, 100, 0], ranch: [240, 110, 0], oilwell: [120, 165, 0], refinery: [180, 110, 50], mine: [180, 110, 10] };
-    var DEFS = [
-      { id: 't50', name: 'DUSTWATER', pop: 50, ty: 'mixed', dx: -6200, main: ['livery', 'smith', 'general', 'saloon', 'hotel', 'bank', 'sheriff', 'church', 'tailor', 'depot'], edge: ['farm', 'farm', 'ranch'] },
-      { id: 't30', name: 'BLACK GULCH', pop: 30, ty: 'oil', dx: 2900, dy: 3600, main: ['general', 'saloon', 'sheriff', 'bank', 'smith', 'hotel', 'refinery'], edge: ['oilwell', 'oilwell', 'oilwell'] },
-      { id: 't15', name: 'EUREKA', pop: 15, ty: 'gold', dx: 6900, main: ['general', 'saloon', 'assay', 'sheriff', 'smith'], edge: ['mine', 'mine', 'farm'] },
-      { id: 't10', name: 'RED MESA', pop: 10, ty: 'farm', dx: -2700, dy: 11000, main: ['general', 'saloon', 'church'], edge: ['farm', 'farm', 'ranch'] }];
+    var SZ = { dock: [220, 90, 0], saloon: [200, 140, 40], general: [180, 110, 34], sheriff: [190, 105, 30], bank: [170, 120, 30], church: [150, 110, 110], hotel: [200, 165, 30], livery: [200, 125, 30], smith: [170, 100, 50], tailor: [150, 100, 30], depot: [210, 95, 30], assay: [170, 110, 30], school: [170, 100, 60], home: [130, 80, 50], farm: [220, 100, 0], ranch: [240, 110, 0], oilwell: [120, 165, 0], refinery: [180, 110, 50], mine: [180, 110, 10] };
+    var DEFS = [ // v136 MAP PLAN: homestead centre, nothing within 8k; ring 1 at 8-12k, ring 2 at 15-25k, the city at 35-50k
+      { id: 't10', name: 'RED MESA', pop: 10, ty: 'farm', dx: -9200, dy: 2600, main: ['general', 'saloon', 'church'], edge: ['farm', 'farm', 'ranch'] },
+      { id: 't10b', name: 'COTTONWOOD', pop: 10, ty: 'farm', dx: 7600, dy: -7200, main: ['general', 'saloon', 'livery'], edge: ['ranch', 'ranch', 'farm'] },
+      { id: 't30', name: 'BLACK GULCH', pop: 30, ty: 'oil', dx: 15500, dy: 9000, bio: 'badlands', main: ['general', 'saloon', 'sheriff', 'bank', 'smith', 'hotel', 'refinery', 'depot'], edge: ['oilwell', 'oilwell', 'oilwell'] },
+      { id: 't15', name: 'EUREKA', pop: 15, ty: 'gold', dx: -13500, dy: -14500, bio: 'hills', main: ['general', 'saloon', 'assay', 'sheriff', 'smith'], edge: ['mine', 'mine', 'farm'] },
+      { id: 'tfb', name: 'FORT BENTON', pop: 12, ty: 'mixed', dx: 2500, dy: 19000, river: 1, main: ['general', 'saloon', 'hotel', 'depot'], edge: ['dock', 'dock', 'farm'] },
+      { id: 't50', name: 'DUSTWATER', pop: 50, ty: 'mixed', dx: -33000, dy: 26000, city: 1, main: ['livery', 'smith', 'general', 'saloon', 'hotel', 'bank', 'sheriff', 'church', 'tailor', 'depot'], edge: ['farm', 'farm', 'ranch'] }];
     var SP = 230, RW = 14, TOWNS = null, KEY = '';
     function hsh(a, b) { return hash2(a * 1.37 + 11, b * 2.11 + 5); }
     function landOK(x, y) { return isLand(x, y) && !(window.LAKE131 && LAKE131(x, y)); }
@@ -5611,15 +5613,29 @@
       if (typeof MODE === 'undefined' || MODE !== 'free' || typeof city === 'undefined') return [];
       var h = { x: city.x, y: city.y + 110 }, k = MODE + ':' + city.x + ':' + city.y; if (TOWNS && KEY === k) return TOWNS; KEY = k;
       var J = { x: h.x, y: h.y + 900 }, out = [];
-      DEFS.forEach(function (d) { var t = null; for (var s = 0; s < 8 && !t; s++) { var m = 1 + s * 0.12, dy = d.dy ? d.dy * m : 0, oy = J.y + dy, ox = h.x + d.dx * m; var c = layout(d, ox, oy); if (okTown(c) || s === 7) t = c; } out.push(t); });
-      // roads: down from your camp to the junction, then out to each town's nearest street end
-      var G = [[h.x, h.y + 560, h.x, J.y]], maxY = J.y;
-      out.forEach(function (t) { var y = t.y, ex = t.x < h.x ? t.east : t.west; if (y > maxY) maxY = y; G.push([Math.min(h.x, ex), y, Math.max(h.x, ex), y]); });
-      G.push([h.x, J.y, h.x, maxY]);
-      out.forEach(function (t, i) { t.econ = { id: t.id, name: t.name, x: t.x, y: t.y, ty131: t.d.ty, res: { food: 200, gold: 500, wood: 50, stone: 50, water: 50 }, bld: [], fac: { name: t.name }, tp133: (function () { var g = t.b.filter(function (b) { return b.k === 'general'; })[0]; return { x: g.x, y: g.y - 40 }; })() }; });
-      TOWNS = out; TOWNS.roads = G; TOWNS.J = J; people(out); return out;
+      DEFS.forEach(function (d) { var t = null; for (var s = 0; s < 8 && !t; s++) { var m = 1 + s * 0.03, dy = d.dy ? d.dy * m : 0, oy = J.y + dy, ox = h.x + d.dx * m; var c = layout(d, ox, oy); if (okTown(c) || s === 7) t = c; } out.push(t); });
+      // v136 roads: every town links to the nearest place already on the network (L-shaped: north/south first, then along its main street)
+      var G = [[h.x, h.y + 560, h.x, J.y]], NODES = [{ x: h.x, y: J.y, home: 1 }]; TOWNS = out;
+      out.slice().sort(function (a, b) { return Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y); }).forEach(function (t) { linkTown(t, G, NODES); });
+      out.forEach(function (t) { mkEcon(t); });
+      TOWNS = out; TOWNS.roads = G; TOWNS.J = J; TOWNS.nodes = NODES; people(out); return out;
     }
-    window.TOWN133 = { towns: build, realms: function () { return build().map(function (t) { return t.econ; }); }, segs: function () { var t = build(); if (!t.length) return []; var a = t.roads.slice(); t.forEach(function (x) { a = a.concat(x.segs); }); return a; }, fps: function () { var a = []; build().forEach(function (t) { t.b.forEach(function (b) { a.push({ f: b.fp, n: t.name + ':' + b.k + b.i }); }); }); return a; } };
+    function mkEcon(t) { t.econ = { id: t.id, name: t.name, x: t.x, y: t.y, ty131: t.d.ty, res: { food: 200, gold: t.d.city ? 1500 : 500, wood: 50, stone: 50, water: 50 }, bld: [], city136: t.d.city ? 1 : 0, fac: { name: t.name }, tp133: (function () { var g = t.b.filter(function (b) { return b.k === 'general'; })[0] || t.b.filter(function (b) { return b.k === 'saloon'; })[0] || t.b[0]; return { x: g.x, y: g.y - 40 }; })() }; }
+    function linkTown(t, G, NODES) { var n = NODES[0], bd = 1e18; NODES.forEach(function (q) { var d = Math.abs(q.x - t.x) + Math.abs(q.y - t.y); if (d < bd) { bd = d; n = q; } });
+      var ex = n.x < t.x ? t.west : t.east, A = [], B = [];
+      if (Math.abs(n.y - t.y) > 1) A.push([n.x, Math.min(n.y, t.y), n.x, Math.max(n.y, t.y)]); A.push([Math.min(n.x, ex), t.y, Math.max(n.x, ex), t.y]);
+      B.push([Math.min(n.x, ex), n.y, Math.max(n.x, ex), n.y]); if (Math.abs(n.y - t.y) > 1) B.push([ex, Math.min(n.y, t.y), ex, Math.max(n.y, t.y)]);
+      function hits(S) { var L = TOWNS || [], hb = { x0: city.x - 900, x1: city.x + 900, y0: city.y - 800, y1: city.y + 700 }; for (var i = 0; i < S.length; i++) { var g = S[i], r = { x0: Math.min(g[0], g[2]) - RW - 10, x1: Math.max(g[0], g[2]) + RW + 10, y0: Math.min(g[1], g[3]) - RW - 10, y1: Math.max(g[1], g[3]) + RW + 10 };
+          if (r.x0 < hb.x1 && r.x1 > hb.x0 && r.y0 < hb.y1 && r.y1 > hb.y0) return true;
+          try { var R = allS75(); for (var q = 0; q < R.length; q++) { var hs = R[q].hallObj || R[q]; if (hs && hs.x != null && r.x0 < hs.x + 1100 && r.x1 > hs.x - 1100 && r.y0 < hs.y + 1100 && r.y1 > hs.y - 1100) return true; } } catch (e) {}
+          for (var j = 0; j < L.length; j++) { var o = L[j]; if (o === t) continue; for (var k = 0; k < o.b.length; k++) { var f = o.b[k].fp; if (r.x0 < f.x1 && r.x1 > f.x0 && r.y0 < f.y1 && r.y1 > f.y0) return true; } } } return false; }
+      var S = !hits(A) ? A : !hits(B) ? B : null; if (!S) { if (t.d.proc) return false; S = A; } S.forEach(function (g) { G.push(g); });
+      t.link = { nx: n.x, ny: n.y, ex: ex, alt: S === B }; NODES.push({ x: ex, y: t.y, t: t }); return true; }
+    // v136: add a town later (procedural chunks); returns it or null
+    function addTown(d, ox, oy) { var T = build(); if (!T.length) return null; var c = layout(d, ox, oy); if (!okTown(c)) return null;
+      for (var i = 0; i < T.length; i++) { var b = T[i].box; if (c.box.x0 < b.x1 + 2500 && c.box.x1 > b.x0 - 2500 && c.box.y0 < b.y1 + 2500 && c.box.y1 > b.y0 - 2500) return null; }
+      if (!d.noroad && !linkTown(c, T.roads, T.nodes)) return null; mkEcon(c); T.push(c); people([c], T.length * 7); return c; }
+    window.TOWN133 = { add: function (d, x, y) { return addTown(d, x, y); }, nearRoad: function (x, y, d) { return nearRoad(x, y, d); }, petArt: function (c, a, x, y) { petArt(c, a, x, y); }, layoutBox: function (d, x, y) { return layout(d, x, y).box; }, towns: build, realms: function () { return build().map(function (t) { return t.econ; }); }, segs: function () { var t = build(); if (!t.length) return []; var a = t.roads.slice(); t.forEach(function (x) { a = a.concat(x.segs); }); return a; }, fps: function () { var a = []; build().forEach(function (t) { t.b.forEach(function (b) { a.push({ f: b.fp, n: t.name + ':' + b.k + b.i }); }); }); return a; } };
     function segD(G, x, y) { var ax = G[0], ay = G[1], bx = G[2], by = G[3], dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy, u = L ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L)) : 0; return Math.hypot(ax + dx * u - x, ay + dy * u - y); }
     function inTownArea(x, y, pad) { var T = build(); for (var i = 0; i < T.length; i++) { var b = T[i].box; if (x > b.x0 - pad && x < b.x1 + pad && y > b.y0 - pad && y < b.y1 + pad) return true; } return false; }
     function nearRoad(x, y, d) { var T = build(); if (!T.length) return false; for (var i = 0; i < T.roads.length; i++) if (segD(T.roads[i], x, y) < d) return true; return false; }
@@ -5635,7 +5651,7 @@
     window.CLOCK133 = { hour: hour, hhmm: hhmm, set: function (h) { CLK = h * 20; } };
     function dark() { var h = hour(); return h < 5 ? 0.55 : h < 7 ? 0.55 * (7 - h) / 2 : h < 18.5 ? 0 : h < 20.5 ? 0.55 * (h - 18.5) / 2 : 0.55; }
     // ---- people
-    function people(T) { T.forEach(function (t, ti) {
+    function people(T, off) { T.forEach(function (t, ti) { ti += off || 0;
       var homes = t.b.filter(function (b) { return b.k === 'home'; }), jobs = []; t.b.forEach(function (b) { (JOBS[b.k] || []).forEach(function (j) { jobs.push([j, b]); }); });
       var saloon = t.b.filter(function (b) { return b.k === 'saloon'; })[0]; t.P = [];
       for (var i = 0; i < t.d.pop; i++) { var r = hsh(ti * 97 + i, i * 13 + 7), r2 = hsh(i * 7 + ti, ti * 3 + 1), J = jobs[i] || (i % 5 === 0 ? ['SCHOOL KID', null] : i % 3 === 0 ? ['DRIFTER', null] : ['HOMEMAKER', null]);
@@ -5661,8 +5677,8 @@
     function tick() { var now = performance.now(), dt = last ? Math.min(0.1, (now - last) / 1000) : 0; last = now; if (!dt) return; CLK += dt; var T = build(); if (!T.length) return;
       acc += dt; var slow = acc > 0.5; if (slow) acc = 0;
       T.forEach(function (t) { var on = Math.abs(t.x - px) < 3500 && Math.abs(t.y - py) < 2500;
-        if (on) t.P.forEach(function (p) { stepP(p, dt); }); else if (slow) t.P.forEach(function (p) { stepP(p, 0.5); });
-        if (slow) try { ECON131.chain(t.econ, 0.5); } catch (e) {}
+        var far = Math.abs(t.x - px) > 16000 || Math.abs(t.y - py) > 16000; if (on) t.P.forEach(function (p) { stepP(p, dt); }); else if (slow && !far) t.P.forEach(function (p) { stepP(p, 0.5); });
+        if (slow && !far) try { ECON131.chain(t.econ, 0.5); } catch (e) {}
         if (on) { t.pets.forEach(function (a) { var dx = a.tx - a.x, dy = a.ty - a.y, d = Math.hypot(dx, dy); if (d < 4) { if (a.b) { a.tx = a.b.x + (Math.random() - 0.5) * a.b.w * 0.8; a.ty = a.b.y - 20 + (Math.random() - 0.5) * 50; } else { var q = t.P[Math.floor(Math.random() * t.P.length)]; a.tx = q.in ? t.x + (Math.random() - 0.5) * 600 : q.x + 20; a.ty = street(t, q.y) + (Math.random() - 0.5) * 16; } } else { var v = (a.k === 'dog' ? 60 : a.k === 'hen' ? 25 : 10) * dt; a.x += dx / d * Math.min(v, d); a.y += dy / d * Math.min(v, d); a.f = dx > 0 ? 1 : -1; } a.p += dt; });
           t.weeds.forEach(function (w) { w.x += w.v * dt; w.r += w.v * dt / 14; if (w.x > t.east + 300) { w.x = t.west - 200; w.y = t.streetY[Math.floor(Math.random() * t.streetY.length)] + 8; } }); } }); }
     // ---- cached art
@@ -5690,6 +5706,9 @@
           else { c.fillStyle = '#c4a46a'; c.fillRect(x + 3, -h + 3, w - 6, h - 6); c.fillStyle = '#8a3a2a'; c.fillRect(x + w - 70, -h - 40, 60, 46); c.beginPath(); c.moveTo(x + w - 76, -h - 40); c.lineTo(x + w - 40, -h - 64); c.lineTo(x + w - 4, -h - 40); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 2; c.strokeRect(x + w - 54, -h - 20, 28, 26); c.beginPath(); c.moveTo(x + w - 54, -h - 20); c.lineTo(x + w - 26, -h + 6); c.moveTo(x + w - 26, -h - 20); c.lineTo(x + w - 54, -h + 6); c.stroke(); c.fillStyle = '#6a8ac4'; c.fillRect(x + 12, -26, 40, 12); signb(c, x + 70, -h - 30, 'RANCH'); }
           return; }
         if (k === 'oilwell') { c.strokeStyle = '#2a1a0a'; c.lineWidth = 3; c.beginPath(); c.moveTo(-34, 0); c.lineTo(-4, -h); c.lineTo(4, -h); c.lineTo(34, 0); c.stroke(); c.lineWidth = 1.5; for (var i2 = 1; i2 < 7; i2++) { var yy2 = -i2 * h / 7, ww = 34 - 30 * i2 / 7; c.beginPath(); c.moveTo(-ww, yy2); c.lineTo(ww, yy2); c.moveTo(-ww, yy2); c.lineTo(ww - 4, yy2 - h / 7); c.stroke(); } c.fillStyle = '#3b2410'; c.fillRect(-44, -6, 88, 6); c.fillStyle = '#222'; c.beginPath(); c.ellipse(-30, -2, 12, 5, 0, 0, 7); c.fill(); signb(c, 0, 4, 'WELL #' + (v + 1)); return; }
+        if (k === 'dock') { c.fillStyle = '#4a7aa0'; c.beginPath(); c.ellipse(0, -h / 2, w / 2 + 6, h / 2 + 4, 0, 0, 7); c.fill(); c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 2; for (var wv = 0; wv < 5; wv++) { c.beginPath(); c.moveTo(x + 20 + wv * 36, -h / 2 + (wv % 2) * 18 - 8); c.lineTo(x + 40 + wv * 36, -h / 2 + (wv % 2) * 18 - 8); c.stroke(); }
+          c.fillStyle = '#8a5a2e'; c.fillRect(-14, -h - 4, 28, h + 8); c.strokeStyle = '#5a3818'; c.lineWidth = 1; for (var pl = -h; pl < 4; pl += 7) { c.beginPath(); c.moveTo(-14, pl); c.lineTo(14, pl); c.stroke(); } c.fillStyle = '#5a3818'; c.fillRect(-18, -h - 6, 5, h + 12); c.fillRect(13, -h - 6, 5, h + 12);
+          c.fillStyle = '#6b3f1d'; c.beginPath(); c.moveTo(24, -h + 22); c.lineTo(84, -h + 22); c.lineTo(76, -h + 36); c.lineTo(30, -h + 36); c.closePath(); c.fill(); c.fillStyle = '#3b2410'; c.fillRect(52, -h - 12, 3, 34); c.fillStyle = '#efe8d8'; c.beginPath(); c.moveTo(55, -h - 10); c.lineTo(76, -h + 14); c.lineTo(55, -h + 14); c.fill(); signb(c, 0, -h - 34, 'DOCK'); return; }
         if (k === 'mine') { c.fillStyle = '#9a7a5a'; c.beginPath(); c.moveTo(x - 10, 0); c.quadraticCurveTo(x + 20, -h - 30, 0, -h - 10); c.quadraticCurveTo(x + w - 10, -h - 20, x + w + 10, 0); c.fill(); c.fillStyle = '#7a5a3a'; for (var rk = 0; rk < 8; rk++) { c.beginPath(); c.arc(x + 20 + rk * 20, -20 - (rk % 3) * 18, 6, 0, 7); c.fill(); } c.fillStyle = '#140a04'; c.fillRect(-26, -60, 52, 60); c.fillStyle = '#7a4a22'; c.fillRect(-34, -68, 68, 10); c.fillRect(-34, -68, 9, 68); c.fillRect(25, -68, 9, 68); signb(c, 0, -94, 'MINE'); c.fillStyle = '#555'; c.fillRect(-50, -6, 100, 3); c.fillStyle = '#3b2410'; c.fillRect(30, -24, 30, 16); c.fillStyle = '#6a6a6a'; c.beginPath(); c.arc(36, -24, 6, Math.PI, 0); c.arc(50, -26, 7, Math.PI, 0); c.fill(); return; }
         if (k === 'refinery') { c.fillStyle = '#8a8a8a'; c.fillRect(x + 10, -h + 20, 60, h - 20); c.fillRect(x + 80, -h + 40, 50, h - 40); c.fillStyle = '#5a5a5a'; c.fillRect(x + 140, -h - 40, 16, h + 40); meta.smoke.push([x + 148, -h - 44]); c.strokeStyle = '#333'; c.lineWidth = 2; c.strokeRect(x + 10, -h + 20, 60, h - 20); c.strokeRect(x + 80, -h + 40, 50, h - 40); c.beginPath(); c.moveTo(x + 70, -40); c.lineTo(x + 80, -40); c.moveTo(x + 130, -50); c.lineTo(x + 140, -50); c.stroke(); signb(c, 0, -h - 6, 'REFINERY'); return; }
         // false-front western storefronts
@@ -5734,7 +5753,7 @@
         if (t.rail) { var R = t.rail; c.fillStyle = '#6b4520'; for (var rx = R[0]; rx < R[2]; rx += 16) c.fillRect(rx - camX, R[1] - camY - 8, 6, 22); c.fillStyle = '#555'; c.fillRect(R[0] - camX, R[1] - camY - 4, R[2] - R[0], 3); c.fillRect(R[0] - camX, R[1] - camY + 8, R[2] - R[0], 3); }
         c.fillStyle = 'rgba(160,120,70,.25)'; t.streetY.forEach(function (y, i) { for (var q = 0; q < 6; q++) { var dx = ((q * 377 + i * 91) % (t.east - t.west)) + t.west; c.beginPath(); c.ellipse(dx - camX, y - camY + ((q * 7) % 9) - 4, 20, 4, 0, 0, 7); c.fill(); } }); });
       // signpost at the junction
-      var J = T.J, sx = J.x - camX + 40, sy = J.y - camY - 30; if (sx > -200 && sx < W / zoom + 200 && sy > -200 && sy < H / zoom + 300) { c.fillStyle = '#6b4520'; c.fillRect(sx - 3, sy - 70, 6, 84); c.font = 'bold 11px monospace'; T.forEach(function (t, i) { var left = t.x < J.x, yy = sy - 66 + i * 16, tw = c.measureText(t.name).width + 18, lx = left ? sx - tw : sx; c.fillStyle = '#c9a46e'; c.beginPath(); if (left) { c.moveTo(lx, yy + 6); c.lineTo(lx + 8, yy); c.lineTo(sx, yy); c.lineTo(sx, yy + 12); c.lineTo(lx + 8, yy + 12); } else { c.moveTo(sx, yy); c.lineTo(sx + tw - 8, yy); c.lineTo(sx + tw, yy + 6); c.lineTo(sx + tw - 8, yy + 12); c.lineTo(sx, yy + 12); } c.fill(); c.fillStyle = '#2a1a0a'; c.textAlign = 'center'; c.fillText((t.y > J.y + 400 ? '\u2193 ' : '') + t.name, lx + tw / 2, yy + 10); }); }
+      var J = T.J, sx = J.x - camX + 40, sy = J.y - camY - 30; if (sx > -200 && sx < W / zoom + 200 && sy > -200 && sy < H / zoom + 300) { c.fillStyle = '#6b4520'; c.fillRect(sx - 3, sy - 70, 6, 84); c.font = 'bold 11px monospace'; T.filter(function (t) { return !t.d.mini && !t.d.proc; }).forEach(function (t, i) { var left = t.x < J.x, yy = sy - 66 + i * 16, tw = c.measureText(t.name).width + 18, lx = left ? sx - tw : sx; c.fillStyle = '#c9a46e'; c.beginPath(); if (left) { c.moveTo(lx, yy + 6); c.lineTo(lx + 8, yy); c.lineTo(sx, yy); c.lineTo(sx, yy + 12); c.lineTo(lx + 8, yy + 12); } else { c.moveTo(sx, yy); c.lineTo(sx + tw - 8, yy); c.lineTo(sx + tw, yy + 6); c.lineTo(sx + tw - 8, yy + 12); c.lineTo(sx, yy + 12); } c.fill(); c.fillStyle = '#2a1a0a'; c.textAlign = 'center'; c.fillText((t.y > J.y + 400 ? '\u2193 ' : '') + t.name, lx + tw / 2, yy + 10); }); }
     } catch (e) { if (!window.E133) { window.E133 = 1; console.warn(e); } } };
     var VIEW = null;
     var _pf = pushFactionItems; pushFactionItems = function (items, R) { _pf.apply(this, arguments); try { var T = build(); if (!T.length) return; var lit = dark() > 0.15, vx0 = px - W / (2 * zoom) - 300, vx1 = px + W / (2 * zoom) + 300, vy0 = py - H / (2 * zoom) - 100, vy1 = py + H / (2 * zoom) + 400; VIEW = [];
@@ -5934,7 +5953,7 @@
     var _bw = blockedWorld; blockedWorld = function (x, y) { if (_bw.apply(this, arguments)) return true; var l = sets(); for (var i = 0; i < l.length; i++) { var s = l[i]; if (!s.v135 || s.v135.x == null) continue; var p = vpos(s); if (x > p.x - 52 && x < p.x + 52 && y > p.y - 50 && y < p.y + 12) return true; } return false; };
     var _fs = freeSpot32; freeSpot32 = function (s, x, y) { if (!_fs.apply(this, arguments)) return false; var l = sets(); for (var i = 0; i < l.length; i++) { var q = l[i]; if (!q.v135 || q.v135.x == null) continue; var p = vpos(q); if (Math.abs(p.x - x) < 200 && Math.abs(p.y - y) < 190) return false; } return true; };
     function recheck(s) { if (!s.v135 || s.v135.x == null) return; var p = vpos(s), f = vfp(p.x, p.y, 4), O = obst(s, p.x, p.y); for (var i = 0; i < O.length; i++) if (ov(f, O[i])) { var h = homeXY(s), q = findSpot(s, h.x, h.y); if (q) { s.v135.x = q[0] - h.x; s.v135.y = q[1] - h.y; } return; } }
-    function townVaults() { if (TV.length || !window.TOWN133) return; try { var T = TOWN133.towns(); if (!T || !T.length) return; T.forEach(function (t) { var p = findSpot(null, t.x, t.y); if (p) TV.push({ x: p[0], y: p[1], hp: 900, max: 900, arm: 14, name: t.name }); }); } catch (e) {} }
+    function townVaults() { if (TV.length || !window.TOWN133) return; try { var T = TOWN133.towns(); if (!T || !T.length) return; T.forEach(function (t) { var p = findSpot(null, t.x, t.y); if (p) TV.push({ x: p[0], y: p[1], hp: t.d && t.d.city ? 3000 : 900, max: t.d && t.d.city ? 3000 : 900, arm: t.d && t.d.city ? 20 : 14, name: t.name }); }); } catch (e) {} }
     var rk = 0;
     function tickAll(dt) { clock += dt; var l = sets(); townVaults();
       l.forEach(function (s) { stripWalls(s); if (!ensure(s)) return; genTick(s, dt); raidTick(s, dt); });
@@ -5976,6 +5995,116 @@
       if (!s.tip135 && clock > 4) { s.tip135 = 1; showToast('WALK UP TO YOUR GENERAL AND GIVE HIM A JOB'); }
     } catch (e) {} }, 250);
     window.GEN135 = { STAT: STAT, sets: sets, vpos: vpos, vfp: vfp, TV: TV, hire: hire, hireCost: hireCost, assign: assign, job: jobB, OUT: OUT, wave: function () { GW.t = 0.01; }, GW: GW, panel: panel, tick: tickAll };
+  })();
+  // ===== v136 MAP PLAN (MAP136): spaced-out frontier. Fixed rings of towns, then procedural towns every 20-40k generated in chunks as you travel; wilderness (fishing lakes, goblin camps, lone ranches, cattle, crossroads saloons); rail between the big towns with fast travel; faster riding on roads; a MAP view =====
+  (function () {
+    var CELL = 8000, TC = 30000, LK = new Map(), FT = new Map(), TRIED = {}, busy = false, RAIL = { st: [], seg: [], key: '' }, HERDS = [];
+    var SYL2 = ['ash', 'bel', 'cor', 'dun', 'el', 'fen', 'gar', 'hol', 'kel', 'mor', 'nor', 'pel', 'ros', 'sil', 'tor', 'val', 'wyn', 'cal', 'dra', 'bri', 'mes', 'can', 'rio', 'sto'];
+    var SUF = [' CREEK', ' SPRINGS', ' GULCH', ' FLATS', 'VILLE', ' CROSSING', ' BUTTE', ' WELLS', ' JUNCTION', ' RIDGE'];
+    function H(i, j, k) { return hash2(i * 3.17 + k * 11.3 + 0.5, j * 5.71 + k * 7.9 + 0.25); }
+    function free() { return typeof MODE !== 'undefined' && MODE === 'free' && typeof city !== 'undefined' && window.TOWN133; }
+    function T() { if (busy) return []; busy = true; try { return TOWN133.towns() || []; } catch (e) { return []; } finally { busy = false; } }
+    function homeP() { return { x: city.x, y: city.y + 110 }; }
+    function nearTown(x, y, pad, L) { L = L || T(); for (var i = 0; i < L.length; i++) { var b = L[i].box; if (x > b.x0 - pad && x < b.x1 + pad && y > b.y0 - pad && y < b.y1 + pad) return true; } return false; }
+    // ---- wilderness features per 8k cell (pure function of the cell + current road network)
+    function feat(i, j) { var k = i + ',' + j, f = FT.get(k); if (f !== undefined) return f; f = null;
+      var h = homeP(), cx = (i + 0.5) * CELL + (H(i, j, 2) - 0.5) * CELL * 0.6, cy = (j + 0.5) * CELL + (H(i, j, 3) - 0.5) * CELL * 0.6, r = H(i, j, 1);
+      if (Math.hypot(cx - h.x, cy - h.y) > 9000 && !(BOUNDS && (cx < BOUNDS.x0 + 9000 || cx > BOUNDS.x1 - 9000 || cy < BOUNDS.y0 + 9000 || cy > BOUNDS.y1 - 9000))) {
+        if (r < 0.11) f = { k: 'lake', x: cx, y: cy, rx: 420 + H(i, j, 4) * 380 }; else if (r < 0.19) f = { k: 'camp', x: cx, y: cy }; else if (r < 0.27) f = { k: 'ranch', x: cx, y: cy }; else if (r < 0.42) f = { k: 'cattle', x: cx, y: cy };
+        if (f) { f.ry = f.rx ? f.rx * 0.62 : 0; var pad = f.k === 'lake' ? f.rx + 400 : 900, L = T(); if (!L.length && !busy) f = null; else if (nearTown(f.x, f.y, pad + 1200, L) || TOWN133.nearRoad(f.x, f.y, pad)) f = null; } }
+      FT.set(k, f); return f; }
+    function lakeAt(x, y) { if (busy || !free()) return false; var i = Math.floor(x / CELL), j = Math.floor(y / CELL);
+      for (var a = -1; a <= 0; a++) for (var b = -1; b <= 0; b++) { var ii = i + (x - i * CELL > CELL / 2 ? a + 1 : a), jj = j + (y - j * CELL > CELL / 2 ? b + 1 : b), key = ii + ',' + jj, f = FT.get(key);
+        if (f === undefined) { if (!TOWNS_READY()) return false; f = feat(ii, jj); } if (f && f.k === 'lake') { var dx = (x - f.x) / f.rx, dy = (y - f.y) / f.ry; if (dx * dx + dy * dy < 1) return true; } } return false; }
+    function TOWNS_READY() { return !busy && T().length > 0; }
+    var _z = zone; zone = function (x, y) { if (lakeAt(x, y)) return 1; return _z(x, y); };
+    var _il = isLand; isLand = function (x, y) { if (lakeAt(x, y)) return false; return _il(x, y); };
+    function resetWater() { FT.forEach(function (f, k) { if (!f || f.k === 'lake') FT.delete(k); }); try { ZC.clear(); } catch (e) {} try { landCache.clear(); } catch (e) {} }
+    // ---- procedural towns: one try per 30k chunk once you come within 45k of it
+    function townDef(I, J, n) { var r = H(I, J, 9 + n), pop = [10, 10, 15, 15, 30, 10, 15, 50][Math.floor(H(I, J, 10 + n) * 8)], ty = ['farm', 'oil', 'gold', 'farm', 'mixed'][Math.floor(r * 5)];
+      var name = (SYL2[Math.floor(H(I, J, 11 + n) * SYL2.length)] + SYL2[Math.floor(H(I, J, 12 + n) * SYL2.length)]).toUpperCase() + SUF[Math.floor(H(I, J, 13 + n) * SUF.length)];
+      var main = pop >= 50 ? ['livery', 'smith', 'general', 'saloon', 'hotel', 'bank', 'sheriff', 'church', 'tailor', 'depot'] : pop >= 30 ? ['general', 'saloon', 'sheriff', 'bank', 'smith', 'hotel', 'depot'] : pop >= 15 ? ['general', 'saloon', 'sheriff', 'smith'] : ['general', 'saloon', 'church'];
+      if (ty === 'oil' && pop >= 30) main.splice(6, 0, 'refinery'); if (ty === 'gold' && pop >= 15) main.splice(2, 0, 'assay');
+      var edge = ty === 'oil' ? ['oilwell', 'oilwell', 'farm'] : ty === 'gold' ? ['mine', 'mine', 'farm'] : ['farm', 'ranch', 'farm'];
+      return { id: 'p' + I + '_' + J + '_' + n, name: name, pop: pop, ty: ty, main: main, edge: edge, proc: 1 }; }
+    function grow() { if (!free()) return; var L = T(); if (!L.length) return; var h = homeP(), I0 = Math.floor(px / TC), J0 = Math.floor(py / TC), added = 0;
+      for (var I = I0 - 2; I <= I0 + 2; I++) for (var J = J0 - 2; J <= J0 + 2; J++) { var k = I + ',' + J; if (TRIED[k]) continue; var cx = (I + 0.5) * TC, cy = (J + 0.5) * TC; if (Math.hypot(cx - px, cy - py) > 45000) continue; TRIED[k] = 1;
+        if (Math.hypot(cx - h.x, cy - h.y) < 52000 || H(I, J, 8) < 0.15) continue;
+        var n = H(I, J, 14) < 0.3 ? 2 : 1; for (var q = 0; q < n; q++) { var ox = cx + (H(I, J, 15 + q) - 0.5) * TC * 0.6 + q * 9000, oy = cy + (H(I, J, 16 + q) - 0.5) * TC * 0.6 + q * 2500; if (BOUNDS && (ox < BOUNDS.x0 + 6000 || ox > BOUNDS.x1 - 6000 || oy < BOUNDS.y0 + 6000 || oy > BOUNDS.y1 - 6000)) continue;
+          if (Math.hypot(ox - h.x, oy - h.y) < 50000) continue; busy = true; var t = null; try { t = TOWN133.add(townDef(I, J, q), ox, oy); } catch (e) { console.warn(e); } busy = false; if (t) { added++; saloonFor(t); } } }
+      if (added) { resetWater(); RAIL.key = ''; } }
+    // crossroads saloon at the bend of a long road
+    function saloonFor(t) { if (!t.link || t.d.mini || t.link.alt) return; var hh = homeP(); if (Math.hypot(t.link.nx - hh.x, t.y - hh.y) < 9500) return; var L = Math.abs(t.link.ny - t.y) + Math.abs(t.link.nx - t.link.ex); if (L < 12000 || Math.abs(t.link.nx - t.link.ex) < 3000) return;
+      var dir = t.link.ex > t.link.nx ? 1 : -1, ox = t.link.nx + dir * 1400; busy = true; try { TOWN133.add({ id: t.id + 'x', name: 'CROSSROADS SALOON', pop: 3, ty: 'mixed', mini: 1, noroad: 1, main: ['saloon', 'general'], edge: [] }, ox, t.y); } catch (e) {} busy = false; }
+    // lone ranches become tiny homesteads with a family (no road, just a trail)
+    function ranchTowns() { var L = T(); if (!L.length) return; var I0 = Math.floor(px / CELL), J0 = Math.floor(py / CELL);
+      for (var i = I0 - 3; i <= I0 + 3; i++) for (var j = J0 - 3; j <= J0 + 3; j++) { var f = feat(i, j); if (!f || f.k !== 'ranch' || f.done) continue; f.done = 1; var hh = homeP(); if (Math.hypot(f.x - hh.x, f.y - hh.y) < 9000) continue; busy = true; try { f.t = TOWN133.add({ id: 'r' + i + '_' + j, name: (LNm(i, j)) + ' RANCH', pop: 2, ty: 'farm', mini: 1, noroad: 1, main: ['home'], edge: ['ranch'] }, f.x, f.y); } catch (e) {} busy = false; } }
+    function LNm(i, j) { return ['HOLLIS', 'MCCOY', 'TATE', 'GRAVES', 'DALTON', 'COBB', 'SUTTER', 'BOONE', 'KINCAID', 'RHODES', 'BARLOW', 'CASSIDY'][Math.floor(H(i, j, 21) * 12)]; }
+    // ---- rail: home halt + every depot town, each linked to the nearest station already on the line
+    function rail() { var L = T(); if (!L.length) return RAIL; var key = L.length + ':' + city.x; if (RAIL.key === key) return RAIL; RAIL.key = key;
+      var J = L.J, st = [{ x: J.x + 380, y: J.y + 70, name: 'HOMESTEAD HALT', home: 1 }];
+      L.filter(function (t) { return t.d.main.indexOf('depot') >= 0; }).sort(function (a, b) { return Math.hypot(a.x - J.x, a.y - J.y) - Math.hypot(b.x - J.x, b.y - J.y); }).forEach(function (t) { var d = t.b.filter(function (b) { return b.k === 'depot'; })[0]; st.push({ x: t.rail ? t.rail[2] : d.x + 300, y: (t.rail ? t.rail[1] : d.y) , dx: d.x, dy: d.y + 40, name: t.name, t: t }); });
+      var seg = []; for (var i = 1; i < st.length; i++) { var bi = 0, bd = 1e18; for (var j = 0; j < i; j++) { var d2 = Math.hypot(st[i].x - st[j].x, st[i].y - st[j].y); if (d2 < bd) { bd = d2; bi = j; } } seg.push([st[bi].x, st[bi].y, st[i].x, st[i].y]); }
+      RAIL.st = st; RAIL.seg = seg; return RAIL; }
+    // ---- ground art: rails, lakes are drawn by the water art (zone), camps + cattle as items
+    var _dg = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dg.apply(this, arguments); if (!free()) return; try { var R = rail(), c = ctx;
+      R.seg.forEach(function (G) { var dx = G[2] - G[0], dy = G[3] - G[1], L = Math.hypot(dx, dy); if (!L) return; var ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+        // clip the segment to the view
+        var t0 = 0, t1 = L; [[ux, G[0], x0 - 60, x1 + 60], [uy, G[1], y0 - 60, y1 + 60]].forEach(function (A) { if (Math.abs(A[0]) < 1e-9) { if (A[1] < A[2] || A[1] > A[3]) { t0 = 1; t1 = 0; } return; } var a = (A[2] - A[1]) / A[0], b = (A[3] - A[1]) / A[0]; t0 = Math.max(t0, Math.min(a, b)); t1 = Math.min(t1, Math.max(a, b)); }); if (t1 <= t0) return;
+        c.strokeStyle = '#6b4520'; c.lineWidth = 6; c.beginPath(); for (var t = Math.ceil(t0 / 18) * 18; t < t1; t += 18) { var X = G[0] + ux * t - camX, Y = G[1] + uy * t - camY; c.moveTo(X - nx * 11, Y - ny * 11); c.lineTo(X + nx * 11, Y + ny * 11); } c.stroke();
+        c.strokeStyle = '#4a4a4a'; c.lineWidth = 3; [-6, 6].forEach(function (o) { c.beginPath(); c.moveTo(G[0] + ux * t0 + nx * o - camX, G[1] + uy * t0 + ny * o - camY); c.lineTo(G[0] + ux * t1 + nx * o - camX, G[1] + uy * t1 + ny * o - camY); c.stroke(); }); });
+      R.st.forEach(function (S) { if (!S.home || S.x < x0 - 200 || S.x > x1 + 200 || S.y < y0 - 200 || S.y > y1 + 200) return; c.fillStyle = '#8a5a2e'; c.fillRect(S.x - 70 - camX, S.y - 34 - camY, 140, 22); c.fillStyle = '#5a3818'; c.fillRect(S.x - 60 - camX, S.y - 80 - camY, 6, 48); c.fillRect(S.x + 54 - camX, S.y - 80 - camY, 6, 48); c.fillStyle = '#f3e3c3'; c.fillRect(S.x - 64 - camX, S.y - 96 - camY, 128, 18); c.strokeStyle = '#3b2410'; c.lineWidth = 2; c.strokeRect(S.x - 64 - camX, S.y - 96 - camY, 128, 18); c.fillStyle = '#3b2410'; c.font = 'bold 11px Georgia,serif'; c.textAlign = 'center'; c.fillText('HOMESTEAD HALT', S.x - camX, S.y - 83 - camY); c.textAlign = 'left'; });
+    } catch (e) { if (!window.E136) { window.E136 = 1; console.warn(e); } } };
+    function campArt(c, x, y, f) { var T2 = performance.now() / 1000; for (var i = 0; i < 3; i++) { var tx = x - 90 + i * 80, ty = y - 30 + (i % 2) * 40; c.fillStyle = ['#6b5a3a', '#5a4a2a', '#7a6040'][i]; c.beginPath(); c.moveTo(tx - 34, ty); c.lineTo(tx, ty - 46); c.lineTo(tx + 34, ty); c.closePath(); c.fill(); c.fillStyle = '#1a1208'; c.beginPath(); c.moveTo(tx - 8, ty); c.lineTo(tx, ty - 22); c.lineTo(tx + 8, ty); c.fill(); c.strokeStyle = '#3b2410'; c.lineWidth = 2; c.beginPath(); c.moveTo(tx - 4, ty - 52); c.lineTo(tx, ty - 44); c.lineTo(tx + 5, ty - 54); c.stroke(); }
+      c.fillStyle = '#555'; for (var s = 0; s < 6; s++) { c.beginPath(); c.arc(x + Math.cos(s) * 16, y + 30 + Math.sin(s) * 8, 4, 0, 7); c.fill(); } var fl = 10 + Math.sin(T2 * 9) * 3; c.fillStyle = '#e8641a'; c.beginPath(); c.moveTo(x - 9, y + 30); c.quadraticCurveTo(x, y + 30 - fl * 2.4, x + 9, y + 30); c.fill(); c.fillStyle = '#ffd040'; c.beginPath(); c.moveTo(x - 4, y + 30); c.quadraticCurveTo(x, y + 30 - fl * 1.2, x + 4, y + 30); c.fill();
+      for (var g = 0; g < 3; g++) { var gx = x - 40 + g * 40 + Math.sin(T2 + g) * 4, gy = y + 54; c.fillStyle = '#5a7a2a'; c.beginPath(); c.arc(gx, gy - 18, 8, 0, 7); c.fill(); c.fillRect(gx - 6, gy - 12, 12, 12); c.beginPath(); c.moveTo(gx - 8, gy - 22); c.lineTo(gx - 15, gy - 28); c.lineTo(gx - 5, gy - 18); c.moveTo(gx + 8, gy - 22); c.lineTo(gx + 15, gy - 28); c.lineTo(gx + 5, gy - 18); c.fill(); c.fillStyle = '#ff3'; c.fillRect(gx - 4, gy - 20, 2, 2); c.fillRect(gx + 2, gy - 20, 2, 2); }
+      c.fillStyle = '#3b2410'; c.fillRect(x + 110, y - 70, 4, 70); c.fillStyle = '#7a1a1a'; c.beginPath(); c.moveTo(x + 114, y - 70); c.lineTo(x + 146, y - 60 + Math.sin(T2 * 3) * 3); c.lineTo(x + 114, y - 50); c.fill(); }
+    var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); if (!free()) return; try { var W = innerWidth, Hh = innerHeight, vx0 = px - W / (2 * zoom) - 300, vx1 = px + W / (2 * zoom) + 300, vy0 = py - Hh / (2 * zoom) - 300, vy1 = py + Hh / (2 * zoom) + 300, I0 = Math.floor(px / CELL), J0 = Math.floor(py / CELL);
+      for (var i = I0 - 1; i <= I0 + 1; i++) for (var j = J0 - 1; j <= J0 + 1; j++) { var f = feat(i, j); if (!f) continue;
+        if (f.k === 'camp' && f.x > vx0 && f.x < vx1 && f.y > vy0 && f.y < vy1) (function (f) { items.push({ y: f.y + 60, x: f.x, y2: f.y + 60, fn: function (sx, sy) { campArt(ctx, sx, sy - 60, f); } }); })(f);
+        if (f.k === 'cattle') { if (!f.cows) { f.cows = []; for (var q = 0; q < 6 + Math.floor(H(i, j, 30) * 6); q++) f.cows.push({ k: 'cow', x: f.x + (H(i + q, j, 31) - 0.5) * 500, y: f.y + (H(i, j + q, 32) - 0.5) * 300, tx: f.x, ty: f.y, p: q }); }
+          f.cows.forEach(function (a) { var dx = a.tx - a.x, dy = a.ty - a.y, d = Math.hypot(dx, dy); if (d < 4) { a.tx = f.x + (Math.random() - 0.5) * 700; a.ty = f.y + (Math.random() - 0.5) * 380; } else { a.x += dx / d * 0.35; a.y += dy / d * 0.35; a.f = dx < 0 ? -1 : 1; }
+            if (a.x > vx0 && a.x < vx1 && a.y > vy0 && a.y < vy1) items.push({ y: a.y, x: a.x, y2: a.y, fn: function (sx, sy) { TOWN133.petArt(ctx, a, sx, sy); } }); }); } } } catch (e) { if (!window.E136b) { window.E136b = 1; console.warn(e); } } };
+    // ---- faster on roads (horse, wagon, car), not on water
+    var _sp = window.SP102; window.SP102 = function (base) { var v = _sp ? _sp(base) : base; try { var V = window.VEH130 && VEH130(); if (free() && !(V && V.on && V.k >= 8) && TOWN133.nearRoad(px, py, 34)) v *= 1.7; } catch (e) {} return v; };
+    // ---- UI: rail button near a station, rail panel, map
+    var css = 'position:fixed;z-index:75;font:bold 13px Georgia,serif;background:#f3e3c3;color:#3b2410;border:3px solid #3b2410;border-radius:8px;';
+    var RB = document.createElement('button'); RB.id = 'rail136'; RB.textContent = '\ud83d\ude82 TAKE THE TRAIN'; RB.style.cssText = css + 'display:none;left:50%;bottom:150px;transform:translateX(-50%);padding:8px 14px'; document.body.appendChild(RB);
+    var RP = document.createElement('div'); RP.id = 'railp136'; RP.style.cssText = css + 'display:none;left:50%;top:50%;transform:translate(-50%,-50%);padding:8px;max-height:80vh;overflow:auto;min-width:260px'; document.body.appendChild(RP);
+    var MB = document.createElement('button'); MB.id = 'mapb136'; MB.textContent = '\ud83d\uddfa MAP'; MB.style.cssText = css + 'display:none;right:8px;top:64px;padding:4px 8px;font-size:12px'; document.body.appendChild(MB);
+    var MV = document.createElement('canvas'); MV.id = 'map136'; MV.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:80;display:none;background:#d9c59a'; document.body.appendChild(MV);
+    var MX = document.createElement('div'); MX.style.cssText = css + 'display:none;z-index:81;right:10px;top:10px;padding:2px'; MX.innerHTML = '<button data-z="0.6" style="font:bold 18px serif;width:40px">+</button><button data-z="1.6" style="font:bold 18px serif;width:40px">\u2212</button><button data-z="x" style="font:bold 18px serif;width:40px">\u2715</button>'; document.body.appendChild(MX);
+    var FADE = document.createElement('div'); FADE.style.cssText = 'position:fixed;inset:0;z-index:90;background:#1a1208;color:#f3e3c3;font:bold 20px Georgia,serif;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .35s'; document.body.appendChild(FADE);
+    var STN = null, MAPR = 60000;
+    function fare(a, b) { return Math.max(2, Math.round(Math.hypot(a.x - b.x, a.y - b.y) / 1500)); }
+    function stPos(S) { return S.home ? { x: S.x, y: S.y + 30 } : { x: S.dx, y: S.dy + 30 }; }
+    function ride(S) { var g = ME_S && ME_S.res ? ME_S.res.gold : 0, f = fare(stPos(STN), stPos(S)); if (g < f) { showToast('THE TICKET COSTS ' + f + ' GOLD'); return false; } ME_S.res.gold -= f; RP.style.display = 'none';
+      FADE.textContent = '\ud83d\ude82 RIDING THE RAIL TO ' + S.name + '\u2026'; FADE.style.display = 'flex'; requestAnimationFrame(function () { FADE.style.opacity = '1'; });
+      setTimeout(function () { var p = stPos(S); px = p.x; py = p.y; try { var V = VEH130(); if (V && V.on) { V.x = px; V.y = py; } } catch (e) {} try { if (typeof steed !== 'undefined' && steed.x != null) { steed.x = px; steed.y = py; } } catch (e) {} window.RIDES136 = (window.RIDES136 || 0) + 1; grow(); FADE.style.opacity = '0'; setTimeout(function () { FADE.style.display = 'none'; }, 400); showToast('WELCOME TO ' + S.name); }, 900); return true; }
+    function railPanel() { var R = rail(); RP.innerHTML = '<div style="margin-bottom:6px">\ud83d\ude82 ' + STN.name + ' \u2014 WHERE TO?</div>'; R.st.forEach(function (S) { if (S === STN) return; var b = document.createElement('button'), d = Math.round(Math.hypot(stPos(S).x - px, stPos(S).y - py) / 1000); b.textContent = S.name + ' \u00b7 ' + d + 'K \u00b7 ' + fare(stPos(STN), stPos(S)) + ' GOLD'; b.style.cssText = 'display:block;width:100%;margin:3px 0;padding:6px;font:bold 13px Georgia,serif;background:#e8d4a8;border:2px solid #3b2410;border-radius:5px'; b.onclick = function () { ride(S); }; RP.appendChild(b); });
+      var x = document.createElement('button'); x.textContent = '\u2715 CLOSE'; x.style.cssText = 'margin-top:4px;font:bold 12px Georgia,serif'; x.onclick = function () { RP.style.display = 'none'; }; RP.appendChild(x); RP.style.display = 'block'; }
+    RB.onclick = function () { if (STN) railPanel(); };
+    function drawMap() { var dpr = window.devicePixelRatio || 1, W = innerWidth, Hh = innerHeight; MV.width = W * dpr; MV.height = Hh * dpr; var c = MV.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); var sc = Math.min(W, Hh) / (2 * MAPR), L = T(), R = rail();
+      function P(x, y) { return [W / 2 + (x - px) * sc, Hh / 2 + (y - py) * sc]; }
+      c.fillStyle = '#d9c59a'; c.fillRect(0, 0, W, Hh); c.strokeStyle = 'rgba(90,60,30,.12)'; c.lineWidth = 1; var gs = 10000; for (var gx = Math.floor((px - W / 2 / sc) / gs) * gs; gx < px + W / 2 / sc; gx += gs) { var a = P(gx, 0); c.beginPath(); c.moveTo(a[0], 0); c.lineTo(a[0], Hh); c.stroke(); } for (var gy = Math.floor((py - Hh / 2 / sc) / gs) * gs; gy < py + Hh / 2 / sc; gy += gs) { var b2 = P(0, gy); c.beginPath(); c.moveTo(0, b2[1]); c.lineTo(W, b2[1]); c.stroke(); }
+      FT.forEach(function (f) { if (!f) return; var a = P(f.x, f.y); if (f.k === 'lake') { c.fillStyle = '#5a8ab0'; c.beginPath(); c.ellipse(a[0], a[1], Math.max(2, f.rx * sc), Math.max(1.5, f.ry * sc), 0, 0, 7); c.fill(); } else if (f.k === 'camp') { c.fillStyle = '#5a7a2a'; c.font = 'bold 11px sans-serif'; c.fillText('\u25b2', a[0] - 4, a[1] + 4); } });
+      c.strokeStyle = '#a07a46'; c.lineWidth = 2.5; L.roads.forEach(function (G) { var a = P(G[0], G[1]), b = P(G[2], G[3]); c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke(); });
+      c.strokeStyle = '#3b3b3b'; c.lineWidth = 2; c.setLineDash([5, 3]); R.seg.forEach(function (G) { var a = P(G[0], G[1]), b = P(G[2], G[3]); c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke(); }); c.setLineDash([]);
+      c.textAlign = 'center'; L.forEach(function (t) { var a = P(t.x, t.y), r = t.d.mini ? 2.5 : 3 + Math.sqrt(t.d.pop); c.fillStyle = t.d.mini ? '#7a5a3a' : '#8a3a24'; c.beginPath(); c.arc(a[0], a[1], r, 0, 7); c.fill(); if (!t.d.mini || MAPR < 25000) { c.fillStyle = '#2a1a0a'; c.font = 'bold ' + (t.d.mini ? 9 : 12) + 'px Georgia,serif'; c.fillText(t.name + (t.d.mini ? '' : ' \u00b7 ' + t.d.pop), a[0], a[1] - r - 4); } });
+      var h = P(city.x, city.y); c.fillStyle = '#1a4a8a'; c.font = 'bold 16px serif'; c.fillText('\u2605', h[0], h[1] + 5); c.font = 'bold 11px Georgia,serif'; c.fillText('HOMESTEAD', h[0], h[1] + 18);
+      try { (factions || []).forEach(function (f) { if (!f || !f.hallObj || f.dead) return; var a = P(f.x, f.y); if (a[0] < 0 || a[0] > W || a[1] < 0 || a[1] > Hh) return; c.fillStyle = '#a02020'; c.fillRect(a[0] - 3, a[1] - 3, 6, 6); }); } catch (e) {}
+      c.fillStyle = '#ffd040'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.beginPath(); c.arc(W / 2, Hh / 2, 6, 0, 7); c.fill(); c.stroke(); c.fillStyle = '#2a1a0a'; c.font = 'bold 13px Georgia,serif'; c.fillText('YOU', W / 2, Hh / 2 - 10);
+      c.textAlign = 'left'; c.font = 'bold 12px Georgia,serif'; c.fillText('MAP \u00b7 ' + Math.round(MAPR * 2 / 1000) + 'K ACROSS \u00b7 \u25cf TOWN  \u2605 HOME  \u25a0 KINGDOM  \u25b2 GOBLIN CAMP  - - RAIL', 10, Hh - 10); }
+    function openMap(on) { MV.style.display = MX.style.display = on ? 'block' : 'none'; if (on) drawMap(); }
+    MB.onclick = function () { openMap(MV.style.display !== 'block'); };
+    MX.onclick = function (e) { var z = e.target.getAttribute('data-z'); if (!z) return; if (z === 'x') openMap(false); else { MAPR = Math.max(6000, Math.min(240000, MAPR * +z)); drawMap(); } };
+    addEventListener('keydown', function (e) { if (!free() || e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; if (e.key === 'm' || e.key === 'M') openMap(MV.style.display !== 'block'); else if (e.key === 'Escape' && MV.style.display === 'block') openMap(false); });
+    var gT = 0;
+    setInterval(function () { try { var on = free() && T().length > 0 && (typeof running === 'undefined' || running !== false); MB.style.display = on ? 'block' : 'none'; if (!on) { RB.style.display = 'none'; return; }
+      if (++gT % 4 === 0) { grow(); ranchTowns(); } var R = rail(); STN = null; R.st.forEach(function (S) { var p = stPos(S); if (Math.hypot(p.x - px, p.y - py) < 260) STN = S; }); RB.style.display = STN && RP.style.display !== 'block' ? 'block' : 'none'; if (!STN) RP.style.display = 'none'; if (MV.style.display === 'block') drawMap(); } catch (e) { if (!window.E136c) { window.E136c = 1; console.warn(e); } } }, 250);
+    // first pass: crossroads saloons on the fixed roads, once the towns exist
+    var once = setInterval(function () { if (!free()) return; var L = T(); if (!L.length) return; clearInterval(once); L.slice().forEach(function (t) { if (!t.d.proc && !t.d.mini) saloonFor(t); }); resetWater(); RAIL.key = ''; }, 300);
+    window.MAP136 = { feat: feat, lake: lakeAt, grow: grow, rail: rail, ride: ride, openMap: openMap, stations: function () { return rail().st; }, near: function () { return STN; }, FT: FT, cell: CELL, TC: TC };
   })();
   requestAnimationFrame(frame);
 </script>
