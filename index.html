@@ -4542,7 +4542,7 @@
 
   // ===== v58: start at your hall, first-minute goals, rams batter the gate =====
   (function () {
-    var _bg58 = beginGame; beginGame = function (mode) { _bg58(mode); try { if (me && me.hallObj) { var sh72 = (cv.height / (window.devicePixelRatio || 1)) < 500; zoom = sh72 ? 0.7 : 1; px = me.hallObj.x - (sh72 ? 260 : 0); py = me.hallObj.y + (sh72 ? 60 : 260); } } catch (e) {} try { allSets().forEach(function (s) { if (!s || !s.res) return; s.res.wood = (s.res.wood || 0) + 40; s.res.food = (s.res.food || 0) + 25; s.res.stone = (s.res.stone || 0) + 20; s.res.water = (s.res.water || 0) + 15; }); updateRes(); } catch (e) {} goals58Start(); };
+    var _bg58 = beginGame; beginGame = function (mode) { _bg58(mode); try { if (me && me.hallObj) { var sh72 = (cv.height / (window.devicePixelRatio || 1)) < 500; zoom = sh72 ? 0.7 : 1; px = me.hallObj.x - (sh72 ? 260 : 300); py = me.hallObj.y + 60; /* v96: PC starts beside the camp so it is fully on screen */ } } catch (e) {} try { allSets().forEach(function (s) { if (!s || !s.res) return; s.res.wood = (s.res.wood || 0) + 40; s.res.food = (s.res.food || 0) + 25; s.res.stone = (s.res.stone || 0) + 20; s.res.water = (s.res.water || 0) + 15; }); updateRes(); } catch (e) {} goals58Start(); };
     // rams (siege t>10) batter the gate: gate hp = 40 + 30% of wall max; a broken gate lets attackers past the wall until the siege ends
     var _dd58 = dealDamage; dealDamage = function (src, t, dmg) { try { var S = t && t.hall && SIEGE51[t.fac && t.fac.id];
         if (S && S.t > 10 && src && S.by === src.f && !S.gateBroke58 && t.wall55 > 0) { if (S.gateHp58 == null) S.gateHp58 = 40 + 0.3 * (t.wallMax55 || 60); S.gateHp58 -= dmg * 0.5;
