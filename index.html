@@ -4933,15 +4933,15 @@
     window.onRoad102 = onRoad;
     window.T102 = { traffic: function (s) { return trafficOf(s); }, segs: function (s) { return segsOf(s); } };
     // ---- player vehicle (same walk-up / enter / exit idea as the horse)
-    var VK = [{ n: 'CART', c: 12, m: 2.5 }, { n: 'WAGON', c: 20, m: 2.8 }, { n: 'CAR', c: 40, m: 3.6 }, { n: 'TRUCK', c: 60, m: 3.2 }, { n: 'JEEP', c: 80, m: 4 }, { n: 'TANK', c: 150, m: 2.6, b: 'garage' }, { n: 'BOAT', c: 60, m: 3.2, b: 'dock' }, { n: 'PLANE', c: 300, m: 5.5, b: 'airport' }];
+    var VK = [{ n: 'CART', c: 12, m: 2.5 }, { n: 'WAGON', c: 20, m: 2.8 }, { n: 'CAR', c: 40, m: 3.6 }, { n: 'TRUCK', c: 60, m: 3.2 }, { n: 'JEEP', c: 80, m: 4 }, { n: 'TANK', c: 150, m: 2.6, b: 'garage' }, { n: 'BOAT', c: 60, m: 3.2, b: 'dock' }, { n: 'PLANE', c: 300, m: 5.5, b: 'airport' }, { n: 'SAILBOAT', c: 25, m: 2.6 }, { n: 'BIG SHIP', c: 150, m: 4.2 }];
     var V = { k: -1, on: false, x: 0, y: 0 };
     try { var sv = JSON.parse(localStorage.getItem('kingdom-veh-v1') || 'null'); if (sv && sv.k >= 0) V = sv; } catch (e) {}
     function saveV() { try { localStorage.setItem('kingdom-veh-v1', JSON.stringify(V)); } catch (e) {} }
-    window.SP102 = function (base) { var m = V.on && V.k >= 0 ? (130 * VK[V.k].m) / base : 1; if (V.on && V.k >= 0) base = 130 * VK[V.k].m; return base * (onRoad(px, py) && V.k !== 7 && V.k !== 6 ? 1.6 : 1); };
+    window.SP102 = function (base) { var m = V.on && V.k >= 0 ? (130 * VK[V.k].m) / base : 1; if (V.on && V.k >= 0) base = 130 * VK[V.k].m; if (V.on && V.k >= 8) { var w8 = _bw(px, py); if (!w8) base *= 0.35; else if (V.k === 8 && window.WIND128) base *= WIND128(px - (SP102.lx || px), py - (SP102.ly || py)); } SP102.lx = px; SP102.ly = py; return base * (onRoad(px, py) && !(V.on && V.k >= 6) ? 1.6 : 1); };
     var vb = document.createElement('button'); vb.id = 'vehBtn'; vb.style.display = 'none'; var row = mountBtn && mountBtn.parentNode; if (row) row.appendChild(vb);
     function nearV() { return V.k >= 0 && !V.on && Math.hypot(V.x - px, V.y - py) < 90; }
     function vUi() { var show = V.k >= 0 && (V.on || nearV()); vb.style.display = show ? '' : 'none'; vb.textContent = V.on ? 'EXIT ' + VK[V.k].n : 'DRIVE ' + VK[V.k].n; if (mountBtn) mountBtn.style.display = V.on ? 'none' : ''; }
-    function toggleV() { if (V.k < 0) return; if (V.on) { if (_bw(px, py)) { showToast('LAND FIRST - CAN\'T STEP OUT OVER WATER'); return; } V.on = false; V.x = px + face * 40; V.y = py; showToast(VK[V.k].n + ' PARKED'); } else if (nearV()) { V.on = true; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; steed.face = face; saveHorse(); } showToast('DRIVING THE ' + VK[V.k].n + (onRoad(px, py) ? '' : ' - ROADS ARE FASTER')); } saveV(); vUi(); }
+    function toggleV() { if (V.k < 0) return; if (V.on) { if (_bw(px, py)) { showToast('LAND FIRST - CAN\'T STEP OUT OVER WATER'); return; } V.on = false; V.x = px + face * 40; V.y = py; showToast(VK[V.k].n + ' PARKED'); if (window.LAND128) LAND128(V.k); } else if (nearV()) { V.on = true; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; steed.face = face; saveHorse(); } showToast((V.k >= 8 ? 'SAILING THE ' : 'DRIVING THE ') + VK[V.k].n + (V.k >= 8 ? ' - FIND THE ? ISLANDS' : onRoad(px, py) ? '' : ' - ROADS ARE FASTER')); if (window.BOARD128) BOARD128(V.k); } saveV(); vUi(); }
     vb.addEventListener('click', function (e) { e.stopPropagation(); toggleV(); });
     addEventListener('keydown', function (e) { if ((e.key === 'v' || e.key === 'V') && started) toggleV(); });
     // ---- art (era-appropriate, B/W)
@@ -4960,6 +4960,7 @@
         wheel(c, -18, -6, 6); wheel(c, 14, -6, 6);
       } else if (k === 5) { c.fillStyle = '#000'; c.fillRect(-26, -20, 52, 14); c.fillRect(-12, -30, 22, 10); c.fillRect(8, -27, 26, 4); c.fillStyle = '#fff'; for (var w = -20; w <= 20; w += 10) { c.beginPath(); c.arc(w, -8, 3, 0, 7); c.fill(); }
       } else if (k === 6) { c.fillStyle = '#000'; c.beginPath(); c.moveTo(-28, -16); c.lineTo(30, -16); c.lineTo(20, -4); c.lineTo(-22, -4); c.closePath(); c.fill(); c.fillRect(-8, -28, 4, 12); c.fillStyle = '#fff'; c.fillRect(-14, -13, 6, 4); c.fillRect(0, -13, 6, 4);
+      } else if (k >= 8 && window.SHIP128) { c.restore(); SHIP128(c, k, x, y, f); return;
       } else if (k === 7) { c.fillStyle = '#000'; c.beginPath(); c.moveTo(-30, -26); c.lineTo(28, -26); c.lineTo(34, -22); c.lineTo(28, -18); c.lineTo(-30, -18); c.closePath(); c.fill(); c.beginPath(); c.moveTo(-6, -22); c.lineTo(-16, -6); c.lineTo(-8, -6); c.lineTo(8, -22); c.fill(); c.beginPath(); c.moveTo(-30, -26); c.lineTo(-36, -36); c.lineTo(-24, -26); c.fill(); c.fillStyle = 'rgba(0,0,0,0.2)'; c.beginPath(); c.ellipse(0, 0, 24, 4, 0, 0, 7); c.fill();
       } else { // car / jeep
         c.fillStyle = '#000'; c.beginPath(); c.moveTo(-26, -8); c.lineTo(-26, -18); c.lineTo(-12, -20); c.lineTo(-6, -30); c.lineTo(10, -30); c.lineTo(16, -20); c.lineTo(26, -18); c.lineTo(26, -8); c.closePath(); c.fill();
@@ -4968,7 +4969,7 @@
       }
       c.restore();
     }
-    var _bw = blockedWorld; window.PW102 = function () { return V.on && (V.k === 6 || V.k === 7); }; window.water102 = function (x, y) { return _bw(x, y); };
+    var _bw = blockedWorld; window.PW102 = function () { return V.on && V.k >= 6; }; window.water102 = function (x, y) { return _bw(x, y); };
     window.DV102 = function (c, sx, sy, f, mv) { if (!V.on || V.k < 0) return false; vehArt(c, V.k, sx, sy + (mv ? Math.sin(performance.now() / 60) : 0), f); c.fillStyle = '#000'; c.beginPath(); c.arc(sx + f * (V.k <= 1 ? -2 : 3), sy - (V.k <= 1 ? 30 : 34), 5, 0, 7); c.fill(); return true; };
     // ---- villager / worker traffic on roads (every nation, same rule): trucks haul goods home
     var TR = new Map();
@@ -4996,7 +4997,7 @@
     updateUnits = function (dt) { var b = units.map(function (u) { return [u.x, u.y]; }); _uu(dt); for (var i = 0; i < b.length && i < units.length; i++) { var u = units[i]; if (u.hp > 0 && (u.x !== b[i][0] || u.y !== b[i][1]) && onRoad(u.x, u.y)) { u.x += (u.x - b[i][0]) * 0.5; u.y += (u.y - b[i][1]) * 0.5; } } };
     // ---- buy a vehicle at the market (GEAR tab)
     var _si = shopItems;
-    shopItems = function () { var it = _si.apply(this, arguments); try { var e = eraOf(ME_S), k = e >= 3 ? 4 : e >= 2 ? 2 : e >= 1 ? 1 : 0; var vk = VK[k]; it.push({ label: 'VEHICLE: ' + vk.n + (V.k >= 0 ? ' (YOU HAVE A ' + VK[V.k].n + ')' : ''), btn: V.k === k ? 'OWNED' : vk.c + ' GOLD', dis: V.k === k || gold < vk.c, act: function () { gold -= vk.c; V = { k: k, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + vk.n + ' - DRIVING' + (matchMedia('(pointer:coarse)').matches ? '' : ' (V TO EXIT)')); } }); [5, 6, 7].forEach(function (k2) { var v2 = VK[k2]; if (!bCount(ME_S, v2.b)) return; it.push({ label: 'VEHICLE: ' + v2.n + ' (FROM YOUR ' + v2.b.toUpperCase() + ')', btn: V.k === k2 ? 'OWNED' : v2.c + ' GOLD', dis: V.k === k2 || gold < v2.c, act: function () { gold -= v2.c; V = { k: k2, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + v2.n + ' - V TO EXIT' + (k2 >= 6 ? ' (CROSSES WATER)' : '')); } }); }); it.push({ label: 'TRAIN MILITIA (UP TO 2 ADULTS, 6 FOOD, NO BARRACKS)', btn: '6 FOOD', dis: !window.MIL104 || !MIL104.ok(ME_S), act: function () { if (MIL104.raise(ME_S)) showToast('2 MILITIA RAISED'); } }); if (e >= 2) { var tc = 30; it.push({ label: 'HAUL TRUCK (HAULS GOODS ON ROADS)', btn: tc + ' GOLD', dis: gold < tc, act: function () { gold -= tc; ME_S.xtr102 = (ME_S.xtr102 || 0) + 1; showToast('TRUCK HAULING GOODS'); } }); } } catch (e) {} return it; };
+    shopItems = function () { var it = _si.apply(this, arguments); try { var e = eraOf(ME_S), k = e >= 3 ? 4 : e >= 2 ? 2 : e >= 1 ? 1 : 0; var vk = VK[k]; it.push({ label: 'VEHICLE: ' + vk.n + (V.k >= 0 ? ' (YOU HAVE A ' + VK[V.k].n + ')' : ''), btn: V.k === k ? 'OWNED' : vk.c + ' GOLD', dis: V.k === k || gold < vk.c, act: function () { gold -= vk.c; V = { k: k, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + vk.n + ' - DRIVING' + (matchMedia('(pointer:coarse)').matches ? '' : ' (V TO EXIT)')); } }); [8, 9].forEach(function (k3) { var v3 = VK[k3]; it.push({ label: 'VEHICLE: ' + v3.n + (k3 === 8 ? ' (SAILS WITH THE WIND, EXPLORE ISLANDS)' : ' (FAST, CARRIES TROOPS + HORSE)'), btn: V.k === k3 ? 'OWNED' : v3.c + ' GOLD', dis: V.k === k3 || gold < v3.c, act: function () { gold -= v3.c; V = { k: k3, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + v3.n + ' - SAIL OUT TO THE ? ISLANDS' + (matchMedia('(pointer:coarse)').matches ? '' : ' (V TO EXIT)')); if (window.BOARD128) BOARD128(k3); } }); }); [5, 6, 7].forEach(function (k2) { var v2 = VK[k2]; if (!bCount(ME_S, v2.b)) return; it.push({ label: 'VEHICLE: ' + v2.n + ' (FROM YOUR ' + v2.b.toUpperCase() + ')', btn: V.k === k2 ? 'OWNED' : v2.c + ' GOLD', dis: V.k === k2 || gold < v2.c, act: function () { gold -= v2.c; V = { k: k2, on: true, x: px, y: py }; if (mounted()) { steed.x = px - 30; steed.y = py; steed.st = 'tied'; steed.tx = px - 30; steed.ty = py; steed.post = null; saveHorse(); } saveV(); vUi(); showToast('NEW ' + v2.n + ' - V TO EXIT' + (k2 >= 6 ? ' (CROSSES WATER)' : '')); } }); }); it.push({ label: 'TRAIN MILITIA (UP TO 2 ADULTS, 6 FOOD, NO BARRACKS)', btn: '6 FOOD', dis: !window.MIL104 || !MIL104.ok(ME_S), act: function () { if (MIL104.raise(ME_S)) showToast('2 MILITIA RAISED'); } }); if (e >= 2) { var tc = 30; it.push({ label: 'HAUL TRUCK (HAULS GOODS ON ROADS)', btn: tc + ' GOLD', dis: gold < tc, act: function () { gold -= tc; ME_S.xtr102 = (ME_S.xtr102 || 0) + 1; showToast('TRUCK HAULING GOODS'); } }); } } catch (e) {} return it; };
   })();
   // v99: market split into small tabs, one visible at a time (compact for landscape phones)
   (function () {
@@ -5114,6 +5115,91 @@
       if (k === 'school' && b.L > 0) a.info = 'LESSONS: +' + 4 * Math.min(3, lvSum(s, 'school')) + '% HAPPY';
       if (k === 'hall') { var t = Math.max(0, Math.ceil(s.vT126 == null ? 180 : s.vT126)); a.info = '\ud83d\uddf3 VOTE IN ' + Math.floor(t / 60) + ':' + ('0' + t % 60).slice(-2) + ' \u00b7 APPROVAL ' + Math.round(approval(s) * 100) + '%' + (s.vLast126 ? ' \u00b7 LAST: ' + s.vLast126.split(' - ')[0] : ''); }
     };
+  })();
+  // v128: SEA EXPLORATION - a few small islands out in the deep sea, hidden in fog until visited; each holds a chest of gold, a wild horse (free knight) or a neutral village to claim. Same rules for CPU (it sends ships too).
+  (function () {
+    var IS = { key: '', l: [] }, _z128 = zone, _f128 = field37, KINDS = ['chest', 'horse', 'village', 'chest', 'village'];
+    function SK() { return 'kingdom-isles-v1:' + MODE + ':' + seed; }
+    function isles() {
+      if (!BOUNDS || (MODE !== 'free' && MODE !== 'duel')) return [];
+      var B = BOUNDS, key = MODE + ':' + seed + ':' + B.x0 + ',' + B.y1; if (IS.key === key) return IS.l;
+      if (typeof ISL === 'undefined' || !ISL.key) return [];
+      IS.key = key; IS.l = []; for (var CL = 1500; CL >= 450 && IS.l.length < 3; CL -= 350) { var NZ = CL >= 1100 ? 2 : 1; var cand = [];
+      for (var i = 0; i <= 24; i++) for (var j = 0; j <= 24; j++) {
+        var x = B.x0 + 1300 + i * (B.x1 - B.x0 - 2600) / 24, y = B.y0 + 1300 + j * (B.y1 - B.y0 - 2600) / 24, ok = _z128(x, y) >= NZ && homeDist(x, y) > 3000;
+        for (var a = 0; a < 8 && ok; a++) if (_z128(x + Math.cos(a * 0.785) * 1500, y + Math.sin(a * 0.785) * CL) < NZ) ok = false;
+        if (ok) cand.push({ x: x, y: y, h: hash2(i * 7 + seed % 97, j * 13) });
+      }
+      cand.sort(function (A, Bb) { return A.h - Bb.h; });
+      var sv = {}; try { sv = JSON.parse(localStorage.getItem(SK()) || '{}'); } catch (e) {}
+      for (var c = 0; c < cand.length && IS.l.length < 5; c++) { var p = cand[c]; if (IS.l.some(function (q) { return Math.hypot(q.x - p.x, q.y - p.y) < 3500; })) continue;
+        var n = IS.l.length; IS.l.push({ id: n, x: p.x, y: p.y, r: 520 + (p.h * 1000 % 1) * 260, kind: KINDS[n], seen: !!(MODE === 'free' && sv[n]), got: MODE === 'free' && sv[n] ? sv[n] : null }); } }
+      return IS.l;
+    }
+    function isleAt(x, y, pad) { var l = isles(); for (var i = 0; i < l.length; i++) { var I = l[i]; if (Math.abs(x - I.x) < I.r * 1.3 + pad && Math.hypot(x - I.x, y - I.y) < I.r + pad) return I; } return null; }
+    zone = function (x, y) { var v = _z128(x, y); if (v >= 1 && IS.l.length) { var l = IS.l; for (var i = 0; i < l.length; i++) { var I = l[i], dx = x - I.x, dy = y - I.y; if (Math.abs(dx) > I.r * 1.4 || Math.abs(dy) > I.r * 1.4) continue; var d = Math.hypot(dx, dy); if (d < I.r) return 0; if (d < I.r * 1.25) v = 1; } } return v; };
+    field37 = function (x, y) { var v = _f128(x, y); if (MODE === 'islands' || !IS.l.length || v < 1) return v; var l = IS.l; for (var i = 0; i < l.length; i++) { var I = l[i], dx = x - I.x, dy = y - I.y; if (Math.abs(dx) > I.r * 2 || Math.abs(dy) > I.r * 2) continue; var f = Math.hypot(dx, dy) / I.r; if (f < v) v = f < 1 ? f : 1 + (f - 1) * ISL.sh / 0.25; } return v; };
+    var _rs128 = reserved; reserved = function (x, y) { return !!isleAt(x, y, 1500) || _rs128(x, y); };
+    function save() { if (MODE !== 'free') return; var o = {}; IS.l.forEach(function (I) { if (I.seen) o[I.id] = I.got || 'seen'; }); try { localStorage.setItem(SK(), JSON.stringify(o)); } catch (e) {} }
+    function claim(I, s, who) {
+      if (I.got) return; I.got = who; var mine = s === ME_S;
+      if (I.kind === 'chest') { if (mine) gold += 60; else if (s.fac) s.fac.gold = (s.fac.gold || 0) + 60; if (mine) showToast('TREASURE CHEST! +60 GOLD'); }
+      else if (I.kind === 'horse') { if (mine) { var u = spawnUnit('me', 'k', I.x + 40, I.y); u.tx = u.x; u.ty = u.y; showToast('WILD HORSE TAMED - A FREE KNIGHT JOINS YOU'); } else if (s.fac) s.fac.gold = (s.fac.gold || 0) + 30; }
+      else { if (mine) showToast('VILLAGE CLAIMED - +1 GOLD EVERY 10s'); }
+      if (!mine && who) showToast(who + ' CLAIMED A ' + (I.kind === 'village' ? 'VILLAGE' : I.kind === 'horse' ? 'WILD HORSE' : 'TREASURE') + ' ISLAND');
+      save();
+    }
+    // ---- CPU expeditions (same deal: pay for a big ship, sail out, claim what's there)
+    var SHIPS = [], tk = 0, vt = 0;
+    function cpuTick(dt) {
+      allS75().forEach(function (s) { if (!s || s === ME_S || !s.fac || !s.fac.alive) return; var f = s.fac; if (f.ex128 === undefined) f.ex128 = 360 + Math.random() * 120; f.ex128 -= dt; if (f.ex128 > 0) return; f.ex128 = 420;
+        if ((f.gold || 0) < 150 || SHIPS.some(function (S) { return S.s === s; })) return; var h = homeXY(s), best = null, bd = 1e12; IS.l.forEach(function (I) { if (I.got) return; var d = Math.hypot(I.x - h.x, I.y - h.y); if (d < bd) { bd = d; best = I; } }); if (!best) return;
+        var c = typeof coast === 'function' && coast(s); if (!c) return; f.gold -= 150; SHIPS.push({ s: s, x: c.x, y: c.y, I: best, name: f.name || 'CPU' }); });
+      SHIPS = SHIPS.filter(function (S) { var dx = S.I.x - S.x, dy = S.I.y - S.y, d = Math.hypot(dx, dy); if (d < S.I.r) { if (!S.I.got) claim(S.I, S.s, S.name); return false; } S.x += dx / d * 300 * dt; S.y += dy / d * 300 * dt; S.f = dx < 0 ? -1 : 1; return true; });
+    }
+    function tick(dt) {
+      var l = isles(); if (!l.length) return; tk -= dt; vt += dt;
+      if (tk <= 0) { tk = 0.25; l.forEach(function (I) { var d = Math.hypot(px - I.x, py - I.y); if (!I.seen && d < I.r + 700) { I.seen = true; showToast('ISLAND DISCOVERED' + (I.got ? ' - ALREADY CLAIMED' : '!')); save(); } if (!I.got && d < I.r - 40 && !blockedWorld(px, py) && !(window.PW102 && PW102() && window.water102 && water102(px, py))) claim(I, ME_S, 'YOU'); }); }
+      if (vt >= 10) { vt = 0; l.forEach(function (I) { if (I.kind === 'village' && I.got) { if (I.got === 'YOU') gold += 1; else SHIPS.length >= 0 && allS75().forEach(function (s) { if (s.fac && s.fac.name === I.got) s.fac.gold = (s.fac.gold || 0) + 1; }); } }); }
+      if (MODE === 'duel' || MODE === 'free') cpuTick(dt);
+    }
+    var last = performance.now(); (function lp() { var n = performance.now(), dt = Math.min(0.1, (n - last) / 1000); last = n; try { if (started) tick(dt); } catch (e) {} requestAnimationFrame(lp); })();
+    // ---- art: fog over unseen islands, then chest / horse / huts, CPU ships
+    function hut(c, x, y) { c.fillStyle = '#fff'; c.fillRect(x - 14, y - 16, 28, 16); c.strokeRect(x - 14, y - 16, 28, 16); c.fillStyle = '#000'; c.beginPath(); c.moveTo(x - 18, y - 16); c.lineTo(x, y - 32); c.lineTo(x + 18, y - 16); c.fill(); c.fillRect(x - 3, y - 9, 6, 9); }
+    var _dg = drawGround;
+    drawGround = function (x0, x1, y0, y1, camX, camY) {
+      _dg(x0, x1, y0, y1, camX, camY); var c = ctx; c.save(); c.lineWidth = 2; c.strokeStyle = '#000';
+      IS.l.forEach(function (I) { if (I.x + I.r + 400 < x0 || I.x - I.r - 400 > x1 || I.y + I.r + 400 < y0 || I.y - I.r - 400 > y1) return; var X = I.x - camX, Y = I.y - camY, T = performance.now() / 900;
+        if (!I.seen) { c.fillStyle = 'rgba(245,245,245,0.93)'; for (var k = 0; k < 9; k++) { var a = k * 0.7 + T * 0.05; c.beginPath(); c.arc(X + Math.cos(a) * I.r * 0.55, Y + Math.sin(a) * I.r * 0.45, I.r * 0.75, 0, 7); c.fill(); } c.fillStyle = '#000'; c.font = 'bold 64px monospace'; c.textAlign = 'center'; c.fillText('?', X, Y + 22); return; }
+        if (I.kind === 'village') { hut(c, X - 60, Y - 20); hut(c, X + 50, Y - 40); hut(c, X, Y + 50); if (I.got) { c.fillStyle = '#000'; c.fillRect(X - 2, Y - 110, 3, 60); c.fillRect(X + 1, Y - 110, 26, 16); c.fillStyle = '#fff'; c.font = 'bold 10px monospace'; c.fillText(I.got === 'YOU' ? 'YOU' : 'CPU', X + 3, Y - 98); } }
+        else if (I.kind === 'chest' && !I.got) { c.fillStyle = '#000'; c.fillRect(X - 18, Y - 22, 36, 22); c.fillStyle = '#fff'; c.fillRect(X - 14, Y - 18, 28, 4); c.fillRect(X - 3, Y - 14, 6, 7); c.fillStyle = '#000'; c.beginPath(); c.arc(X, Y - 22, 18, Math.PI, 0); c.fill(); }
+        else if (I.kind === 'horse' && !I.got) { c.fillStyle = '#000'; c.fillRect(X - 20, Y - 30, 36, 14); c.fillRect(X + 10, Y - 46, 8, 22); c.fillRect(X + 10, Y - 46, 16, 8); [-18, -8, 6, 14].forEach(function (lx) { c.fillRect(X + lx, Y - 18, 4, 18); }); c.fillRect(X - 26, Y - 30, 8, 4); }
+      });
+      SHIPS.forEach(function (S) { if (S.x < x0 - 80 || S.x > x1 + 80 || S.y < y0 - 80 || S.y > y1 + 80) return; shipArt(c, 9, S.x - camX, S.y - camY, S.f || 1, true); });
+      c.restore();
+    };
+    function shipArt(c, k, x, y, f, cpu) {
+      c.save(); c.translate(x, y + Math.sin(performance.now() / 300) * 2); c.scale(f || 1, 1); c.fillStyle = '#000'; c.strokeStyle = '#000'; c.lineWidth = 2;
+      if (k === 8) { c.beginPath(); c.moveTo(-24, -12); c.lineTo(26, -12); c.lineTo(16, 0); c.lineTo(-18, 0); c.closePath(); c.fill(); c.fillRect(-2, -54, 3, 42); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(2, -52); c.lineTo(22, -16); c.lineTo(2, -16); c.closePath(); c.fill(); c.stroke(); c.beginPath(); c.moveTo(-3, -46); c.lineTo(-18, -16); c.lineTo(-3, -16); c.closePath(); c.fill(); c.stroke(); }
+      else { c.beginPath(); c.moveTo(-48, -18); c.lineTo(52, -18); c.lineTo(38, 2); c.lineTo(-40, 2); c.closePath(); c.fill(); c.fillStyle = '#fff'; for (var w = -32; w <= 28; w += 12) c.fillRect(w, -12, 5, 4); [-22, 4, 28].forEach(function (mx, i) { c.fillStyle = '#000'; c.fillRect(mx - 1, -74 + i * 6, 3, 56 - i * 6); c.fillStyle = cpu ? '#888' : '#fff'; c.fillRect(mx - 12, -66 + i * 6, 24, 16); c.strokeRect(mx - 12, -66 + i * 6, 24, 16); c.fillRect(mx - 9, -46 + i * 4, 18, 12); c.strokeRect(mx - 9, -46 + i * 4, 18, 12); }); c.fillStyle = '#000'; c.fillRect(-48, -24, 12, 6); }
+      c.restore();
+    }
+    window.SHIP128 = shipArt;
+    // ---- minimap: a "?" marker / arrow toward the nearest unexplored island; wind arrow while sailing
+    var WIND = function () { return performance.now() / 60000; };
+    window.WIND128 = function (dx, dy) { if (!dx && !dy) return 1; var a = Math.atan2(dy, dx) - WIND(); return 0.65 + 0.5 * Math.max(0, Math.cos(a)); };
+    var _dmm = drawMinimap; drawMinimap = function () { _dmm(); try { var sc = 75 / 2000, best = null, bd = 1e12; IS.l.forEach(function (I) { if (I.got) return; var d = Math.hypot(I.x - px, I.y - py); if (d < bd) { bd = d; best = I; } });
+      mctx.save(); mctx.fillStyle = '#000'; mctx.font = 'bold 12px monospace'; mctx.textAlign = 'center';
+      if (best) { var dx = (best.x - px) * sc, dy = (best.y - py) * sc, m = Math.hypot(dx, dy); if (m > 64) { dx = dx / m * 64; dy = dy / m * 64; } mctx.fillText('?', 75 + dx, 79 + dy); }
+      if (window.PW102 && PW102()) { var a = WIND(); mctx.strokeStyle = '#000'; mctx.lineWidth = 2; mctx.beginPath(); mctx.moveTo(18 - Math.cos(a) * 9, 18 - Math.sin(a) * 9); mctx.lineTo(18 + Math.cos(a) * 9, 18 + Math.sin(a) * 9); mctx.stroke(); mctx.beginPath(); mctx.arc(18 + Math.cos(a) * 9, 18 + Math.sin(a) * 9, 3, 0, 7); mctx.fill(); }
+      mctx.restore(); } catch (e) {} };
+    // ---- big ship cargo: nearby soldiers/knights and your horse ride along, unload when you land
+    var CARGO = [], HORSE = false;
+    window.BOARD128 = function (k) { if (k !== 9) return; CARGO = units.filter(function (u) { return u.f === 'me' && u.hp > 0 && !u.sea && !u.g && Math.hypot(u.x - px, u.y - py) < 420; }).slice(0, 12); CARGO.forEach(function (u) { var i = units.indexOf(u); if (i >= 0) units.splice(i, 1); }); HORSE = !mounted() && Math.hypot(steed.x - px, steed.y - py) < 260; showToast('ALL ABOARD - ' + CARGO.length + ' TROOPS' + (HORSE ? ' + HORSE' : '') + ' ON THE BIG SHIP'); };
+    window.LAND128 = function (k) { if (k !== 9 || (!CARGO.length && !HORSE)) return; CARGO.forEach(function (u, i) { u.x = px + face * 60 + (i % 4) * 30; u.y = py - 40 + Math.floor(i / 4) * 30; u.tx = u.x; u.ty = u.y; u.order = null; units.push(u); }); if (HORSE) { steed.x = steed.tx = px - face * 50; steed.y = steed.ty = py + 10; steed.post = null; saveHorse(); } showToast('UNLOADED ' + CARGO.length + ' TROOPS' + (HORSE ? ' + HORSE' : '')); CARGO = []; HORSE = false; };
+    window.CARGO128 = function () { return CARGO.length; };
+    window.V128 = { isles: function () { return isles(); }, ships: function () { return SHIPS; } };
+    var _sm = setupMode; setupMode = function (m) { IS.key = ''; IS.l = []; SHIPS = []; CARGO = []; HORSE = false; _sm(m); isles(); ZC.clear(); };
   })();
   // v111: every realm (you and CPU alike) starts a fresh game with a small stash of gold and water
   (function () { var _bg111 = beginGame; beginGame = function (mode) { _bg111.apply(this, arguments); try { allS75().forEach(function (s) { if (!s || !s.res || s.bld.length > 1) return; if ((s.res.gold || 0) < 30) s.res.gold = 30; if ((s.res.water || 0) < 20) s.res.water = 20; if ((s.res.wood || 0) < 90) s.res.wood = 90; if ((s.res.stone || 0) < 50) s.res.stone = 50; }); updateRes(); } catch (e) {} }; })();
