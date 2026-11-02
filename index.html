@@ -4432,11 +4432,11 @@
   function setMap55() { var m = {}; allSets().forEach(function (s) { if (s) m[s.f] = s; }); return m; }
   function wallMax55(s) { return 30 + 20 * hallL(s) + (s.wallUp55 || 0); }
   // Walls soak damage meant for the hall. Siege towers (20 s into a siege) let attackers go over the walls.
-  var _dd55 = dealDamage; dealDamage = function (src, t, dmg) { if (t && t.hall && t.wall55 > 0 && src && !src.isPlayerWall) { var S = SIEGE51[t.fac && t.fac.id]; if (!(S && (S.tower55 || S.gateBroke58) && S.by === src.f)) { var a = Math.min(t.wall55, dmg); t.wall55 -= a; dmg -= a; t.hitT = 0.2; if (dmg <= 0) return; } } _dd55(src, t, dmg); };
+  var _dd55 = dealDamage; dealDamage = function (src, t, dmg) { if (t && t.hall && t.wall55 > 0 && src && !src.isPlayerWall) { var S = SIEGE51[t.fac && t.fac.id]; if (!(S && (S.tower55 || S.gateBroke58) && S.by === src.f)) { var a = Math.min(t.wall55, dmg); t.wall55 -= a; t.wHit122 = performance.now(); /* v122: walls stop mending while under attack */ dmg -= a; t.hitT = 0.2; if (dmg <= 0) return; } } _dd55(src, t, dmg); };
   var milT55 = 0;
   var _ec55 = econTick; econTick = function (dt) { _ec55(dt); try { milT55 -= dt; if (milT55 > 0) return; milT55 = 1; var M = setMap55();
       (me && factions.indexOf(me) < 0 ? factions.concat([me]) : factions).forEach(function (f) { var h = f.hallObj, s = M[f.id]; if (!h || !s || !f.alive) return; var wm = wallMax55(s), S = SIEGE51[f.id];
-        if (h.wall55 == null) h.wall55 = wm; h.wallMax55 = wm; if (!S) h.wall55 = Math.min(wm, h.wall55 + 1.5);
+        if (h.wall55 == null) h.wall55 = wm; h.wallMax55 = wm; if (!S && !(h.wHit122 && performance.now() - h.wHit122 < 6000)) h.wall55 = Math.min(wm, h.wall55 + 1.5);
         // stone buys stronger walls (up to +120), same rule for everyone
         if (!S && s.res.stone > 200 && (s.wallUp55 || 0) < 120) { s.res.stone -= 30; s.wallUp55 = (s.wallUp55 || 0) + 10; if (f.isMe) { updateRes(); showToast('HALL WALLS REINFORCED (' + Math.round(wallMax55(s)) + ')'); } }
         if (S) { if (!S.tower55 && S.t > (S.towerAt56 || 20)) { S.tower55 = true; if (f.isMe || S.by === 'me' || Math.hypot(h.x - px, h.y - py) < 3000) showToast('SIEGE TOWERS AT THE WALLS OF ' + f.name); }
