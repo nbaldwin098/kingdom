@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. Chapter 1, The Claim: you ride in with a stake and a general. Chapter 2, The Rustlers: the sheriff and cattle thieves test you.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, then The Grade: Crowe wants a strip of land for his railroad.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170/v171: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
+  // ===== v170-v172: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -9831,12 +9831,15 @@ window.B137 = (function () {
       { id: 'smith', name: 'Holt Brennan', title: 'Blacksmith', role: 'blacksmith', age: 44, fem: 0, ox: 140, oy: 120, face: 1 },
       { id: 'baron', name: 'Elias Crowe', title: 'Railroad Baron', role: 'merchant', age: 52, fem: 0, ox: -280, oy: 80, face: 1 },
       { id: 'ike', name: 'Ike Pell', title: 'Wrangler', role: 'farmer', age: 29, fem: 0, ox: -240, oy: -90, face: 1, from: 2 },
-      { id: 'dutch', name: 'Dutch Harlan', title: 'Rustler', role: 'guard', age: 38, fem: 0, ox: 90, oy: 280, face: -1, from: 2 }
+      { id: 'dutch', name: 'Dutch Harlan', title: 'Rustler', role: 'guard', age: 38, fem: 0, ox: 90, oy: 280, face: -1, from: 2 },
+      { id: 'vera', name: 'Vera Pike', title: 'Surveyor', role: 'woman', age: 34, fem: 1, ox: -300, oy: 190, face: 1, from: 3 },
+      { id: 'jed', name: 'Jed Calder', title: 'Homesteader', role: 'farmer', age: 46, fem: 0, ox: -350, oy: 10, face: -1, from: 3 }
     ];
 
     var CHAPTERS = [
       { id: 1, title: 'The Claim', year: 1, need: ['widow', 'sheriff', 'vane'] },
-      { id: 2, title: 'The Rustlers', year: 1, need: ['ike', 'dutch', 'sheriff2'] }
+      { id: 2, title: 'The Rustlers', year: 1, need: ['ike', 'dutch', 'sheriff2'] },
+      { id: 3, title: 'The Grade', year: 1, need: ['baron3', 'vera', 'jed'] }
     ];
 
     var NODES = {
@@ -10042,7 +10045,89 @@ window.B137 = (function () {
       ] },
       vane_ch2_know: { who: 'vane', say: "I know a thief who thinks a paint horse makes him a legend. It doesn't. Don't confuse him with me.", replies: [
         { t: "I won't.", next: 'end', flag: 'vane_ch2' }
+      ] },
+
+      baron_ch3: { who: 'baron', say: "You've settled in. Good. Homestead Halt is only a spur. I want a cleaner grade \u2014 a two-rod strip west of your stake, through Calder's pasture, joining the main at a better angle. I pay fair. Or the railroad files and takes it slower.", replies: [
+        { t: "Name your price.", next: 'baron_ch3_sell', rel: { baron: 1 } },
+        { t: "That land isn't yours to take.", next: 'baron_ch3_refuse' },
+        { t: "Talk to Jed Calder first. It's his pasture.", next: 'baron_ch3_jed' }
+      ] },
+      baron_ch3_friend: { who: 'baron', say: "You said you might use the line. I remember that. Now I need something from you \u2014 a cleaner grade west of your stake, through Calder's pasture. I pay. Or I file and wait the territory out.", replies: [
+        { t: "Name your price.", next: 'baron_ch3_sell', rel: { baron: 1 } },
+        { t: "That land isn't yours to take.", next: 'baron_ch3_refuse' },
+        { t: "Talk to Jed Calder first. It's his pasture.", next: 'baron_ch3_jed' }
+      ] },
+      baron_ch3_sell: { who: 'baron', say: "Gold up front, and a siding if you want one. Talk to Vera Pike \u2014 she's staking the line. And talk to Calder before he hears it from a survey flag.", replies: [
+        { t: "I'll find Vera.", next: 'end', flag: 'met_baron3', rel: { baron: 1 } }
+      ] },
+      baron_ch3_refuse: { who: 'baron', say: "Then we do this the long way. Vera Pike is already walking the grade with a chain and a book. You should hear her numbers before you dig in your heels. Calder will want a word either way.", replies: [
+        { t: "I'll hear them both.", next: 'end', flag: 'met_baron3' }
+      ] },
+      baron_ch3_jed: { who: 'baron', say: "I already sent Pike. Calder can shout all he likes \u2014 the territory grants right-of-way to a working railroad. Talk to them both. Then decide whose side of the stakes you stand on.", replies: [
+        { t: "I will.", next: 'end', flag: 'met_baron3' }
+      ] },
+      baron_ch3_again: { who: 'baron', say: "Pike has the stakes. Calder has his pride. The grade doesn't wait on either.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      vera: { who: 'vera', say: "Vera Pike. I survey for Mr. Crowe. These flags mark a two-rod strip \u2014 west of your claim, then through Calder's grass to the better join. It's legal if the railroad files. It's cleaner if everyone signs.", replies: [
+        { t: "Show me the papers.", next: 'vera_papers' },
+        { t: "You're cutting through a man's pasture.", next: 'vera_pasture' },
+        { t: "What's Crowe really after?", next: 'vera_why' }
+      ] },
+      vera_papers: { who: 'vera', say: "Right-of-way petition, unsigned. Territory law favors a working line. If you and Calder sign, it's done in a week. If you don't, Crowe files anyway and it takes a season \u2014 same strip, less gold for the holders.", replies: [
+        { t: "I'll talk to Calder.", next: 'end', flag: 'met_vera' }
+      ] },
+      vera_pasture: { who: 'vera', say: "I know. I grew up on a claim smaller than his. I also know a bypass around the creek bottom would cost Crowe two extra miles of fill. He won't pay that unless someone makes him.", replies: [
+        { t: "Maybe someone should.", next: 'end', flag: 'met_vera', rel: { vera: 1 } },
+        { t: "That's his problem.", next: 'end', flag: 'met_vera' }
+      ] },
+      vera_why: { who: 'vera', say: "A straighter grade means heavier trains and less coal. Crowe talks about progress. He means profit. Same as any man who lays track. The difference is he has the paper and the patience.", replies: [
+        { t: "I'll remember that.", next: 'end', flag: 'met_vera' }
+      ] },
+      vera_again: { who: 'vera', say: "The flags stay until someone pulls them or signs. I'm not here to fight you.", replies: [
+        { t: "Understood.", next: 'end' }
+      ] },
+
+      jed: { who: 'jed', say: "Jed Calder. That pasture's been mine since before Crowe's first spike. His surveyor put flags in my grass this morning. You the new claim?", replies: [
+        { t: "Crowe wants a strip through here. I'm with you.", next: 'jed_stand', rel: { jed: 1, baron: -1 } },
+        { t: "He'll pay. Maybe you should take it.", next: 'jed_sell' },
+        { t: "There might be a way around the creek.", next: 'jed_reroute' }
+      ] },
+      jed_stand: { who: 'jed', say: "Then we hold. He can file, and we can fight the filing. Boone's the law around here \u2014 thin, but he still reads a claim deed. Don't let Pike move those stakes without a signature.", replies: [
+        { t: "I won't.", next: 'end', flag: 'met_jed', rel: { jed: 1 } }
+      ] },
+      jed_sell: { who: 'jed', say: "Pay don't grow grass back. But I ain't a fool either. If the numbers are honest and the siding's real, I'll listen. You talking for Crowe now?", replies: [
+        { t: "I'm talking for myself.", next: 'jed_self' },
+        { t: "I'm saying hear the offer.", next: 'end', flag: 'met_jed' }
+      ] },
+      jed_self: { who: 'jed', say: "Good. Hear Pike's numbers, then come back if they're crooked. I can use a neighbor who reads a paper before he signs one.", replies: [
+        { t: "I will.", next: 'end', flag: 'met_jed' }
+      ] },
+      jed_reroute: { who: 'jed', say: "Around the creek? That'd spare the grass and cost him fill. Pike mentioned it like a joke. If you can make Crowe eat the extra miles, I'll shake your hand and stay out of his way.", replies: [
+        { t: "I'll try.", next: 'end', flag: 'met_jed', rel: { jed: 1, vera: 1 } }
+      ] },
+      jed_again: { who: 'jed', say: "Flags are still in my pasture. Nothing's signed. That's how I like it until I like it less.", replies: [
+        { t: "I'll be back.", next: 'end' }
+      ] },
+
+      widow_ch3: { who: 'widow', say: "Crowe smiled when he laid Homestead Halt. Now he wants the grass it sits beside. My late husband used that creek bottom to water stock. Don't let a railroad eat a claim just because it can.", replies: [
+        { t: "I'll stand with Jed.", next: 'end', flag: 'widow_ch3', rel: { widow: 1, jed: 1 } },
+        { t: "I'll hear both sides.", next: 'end', flag: 'widow_ch3' }
+      ] },
+      sheriff_ch3: { who: 'sheriff', say: "Crowe's within his rights to file. Calder's within his to refuse until a judge says otherwise. You pick a side, pick it in the open. I don't police a man's signature, but I police a man who pulls stakes at night.", replies: [
+        { t: "I'll keep it clean.", next: 'end', flag: 'sheriff_ch3', rel: { sheriff: 1 } },
+        { t: "Thanks for the warning.", next: 'end', flag: 'sheriff_ch3' }
+      ] },
+      sheriff_ch3_friend: { who: 'sheriff', say: "You told me you'd keep the peace. Here's what that means now: Crowe can file, Calder can refuse, and nobody pulls survey stakes after dark. You pick a side in the open.", replies: [
+        { t: "I'll keep it clean.", next: 'end', flag: 'sheriff_ch3', rel: { sheriff: 1 } },
+        { t: "Thanks for the warning.", next: 'end', flag: 'sheriff_ch3' }
+      ] },
+      vane_ch3: { who: 'vane', say: "A baron with a pen is still a thief. Difference is he files first. You want trouble that pays, wait till the payroll car comes down that new grade.", replies: [
+        { t: "I'm not robbing a train.", next: 'end', flag: 'vane_ch3' },
+        { t: "I'll keep that in mind.", next: 'end', flag: 'vane_ch3' }
       ] }
+
     };
 
     function folkNode(p) {
@@ -10073,8 +10158,12 @@ window.B137 = (function () {
         var d = JSON.parse(localStorage.getItem(KEY) || 'null');
         if (!d) return;
         ST.ch = d.ch || 1; ST.rel = d.rel || {}; ST.met = d.met || {}; ST.flags = d.flags || {}; ST.done = d.done || {};
-        if (ST.done[1] && ST.ch < 2) {
-          for (var i = 0; i < CHAPTERS.length; i++) if (CHAPTERS[i].id === 2) { ST.ch = 2; break; }
+        var guard = 0;
+        while (guard++ < 12 && ST.done[ST.ch]) {
+          var nxt = null, i;
+          for (i = 0; i < CHAPTERS.length; i++) if (CHAPTERS[i].id === ST.ch + 1) nxt = CHAPTERS[i];
+          if (!nxt) break;
+          ST.ch = nxt.id;
         }
       } catch (e) {}
     }
@@ -10208,11 +10297,18 @@ window.B137 = (function () {
     function startTalk(n) {
       if (!n) return;
       if (n.kind === 'story' && n.ch) {
-        var id = n.ch.id, nid = id;
-        if (ST.ch >= 2 && NODES[id + '_ch2'] && !ST.met[id + '2'] && !ST.met[id + '_ch2'] && !ST.flags[id + '_ch2']) {
-          nid = (id === 'sheriff' && (ST.rel.sheriff || 0) > 0) ? 'sheriff_ch2_friend' : (id + '_ch2');
-        } else if (ST.ch >= 2 && ST.met[id] && NODES[id + '_ch2_again']) {
-          nid = id + '_ch2_again';
+        var id = n.ch.id, nid = id, chN = ST.ch;
+        if (chN >= 2) {
+          var tag = '_ch' + chN;
+          var metCh = ST.met[id + String(chN)] || ST.met[id + tag] || ST.flags[id + tag];
+          if (NODES[id + tag] && !metCh) {
+            var friend = id + tag + '_friend';
+            nid = (NODES[friend] && (ST.rel[id] || 0) > 0) ? friend : (id + tag);
+          } else if (NODES[id + tag + '_again'] && (ST.met[id] || metCh)) {
+            nid = id + tag + '_again';
+          } else if (ST.met[id] && NODES[id + '_again']) {
+            nid = id + '_again';
+          }
         } else if (ST.met[id] && NODES[id + '_again']) {
           nid = id + '_again';
         }
@@ -10301,7 +10397,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
@@ -10350,7 +10446,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, then The Rustlers: folk teach you, then rustlers hit the widow\'s herd.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, then The Grade: Crowe wants land for his railroad.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -10370,5 +10466,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --></body>
 </html>
