@@ -189,6 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. Chapter 1: you ride in with nothing but a stake and a general. Folk teach you how this country works.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9816,6 +9817,405 @@ window.B137 = (function () {
     };
   })();
 
+  // ===== v170: STORY MODE - chapter 1 at the homestead, walk-up TALK, named cast =====
+  (function () {
+    var KEY = 'kingdom-story-v170';
+    var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
+    var FREE_NAME = (typeof MODE_NAMES !== 'undefined' && MODE_NAMES.free) ? MODE_NAMES.free : 'FREE WORLD';
+
+    var CAST = [
+      { id: 'widow', name: 'Martha Kane', title: 'Rancher Widow', role: 'woman', age: 41, fem: 1, ox: -160, oy: -20, face: 1 },
+      { id: 'sheriff', name: 'Cal Boone', title: 'Sheriff', role: 'v2captain_v2', age: 48, fem: 0, ox: 40, oy: 40, face: -1 },
+      { id: 'vane', name: 'Red Vane', title: 'Outlaw', role: 'archer', age: 36, fem: 0, ox: -80, oy: 220, face: 1 },
+      { id: 'preacher', name: 'Amos Gill', title: 'Preacher', role: 'priest', age: 58, fem: 0, ox: 200, oy: -40, face: -1 },
+      { id: 'smith', name: 'Holt Brennan', title: 'Blacksmith', role: 'blacksmith', age: 44, fem: 0, ox: 140, oy: 120, face: 1 },
+      { id: 'baron', name: 'Elias Crowe', title: 'Railroad Baron', role: 'merchant', age: 52, fem: 0, ox: -280, oy: 80, face: 1 }
+    ];
+
+    var CHAPTERS = [
+      { id: 1, title: 'The Claim', year: 1, need: ['widow', 'sheriff', 'vane'] }
+    ];
+
+    var NODES = {
+      widow: { who: 'widow', say: "You've made it, then. This stretch of dirt is yours now \u2014 they call it a claim. That stake marks it.", replies: [
+        { t: "This is my land now.", next: 'widow_claim', rel: { widow: 1 } },
+        { t: "I didn't expect company.", next: 'widow_shy' },
+        { t: "Who are you?", next: 'widow_who' }
+      ] },
+      widow_claim: { who: 'widow', say: "Then hold it. You've got one man who answers to you \u2014 your general, there by the stake. Walk up and give him work. Wood first, or you'll have nothing to build with.", replies: [
+        { t: "I'll set him to work.", next: 'end', flag: 'met_widow' },
+        { t: "What's a general good for?", next: 'widow_gen' }
+      ] },
+      widow_shy: { who: 'widow', say: "I'm Martha Kane. I ran cattle west of here till fever took my husband. A new neighbor's rare enough I rode over. That man by the stake is your general. Walk up and give him a job \u2014 wood, if you're smart.", replies: [
+        { t: "Thank you, Martha.", next: 'end', flag: 'met_widow', rel: { widow: 1 } },
+        { t: "What's a general good for?", next: 'widow_gen' }
+      ] },
+      widow_who: { who: 'widow', say: "Martha Kane. Widow, rancher, and the only soul who bothered to greet you. Your general's waiting by that stake. Walk up and give him a job before the day gets away.", replies: [
+        { t: "I'll do that.", next: 'end', flag: 'met_widow' },
+        { t: "What's a general good for?", next: 'widow_gen' }
+      ] },
+      widow_gen: { who: 'widow', say: "He hauls what he gathers to your vault, and he builds whatever you order \u2014 but only if he's free. You start with one. Hiring more costs gold, and the price climbs.", replies: [
+        { t: "Understood.", next: 'end', flag: 'met_widow' }
+      ] },
+      widow_again: { who: 'widow', say: "The country's bigger than it looks. Ride when you're ready \u2014 Red Mesa's the nearest town, a long way east of here. Don't starve on your own claim.", replies: [
+        { t: "I'll keep that in mind.", next: 'end' },
+        { t: "Any other advice?", next: 'widow_more' }
+      ] },
+      widow_more: { who: 'widow', say: "Build a field when you can. People need clothes, and clothes need cotton. And if goblins come, they go for the vault \u2014 that's where everything you own sits.", replies: [
+        { t: "I'll watch the vault.", next: 'end', rel: { widow: 1 } }
+      ] },
+
+      sheriff: { who: 'sheriff', say: "New claim, new face. I'm Sheriff Cal Boone, out of Red Mesa. Law's thin out here, but it ain't gone.", replies: [
+        { t: "I'll keep the peace.", next: 'sheriff_law', rel: { sheriff: 1 } },
+        { t: "I look after my own.", next: 'sheriff_own' },
+        { t: "What kind of trouble should I expect?", next: 'sheriff_trouble' }
+      ] },
+      sheriff_law: { who: 'sheriff', say: "Good. Towns are a long ride from here \u2014 Red Mesa's the closest farm town. If you see goblins hitting a vault, or a man named Red Vane, you come find me.", replies: [
+        { t: "I'll remember.", next: 'end', flag: 'met_sheriff' }
+      ] },
+      sheriff_own: { who: 'sheriff', say: "That's how most start. Just remember: if you rob a saloon or a wagon, witnesses talk. I ride a long circuit.", replies: [
+        { t: "Fair warning.", next: 'end', flag: 'met_sheriff' }
+      ] },
+      sheriff_trouble: { who: 'sheriff', say: "Goblins hit vaults. Outlaws hit the roads. Red Vane's been seen on the ridge south of here \u2014 he'll introduce himself whether you want it or not.", replies: [
+        { t: "I'll keep my eyes open.", next: 'end', flag: 'met_sheriff' }
+      ] },
+      sheriff_again: { who: 'sheriff', say: "I'm headed back toward Red Mesa. Stay on the right side of things and we won't have a problem.", replies: [
+        { t: "Safe ride, sheriff.", next: 'end' }
+      ] },
+
+      vane: { who: 'vane', say: "Well, well. A tenderfoot with a stake. I'm Red Vane. This country's got room for one kind of man \u2014 and it ain't the kind that plants wheat.", replies: [
+        { t: "Get off my claim.", next: 'vane_defy', rel: { vane: -1 } },
+        { t: "I'm not looking for a fight.", next: 'vane_peace' },
+        { t: "What do you want?", next: 'vane_ask' }
+      ] },
+      vane_defy: { who: 'vane', say: "Brave words. I'll be seeing you. Next time maybe I won't be alone.", replies: [
+        { t: "I'll be ready.", next: 'end', flag: 'met_vane' }
+      ] },
+      vane_peace: { who: 'vane', say: "Then stay out of my business and I might stay out of yours. Might.", replies: [
+        { t: "Deal.", next: 'end', flag: 'met_vane' }
+      ] },
+      vane_ask: { who: 'vane', say: "Same as you. Land, gold, a name people remember. Difference is I take mine.", replies: [
+        { t: "Not from me you don't.", next: 'end', flag: 'met_vane', rel: { vane: -1 } }
+      ] },
+      vane_again: { who: 'vane', say: "Still here? Don't get comfortable. This claim's only yours till someone harder wants it.", replies: [
+        { t: "It stays mine.", next: 'end' }
+      ] },
+
+      preacher: { who: 'preacher', say: "Peace to you, neighbor. I'm Amos Gill. I ride a wide circuit \u2014 a blessing for a new claim costs nothing but a moment of your time.", replies: [
+        { t: "I'd welcome that.", next: 'preach_bless', rel: { preacher: 1 } },
+        { t: "I don't need a sermon.", next: 'preach_soft' },
+        { t: "Where do you preach?", next: 'preach_where' }
+      ] },
+      preach_bless: { who: 'preacher', say: "Then may this ground hold, and may the people who work it eat their fill. When you reach Dustwater, the church doors stay open.", replies: [
+        { t: "Thank you, preacher.", next: 'end', flag: 'met_preacher' }
+      ] },
+      preach_soft: { who: 'preacher', say: "No sermon, then. Just this: townsfolk remember kindness longer than gold. That's worth more than it sounds.", replies: [
+        { t: "I'll keep it in mind.", next: 'end', flag: 'met_preacher' }
+      ] },
+      preach_where: { who: 'preacher', say: "Red Mesa on some Sundays, Dustwater when I can. The frontier's my parish. If you ever need a word, walk up and ask.", replies: [
+        { t: "I will.", next: 'end', flag: 'met_preacher' }
+      ] },
+      preacher_again: { who: 'preacher', say: "The Lord sees a new claim as clearly as an old church. Hold fast.", replies: [
+        { t: "I aim to.", next: 'end' }
+      ] },
+
+      smith: { who: 'smith', say: "Holt Brennan. I shoe horses and I forge what this country actually needs \u2014 tools, metal, a rifle if you've got the makings.", replies: [
+        { t: "What does it take to forge?", next: 'smith_how' },
+        { t: "I may need tools.", next: 'smith_tools', rel: { smith: 1 } },
+        { t: "Just looking around.", next: 'smith_look' }
+      ] },
+      smith_how: { who: 'smith', say: "Iron from the hills, coal to run the fire. Together they make steel. A rifle eats iron and coal. A better building eats metal. No coal, no steel \u2014 the forge just sits there looking pretty.", replies: [
+        { t: "I'll find coal and iron.", next: 'end', flag: 'met_smith' }
+      ] },
+      smith_tools: { who: 'smith', say: "Farms, mines, oil \u2014 they all slow down without tools. I turn iron into those. You bring me the ore, I'll make this claim worth something.", replies: [
+        { t: "That's good to know.", next: 'end', flag: 'met_smith' }
+      ] },
+      smith_look: { who: 'smith', say: "Look all you want. When you're tired of breaking ground with your hands, you'll know where to find me.", replies: [
+        { t: "Fair enough.", next: 'end', flag: 'met_smith' }
+      ] },
+      smith_again: { who: 'smith', say: "Bring iron and coal when you have them. The rest I can do.", replies: [
+        { t: "I'll be back.", next: 'end' }
+      ] },
+
+      baron: { who: 'baron', say: "Elias Crowe. I lay track where other men see dirt. There's a halt near this claim \u2014 Homestead Halt. A train already runs it.", replies: [
+        { t: "A train, out here?", next: 'baron_train' },
+        { t: "What's in it for you?", next: 'baron_why' },
+        { t: "I might use that line.", next: 'baron_use', rel: { baron: 1 } }
+      ] },
+      baron_train: { who: 'baron', say: "Steam, coal, and a caboose at the tail. It stops at stations. Ride it when you're tired of the saddle \u2014 bigger towns are linked by rail, and every town has a road.", replies: [
+        { t: "I'll look for the halt.", next: 'end', flag: 'met_baron' }
+      ] },
+      baron_why: { who: 'baron', say: "Money, same as anyone. Towns pay different prices for the same goods. A man who moves cotton, coal, or spice between them gets rich. The railroad just makes it faster.", replies: [
+        { t: "Trading. I see.", next: 'end', flag: 'met_baron' }
+      ] },
+      baron_use: { who: 'baron', say: "Then keep the halt in mind, and keep coal on hand. A tender that runs dry makes a train crawl.", replies: [
+        { t: "I'll remember the coal.", next: 'end', flag: 'met_baron' }
+      ] },
+      baron_again: { who: 'baron', say: "The line won't wait. When you're ready to move goods, the train will be.", replies: [
+        { t: "Until then.", next: 'end' }
+      ] }
+    };
+
+    function folkNode(p) {
+      var n = (p && p.n) || 'Someone', j = ((p && p.job) || '').toUpperCase(), doing = (p && p.doing) || '';
+      var say = n + " looks you over. \"New face.\"";
+      if (j === 'SHERIFF' || j === 'DEPUTY') say = n + " rests a hand near a star. \"Keep your iron holstered in this town.\"";
+      else if (j === 'PREACHER') say = n + " nods with a closed book. \"Peace to you, traveler.\"";
+      else if (j === 'BLACKSMITH') say = n + " wipes soot on an apron. \"Need something forged, or just watching the fire?\"";
+      else if (j === 'BARKEEP') say = n + " polishes a glass. \"What'll it be?\"";
+      else if (j === 'PIANO PLAYER') say = n + " glances up from the keys. \"Request a tune, or just listening?\"";
+      else if (j === 'SHOPKEEPER' || j === 'CLERK' || j === 'GROCER') say = n + " straightens a crate. \"Store's open. Prices change with the stock.\"";
+      else if (j === 'DRIFTER') say = n + " tips a worn hat. \"Just passing through. You?\"";
+      else if (j.indexOf('KID') >= 0 || (p && p.kid)) say = n + " grins. \"You look new.\"";
+      else if (doing) say = n + " (" + j.toLowerCase() + ") pauses. \"" + doing + ", if you were wondering.\"";
+      else if (j) say = n + " the " + j.toLowerCase() + " gives a short nod. \"Howdy.\"";
+      return { who: null, folk: p, say: say, replies: [
+        { t: "Howdy.", next: 'folk_hi' },
+        { t: "What's news?", next: 'folk_news' },
+        { t: "I'll be moving on.", next: 'end' }
+      ] };
+    }
+
+    NODES.folk_hi = { say: "\"Howdy yourself. Don't let me keep you.\"", replies: [{ t: "Take care.", next: 'end' }] };
+    NODES.folk_news = { say: "\"Same as yesterday. Heat, dust, and somebody asking about the price of iron.\"", replies: [{ t: "Figures.", next: 'end' }] };
+
+    function load() {
+      try {
+        var d = JSON.parse(localStorage.getItem(KEY) || 'null');
+        if (!d) return;
+        ST.ch = d.ch || 1; ST.rel = d.rel || {}; ST.met = d.met || {}; ST.flags = d.flags || {}; ST.done = d.done || {};
+      } catch (e) {}
+    }
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify({ ch: ST.ch, rel: ST.rel, met: ST.met, flags: ST.flags, done: ST.done })); } catch (e) {}
+    }
+    function chDef() { return CHAPTERS[0]; }
+
+    function place() {
+      ST.chars = [];
+      if (!ST.on || typeof city === 'undefined' || !city) return;
+      CAST.forEach(function (c) {
+        var ch = {};
+        Object.keys(c).forEach(function (k) { ch[k] = c[k]; });
+        ch.x = city.x + c.ox; ch.y = city.y + c.oy; ch.here = 1; ch.ph = Math.random() * 6;
+        ST.chars.push(ch);
+      });
+    }
+
+    function byId(id) { for (var i = 0; i < ST.chars.length; i++) if (ST.chars[i].id === id) return ST.chars[i]; return null; }
+
+    function nearest() {
+      var best = null, bd = 88;
+      if (ST.on) {
+        ST.chars.forEach(function (ch) {
+          if (!ch.here) return;
+          var d = Math.hypot(ch.x - px, ch.y - py);
+          if (d < bd) { bd = d; best = { kind: 'story', ch: ch }; }
+        });
+      }
+      try {
+        if (typeof MODE !== 'undefined' && MODE === 'free' && window.TOWN133 && TOWN133.near) {
+          var p = TOWN133.near();
+          if (p && !p.in) {
+            var d2 = Math.hypot((p.x || 0) - px, (p.y || 0) - py);
+            if (d2 < bd) best = { kind: 'folk', p: p };
+          }
+        }
+      } catch (e) {}
+      return best;
+    }
+
+    var css = document.createElement('style');
+    css.textContent = '#talk170{position:fixed;left:50%;top:calc(12% + 48px);transform:translateX(-50%);z-index:57;display:none;font:bold 15px monospace;padding:10px 16px;background:#7a4a1c;color:#ffe9b8;border:2px solid #3b2410;border-radius:8px;box-shadow:0 3px 0 #3b2410}' +
+      '#dlg170{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:92;display:none;background:#f3e6c4;border:3px solid #3b2410;border-radius:10px;padding:12px;font:13px monospace;color:#2a1a0a;width:min(480px,92vw);max-height:86vh;overflow:auto;box-shadow:0 8px 0 rgba(0,0,0,.3)}' +
+      '#dlg170 .row{display:flex;gap:10px;align-items:flex-start}' +
+      '#dlg170 canvas{width:72px;height:88px;background:#e8d4a8;border:2px solid #3b2410;border-radius:6px;flex:0 0 auto}' +
+      '#dlg170 .meta{font-weight:bold;letter-spacing:.4px}' +
+      '#dlg170 .ttl{font-weight:normal;opacity:.75;font-size:11px}' +
+      '#dlg170 .say{margin:8px 0;line-height:1.35;max-height:120px;overflow:auto}' +
+      '#dlg170 button{display:block;width:100%;margin:4px 0;padding:8px 10px;font:bold 12px monospace;background:#7a4a1c;color:#ffe9b8;border:2px solid #3b2410;border-radius:6px;text-align:left}' +
+      '#dlg170 .x{position:absolute;right:8px;top:6px;width:auto;padding:2px 8px;text-align:center}' +
+      '@media (orientation:landscape) and (max-height:500px){#talk170{top:8px;padding:6px 12px;font-size:13px}#dlg170{max-height:94vh;padding:8px 10px}#dlg170 .say{max-height:72px;margin:6px 0}#dlg170 button{padding:6px 8px;margin:3px 0}#dlg170 canvas{width:56px;height:68px}}';
+    document.head.appendChild(css);
+
+    var talkBtn = document.createElement('button'); talkBtn.id = 'talk170'; talkBtn.textContent = 'TALK'; document.body.appendChild(talkBtn);
+    var dlg = document.createElement('div'); dlg.id = 'dlg170'; document.body.appendChild(dlg);
+    var por = document.createElement('canvas'); por.width = 90; por.height = 110;
+
+    function paintPor(ch) {
+      var c = por.getContext('2d'); c.clearRect(0, 0, por.width, por.height);
+      c.fillStyle = '#e8d4a8'; c.fillRect(0, 0, por.width, por.height);
+      try {
+        if (ch && typeof drawArt === 'function' && typeof personArt !== 'undefined' && personArt[ch.role || 'villager']) {
+          c.save(); c.translate(por.width / 2, por.height - 2); c.scale(0.95, 0.95); c.translate(-50, -88);
+          drawArt(c, personArt[ch.role || 'villager']); c.restore(); return;
+        }
+      } catch (e) {}
+      c.fillStyle = '#e0b088'; c.beginPath(); c.arc(45, 40, 16, 0, 7); c.fill();
+      c.fillStyle = '#6a4a2a'; c.fillRect(28, 58, 34, 40);
+    }
+
+    function closeDlg() { ST.node = null; ST.who = null; dlg.style.display = 'none'; dlg.innerHTML = ''; }
+
+    function applyRel(r) { if (!r) return; Object.keys(r).forEach(function (k) { ST.rel[k] = (ST.rel[k] || 0) + r[k]; }); }
+
+    function finishCh1() {
+      var need = chDef().need, i;
+      for (i = 0; i < need.length; i++) if (!ST.met[need[i]]) return;
+      if (!ST.done[1]) ST.done[1] = 1;
+      ST.flags.ch1done = 1;
+      save();
+    }
+
+    function openNode(id, folk) {
+      var node = id === 'folk' ? folkNode(folk) : NODES[id];
+      if (!node) { closeDlg(); return; }
+      if (id === 'end' || node === NODES.end) { closeDlg(); return; }
+      ST.node = node; ST.who = node.who || (folk && ('folk:' + (folk.n || ''))) || id;
+      var ch = node.who ? byId(node.who) : null;
+      if (folk && !ch) ch = { name: folk.n || 'Townsfolk', title: (folk.job || 'TOWNSFOLK'), role: folk.fem ? 'woman' : 'villager' };
+      dlg.innerHTML = '';
+      var x = document.createElement('button'); x.className = 'x'; x.textContent = '\u2715'; x.onclick = function (e) { e.stopPropagation(); closeDlg(); }; dlg.appendChild(x);
+      var row = document.createElement('div'); row.className = 'row';
+      paintPor(ch); row.appendChild(por);
+      var info = document.createElement('div');
+      var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = (ch && ch.name) || 'Someone';
+      var ttl = document.createElement('div'); ttl.className = 'ttl'; ttl.textContent = ((ch && ch.title) || (folk && folk.job) || '').toUpperCase();
+      info.appendChild(meta); info.appendChild(ttl); row.appendChild(info); dlg.appendChild(row);
+      var say = document.createElement('div'); say.className = 'say'; say.textContent = node.say; dlg.appendChild(say);
+      (node.replies || []).forEach(function (r, i) {
+        var b = document.createElement('button'); b.textContent = (i + 1) + '. ' + r.t;
+        b.onclick = function (e) { e.stopPropagation(); pick(r); };
+        dlg.appendChild(b);
+      });
+      dlg.style.display = 'block';
+    }
+
+    function pick(r) {
+      if (!r) return;
+      applyRel(r.rel);
+      if (r.flag) {
+        var id = String(r.flag).replace(/^met_/, '');
+        ST.met[id] = 1; ST.flags[r.flag] = 1;
+      }
+      save();
+      finishCh1();
+      if (!r.next || r.next === 'end') { closeDlg(); return; }
+      openNode(r.next, ST.node && ST.node.folk);
+    }
+
+    function startTalk(n) {
+      if (!n) return;
+      if (n.kind === 'story' && n.ch) {
+        var id = n.ch.id;
+        openNode((ST.met[id] && NODES[id + '_again']) ? id + '_again' : id);
+      } else if (n.kind === 'folk') openNode('folk', n.p);
+    }
+
+    talkBtn.onclick = function (e) { e.stopPropagation(); startTalk(nearest()); };
+    dlg.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+    addEventListener('keydown', function (e) {
+      if (/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (dlg.style.display === 'block') {
+        var k = e.key;
+        if (k === 'Escape') { closeDlg(); e.preventDefault(); return; }
+        var n = +k; if (n >= 1 && n <= 9 && ST.node && ST.node.replies && ST.node.replies[n - 1]) { pick(ST.node.replies[n - 1]); e.preventDefault(); }
+        return;
+      }
+      if ((e.key === 't' || e.key === 'T') && nearest()) { startTalk(nearest()); e.preventDefault(); }
+    }, true);
+
+    function drawChars(camX, camY) {
+      ST.drawn = 0;
+      if (!ST.on || !ST.chars.length) return;
+      var vx0 = px - (typeof W !== 'undefined' ? W : 1280) / (2 * (zoom || 1)) - 80;
+      var vx1 = px + (typeof W !== 'undefined' ? W : 1280) / (2 * (zoom || 1)) + 80;
+      ST.chars.forEach(function (ch) {
+        if (!ch.here) return;
+        if (ch.x < vx0 || ch.x > vx1) return;
+        var sx = ch.x - camX, sy = ch.y - camY;
+        if (Math.hypot(ch.x - px, ch.y - py) < 200) ch.face = px < ch.x ? -1 : 1;
+        try {
+          if (typeof drawArt === 'function' && typeof personArt !== 'undefined' && personArt[ch.role]) {
+            ctx.save(); ctx.translate(sx, sy); ctx.scale((ch.face || 1) * 0.55, 0.55); ctx.translate(-50, -88);
+            drawArt(ctx, personArt[ch.role]); ctx.restore();
+          } else {
+            ctx.fillStyle = '#e0b088'; ctx.beginPath(); ctx.arc(sx, sy - 42, 7, 0, 7); ctx.fill();
+            ctx.fillStyle = '#6a4a2a'; ctx.fillRect(sx - 7, sy - 34, 14, 24);
+          }
+        } catch (e) {}
+        ctx.fillStyle = '#2a1a0a'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText(ch.name.toUpperCase(), sx, sy - 62);
+        ST.drawn++;
+      });
+    }
+
+    var _du = drawUnits;
+    drawUnits = function (camX, camY) {
+      var r = _du.apply(this, arguments);
+      try { drawChars(camX, camY); } catch (e) { if (!window.E170) { window.E170 = 1; console.warn(e); } }
+      return r;
+    };
+
+    setInterval(function () {
+      try {
+        if (dlg.style.display === 'block') { talkBtn.style.display = 'none'; return; }
+        var n = nearest();
+        if (!n) { talkBtn.style.display = 'none'; return; }
+        var label = 'TALK';
+        if (n.kind === 'story' && n.ch) label = 'TALK TO ' + n.ch.name.toUpperCase();
+        else if (n.kind === 'folk' && n.p) label = 'TALK TO ' + String(n.p.n || 'THEM').toUpperCase();
+        if (!matchMedia('(pointer:coarse)').matches) label += ' [T]';
+        talkBtn.textContent = label; talkBtn.style.display = 'block';
+      } catch (e) {}
+    }, 250);
+
+    function boot() {
+      load();
+      place();
+      try {
+        if (typeof MODE_NAMES !== 'undefined') MODE_NAMES.free = ST.on ? ('STORY \u00b7 ' + chDef().title.toUpperCase()) : FREE_NAME;
+      } catch (e) {}
+    }
+
+    var _bg = beginGame;
+    beginGame = function (mode) {
+      ST.on = (mode === 'story');
+      if (mode === 'story') mode = 'free';
+      var r = _bg.call(this, mode);
+      try { boot(); } catch (e) { if (!window.E170) { window.E170 = 1; console.warn(e); } }
+      return r;
+    };
+
+    window.STORY170 = {
+      on: function () { return !!ST.on; },
+      chapter: function () { var d = chDef(); return { id: ST.ch, title: d.title, done: !!ST.done[1], need: d.need.slice() }; },
+      chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
+      nearHome: function () {
+        if (typeof city === 'undefined' || !city || !ST.chars.length) return 1e9;
+        var best = 1e9, i; for (i = 0; i < ST.chars.length; i++) best = Math.min(best, Math.hypot(ST.chars[i].x - city.x, ST.chars[i].y - city.y));
+        return best;
+      },
+      nodes: function () { return Object.keys(NODES).length; },
+      chapters: function () { return CHAPTERS.length; },
+      nearest: nearest,
+      open: function (id) {
+        var ch = byId(id);
+        if (ch) { startTalk({ kind: 'story', ch: ch }); return true; }
+        return false;
+      },
+      reply: function (i) { if (ST.node && ST.node.replies && ST.node.replies[i]) { pick(ST.node.replies[i]); return true; } return false; },
+      talking: function () { return dlg.style.display === 'block' ? { say: ST.node && ST.node.say, n: ST.node && ST.node.replies ? ST.node.replies.length : 0, who: ST.who } : null; },
+      rel: function () { return ST.rel; },
+      met: function () { return ST.met; },
+      drawn: function () { return ST.drawn; },
+      folkNode: folkNode,
+      modeBtn: function () { return !!document.querySelector('.mode[data-mode=story]'); },
+      dlgOn: function () { return dlg.style.display === 'block'; }
+    };
+  })();
+
+
   requestAnimationFrame(frame);
 </script>
 
@@ -9835,9 +10235,10 @@ window.B137 = (function () {
 </script>
 <script>
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
-var d=q('duel'),f=q('free');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
+var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns='1fr 1fr';[d,f].forEach(function(e){e.style.minHeight='150px';e.querySelector('b').style.fontSize='22px'});}
+if(st){st.querySelector('b').textContent='STORY — THE CLAIM';st.querySelector('small').textContent='A year-long frontier tale. Chapter 1: you arrive with a stake and a general. Folk teach you how this country works.';g.insertBefore(st,f.nextSibling);}
+['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
 <script>
@@ -9856,5 +10257,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --></body>
 </html>
