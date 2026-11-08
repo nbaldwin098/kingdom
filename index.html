@@ -2282,7 +2282,237 @@ window.B137 = (function () {
       var nf = nearestFaction();
       hud.textContent = 'X ' + Math.floor(px / 48) + '   Y ' + Math.floor(py / 48) + '   ' + MODE_NAMES[MODE] + (nf ? '   NEAR ' + nf.name + (nf.alive ? '' : ' (CONQUERED)') : '');
     }
-    requestAnimationFrame(frame);
+    // ===== v165: town life - gamblers at a card table by the saloon =====
+  (function () {
+    var TABLE = null, CARDS = null, HANDS = null, OVER = [], FLY = [];
+    var SEAT = [
+      { dx: 0, dy: 18, f: -1 },
+      { dx: -24, dy: 6, f: 1 },
+      { dx: 24, dy: 6, f: -1 },
+      { dx: 2, dy: -16, f: 1 }
+    ];
+
+    function chip(g, x, y, col, n) {
+      var i;
+      for (i = 0; i < n; i++) {
+        g.fillStyle = col;
+        g.beginPath(); g.ellipse(x, y - i * 1.6, 5.2, 2.2, 0, 0, 7); g.fill();
+        g.strokeStyle = 'rgba(42,26,10,.35)'; g.lineWidth = 0.6;
+        g.beginPath(); g.ellipse(x, y - i * 1.6, 5.2, 2.2, 0, 0, 7); g.stroke();
+      }
+    }
+
+    function card(g, x, y, rot, face, red) {
+      g.save();
+      g.translate(x, y); g.rotate(rot);
+      g.fillStyle = '#3b2410'; g.fillRect(-5.2, -7.2, 10.4, 14.4);
+      g.fillStyle = face ? '#f4ecd8' : '#6a2a28';
+      g.fillRect(-4.6, -6.6, 9.2, 13.2);
+      if (face) {
+        g.fillStyle = red ? '#c94a3a' : '#1a1a1a';
+        g.font = 'bold 7px serif'; g.textAlign = 'center';
+        g.fillText(red ? '\u2665' : '\u2660', 0, 2.4);
+      } else {
+        g.strokeStyle = '#d4a020'; g.lineWidth = 0.7;
+        g.strokeRect(-3.2, -5.2, 6.4, 10.4);
+      }
+      g.restore();
+    }
+
+    function tableSpr() {
+      if (TABLE) return TABLE;
+      var cv = document.createElement('canvas'); cv.width = 92; cv.height = 62;
+      var g = cv.getContext('2d');
+      g.translate(46, 36);
+      g.fillStyle = 'rgba(40,25,10,.24)';
+      g.beginPath(); g.ellipse(0, 12, 38, 9, 0, 0, 7); g.fill();
+      g.fillStyle = '#5a3818';
+      g.beginPath(); g.ellipse(-26, 10, 6, 3, 0, 0, 7); g.fill();
+      g.beginPath(); g.ellipse(26, 10, 6, 3, 0, 0, 7); g.fill();
+      g.beginPath(); g.ellipse(0, -16, 6, 3, 0, 0, 7); g.fill();
+      g.fillStyle = '#3b2410';
+      g.fillRect(-4, 0, 4, 14); g.fillRect(1, 0, 4, 14);
+      g.fillRect(-22, -2, 4, 12); g.fillRect(18, -2, 4, 12);
+      g.fillStyle = '#5a3818';
+      g.beginPath(); g.ellipse(0, 0, 36, 16, 0, 0, 7); g.fill();
+      g.fillStyle = '#2a4a28';
+      g.beginPath(); g.ellipse(0, -1, 30, 12.4, 0, 0, 7); g.fill();
+      g.fillStyle = '#3a6a38';
+      g.beginPath(); g.ellipse(-8, -4, 14, 6, 0, 0, 7); g.fill();
+      card(g, -8, -2, -0.25, 1, 1);
+      card(g, 0, -3, 0.05, 1, 0);
+      card(g, 8, -1, 0.28, 1, 1);
+      card(g, 16, 2, 1.2, 0, 0);
+      card(g, 20, 4, 1.45, 0, 0);
+      chip(g, -22, 2, '#efe8d8', 4);
+      chip(g, -16, 5, '#c94a3a', 3);
+      chip(g, 22, 1, '#3a5a9a', 4);
+      chip(g, 16, 5, '#d4a020', 5);
+      g.fillStyle = '#6b3010';
+      g.fillRect(8, -12, 5, 11);
+      g.fillStyle = '#8a4520'; g.fillRect(8.6, -11.2, 3.8, 9);
+      g.fillStyle = '#c9a46e'; g.fillRect(8.4, -13.4, 4.4, 2.2);
+      g.fillStyle = 'rgba(232,216,176,.55)';
+      g.beginPath(); g.moveTo(4, -6); g.lineTo(3.2, 2); g.lineTo(8, 2); g.lineTo(7.4, -6); g.closePath(); g.fill();
+      g.fillStyle = '#c07828';
+      g.beginPath(); g.moveTo(4.2, -1); g.lineTo(3.6, 1.6); g.lineTo(7.6, 1.6); g.lineTo(7.2, -1); g.closePath(); g.fill();
+      TABLE = cv;
+      return TABLE;
+    }
+
+    function cardFanSpr() {
+      if (CARDS) return CARDS;
+      CARDS = [];
+      var i, cv, g;
+      for (i = 0; i < 4; i++) {
+        cv = document.createElement('canvas'); cv.width = 28; cv.height = 22;
+        g = cv.getContext('2d');
+        g.translate(14, 16);
+        card(g, -5, -4, -0.35 + i * 0.04, 1, i % 2 === 0);
+        card(g, 1, -5, 0.05 + i * 0.03, 1, i % 2 === 1);
+        card(g, 6, -3, 0.4 - i * 0.02, 0, 0);
+        CARDS.push(cv);
+      }
+      return CARDS;
+    }
+
+    function handSpr() {
+      if (HANDS) return HANDS;
+      HANDS = [];
+      var ai, cv, g, y;
+      for (ai = 0; ai < 8; ai++) {
+        cv = document.createElement('canvas'); cv.width = 22; cv.height = 16;
+        g = cv.getContext('2d');
+        y = Math.sin(ai / 7 * Math.PI * 2) * 2.4;
+        g.fillStyle = '#e0b088';
+        g.beginPath(); g.ellipse(11, 9 + y, 6.4, 3.4, -0.15, 0, 7); g.fill();
+        g.fillStyle = '#c09068';
+        g.fillRect(8, 7 + y, 1.3, 3.6); g.fillRect(12, 7 + y, 1.3, 3.6);
+        HANDS.push(cv);
+      }
+      return HANDS;
+    }
+
+    function workHour(hr) {
+      return hr >= 7.6 && hr < 18 && !(hr >= 12 && hr < 13);
+    }
+
+    function canTake(p) {
+      if (!p.doing) return true;
+      if (p.doing.indexOf('WORKING AT THE') === 0) return true;
+      if (p.doing === 'PLAYING CARDS') return true;
+      if (p.doing === 'LOAFING AROUND THE SALOON') return true;
+      if (p.doing === 'ROLLING A HOOP' || p.doing === 'PLAYING HOPSCOTCH' || p.doing === 'PLAYING TAG') return true;
+      return false;
+    }
+
+    function tableAt(s) {
+      return { x: s.x + (s.w || 200) * 0.30, y: s.y + 48 };
+    }
+
+    function pickPlayers(t) {
+      var out = [], seen = {};
+      function add(p) {
+        if (!p || seen[p.n] || !canTake(p) || p.kid) return;
+        if (p.job === 'BARKEEP' || p.job === 'PIANO PLAYER' || p.job === 'SHOPKEEPER' || p.job === 'CLERK') return;
+        if (p.job === 'SHERIFF' || p.job === 'DEPUTY' || p.job === 'PREACHER' || p.job === 'BLACKSMITH') return;
+        seen[p.n] = 1; out.push(p);
+      }
+      (t.P || []).forEach(function (p) { if (p.job === 'GAMBLER') add(p); });
+      (t.P || []).forEach(function (p) { if (out.length >= 3) return; if (p.job === 'COOK' || p.job === 'DRIFTER') add(p); });
+      if (out.length < 2) {
+        (t.P || []).slice().sort(function (a, b) { return (a.ph || 0) - (b.ph || 0); }).forEach(function (p) {
+          if (out.length >= 3) return;
+          add(p);
+        });
+      }
+      return out.slice(0, 4);
+    }
+
+    var _pf = pushFactionItems;
+    pushFactionItems = function (items) {
+      try {
+        if (MODE === 'free' && window.TOWN133) {
+          TOWN133.towns().forEach(function (t) {
+            if (t.kids161) t.kids161 = t.kids161.filter(function (p) {
+              return p.job !== 'GAMBLER' && p.job !== 'COOK' && p.job !== 'DRIFTER';
+            });
+          });
+        }
+      } catch (e) {}
+      _pf.apply(this, arguments);
+      OVER = [];
+      try {
+        if (MODE === 'free' && window.TOWN133) {
+          var L = TOWN133.towns(), now = performance.now() / 1000, hr = 12;
+          try { hr = CLOCK133.hour(); } catch (e) {}
+          var work = workHour(hr);
+          var x0 = px - innerWidth / (2 * zoom) - 220, x1 = px + innerWidth / (2 * zoom) + 220;
+          var y0 = py - innerHeight / (2 * zoom) - 200, y1 = py + innerHeight / (2 * zoom) + 320;
+          var np = 0, nb = 0;
+          L.forEach(function (t) {
+            if (t.box && (t.box.x1 < x0 || t.box.x0 > x1 || t.box.y1 < y0 || t.box.y0 > y1)) return;
+            var saloon = t.saloon || null;
+            (t.b || []).forEach(function (b) { if (b.k === 'saloon') saloon = b; });
+            if (!saloon) return;
+            var pos = tableAt(saloon);
+            if (pos.x >= x0 && pos.x <= x1 && pos.y >= y0 && pos.y <= y1) {
+              nb++;
+              OVER.push({ k: 'table', x: pos.x, y: pos.y });
+            }
+            if (!work) return;
+            var players = pickPlayers(t);
+            players.forEach(function (p, i) {
+              var s = SEAT[i % SEAT.length];
+              p.doing = 'PLAYING CARDS';
+              p.x = pos.x + s.dx;
+              p.y = pos.y + s.dy;
+              p.f = s.f;
+              p.mv = false; p.path = []; p.in = false;
+              if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) return;
+              np++;
+              OVER.push({ k: 'fan', x: pos.x + s.dx * 0.55, y: pos.y + s.dy * 0.35 - 2, i: i % 4 });
+              OVER.push({ k: 'hand', x: pos.x + s.dx * 0.4, y: pos.y + s.dy * 0.2 - 4, ang: (Math.sin(now * 5 + (p.ph || 0) + i) + 1) * 0.5 });
+              if (Math.random() < 0.03) {
+                FLY.push({ x: pos.x + s.dx * 0.6, y: pos.y + s.dy * 0.4 - 8, tx: pos.x + (Math.random() - 0.5) * 10, ty: pos.y - 2, l: 1, red: Math.random() < 0.5 });
+              }
+            });
+          });
+          window.CARD165 = np; window.CARD165T = nb;
+        }
+      } catch (e) { if (!window.E165) { window.E165 = 1; console.warn(e); } }
+    };
+
+    var _du = drawUnits;
+    drawUnits = function (camX, camY) {
+      var r = _du.apply(this, arguments);
+      try {
+        var c = ctx, i, o, sx, sy, ai;
+        for (i = 0; i < OVER.length; i++) {
+          o = OVER[i]; sx = o.x - camX; sy = o.y - camY;
+          if (o.k === 'table') {
+            c.drawImage(tableSpr(), sx - 46, sy - 36);
+          } else if (o.k === 'fan') {
+            c.drawImage(cardFanSpr()[o.i], sx - 14, sy - 16);
+          } else if (o.k === 'hand') {
+            ai = Math.max(0, Math.min(7, (o.ang * 7 + 0.5) | 0));
+            c.drawImage(handSpr()[ai], sx - 11, sy - 10);
+          }
+        }
+        FLY.forEach(function (n) {
+          n.l -= 0.03;
+          n.x += (n.tx - n.x) * 0.12;
+          n.y += (n.ty - n.y) * 0.12;
+          card(c, n.x - camX, n.y - camY, (1 - n.l) * 0.8, 1, n.red);
+        });
+        FLY = FLY.filter(function (n) { return n.l > 0; });
+      } catch (e) { if (!window.E165b) { window.E165b = 1; console.warn(e); } }
+      return r;
+    };
+    window.LIFE165 = { play: function () { return window.CARD165 || 0; }, tables: function () { return window.CARD165T || 0; } };
+  })();
+
+  requestAnimationFrame(frame);
   }
   // ================= REAL SETTLEMENT ECONOMY (v18) =================
   // Everyone (me, CPU, every nation) starts as a camp with 2 adults, nothing else. Same rules for all.
@@ -8177,5 +8407,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --></body>
 </html>
