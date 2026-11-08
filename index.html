@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, then The Station: past the draw a lonely stage station sits on the empty prison road, and its yard bar lies across the road.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, then The Gate: past the station, the Vane gang ambushes the wagon at the territorial prison gate.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9861,7 +9861,9 @@ window.B137 = (function () {
       { id: 'baines', name: 'Cora Baines', title: 'Draw Tender', role: 'woman', age: 38, fem: 1, ox: 560, oy: -200, face: 1, from: 16 },
       { id: 'darrow', name: 'Whit Darrow', title: 'Span Man', role: 'mason', age: 47, fem: 0, ox: -460, oy: -180, face: -1, from: 16 },
       { id: 'rowe', name: 'Seth Rowe', title: 'Station Keeper', role: 'guard', age: 55, fem: 0, ox: 560, oy: -200, face: 1, from: 17 },
-      { id: 'dunne', name: 'Pearl Dunne', title: 'Yard Hand', role: 'woman', age: 29, fem: 1, ox: -460, oy: -180, face: -1, from: 17 }
+      { id: 'dunne', name: 'Pearl Dunne', title: 'Yard Hand', role: 'woman', age: 29, fem: 1, ox: -460, oy: -180, face: -1, from: 17 },
+      { id: 'holcomb', name: 'Nate Holcomb', title: 'Prison Gate Sergeant', role: 'guard', age: 48, fem: 0, ox: 560, oy: -200, face: 1, from: 18 },
+      { id: 'gable', name: 'Ruth Gable', title: 'Turnkey', role: 'woman', age: 41, fem: 1, ox: -460, oy: -180, face: -1, from: 18 }
     ];
 
     var CHAPTERS = [
@@ -9881,7 +9883,8 @@ window.B137 = (function () {
       { id: 14, title: 'The Tank', year: 1, need: ['peck', 'lang', 'mercer14'] },
       { id: 15, title: 'The Wire', year: 1, need: ['drew', 'pyle', 'mercer15'] },
       { id: 16, title: 'The Draw', year: 1, need: ['baines', 'darrow', 'mercer16'] },
-      { id: 17, title: 'The Station', year: 1, need: ['rowe', 'dunne', 'mercer17'] }
+      { id: 17, title: 'The Station', year: 1, need: ['rowe', 'dunne', 'mercer17'] },
+      { id: 18, title: 'The Gate', year: 1, need: ['holcomb', 'gable', 'mercer18'] }
     ];
 
     var NODES = {
@@ -11243,6 +11246,64 @@ window.B137 = (function () {
         { t: "Good.", next: 'end' }
       ] },
 
+      holcomb: { who: 'holcomb', say: "Nate Holcomb. I keep this gate — last mile for Holley's box. Territorial prison's right behind me, walls and all. Riders on the ridge since Rowe's station. That's Vane's bunch, coming for the prisoner before we get him inside. You riding the wagon in, or holding the wall?", replies: [
+        { t: "I'll ride the wagon in.", next: 'holcomb_ride', rel: { holcomb: 1 } },
+        { t: "I'll hold the wall.", next: 'holcomb_wall' },
+        { t: "I'll take the riders first.", next: 'holcomb_riders' }
+      ] },
+      holcomb_ride: { who: 'holcomb', say: "Then stay with the box. Gate's open — we don't bar it till Holley's through. But those four on the ridge will hit the wagon before it rolls a yard. Shoot them off it, then get Holley inside.", replies: [
+        { t: "I'll shoot them off and ride in.", next: 'end', flag: 'met_holcomb', rel: { holcomb: 1 } }
+      ] },
+      holcomb_wall: { who: 'holcomb', say: "Hold it, then. I'll keep the tower. Gate stays open until that box is in the yard. First you have to put those riders down — they want Vane before the walls close.", replies: [
+        { t: "I'll take the riders, then hold.", next: 'end', flag: 'met_holcomb' }
+      ] },
+      holcomb_riders: { who: 'holcomb', say: "That's the job. Four of them, Vane's men, coming for the box. Shoot them off the wagon, then stay close and Holley rolls through the gate. Once he's in, we bar it.", replies: [
+        { t: "I'll take the riders.", next: 'end', flag: 'met_holcomb' }
+      ] },
+      holcomb_again: { who: 'holcomb', say: "Riders first. Then the wagon through the gate. I'll bar it when Holley's in.", replies: [
+        { t: "Understood.", next: 'end' }
+      ] },
+      gable: { who: 'gable', say: "Ruth Gable. Turnkey. I'm waiting to take the man once that box is inside. Gate stays open till Holley's through, then we bar it. Vane's bunch is on the ridge — they mean to grab him before I get the irons on. You riding him in, or shooting first?", replies: [
+        { t: "I'll ride the wagon in.", next: 'gable_ride', rel: { gable: 1 } },
+        { t: "I'll hold the wall.", next: 'gable_wall' },
+        { t: "I'll take the riders first.", next: 'gable_riders' }
+      ] },
+      gable_ride: { who: 'gable', say: "Then get those riders off the box first. I can't take a man whose friends are still shooting. Once they're down, stay with Holley and roll him through. I'll be at the inner door.", replies: [
+        { t: "Riders first. Then we roll.", next: 'end', flag: 'met_gable', rel: { gable: 1 } }
+      ] },
+      gable_wall: { who: 'gable', say: "Fair. You hold the wall, I'll hold the keys. Those riders still have to go down before the wagon moves. Shoot them, then watch the yard.", replies: [
+        { t: "I'll shoot them and watch.", next: 'end', flag: 'met_gable' }
+      ] },
+      gable_riders: { who: 'gable', say: "Good. Four of Vane's, coming hard at the wagon. Put them down, then stay close so Holley can roll through the open gate. I'll take the prisoner once the box is in the yard.", replies: [
+        { t: "I'll take the riders.", next: 'end', flag: 'met_gable' }
+      ] },
+      gable_again: { who: 'gable', say: "Riders first. Then Holley through the gate. I'll be waiting inside.", replies: [
+        { t: "Good.", next: 'end' }
+      ] },
+
+      mercer_ch18: { who: 'mercer', say: "We're past Rowe's station. This is the prison — Holcomb keeps the gate, Gable's the turnkey waiting inside. Those three from the ridge, they're Vane's, and they're hitting now. Talk to both of them, then shoot the riders off the wagon and get Holley through the gate.", replies: [
+        { t: "I'll ride the wagon in.", next: 'mercer_ch18_ride', rel: { mercer: 1 } },
+        { t: "I'll hold the wall.", next: 'mercer_ch18_watch' },
+        { t: "I'll take the riders first.", next: 'mercer_ch18_riders' }
+      ] },
+      mercer_ch18_friend: { who: 'mercer', say: "You rode the station with me. Bar's up, box is still shut, and Rowe's yard is behind us. This is the prison — same three, and they're Vane's, hitting the wagon now. Talk to Holcomb and Gable, then we shoot those riders off the box and get Holley through the gate.", replies: [
+        { t: "I'll ride the wagon in.", next: 'mercer_ch18_ride', rel: { mercer: 1 } },
+        { t: "I'll hold the wall.", next: 'mercer_ch18_watch' },
+        { t: "I'll take the riders first.", next: 'mercer_ch18_riders' }
+      ] },
+      mercer_ch18_ride: { who: 'mercer', say: "Then stay left of the box, same as the station. Those riders won't wait — put them down first. Once they're off the wagon, Holley moves. Gate's already open. I'll be with the box.", replies: [
+        { t: "Riders, then the wagon.", next: 'end', flag: 'met_mercer18', rel: { mercer: 1 } }
+      ] },
+      mercer_ch18_watch: { who: 'mercer', say: "The wall, then. Holcomb's seen four on the ridge since the station. The wagon still sits till those riders are down. Shoot them, then hold.", replies: [
+        { t: "I'll shoot them and hold.", next: 'end', flag: 'met_mercer18' }
+      ] },
+      mercer_ch18_riders: { who: 'mercer', say: "That's the first job. Shoot Vane's riders off the wagon. Until they're down the box sits, even if you stand next to it. After that — stay close and Holley rolls through the gate.", replies: [
+        { t: "I'll take the riders.", next: 'end', flag: 'met_mercer18' }
+      ] },
+      mercer_ch18_again: { who: 'mercer', say: "Riders first. Then Holley through the gate. I'll be where the box is.", replies: [
+        { t: "Good.", next: 'end' }
+      ] },
+
       judge_ch9: { who: 'judge', say: "I wrote it. Brant inked it. Now it belongs to Keene, and that's the hardest part of my job \u2014 letting go of a sentence and watching what a city does with it. The wagon's in the yard. Whatever it means to Dustwater, it means it by morning.", replies: [
         { t: "You wrote it fair.", next: 'end', flag: 'judge_ch9', rel: { judge: 1 } },
         { t: "The city will live with it.", next: 'end', flag: 'judge_ch9' }
@@ -11386,7 +11447,8 @@ window.B137 = (function () {
       14: { cast: ['peck', 'lang', 'mercer'], at: 'tank', do: 'pump', mark: 'THE TANK' },
       15: { cast: ['drew', 'pyle', 'mercer'], at: 'wire', do: 'wire', mark: 'THE WIRE' },
       16: { cast: ['baines', 'darrow', 'mercer'], at: 'draw', do: 'span', mark: 'THE DRAW' },
-      17: { cast: ['rowe', 'dunne', 'mercer'], at: 'station', do: 'bar', mark: 'THE STATION' }
+      17: { cast: ['rowe', 'dunne', 'mercer'], at: 'station', do: 'bar', mark: 'THE STATION' },
+      18: { cast: ['holcomb', 'gable', 'mercer'], at: 'gate', do: 'gate', mark: 'THE GATE' }
     };
     CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
     var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]] };
@@ -11413,6 +11475,7 @@ window.B137 = (function () {
       if (at === 'wire') { var d8 = dustwater(); return { x: d8.x + 12800, y: d8.y + 500 }; }
       if (at === 'draw') { var d9 = dustwater(); return { x: d9.x + 14600, y: d9.y + 500 }; }
       if (at === 'station') { var d10 = dustwater(); return { x: d10.x + 16400, y: d10.y + 500 }; }
+      if (at === 'gate') { var d11 = dustwater(); return { x: d11.x + 18200, y: d11.y + 500 }; }
       return { x: city.x, y: city.y };
     }
     function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
@@ -11492,6 +11555,11 @@ window.B137 = (function () {
         ACT.bar = { x: s.x + 260, y: s.y + 80, cleared: 0 };
         [[500, -100], [680, 30], [580, 210]].forEach(function (o) {
           ACT.foes.push({ x: s.x + o[0], y: s.y + o[1], hp: 3, f: -1, role: 'archer', hitT: 0, name: 'DRY RIDER' });
+        });
+      } else if (d.do === 'gate') {
+        ACT.wagon = { k: 'money', x: s.x - 280, y: s.y + 80, f: 1, ph: 0, ex: s.x + 240 };
+        [[-220, 130], [-140, -150], [-40, 190], [-340, -60]].forEach(function (o) {
+          ACT.foes.push({ x: s.x + o[0], y: s.y + o[1], hp: 3, f: 1, role: 'archer', hitT: 0, name: 'VANE GANG' });
         });
       }
     }
@@ -11576,6 +11644,11 @@ window.B137 = (function () {
         if (yb && yb.cleared && w && Math.hypot(w.x - px, w.y - py) < 240 && w.x < w.ex) { w.x = Math.min(w.ex, w.x + 70 * dt); w.ph += dt * 6; }
         moveFoes(dt, ACT.wagon);
         if (yb && yb.cleared && w && w.x >= w.ex) completeAct();
+      } else if (d.do === 'gate') {
+        var w = ACT.wagon, alive = ACT.foes.filter(function (f) { return f.hp > 0; }).length;
+        moveFoes(dt, ACT.wagon);
+        if (alive === 0 && w && Math.hypot(w.x - px, w.y - py) < 240 && w.x < w.ex) { w.x = Math.min(w.ex, w.x + 70 * dt); w.ph += dt * 6; }
+        if (alive === 0 && w && w.x >= w.ex) completeAct();
       }
     }
     function moveFoes(dt, goal) {
@@ -11611,6 +11684,7 @@ window.B137 = (function () {
         else if (d.do === 'wire') { if (ACT.wire && !ACT.wire.cleared) t = { x: ACT.wire.x, y: ACT.wire.y, label: 'FALLEN POLE' }; else if (ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' }; }
         else if (d.do === 'span') { if (ACT.span && !ACT.span.cleared) t = { x: ACT.span.x, y: ACT.span.y, label: 'PLANK SPAN' }; else if (ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' }; }
         else if (d.do === 'bar') { if (ACT.bar && !ACT.bar.cleared) t = { x: ACT.bar.x, y: ACT.bar.y, label: 'YARD BAR' }; else if (ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' }; }
+        else if (d.do === 'gate') { var vg = ACT.foes.filter(function (q) { return q.hp > 0; })[0]; if (vg) t = { x: vg.x, y: vg.y, label: "VANE'S GANG" }; else if (ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' }; }
         else if (d.do === 'wagon' && ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' };
         else if (d.do === 'arrive') t = { x: s.x, y: s.y, label: lab };
         if (t) return t;
@@ -12056,6 +12130,80 @@ window.B137 = (function () {
       c.fillText('LITTLE PINE FERRY', sx, sy - 64);
       c.restore();
     }
+    function drawPrison(c, sx, sy) {
+      c.save();
+      c.fillStyle = '#d8bc80';
+      c.beginPath(); c.ellipse(sx - 40, sy + 80, 320, 28, 0, 0, 7); c.fill();
+      c.fillStyle = '#c4a468';
+      c.beginPath(); c.ellipse(sx - 40, sy + 84, 280, 9, 0, 0, 7); c.fill();
+      c.fillStyle = '#c9a66e';
+      c.fillRect(sx + 8, sy - 110, 220, 230);
+      c.fillStyle = 'rgba(180,140,80,.25)';
+      c.fillRect(sx + 16, sy - 100, 200, 210);
+      var wall = '#c4a06a', mortar = '#8a6238', wallLt = '#d8bc88';
+      c.fillStyle = wall; c.strokeStyle = mortar; c.lineWidth = 2;
+      c.fillRect(sx - 20, sy - 130, 250, 22); c.strokeRect(sx - 20, sy - 130, 250, 22);
+      c.fillRect(sx - 20, sy + 108, 250, 22); c.strokeRect(sx - 20, sy + 108, 250, 22);
+      c.fillRect(sx + 220, sy - 130, 22, 260); c.strokeRect(sx + 220, sy - 130, 22, 260);
+      c.fillRect(sx - 20, sy - 130, 22, 88); c.strokeRect(sx - 20, sy - 130, 22, 88);
+      c.fillRect(sx - 20, sy + 42, 22, 88); c.strokeRect(sx - 20, sy + 42, 22, 88);
+      c.strokeStyle = '#b89258'; c.lineWidth = 1;
+      for (var i = 0; i < 6; i++) { c.beginPath(); c.moveTo(sx - 18, sy - 126 + i * 3.5); c.lineTo(sx + 228, sy - 126 + i * 3.5); c.stroke(); }
+      c.fillStyle = wallLt;
+      for (var i = 0; i < 10; i++) c.fillRect(sx - 16 + i * 26, sy - 138, 14, 10);
+      c.fillRect(sx + 222, sy - 138, 18, 10);
+      function door(cx, cy, ang) {
+        c.save(); c.translate(cx, cy); c.rotate(ang);
+        c.fillStyle = '#a07040'; c.strokeStyle = '#5a3418'; c.lineWidth = 2;
+        c.fillRect(0, -6, 78, 12); c.strokeRect(0, -6, 78, 12);
+        c.strokeStyle = '#7a4e28'; c.lineWidth = 1;
+        for (var i = 1; i < 5; i++) { c.beginPath(); c.moveTo(i * 15, -6); c.lineTo(i * 15, 6); c.stroke(); }
+        c.fillStyle = '#8a96a0';
+        c.fillRect(8, -6, 6, 12); c.fillRect(36, -6, 6, 12); c.fillRect(64, -6, 6, 12);
+        c.fillStyle = '#6a7680';
+        [12, 40, 68].forEach(function (bx) { c.beginPath(); c.arc(bx, 0, 2, 0, 7); c.fill(); });
+        c.restore();
+      }
+      door(sx - 8, sy - 38, -1.15);
+      door(sx - 8, sy + 38, 1.15);
+      c.fillStyle = '#8a5a32'; c.strokeStyle = '#5a3418'; c.lineWidth = 1.5;
+      c.fillRect(sx - 16, sy - 50, 12, 16); c.strokeRect(sx - 16, sy - 50, 12, 16);
+      c.fillRect(sx - 16, sy + 34, 12, 16); c.strokeRect(sx - 16, sy + 34, 12, 16);
+      var tx = sx - 8, ty = sy - 150;
+      c.fillStyle = '#b89258'; c.strokeStyle = '#6a4424'; c.lineWidth = 2;
+      c.fillRect(tx - 28, ty - 70, 52, 90); c.strokeRect(tx - 28, ty - 70, 52, 90);
+      c.strokeStyle = '#a07848'; c.lineWidth = 1;
+      for (var i = 0; i < 8; i++) { c.beginPath(); c.moveTo(tx - 28, ty - 62 + i * 10); c.lineTo(tx + 24, ty - 62 + i * 10); c.stroke(); }
+      c.fillStyle = '#6a8ab0'; c.strokeStyle = '#5a3418';
+      c.fillRect(tx - 16, ty - 50, 12, 14); c.strokeRect(tx - 16, ty - 50, 12, 14);
+      c.fillRect(tx + 2, ty - 50, 12, 14); c.strokeRect(tx + 2, ty - 50, 12, 14);
+      c.fillStyle = '#c45a3a'; c.strokeStyle = '#8a2a1e'; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(tx - 36, ty - 66); c.lineTo(tx - 2, ty - 96); c.lineTo(tx + 32, ty - 66); c.closePath(); c.fill(); c.stroke();
+      c.strokeStyle = '#a04028';
+      c.beginPath(); c.moveTo(tx - 22, ty - 76); c.lineTo(tx + 18, ty - 76); c.moveTo(tx - 12, ty - 86); c.lineTo(tx + 8, ty - 86); c.stroke();
+      c.fillStyle = '#c4a06a'; c.fillRect(tx - 32, ty - 20, 60, 8); c.strokeStyle = '#6a4424'; c.strokeRect(tx - 32, ty - 20, 60, 8);
+      c.fillStyle = '#8a6238';
+      [-28, -8, 12, 24].forEach(function (q) { c.fillRect(tx + q, ty - 32, 3, 14); });
+      var gx = sx + 50, gy = sy + 70;
+      c.fillStyle = 'rgba(90,50,20,.16)'; c.fillRect(gx - 50, gy + 8, 108, 8);
+      c.fillStyle = '#c4a06a'; c.strokeStyle = '#6a4424'; c.lineWidth = 2;
+      c.fillRect(gx - 46, gy - 48, 96, 56); c.strokeRect(gx - 46, gy - 48, 96, 56);
+      c.strokeStyle = '#b89258'; c.lineWidth = 1;
+      for (var i = 0; i < 5; i++) { c.beginPath(); c.moveTo(gx - 46, gy - 40 + i * 10); c.lineTo(gx + 50, gy - 40 + i * 10); c.stroke(); }
+      c.fillStyle = '#8a5a32'; c.fillRect(gx - 10, gy - 20, 20, 28); c.strokeStyle = '#5a3418'; c.strokeRect(gx - 10, gy - 20, 20, 28);
+      c.fillStyle = '#d8a050'; c.beginPath(); c.arc(gx + 6, gy - 6, 2, 0, 7); c.fill();
+      c.fillStyle = '#6a8ab0'; c.fillRect(gx + 18, gy - 34, 18, 16); c.strokeRect(gx + 18, gy - 34, 18, 16);
+      c.fillStyle = '#c45a3a'; c.strokeStyle = '#8a2a1e'; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(gx - 54, gy - 46); c.lineTo(gx + 2, gy - 78); c.lineTo(gx + 58, gy - 46); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = '#f0dcae'; c.strokeStyle = '#5a3418'; c.lineWidth = 1.5;
+      c.fillRect(gx - 28, gy - 70, 56, 14); c.strokeRect(gx - 28, gy - 70, 56, 14);
+      c.fillStyle = '#8a2a1e'; c.font = 'bold 9px monospace'; c.textAlign = 'center';
+      c.fillText('GATE HOUSE', gx, gy - 60);
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center';
+      c.fillText('THE TERRITORIAL PRISON', sx + 90, sy - 200);
+      c.fillText('THE GATE', sx - 8, sy - 64);
+      c.restore();
+    }
     function drawAct(camX, camY) {
       if (!ST.on || ACT.id !== ST.ch) return;
       var c = ctx, z = (typeof zoom !== 'undefined' && zoom) || 1, Wv = (typeof W !== 'undefined' ? W : 1280) / (2 * z) + 160;
@@ -12077,6 +12225,7 @@ window.B137 = (function () {
       if (ACT.span && vis(ACT.span)) drawSpan(c, ACT.span, ACT.span.x - camX, ACT.span.y - camY);
       if (ACT.kind === 'bar' && vis(scenePos())) drawStation(c, scenePos().x - camX, scenePos().y - camY);
       if (ACT.bar && vis(ACT.bar)) drawBar(c, ACT.bar, ACT.bar.x - camX, ACT.bar.y - camY);
+      if (ACT.kind === 'gate' && vis(scenePos())) drawPrison(c, scenePos().x - camX, scenePos().y - camY);
       if (ACT.ferry && vis(ACT.ferry)) drawFerry(c, ACT.ferry, ACT.ferry.x - camX, ACT.ferry.y - camY);
       if (ACT.wagon && vis(ACT.wagon) && window.ART153) try { ART153.wagonFig(c, ACT.wagon, ACT.wagon.x - camX, ACT.wagon.y - camY); c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('PRISON WAGON', ACT.wagon.x - camX, ACT.wagon.y - camY - 92); } catch (e) {}
       ACT.foes.forEach(function (f) { if (vis(f)) drawFoe(c, f, f.x - camX, f.y - camY); });
@@ -12310,7 +12459,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8], ch9done: !!ST.done[9], ch10done: !!ST.done[10], ch11done: !!ST.done[11], ch12done: !!ST.done[12], ch13done: !!ST.done[13], ch14done: !!ST.done[14], ch15done: !!ST.done[15], ch16done: !!ST.done[16], ch17done: !!ST.done[17] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8], ch9done: !!ST.done[9], ch10done: !!ST.done[10], ch11done: !!ST.done[11], ch12done: !!ST.done[12], ch13done: !!ST.done[13], ch14done: !!ST.done[14], ch15done: !!ST.done[15], ch16done: !!ST.done[16], ch17done: !!ST.done[17], ch18done: !!ST.done[18] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
@@ -12334,7 +12483,7 @@ window.B137 = (function () {
       folkNode: folkNode,
       modeBtn: function () { return !!document.querySelector('.mode[data-mode=story]'); },
       dlgOn: function () { return dlg.style.display === 'block'; },
-      scene: function () { var d = chDef(), p = scenePos(); return { at: d.at, x: p.x, y: p.y, label: d.mark, cast: (d.cast || []).slice(), do: d.do, actDone: actOK(), n: ST.chars.length, ids: ST.chars.map(function (c) { return c.id; }), fromHome: (typeof city !== 'undefined' && city) ? Math.hypot(p.x - city.x, p.y - city.y) : 0, cattle: ACT.cattle.length, foes: ACT.foes.filter(function (f) { return f.hp > 0; }).length, stakes: ACT.stakes.length, marks: ACT.marks.length, coach: !!ACT.coach, wagon: ACT.wagon ? { x: ACT.wagon.x, y: ACT.wagon.y, ex: ACT.wagon.ex } : null, ferry: ACT.ferry ? { x: ACT.ferry.x, y: ACT.ferry.y, ramp: !!ACT.ferry.ramp } : null, log: ACT.log ? { x: ACT.log.x, y: ACT.log.y, cleared: !!ACT.log.cleared } : null, slide: ACT.slide ? { x: ACT.slide.x, y: ACT.slide.y, cleared: !!ACT.slide.cleared } : null, pump: ACT.pump ? { x: ACT.pump.x, y: ACT.pump.y, cleared: !!ACT.pump.cleared } : null, wire: ACT.wire ? { x: ACT.wire.x, y: ACT.wire.y, cleared: !!ACT.wire.cleared } : null, span: ACT.span ? { x: ACT.span.x, y: ACT.span.y, cleared: !!ACT.span.cleared } : null, bar: ACT.bar ? { x: ACT.bar.x, y: ACT.bar.y, cleared: !!ACT.bar.cleared } : null }; },
+      scene: function () { var d = chDef(), p = scenePos(); return { at: d.at, x: p.x, y: p.y, label: d.mark, cast: (d.cast || []).slice(), do: d.do, actDone: actOK(), n: ST.chars.length, ids: ST.chars.map(function (c) { return c.id; }), fromHome: (typeof city !== 'undefined' && city) ? Math.hypot(p.x - city.x, p.y - city.y) : 0, cattle: ACT.cattle.length, foes: ACT.foes.filter(function (f) { return f.hp > 0; }).length, foeNames: ACT.foes.map(function (f) { return f.name; }), stakes: ACT.stakes.length, marks: ACT.marks.length, coach: !!ACT.coach, wagon: ACT.wagon ? { x: ACT.wagon.x, y: ACT.wagon.y, ex: ACT.wagon.ex } : null, ferry: ACT.ferry ? { x: ACT.ferry.x, y: ACT.ferry.y, ramp: !!ACT.ferry.ramp } : null, log: ACT.log ? { x: ACT.log.x, y: ACT.log.y, cleared: !!ACT.log.cleared } : null, slide: ACT.slide ? { x: ACT.slide.x, y: ACT.slide.y, cleared: !!ACT.slide.cleared } : null, pump: ACT.pump ? { x: ACT.pump.x, y: ACT.pump.y, cleared: !!ACT.pump.cleared } : null, wire: ACT.wire ? { x: ACT.wire.x, y: ACT.wire.y, cleared: !!ACT.wire.cleared } : null, span: ACT.span ? { x: ACT.span.x, y: ACT.span.y, cleared: !!ACT.span.cleared } : null, bar: ACT.bar ? { x: ACT.bar.x, y: ACT.bar.y, cleared: !!ACT.bar.cleared } : null }; },
       marker: function () { var m = marker(); return m ? { x: m.x, y: m.y, label: m.label } : null; },
       gotoScene: function () { var p = scenePos(); px = p.x; py = p.y + 40; try { moveId = null; targetX = px; targetY = py; } catch (e) {} actOK(); return { x: px, y: py }; },
       finishAct: function () { var d = chDef(); if (!d || d.do === 'meet') return actOK(); if (d.do === 'arrive') { ST.flags['act' + d.id] = 1; save(); finishChapter(); return true; } if (ACT.id !== d.id) setupAct(); completeAct(); return true; },
@@ -12364,7 +12513,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, then The Station: past the draw a lonely stage station sits on the empty prison road, and its yard bar lies across the road.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, then The Gate: past the station, the Vane gang ambushes the wagon at the territorial prison gate.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
