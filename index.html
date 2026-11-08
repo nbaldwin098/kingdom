@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, then The Showdown: Red Vane hits the railroad payroll.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, then The Posse: Boone wants Vane in Dustwater.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170-v173: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
+  // ===== v170-v174: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -9835,14 +9835,17 @@ window.B137 = (function () {
       { id: 'vera', name: 'Vera Pike', title: 'Surveyor', role: 'woman', age: 34, fem: 1, ox: -300, oy: 190, face: 1, from: 3 },
       { id: 'jed', name: 'Jed Calder', title: 'Homesteader', role: 'farmer', age: 46, fem: 0, ox: -350, oy: 10, face: -1, from: 3 },
       { id: 'lila', name: 'Lila Finch', title: 'Witness', role: 'woman', age: 27, fem: 1, ox: 240, oy: 80, face: -1, from: 4 },
-      { id: 'kit', name: 'Kit Rourke', title: 'Gunhand', role: 'guard', age: 33, fem: 0, ox: -40, oy: 340, face: 1, from: 4 }
+      { id: 'kit', name: 'Kit Rourke', title: 'Gunhand', role: 'guard', age: 33, fem: 0, ox: -40, oy: 340, face: 1, from: 4 },
+      { id: 'tess', name: 'Tess Quill', title: 'Dustwater Marshal', role: 'v2captain_v2', age: 39, fem: 1, ox: 280, oy: 200, face: -1, from: 5 },
+      { id: 'wren', name: 'Sam Wren', title: 'Tracker', role: 'archer', age: 42, fem: 0, ox: -180, oy: 300, face: 1, from: 5 }
     ];
 
     var CHAPTERS = [
       { id: 1, title: 'The Claim', year: 1, need: ['widow', 'sheriff', 'vane'] },
       { id: 2, title: 'The Rustlers', year: 1, need: ['ike', 'dutch', 'sheriff2'] },
       { id: 3, title: 'The Grade', year: 1, need: ['baron3', 'vera', 'jed'] },
-      { id: 4, title: 'The Showdown', year: 1, need: ['lila', 'kit', 'vane4'] }
+      { id: 4, title: 'The Showdown', year: 1, need: ['lila', 'kit', 'vane4'] },
+      { id: 5, title: 'The Posse', year: 1, need: ['tess', 'wren', 'sheriff5'] }
     ];
 
     var NODES = {
@@ -10206,6 +10209,106 @@ window.B137 = (function () {
       baron_ch4: { who: 'baron', say: "That box was wages for the men laying my grade. Vane didn't rob a bank \u2014 he robbed a railroad. I pay for results, not speeches.", replies: [
         { t: "I'll get it back.", next: 'end', flag: 'baron_ch4', rel: { baron: 1 } },
         { t: "That's between you and Vane.", next: 'end', flag: 'baron_ch4' }
+      ] },
+
+      sheriff_ch5: { who: 'sheriff', say: "Red Mesa can't hold a man like Vane. Dustwater can. Marshal Tess Quill rode out to take him in, and Sam Wren can track a ghost through that wash. I want a posse on the south road by nightfall.", replies: [
+        { t: "I'll ride with you.", next: 'sheriff_ch5_ride', rel: { sheriff: 1 } },
+        { t: "That's a long way to take one man.", next: 'sheriff_ch5_long' },
+        { t: "What if he isn't coming quietly?", next: 'sheriff_ch5_fight' }
+      ] },
+      sheriff_ch5_friend: { who: 'sheriff', say: "You told me you'd keep the peace. Here's the next mile of that. Red Mesa can't hold Vane. Dustwater can. Marshal Tess Quill is here for him, and Sam Wren knows the washes. I want a posse on the south road by nightfall.", replies: [
+        { t: "I'll ride with you.", next: 'sheriff_ch5_ride', rel: { sheriff: 1 } },
+        { t: "That's a long way to take one man.", next: 'sheriff_ch5_long' },
+        { t: "What if he isn't coming quietly?", next: 'sheriff_ch5_fight' }
+      ] },
+      sheriff_ch5_ride: { who: 'sheriff', say: "Good. Talk to Tess about the city warrant, and to Wren about the trail. Then we move.", replies: [
+        { t: "I'll find them.", next: 'end', flag: 'met_sheriff5' }
+      ] },
+      sheriff_ch5_long: { who: 'sheriff', say: "Thirty-five miles or fifty, depending who you ask. Wren says the south wash cuts a day if the river's down. Tess says Dustwater's jail is the only one with walls that aren't a suggestion.", replies: [
+        { t: "I'll talk to them.", next: 'end', flag: 'met_sheriff5' }
+      ] },
+      sheriff_ch5_fight: { who: 'sheriff', say: "Then we go anyway. I'd rather a hard ride than Vane slipping into the next county. Tess brought irons. Wren brought a map. What's left is you deciding if you're on it.", replies: [
+        { t: "I'll hear them out.", next: 'end', flag: 'met_sheriff5' }
+      ] },
+      sheriff_ch5_again: { who: 'sheriff', say: "Tess has the warrant. Wren has the trail. The posse doesn't wait on a maybe.", replies: [
+        { t: "Understood.", next: 'end' }
+      ] },
+
+      tess: { who: 'tess', say: "Marshal Tess Quill, out of Dustwater. Your sheriff sent word that Red Vane's been working this ridge. The city wants him in a real cell \u2014 not a board shed in Red Mesa. I'm here to take him in, and I need riders who know this ground.", replies: [
+        { t: "I'll ride with the posse.", next: 'tess_ride', rel: { tess: 1, sheriff: 1 } },
+        { t: "What's Dustwater offering?", next: 'tess_pay' },
+        { t: "Vane's not an easy man to walk anywhere.", next: 'tess_hard' }
+      ] },
+      tess_ride: { who: 'tess', say: "Then you're on the roll. Warrant's in my coat. We take the south road unless Wren finds a cleaner track. No heroics \u2014 I want him breathing when we hit the city limits.", replies: [
+        { t: "Understood.", next: 'end', flag: 'met_tess' }
+      ] },
+      tess_pay: { who: 'tess', say: "Dustwater pays a bounty on Vane, posted after the payroll coach. You ride, you share it. You tip him off, you share his cell. Simple as a city ordinance gets.", replies: [
+        { t: "Fair enough.", next: 'end', flag: 'met_tess' }
+      ] },
+      tess_hard: { who: 'tess', say: "I didn't ride thirty-odd miles because I thought he'd tip his hat. Boone says you know him. That makes you useful, or it makes you a problem. Which is it?", replies: [
+        { t: "Useful.", next: 'end', flag: 'met_tess', rel: { tess: 1 } },
+        { t: "I'll decide after I hear Wren.", next: 'end', flag: 'met_tess' }
+      ] },
+      tess_again: { who: 'tess', say: "The warrant doesn't get cooler sitting in my pocket. When Wren's ready, we ride.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      wren: { who: 'wren', say: "Sam Wren. I track what other people lose. Boone asked me to read the south wash \u2014 Vane's been through there, whether he's in irons already or still playing ghost. There's a trail toward Dustwater either way. Funny, a man running from a city riding toward one.", replies: [
+        { t: "Show me the trail.", next: 'wren_trail' },
+        { t: "Can we take him without a shootout?", next: 'wren_quiet' },
+        { t: "What if someone warned him?", next: 'wren_warn' }
+      ] },
+      wren_trail: { who: 'wren', say: "South wash, then the old freight cut. If the river's down we save a day. If it isn't, we take the ridge and pray Vane's horse is slower than he thinks. I'll mark it. You tell Boone and the marshal.", replies: [
+        { t: "I'll tell them.", next: 'end', flag: 'met_wren' }
+      ] },
+      wren_quiet: { who: 'wren', say: "There's a night track along the creek \u2014 two riders, not a posse stomping like cattle. You, me, irons, no speeches. Boone won't like being left behind. Tess might, if it gets Vane to Dustwater breathing.", replies: [
+        { t: "We'll try the quiet way.", next: 'end', flag: 'met_wren', rel: { wren: 1 } },
+        { t: "We ride as a posse.", next: 'end', flag: 'met_wren' }
+      ] },
+      wren_warn: { who: 'wren', say: "Then he already knows the south road. I'd take the creek anyway and let the posse be the noise he watches while we come the other way. Or you could be the one who warned him. I don't ask twice.", replies: [
+        { t: "I didn't warn him.", next: 'end', flag: 'met_wren' },
+        { t: "Just show me the trail.", next: 'end', flag: 'met_wren' }
+      ] },
+      wren_again: { who: 'wren', say: "Wash is still there. So's the freight cut. Horses don't track themselves.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      widow_ch5: { who: 'widow', say: "Boone's gathering a posse on my porch like it's a church social. Dustwater's a long ride with a man like Vane. Don't let this claim become the place someone dies for someone else's warrant.", replies: [
+        { t: "I'll keep it from coming back here.", next: 'end', flag: 'widow_ch5', rel: { widow: 1 } },
+        { t: "I'll be careful.", next: 'end', flag: 'widow_ch5' }
+      ] },
+
+      vane_ch5: { who: 'vane', say: "A marshal from Dustwater, a tracker, and Boone playing general. You think a posse makes you safer? It makes you louder. You want me in that city jail, you'll have to walk me there yourself.", replies: [
+        { t: "That's the plan.", next: 'end', flag: 'vane_ch5', rel: { vane: -1 } },
+        { t: "There's still a way this ends without a grave.", next: 'vane_ch5_deal' },
+        { t: "Ride now, before they form up.", next: 'vane_ch5_help' }
+      ] },
+      vane_ch5_friend: { who: 'vane', say: "You didn't try to put a rope on me last time. I'll remember that when the posse starts counting heads. Dustwater wants a show. You want to be in it, or you want to be useful?", replies: [
+        { t: "I'm riding them to you.", next: 'end', flag: 'vane_ch5', rel: { vane: -1 } },
+        { t: "There's still a way this ends without a grave.", next: 'vane_ch5_deal' },
+        { t: "Ride now, before they form up.", next: 'vane_ch5_help' }
+      ] },
+      vane_ch5_deal: { who: 'vane', say: "Housebroken again? Fine. I'll meet Wren on the creek at dusk and I'll wear the irons if Tess keeps Boone's boys off the trigger. One trick and I won't be the one in the dirt.", replies: [
+        { t: "Dusk, then.", next: 'end', flag: 'vane_ch5' }
+      ] },
+      vane_ch5_help: { who: 'vane', say: "Now you're talking. I'll be gone before their coffee cools. Don't expect a thank-you in front of Boone.", replies: [
+        { t: "Just go.", next: 'end', flag: 'vane_ch5', rel: { vane: 1, sheriff: -1, tess: -1 } }
+      ] },
+      vane_ch5_again: { who: 'vane', say: "Clock's running the same for both of us.", replies: [
+        { t: "So is the road.", next: 'end' }
+      ] },
+
+      baron_ch5: { who: 'baron', say: "Dustwater has a court that understands railroad property. I want Vane in it, and I want my men's wages back if there's anything left of that box. Ride or don't \u2014 but don't let him vanish a second time.", replies: [
+        { t: "He'll stand in that court.", next: 'end', flag: 'baron_ch5', rel: { baron: 1 } },
+        { t: "That's Boone's posse, not mine.", next: 'end', flag: 'baron_ch5' }
+      ] },
+      lila_ch5: { who: 'lila', say: "If they take him to Dustwater I'll go. A court needs a witness who saw the coach, not just a sheriff who heard about it.", replies: [
+        { t: "We'll need you there.", next: 'end', flag: 'lila_ch5', rel: { lila: 1 } },
+        { t: "Stay here. It's safer.", next: 'end', flag: 'lila_ch5' }
+      ] },
+      kit_ch5: { who: 'kit', say: "A posse. Fancy. Vane's been hunted by worse and he's still eating supper. You pick the law, you pick a fight. You pick him, you pick a different one.", replies: [
+        { t: "I'm riding with Boone.", next: 'end', flag: 'kit_ch5', rel: { kit: -1 } },
+        { t: "I'm not picking a fight I don't have to.", next: 'end', flag: 'kit_ch5' }
       ] }
 
     };
@@ -10477,7 +10580,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
@@ -10526,7 +10629,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, then The Showdown: Red Vane hits the railroad payroll.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, then The Posse: Boone wants Vane in Dustwater.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -10546,5 +10649,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --></body>
 </html>
