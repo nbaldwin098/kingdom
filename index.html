@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer's offer for the claim goes out.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer's offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow's man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9900,7 +9900,8 @@ window.B137 = (function () {
       { id: 24, title: 'The Shovel', year: 1, need: ['brann24', 'creed24'] },
       { id: 25, title: 'The Haul', year: 1, need: ['brann25', 'creed25'] },
       { id: 26, title: 'The Weigh-In', year: 1, need: ['calhoun26', 'brann26'] },
-      { id: 27, title: 'The Outfit', year: 1, need: ['rook27', 'brann27'] }
+      { id: 27, title: 'The Outfit', year: 1, need: ['rook27', 'brann27'] },
+      { id: 28, title: 'The Lantern', year: 1, need: ['brann28', 'creed28'] }
     ];
 
     var NODES = {
@@ -11727,6 +11728,29 @@ window.B137 = (function () {
       brann_ch27_again: { who: 'brann', say: "One of each in the basket, then the counter. I'll hold the door.", replies: [
         { t: "Right.", next: 'end' }
       ] },
+      brann_ch28: { who: 'brann', say: "Hank woke me an hour past midnight. A hooded lantern moving on the claim, then gone toward the Dustwater road. Marlow's man, sure as sunrise. He came because you turned their offer down. Take the lamp, find his boot prints in the dark and undo whatever he did before the morning shift.", replies: [
+        { t: "What am I looking for?", next: 'brann_ch28_what', rel: { brann: 1 } },
+        { t: "How do I tell his prints?", next: 'brann_ch28_prints' }
+      ] },
+      brann_ch28_what: { who: 'brann', say: "Anything wrong. A dry race means the head gate. A clean box means the riffles. Anything missing means he took it. Follow him and you'll find all three.", replies: [
+        { t: "I'll find them.", next: 'end', flag: 'met_brann28', rel: { brann: 1 } }
+      ] },
+      brann_ch28_prints: { who: 'brann', say: "Hobnail boots leave a ring of nail dots. Ours are smooth soles. Follow the dots and keep the lamp lit. The light only reaches so far, so walk slow.", replies: [
+        { t: "Hobnails. Got it.", next: 'end', flag: 'met_brann28' }
+      ] },
+      brann_ch28_again: { who: 'brann', say: "Follow the hobnails. Come back to the fire when the lamp runs low.", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
+      creed_ch28: { who: 'creed', say: "I sleep light at my age. Saw a lantern by the head gate, then down by the box, then out in the brush. Whoever he was, he knew where to hurt us. The lamp holds oil for a minute or so. The can by the fire fills it.", replies: [
+        { t: "Why not chase him?", next: 'creed_ch28_chase', rel: { creed: 1 } },
+        { t: "I'll take the lamp.", next: 'end', flag: 'met_creed28' }
+      ] },
+      creed_ch28_chase: { who: 'creed', say: "On a moonless night, over rocks? He'd hear me coming a mile off. Prints don't lie and they don't run. Set the claim right, then we'll know who to blame.", replies: [
+        { t: "Fair enough.", next: 'end', flag: 'met_creed28', rel: { creed: 1 } }
+      ] },
+      creed_ch28_again: { who: 'creed', say: "Lamp low? Oil can's by the fire. Hobnails lead the way.", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
       creed_ch25_again: { who: 'creed', say: "Walk beside her, lean high. The scale's at the end of the road.", replies: [
         { t: "Right.", next: 'end' }
       ] },
@@ -11884,10 +11908,11 @@ window.B137 = (function () {
       24: { cast: ['brann', 'creed'], at: 'diggings', do: 'shovel', mark: 'THE SHOVEL' },
       25: { cast: ['brann', 'creed'], at: 'diggings', do: 'haul', mark: 'THE HAUL' },
       26: { cast: ['calhoun', 'brann'], at: 'assay', do: 'weigh', mark: 'THE WEIGH-IN' },
-      27: { cast: ['rook', 'brann'], at: 'store', do: 'stock', mark: 'THE OUTFIT' }
+      27: { cast: ['rook', 'brann'], at: 'store', do: 'stock', mark: 'THE OUTFIT' },
+      28: { cast: ['brann', 'creed'], at: 'diggings', do: 'lantern', mark: 'THE LANTERN' }
     };
     CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
-    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]], 26: [[-190, -10], [230, 0]], 27: [[0, -40], [-210, -10]] };
+    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]], 26: [[-190, -10], [230, 0]], 27: [[0, -40], [-210, -10]], 28: [[-210, 160], [-70, 200]] };
     var GENERIC = [[-90, -30], [95, -10], [10, 105]];
     var DW = null;
     var EU = null;
@@ -11938,7 +11963,7 @@ window.B137 = (function () {
     function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
     function charId(need) { return String(need).replace(/\d+$/, ''); }
 
-    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, weigh: null, stock: null, t: 0 };
+    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, weigh: null, stock: null, lantern: null, t: 0 };
     function talksDone() { var d = chDef(); for (var i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return false; return true; }
     function actOK() {
       var d = chDef(); if (!d) return true;
@@ -11947,7 +11972,7 @@ window.B137 = (function () {
       if (d.do === 'arrive') { var s = scenePos(); if (Math.hypot(px - s.x, py - s.y) < 280) { ST.flags['act' + d.id] = 1; save(); return true; } return false; }
       return !!(ACT.id === d.id && ACT.done);
     }
-    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; ACT.weigh = null; ACT.stock = null; }
+    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; ACT.weigh = null; ACT.stock = null; ACT.lantern = null; }
     function setupAct() {
       var d = chDef(); clearAct(); ACT.id = d.id; ACT.kind = d.do || ''; ACT.done = !!ST.flags['act' + d.id];
       if (ACT.done || !ST.on) return;
@@ -12045,6 +12070,25 @@ window.B137 = (function () {
         cats.forEach(function (cat, i) { for (var v = 0; v < 2; v++) ACT.stock.items.push({ x: s.x + (i - (cats.length - 1) / 2) * 90, y: s.y + 25 + v * 65, cat: cat, prem: v, price: PR[cat][v], on: 0, arm: 0 }); });
         var why = ST.flags.ch26_bank ? "You banked the payout, so you can draw $45 from it." : ST.flags.ch26_tools ? "You already bought the mule and second box, so you need no pick. Three supplies, and $25 left to spend." : ST.flags.ch26_shares ? "You paid Lottie and Hank their shares, so the claim has $18. Cheap crates only." : "$30 on the counter.";
         NODES.rook_ch27_budget.say = why + " Cheap crates cost less, fancy crates cost more. Pick, rope, lamp, beans. The total has to fit.";
+      } else if (d.do === 'lantern') {
+        var fl = !!ST.flags.ch27_fancy_lamp;
+        var camp = { x: s.x - 150, y: s.y + 120 };
+        var T = [
+          { x: s.x - 300, y: s.y - 200, kind: 'gate', label: 'HEAD GATE', fix: 'PULL THE PLANK', done: 'GATE OPEN' },
+          { x: s.x + 380, y: s.y - 60, kind: 'riffles', label: 'RIFFLES IN THE CREEK', fix: 'FISH THEM OUT', done: 'RIFFLES BACK' },
+          { x: s.x + 260, y: s.y + 330, kind: 'pick', label: 'STOLEN PICK', fix: 'DIG IT OUT', done: 'PICK FOUND' },
+          { x: s.x - 200, y: s.y + 430, kind: 'tag', label: 'DROPPED TAG', fix: 'PICK IT UP', done: 'MARLOW & SONS' }
+        ];
+        T.forEach(function (t) { t.prog = 0; t.ok = 0; t.seen = 0; });
+        var prints = [], pts = [camp].concat(T), side = 1;
+        for (var q = 0; q < pts.length - 1; q++) {
+          var A = pts[q], B = pts[q + 1], L = Math.hypot(B.x - A.x, B.y - A.y), ux = (B.x - A.x) / L, uy = (B.y - A.y) / L, nst = Math.floor(L / 38);
+          for (var k = 1; k < nst; k++) { var wob = Math.sin(k * 0.9 + q) * 14; side = -side; prints.push({ x: A.x + ux * k * 38 - uy * (side * 7 + wob), y: A.y + uy * k * 38 + ux * (side * 7 + wob), a: Math.atan2(uy, ux), seg: q, seen: 0 }); }
+        }
+        var dec = [];
+        for (var k2 = 1; k2 < 9; k2++) dec.push({ x: camp.x + 30 + k2 * 34, y: camp.y + 40 + Math.sin(k2) * 8, a: 0.2, seen: 0 });
+        ACT.lantern = { camp: camp, oil: 1, burn: fl ? 1 / 110 : 1 / 75, fancy: fl, r: 0, T: T, prints: prints, smooth: dec, fixedN: 0, fillT: 0, tag: 0 };
+        NODES.creed_ch28.say = "I sleep light at my age. Saw a lantern by the head gate, then down by the box, then out in the brush. Whoever he was, he knew where to hurt us. " + (fl ? "That fancy lamp you bought at Rook's throws a wide light and burns long." : "The plain lamp from Rook's throws a short light and drinks oil.") + " The can by the fire fills it.";
       } else if (d.do === 'shovel') {
         ACT.shovel = { x: s.x + 50, y: s.y + 160, n: 0, need: 10, miss: 0, ph: 0, flash: 0, flashT: 0, pile: 1 };
       }
@@ -12060,6 +12104,7 @@ window.B137 = (function () {
       if (ACT.haul) ACT.haul.d = ACT.haul.len;
       if (ACT.weigh) { ACT.weigh.asked = 1; ACT.weigh.hold = 9; }
       if (ACT.stock) ACT.stock.applied = 1;
+      if (ACT.lantern) ACT.lantern.T.forEach(function (t) { t.ok = 1; t.seen = 1; });
       if (ACT.wagon) ACT.wagon.ex = ACT.wagon.x;
       save(); finishChapter();
     }
@@ -12218,9 +12263,30 @@ window.B137 = (function () {
           SK.ready = (!SK.over && SK.need.every(function (c) { return sgot[c]; })) ? 1 : 0;
           if (SK.ready && Math.hypot(SK.cx - px, SK.cy - py) < 50 && !SK.applied) {
             SK.applied = 1;
+            SK.items.forEach(function (it) { if (it.on && it.prem) ST.flags['ch27_fancy_' + it.cat.toLowerCase()] = 1; });
             try { gold += SK.prem * 5; updateRes(); showToast('OUTFITTED $' + stot + ' OF $' + SK.budget + (SK.prem ? ' +' + (SK.prem * 5) + ' GOLD' : '') + ' - MARLOW OFFER REFUSED'); } catch (e) {}
             completeAct();
           }
+        }
+      } else if (d.do === 'lantern') {
+        var LN = ACT.lantern;
+        if (LN && talksDone() && !ACT.done) {
+          LN.oil = Math.max(0, LN.oil - LN.burn * dt);
+          if (Math.hypot(LN.camp.x - px, LN.camp.y - py) < 60) { if (LN.oil < 0.98) LN.fillT = 1.2; LN.oil = 1; }
+          if (LN.fillT > 0) LN.fillT -= dt;
+          LN.r = (LN.fancy ? 110 : 80) + 140 * LN.oil;
+          var rr = LN.r * 0.85;
+          LN.prints.forEach(function (p) { if (!p.seen && Math.hypot(p.x - px, p.y - py) < rr) p.seen = 1; });
+          var three = LN.T.slice(0, 3), allFix = three.every(function (t) { return t.ok; });
+          LN.T.forEach(function (t) {
+            var dd = Math.hypot(t.x - px, t.y - py);
+            if (dd < rr) t.seen = 1;
+            if (t.ok) return;
+            if (t.kind === 'tag' && !allFix) { t.prog = 0; return; }
+            if (dd < 52) { t.prog += dt; if (t.prog >= 1.4) { t.ok = 1; LN.fixedN = three.filter(function (q) { return q.ok; }).length; try { showToast(t.kind === 'gate' ? 'PLANK PULLED - WATER IN THE RACE' : t.kind === 'riffles' ? 'RIFFLES BACK IN THE BOX' : t.kind === 'pick' ? 'PICK DUG OUT OF THE BRUSH' : 'MARLOW & SONS TAG FOUND'); } catch (e) {} } }
+            else t.prog = Math.max(0, t.prog - dt * 2);
+          });
+          if (LN.T[3].ok) { ST.flags.ch28_tag = 1; try { gold += 10; updateRes(); } catch (e) {} completeAct(); }
         }
       } else if (d.do === 'haul') {
         var H = ACT.haul;
@@ -12304,6 +12370,12 @@ window.B137 = (function () {
         else if (d.do === 'haul') { var HH = ACT.haul; if (HH) { var hmx = HH.x0 + HH.ux * HH.d, hmy = HH.y0 + HH.uy * HH.d; if (Math.hypot(px - hmx, py - hmy) > 190) t = { x: hmx, y: hmy, label: 'ORE CART' }; else t = { x: HH.x0 + HH.ux * HH.len, y: HH.y0 + HH.uy * HH.len, label: 'ORE SCALE' }; } }
         else if (d.do === 'weigh') { var WM = ACT.weigh; if (WM && talksDone()) { var nw = WM.ws.filter(function (q) { return !q.on; })[0]; t = Math.hypot(WM.x - px, WM.y - py) < 150 ? { x: WM.x, y: WM.y, label: 'LEVEL THE BEAM' } : { x: WM.x, y: WM.y, label: 'ASSAY SCALE' }; } }
         else if (d.do === 'stock') { var SM = ACT.stock; if (SM && talksDone()) { var miss = SM.need.filter(function (c) { return !SM.items.some(function (q) { return q.on && q.cat === c; }); })[0]; if (SM.over) t = { x: SM.x, y: SM.y + 50, label: 'OVER BUDGET - SWAP A CRATE' }; else if (SM.ready) t = { x: SM.cx, y: SM.cy, label: 'PAY AT THE COUNTER' }; else { var mi2 = SM.items.filter(function (q) { return q.cat === miss; })[0]; t = { x: mi2.x, y: mi2.y + 30, label: 'SHELF: ' + miss }; } } }
+        else if (d.do === 'lantern') { var LM = ACT.lantern; if (LM && talksDone()) {
+          var nT = LM.T.filter(function (q) { return !q.ok && (q.kind !== 'tag' || LM.T.slice(0, 3).every(function (z) { return z.ok; })); })[0];
+          if (LM.oil < 0.2 && Math.hypot(LM.camp.x - px, LM.camp.y - py) > 120) t = { x: LM.camp.x, y: LM.camp.y, label: 'REFILL THE LAMP' };
+          else if (nT && Math.hypot(nT.x - px, nT.y - py) < LM.r * 0.85) t = { x: nT.x, y: nT.y, label: nT.fix };
+          else if (nT) { var si = LM.T.indexOf(nT), seg = LM.prints.filter(function (q) { return q.seg <= si && !q.seen; })[0]; t = seg ? { x: seg.x, y: seg.y, label: 'HOBNAIL PRINTS' } : { x: nT.x, y: nT.y, label: nT.label }; }
+        } }
         else if (d.do === 'shovel') { var SV2 = ACT.shovel; if (SV2) t = { x: SV2.x, y: SV2.y, label: Math.hypot(SV2.x - px, SV2.y - py) < 130 ? 'SWING ON THE GREEN' : 'SLUICE BOX' }; }
         else if (d.do === 'race') { var RR = ACT.race; if (RR) { if (RR.cut < RR.len) { var rf = RR.cut / RR.len; t = { x: RR.sx + (RR.ex - RR.sx) * rf, y: RR.sy + (RR.ey - RR.sy) * rf, label: RR.cut > 0 ? 'RACE HEAD' : 'START THE RACE' }; } else t = { x: RR.sx, y: RR.sy, label: 'WATCH THE WATER' }; } }
         else if (d.do === 'sluice') { var sb = ACT.sluices.filter(function (q) { return !q.got; })[0]; if (sb) { if (sb.kind === 'gravel' && sb.held) { var bx = ACT.sluices.filter(function (q) { return q.kind === 'box'; })[0]; t = bx ? { x: bx.x, y: bx.y, label: 'RUN THE BOX' } : { x: sb.x, y: sb.y, label: sb.label }; } else t = { x: sb.x, y: sb.y, label: sb.label }; } }
@@ -12940,6 +13012,81 @@ window.B137 = (function () {
       c.fillText(H.spillT > 0 ? 'SACK SPILLED' : H.lean > 0.35 ? 'RIGHT SIDE HIGH - STAND ON IT' : H.lean < -0.35 ? 'LEFT SIDE HIGH - STAND ON IT' : 'LOAD LEVEL ' + H.sacks + '/6', 0, gy - 8);
       c.restore();
     }
+    function drawLantern(c, LN, camX0, camY0, Wv) {
+      var cx = px - camX0, cy = py - camY0, R = LN.r || 200, now = performance.now();
+      function lit(x, y) { var dd = Math.hypot(x - px, y - py); return Math.max(0, Math.min(1, (R - dd) / (R * 0.35))); }
+      var g1 = LN.T[0], g2 = LN.T[1];
+      /* sluice box (riffles missing until fished out) and the head race (dry until the gate plank is pulled) */
+      var bx = LN.camp.x + 200 - camX0, by = LN.camp.y + 40 - camY0;
+      try { drawSluiceBox(c, { got: 1 }, { got: g2.ok }, null, bx, by + 30); } catch (e) {}
+      c.save(); c.lineCap = 'round'; c.strokeStyle = '#8a6a3a'; c.lineWidth = 20; c.beginPath(); c.moveTo(bx, by); c.lineTo(g1.x - camX0, g1.y - camY0); c.stroke();
+      if (g1.ok) { c.strokeStyle = 'rgba(70,130,170,.85)'; c.lineWidth = 10; c.beginPath(); c.moveTo(bx, by); c.lineTo(g1.x - camX0, g1.y - camY0); c.stroke(); }
+      c.restore();
+      /* night */
+      c.save();
+      var gr = c.createRadialGradient(cx, cy - 20, R * 0.3, cx, cy - 20, R);
+      gr.addColorStop(0, 'rgba(10,12,30,0)'); gr.addColorStop(0.65, 'rgba(10,12,30,.55)'); gr.addColorStop(1, 'rgba(8,10,24,.94)');
+      c.fillStyle = gr; c.fillRect(cx - Wv - 600, cy - Wv - 600, 2 * Wv + 1200, 2 * Wv + 1200);
+      c.globalCompositeOperation = 'lighter';
+      var wg = c.createRadialGradient(cx, cy - 20, 0, cx, cy - 20, R * 0.8); wg.addColorStop(0, 'rgba(120,80,20,.22)'); wg.addColorStop(1, 'rgba(120,80,20,0)');
+      c.fillStyle = wg; c.beginPath(); c.arc(cx, cy - 20, R * 0.8, 0, 7); c.fill();
+      var fx = LN.camp.x - camX0, fy = LN.camp.y - camY0, fl = 0.85 + 0.15 * Math.sin(now / 90) * Math.sin(now / 37);
+      var fg = c.createRadialGradient(fx, fy, 0, fx, fy, 110 * fl); fg.addColorStop(0, 'rgba(255,150,50,.45)'); fg.addColorStop(1, 'rgba(255,120,40,0)');
+      c.fillStyle = fg; c.beginPath(); c.arc(fx, fy, 110 * fl, 0, 7); c.fill();
+      c.restore();
+      /* camp fire and oil can */
+      c.save(); c.translate(fx, fy);
+      c.fillStyle = '#4a2a10'; c.fillRect(-14, 2, 28, 5); c.fillRect(-10, -1, 20, 4);
+      c.fillStyle = '#f08a2a'; c.beginPath(); c.moveTo(-9, 2); c.quadraticCurveTo(0, -24 * fl, 9, 2); c.fill();
+      c.fillStyle = '#ffd860'; c.beginPath(); c.moveTo(-4, 2); c.quadraticCurveTo(0, -12 * fl, 4, 2); c.fill();
+      c.fillStyle = '#b8322a'; c.fillRect(20, -14, 12, 16); c.fillStyle = '#7a1a10'; c.fillRect(24, -18, 4, 4);
+      c.fillStyle = '#ffe9b8'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText(LN.fillT > 0 ? 'LAMP FILLED' : 'OIL CAN', 26, -24);
+      c.restore();
+      /* boot prints: only what the lamp reaches */
+      function boot(p, hob) {
+        var a = lit(p.x, p.y); if (a <= 0.02) return;
+        c.save(); c.globalAlpha = a; c.translate(p.x - camX0, p.y - camY0); c.rotate(p.a);
+        c.fillStyle = 'rgba(52,34,16,.85)'; c.beginPath(); c.ellipse(0, 0, 9, 4.2, 0, 0, 7); c.fill(); c.beginPath(); c.ellipse(-11, 0, 3.6, 3.4, 0, 0, 7); c.fill();
+        if (hob) { c.fillStyle = '#d8d0b8'; for (var i = 0; i < 6; i++) { var q = i * 1.05; c.fillRect(Math.cos(q) * 6 - 0.8, Math.sin(q) * 2.8 - 0.8, 1.6, 1.6); } }
+        c.restore();
+      }
+      LN.smooth.forEach(function (p) { boot(p, 0); });
+      LN.prints.forEach(function (p) { boot(p, 1); });
+      /* the tampered spots */
+      var allFix = LN.T.slice(0, 3).every(function (t) { return t.ok; });
+      LN.T.forEach(function (t) {
+        var a = Math.max(lit(t.x, t.y), t.ok ? 0.35 : 0); if (a <= 0.02) return;
+        c.save(); c.globalAlpha = a; c.translate(t.x - camX0, t.y - camY0);
+        c.fillStyle = 'rgba(20,14,6,.35)'; c.beginPath(); c.ellipse(0, 6, 26, 7, 0, 0, 7); c.fill();
+        if (t.kind === 'gate') {
+          c.fillStyle = '#5a3418'; c.fillRect(-22, -36, 6, 40); c.fillRect(16, -36, 6, 40);
+          if (!t.ok) { c.fillStyle = '#9a6a3a'; c.fillRect(-18, -22, 36, 18); c.strokeStyle = '#3a2410'; c.lineWidth = 1; c.strokeRect(-18, -22, 36, 18); }
+          else { c.fillStyle = 'rgba(70,130,170,.9)'; c.fillRect(-16, -6, 32, 10); c.save(); c.translate(30, 4); c.rotate(0.4); c.fillStyle = '#9a6a3a'; c.fillRect(-18, -4, 36, 8); c.restore(); }
+        } else if (t.kind === 'riffles') {
+          c.fillStyle = 'rgba(62,118,148,.6)'; c.beginPath(); c.ellipse(0, 0, 30, 10, 0, 0, 7); c.fill();
+          var n = t.ok ? 0 : 4; for (var i = 0; i < n; i++) { c.save(); c.translate(-14 + i * 9, -2 + (i % 2) * 4); c.rotate(-0.5 + i * 0.35); c.fillStyle = '#7a4a24'; c.fillRect(-12, -2, 24, 4); c.restore(); }
+        } else if (t.kind === 'pick') {
+          c.fillStyle = '#5a7a3a'; [[-14, -6, 12], [10, -8, 14], [0, -14, 11]].forEach(function (b) { c.beginPath(); c.arc(b[0], b[1], b[2], 0, 7); c.fill(); });
+          if (!t.ok) { c.strokeStyle = '#7a4a24'; c.lineWidth = 3; c.beginPath(); c.moveTo(-4, 4); c.lineTo(14, -18); c.stroke(); c.fillStyle = '#9aa4aa'; c.fillRect(8, -24, 14, 4); }
+        } else {
+          if (!t.ok) { c.fillStyle = '#e8dcc0'; c.fillRect(-8, -6, 16, 10); c.strokeStyle = '#8a6a3a'; c.strokeRect(-8, -6, 16, 10); c.fillStyle = '#2a1a0a'; c.font = 'bold 6px monospace'; c.textAlign = 'center'; c.fillText('M&S', 0, 1); }
+        }
+        c.font = 'bold 10px monospace'; c.textAlign = 'center';
+        c.fillStyle = t.ok ? '#8ad08a' : '#ffe9b8';
+        var lb = t.ok ? t.done : (t.kind === 'tag' && !allFix) ? 'SOMETHING SHINES - FIX THE CLAIM FIRST' : t.prog > 0 ? t.fix + ' ' + Math.round(t.prog / 1.4 * 100) + '%' : t.label;
+        c.fillText(lb, 0, -66);
+        if (!t.ok && t.prog > 0) { c.fillStyle = 'rgba(0,0,0,.6)'; c.fillRect(-26, -60, 52, 6); c.fillStyle = '#e8c040'; c.fillRect(-26, -60, 52 * Math.min(1, t.prog / 1.4), 6); }
+        c.restore();
+      });
+      /* lamp gauge over the player */
+      c.save(); c.translate(cx, cy + 34);
+      c.fillStyle = 'rgba(0,0,0,.6)'; c.fillRect(-32, -4, 64, 8);
+      c.fillStyle = LN.oil < 0.25 ? '#d8402a' : '#e8b040'; c.fillRect(-31, -3, 62 * LN.oil, 6);
+      c.font = 'bold 9px monospace'; c.textAlign = 'center'; var gt = LN.oil < 0.25 ? 'LOW OIL - BACK TO THE FIRE' : 'LAMP  ' + LN.fixedN + '/3 SET RIGHT', gw = c.measureText(gt).width + 8;
+      c.fillStyle = 'rgba(20,14,6,.75)'; c.fillRect(-gw / 2, 7, gw, 12); c.fillStyle = '#ffe9b8';
+      c.fillText(LN.oil < 0.25 ? 'LOW OIL - BACK TO THE FIRE' : 'LAMP  ' + LN.fixedN + '/3 SET RIGHT', 0, 16);
+      c.restore();
+    }
     function drawStock(c, SK, camX0, camY0) {
       var sx = SK.x - camX0, sy = SK.y - camY0;
       c.save();
@@ -13171,7 +13318,7 @@ window.B137 = (function () {
       if (ACT.kind === 'bar' && vis(scenePos())) drawStation(c, scenePos().x - camX, scenePos().y - camY);
       if (ACT.bar && vis(ACT.bar)) drawBar(c, ACT.bar, ACT.bar.x - camX, ACT.bar.y - camY);
       if (ACT.kind === 'gate' && vis(scenePos())) drawPrison(c, scenePos().x - camX, scenePos().y - camY);
-      if ((ACT.kind === 'pan' || ACT.kind === 'corners' || ACT.kind === 'sluice' || ACT.kind === 'race' || ACT.kind === 'shovel' || ACT.kind === 'haul') && vis(scenePos())) drawDiggings(c, scenePos().x - camX, scenePos().y - camY);
+      if ((ACT.kind === 'pan' || ACT.kind === 'corners' || ACT.kind === 'sluice' || ACT.kind === 'race' || ACT.kind === 'shovel' || ACT.kind === 'haul' || ACT.kind === 'lantern') && vis(scenePos())) drawDiggings(c, scenePos().x - camX, scenePos().y - camY);
       (ACT.pans || []).forEach(function (k) { if (vis(k)) drawPan(c, k, k.x - camX, k.y - camY); });
       if (ACT.kind === 'file' && vis(scenePos())) drawAssay(c, scenePos().x - camX, scenePos().y - camY);
       (ACT.files || []).forEach(function (k) { if (vis(k)) drawFile(c, k, k.x - camX, k.y - camY); });
@@ -13184,6 +13331,7 @@ window.B137 = (function () {
       if (ACT.kind === 'haul' && ACT.haul) drawHaul(c, ACT.haul, camX, camY);
       if (ACT.kind === 'weigh' && vis(scenePos())) drawAssay(c, scenePos().x - camX, scenePos().y - camY);
       if (ACT.kind === 'stock' && ACT.stock) drawStock(c, ACT.stock, camX, camY);
+      if (ACT.kind === 'lantern' && ACT.lantern && !ACT.done) drawLantern(c, ACT.lantern, camX, camY, Wv);
       if (ACT.kind === 'weigh' && ACT.weigh) drawWeigh(c, ACT.weigh, ACT.weigh.x - camX, ACT.weigh.y - camY, camX, camY);
       if (ACT.kind === 'shovel' && ACT.shovel) drawShovel(c, ACT.shovel, ACT.shovel.x - camX, ACT.shovel.y - camY);
       if (ACT.kind === 'sluice') {
@@ -13379,7 +13527,7 @@ window.B137 = (function () {
             ctx.fillStyle = '#6a4a2a'; ctx.fillRect(sx - 7, sy - 34, 14, 24);
           }
         } catch (e) {}
-        ctx.fillStyle = '#2a1a0a'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillStyle = (ACT.kind === 'lantern' && !ACT.done) ? '#ffe9b8' : '#2a1a0a'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText(ch.name.toUpperCase(), sx, sy - 62);
         ST.drawn++;
       });
@@ -13459,6 +13607,8 @@ window.B137 = (function () {
       haul: function () { var H = ACT.haul; if (!H) return null; var cx = H.x0 + H.ux * H.d, cy = H.y0 + H.uy * H.d; return { d: H.d, len: H.len, lean: H.lean, sacks: H.sacks, spills: H.spills, cx: cx, cy: cy, ux: H.ux, uy: H.uy, ex: H.x0 + H.ux * H.len, ey: H.y0 + H.uy * H.len, rut: H.rut }; },
       stock: function () { var K = ACT.stock; return K ? { budget: K.budget, total: K.total, prem: K.prem, ready: K.ready, over: K.over, need: K.need.slice(), cx: K.cx, cy: K.cy, items: K.items.map(function (q) { return { x: q.x, y: q.y, cat: q.cat, price: q.price, prem: q.prem, on: q.on }; }) } : null; },
       weigh: function () { var W = ACT.weigh; return W ? { target: W.target, sum: W.sum || 0, hold: W.hold, asked: W.asked, ws: W.ws.map(function (w) { return { x: w.x, y: w.y, v: w.v, on: w.on }; }), x: W.x, y: W.y } : null; },
+      lantern: function () { var L = ACT.lantern; return L ? { oil: L.oil, r: L.r, fancy: L.fancy, fixedN: L.fixedN, camp: { x: L.camp.x, y: L.camp.y }, seen: L.prints.filter(function (p) { return p.seen; }).length, prints: L.prints.length, T: L.T.map(function (t) { return { x: t.x, y: t.y, kind: t.kind, ok: t.ok, prog: t.prog, seen: t.seen }; }), path: L.prints.map(function (p) { return [p.x, p.y, p.seg]; }) } : null; },
+      lanternOil: function (v) { if (ACT.lantern) ACT.lantern.oil = v; },
       haulLean: function (v) { if (ACT.haul) ACT.haul.lean = v; },
       shovelPh: function (p) { if (ACT.shovel) ACT.shovel.ph = p; },
       setFlag: function (f) { ST.flags[f] = 1; setupAct(); },
@@ -13489,7 +13639,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer\'s offer for the claim goes out.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer\'s offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow\'s man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
