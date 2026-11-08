@@ -10046,10 +10046,8 @@ window.B137 = (function () {
       var c = por.getContext('2d'); c.clearRect(0, 0, por.width, por.height);
       c.fillStyle = '#e8d4a8'; c.fillRect(0, 0, por.width, por.height);
       try {
-        if (ch && typeof drawArt === 'function' && typeof personArt !== 'undefined' && personArt[ch.role || 'villager']) {
-          c.save(); c.translate(por.width / 2, por.height - 2); c.scale(0.95, 0.95); c.translate(-50, -88);
-          drawArt(c, personArt[ch.role || 'villager']); c.restore(); return;
-        }
+        var im = ch && window.ART137 && ART137.spr(ch.role || 'villager');
+        if (im) { c.drawImage(im, -24, -10, 138, 138); return; }
       } catch (e) {}
       c.fillStyle = '#e0b088'; c.beginPath(); c.arc(45, 40, 16, 0, 7); c.fill();
       c.fillStyle = '#6a4a2a'; c.fillRect(28, 58, 34, 40);
@@ -10136,9 +10134,11 @@ window.B137 = (function () {
         var sx = ch.x - camX, sy = ch.y - camY;
         if (Math.hypot(ch.x - px, ch.y - py) < 200) ch.face = px < ch.x ? -1 : 1;
         try {
-          if (typeof drawArt === 'function' && typeof personArt !== 'undefined' && personArt[ch.role]) {
-            ctx.save(); ctx.translate(sx, sy); ctx.scale((ch.face || 1) * 0.55, 0.55); ctx.translate(-50, -88);
-            drawArt(ctx, personArt[ch.role]); ctx.restore();
+          var im = window.ART137 && ART137.spr(ch.role || 'villager');
+          if (im && typeof dspr === 'function') dspr(ctx, im, sx, sy, 52, ch.face || 1);
+          else if (im) {
+            ctx.save(); ctx.translate(sx, sy); if ((ch.face || 1) < 0) ctx.scale(-1, 1);
+            ctx.drawImage(im, -28, -48, 56, 56); ctx.restore();
           } else {
             ctx.fillStyle = '#e0b088'; ctx.beginPath(); ctx.arc(sx, sy - 42, 7, 0, 7); ctx.fill();
             ctx.fillStyle = '#6a4a2a'; ctx.fillRect(sx - 7, sy - 34, 14, 24);
@@ -10237,7 +10237,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY — THE CLAIM';st.querySelector('small').textContent='A year-long frontier tale. Chapter 1: you arrive with a stake and a general. Folk teach you how this country works.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. Chapter 1: you arrive with a stake and a general. Folk teach you how this country works.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
