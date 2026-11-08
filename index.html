@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, then The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9866,7 +9866,8 @@ window.B137 = (function () {
       { id: 'gable', name: 'Ruth Gable', title: 'Turnkey', role: 'woman', age: 41, fem: 1, ox: -460, oy: -180, face: -1, from: 18 },
       { id: 'creed', name: 'Hank Creed', title: 'Prospector', role: 'farmer', age: 61, fem: 0, ox: 560, oy: -200, face: 1, from: 19 },
       { id: 'brann', name: 'Lottie Brann', title: 'Claim Partner', role: 'woman', age: 32, fem: 1, ox: -460, oy: -180, face: -1, from: 19 },
-      { id: 'calhoun', name: 'Wes Calhoun', title: 'Eureka Assay Clerk', role: 'merchant', age: 44, fem: 0, ox: 220, oy: -300, face: -1, from: 19 }
+      { id: 'calhoun', name: 'Wes Calhoun', title: 'Eureka Assay Clerk', role: 'merchant', age: 44, fem: 0, ox: 220, oy: -300, face: -1, from: 19 },
+      { id: 'quinn', name: 'Ada Quinn', title: 'County Recorder', role: 'woman', age: 39, fem: 1, ox: 560, oy: -200, face: 1, from: 20 }
     ];
 
     var CHAPTERS = [
@@ -9888,7 +9889,8 @@ window.B137 = (function () {
       { id: 16, title: 'The Draw', year: 1, need: ['baines', 'darrow', 'mercer16'] },
       { id: 17, title: 'The Station', year: 1, need: ['rowe', 'dunne', 'mercer17'] },
       { id: 18, title: 'The Gate', year: 1, need: ['holcomb', 'gable', 'mercer18'] },
-      { id: 19, title: 'The Diggings', year: 1, need: ['creed', 'brann', 'calhoun'] }
+      { id: 19, title: 'The Diggings', year: 1, need: ['creed', 'brann', 'calhoun'] },
+      { id: 20, title: 'The Assay', year: 1, need: ['calhoun20', 'creed20', 'quinn'] }
     ];
 
     var NODES = {
@@ -11360,6 +11362,70 @@ window.B137 = (function () {
         { t: "Understood.", next: 'end' }
       ] },
 
+      calhoun_ch20: { who: 'calhoun', say: "Back at my own counter. Three bars showed color out on the creek — I saw every pan. Now we do it the town way. Set the poke on my scale first. Then you sign the claim ledger, then Ada Quinn records it and the notice goes on the board. Talk doesn't file a claim. Paper does.", replies: [
+        { t: "Scale first. I'll set the poke down.", next: 'calhoun_ch20_scale', rel: { calhoun: 1 } },
+        { t: "Why not just write it now?", next: 'calhoun_ch20_why' },
+        { t: "Where's Lottie?", next: 'calhoun_ch20_lottie' }
+      ] },
+      calhoun_ch20_friend: { who: 'calhoun', say: "You walked those bars square, and I'll say so in the book. Three bars of color, all proved. Now the dust goes on my scale before anything else — weight first, then your name in the ledger, then Ada posts the notice. That's the order. Talking doesn't file it.", replies: [
+        { t: "Scale first. I'll set the poke down.", next: 'calhoun_ch20_scale', rel: { calhoun: 1 } },
+        { t: "Why not just write it now?", next: 'calhoun_ch20_why' },
+        { t: "Where's Lottie?", next: 'calhoun_ch20_lottie' }
+      ] },
+      calhoun_ch20_scale: { who: 'calhoun', say: "Walk up to the assay scale and set Creed's poke in the pan. I read the beam, I write the weight. Ledger's locked till then — I won't let a man sign for dust I haven't weighed.", replies: [
+        { t: "Weigh it, then.", next: 'end', flag: 'met_calhoun20', rel: { calhoun: 1 } }
+      ] },
+      calhoun_ch20_why: { who: 'calhoun', say: "Because half of Eureka would swear it saw color if it got them a claim. Weight goes in the book first. The ledger takes your name after. The notice goes up last. Out of order, it doesn't count.", replies: [
+        { t: "Weight, ledger, notice. Got it.", next: 'end', flag: 'met_calhoun20' }
+      ] },
+      calhoun_ch20_lottie: { who: 'calhoun', say: "Holding the ground. Somebody has to sit on those bars till the notice is posted, or the first drunk with a shovel calls it his. Brann stayed. Creed rode in with the dust. Scale's yours.", replies: [
+        { t: "Then let's not keep her waiting.", next: 'end', flag: 'met_calhoun20' }
+      ] },
+      calhoun_ch20_again: { who: 'calhoun', say: "Scale, ledger, notice board. In that order. I'll be at the counter.", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
+
+      creed_ch20: { who: 'creed', say: "Rode in with the poke in my shirt the whole way. Never held still so long in my life. Lottie stayed out on the creek to hold the bars — she's got the shotgun and the coffee. All three bars showed color. Now we get it on paper before somebody else does.", replies: [
+        { t: "Give me the poke. I'll take it to the scale.", next: 'creed_ch20_poke', rel: { creed: 1 } },
+        { t: "You think anyone followed us in?", next: 'creed_ch20_follow' },
+        { t: "What happens after it's filed?", next: 'creed_ch20_after' }
+      ] },
+      creed_ch20_friend: { who: 'creed', say: "Partner. You panned those bars like you'd been at it twenty years. Lottie's sitting on the claim with the shotgun till we get back. Poke's right here. Calhoun weighs it, you sign, the recorder posts it — then it's ours by law, not just by luck.", replies: [
+        { t: "Give me the poke. I'll take it to the scale.", next: 'creed_ch20_poke', rel: { creed: 1 } },
+        { t: "You think anyone followed us in?", next: 'creed_ch20_follow' },
+        { t: "What happens after it's filed?", next: 'creed_ch20_after' }
+      ] },
+      creed_ch20_poke: { who: 'creed', say: "Here. Don't spill a flake. Walk it to Calhoun's scale, then the ledger, then Ada's board. I'll stand right here where everybody on the street can see I'm not salting anything.", replies: [
+        { t: "Scale, ledger, board.", next: 'end', flag: 'met_creed20', rel: { creed: 1 } }
+      ] },
+      creed_ch20_follow: { who: 'creed', say: "Saloon emptied out to watch us ride past. Every man in there smells color. That's why we file it now, not after supper. Weigh it, sign it, post it.", replies: [
+        { t: "Then we file it now.", next: 'end', flag: 'met_creed20' }
+      ] },
+      creed_ch20_after: { who: 'creed', say: "After? Notice goes on the board and the county knows whose ground it is. Then we ride back to Lottie and mark the corners proper. One thing at a time — the scale's first.", replies: [
+        { t: "One thing at a time.", next: 'end', flag: 'met_creed20' }
+      ] },
+      creed_ch20_again: { who: 'creed', say: "Scale's waiting. Then the book. Then the board. Lottie's holding the bars.", replies: [
+        { t: "On it.", next: 'end' }
+      ] },
+
+      quinn: { who: 'quinn', say: "Ada Quinn, county recorder. I ride the circuit and Eureka's my busiest stop since the color came in. I stamp what Calhoun weighs and you sign — nothing else. When it's in the book, I nail the notice on the board out front. Until then it's just a story.", replies: [
+        { t: "Weight's coming. Then I'll sign.", next: 'quinn_sign', rel: { quinn: 1 } },
+        { t: "What does the notice do?", next: 'quinn_notice' },
+        { t: "Can you just stamp it now?", next: 'quinn_now' }
+      ] },
+      quinn_sign: { who: 'quinn', say: "Good. Scale first — Calhoun writes the weight. Then the claim ledger under the awning: your name, the creek, three bars. Then walk to the notice board and nail it up. I'll stamp it as it goes on.", replies: [
+        { t: "Scale, ledger, board.", next: 'end', flag: 'met_quinn', rel: { quinn: 1 } }
+      ] },
+      quinn_notice: { who: 'quinn', say: "It tells every jumper in the territory the ground is filed. Thirty days on that board and the claim stands in any court. Lottie Brann can put down her shotgun once it's posted — well, mostly.", replies: [
+        { t: "Then it goes up today.", next: 'end', flag: 'met_quinn' }
+      ] },
+      quinn_now: { who: 'quinn', say: "Stamp a blank page? The last recorder who did that is driving a freight wagon now. Weight, then signature, then notice. I'll be right here.", replies: [
+        { t: "In order, then.", next: 'end', flag: 'met_quinn' }
+      ] },
+      quinn_again: { who: 'quinn', say: "Scale, ledger, notice board. I stamp it when it goes up.", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
+
       judge_ch9: { who: 'judge', say: "I wrote it. Brant inked it. Now it belongs to Keene, and that's the hardest part of my job \u2014 letting go of a sentence and watching what a city does with it. The wagon's in the yard. Whatever it means to Dustwater, it means it by morning.", replies: [
         { t: "You wrote it fair.", next: 'end', flag: 'judge_ch9', rel: { judge: 1 } },
         { t: "The city will live with it.", next: 'end', flag: 'judge_ch9' }
@@ -11505,10 +11571,11 @@ window.B137 = (function () {
       16: { cast: ['baines', 'darrow', 'mercer'], at: 'draw', do: 'span', mark: 'THE DRAW' },
       17: { cast: ['rowe', 'dunne', 'mercer'], at: 'station', do: 'bar', mark: 'THE STATION' },
       18: { cast: ['holcomb', 'gable', 'mercer'], at: 'gate', do: 'gate', mark: 'THE GATE' },
-      19: { cast: ['creed', 'brann', 'calhoun'], at: 'diggings', do: 'pan', mark: 'THE DIGGINGS' }
+      19: { cast: ['creed', 'brann', 'calhoun'], at: 'diggings', do: 'pan', mark: 'THE DIGGINGS' },
+      20: { cast: ['calhoun', 'creed', 'quinn'], at: 'assay', do: 'file', mark: 'THE ASSAY' }
     };
     CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
-    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]] };
+    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]] };
     var GENERIC = [[-90, -30], [95, -10], [10, 105]];
     var DW = null;
     var EU = null;
@@ -11521,6 +11588,12 @@ window.B137 = (function () {
       if (EU) return EU;
       try { if (window.TOWN133) { var L = TOWN133.towns() || []; for (var i = 0; i < L.length; i++) if (L[i] && L[i].name === 'EUREKA') { EU = { x: L[i].x, y: L[i].y }; return EU; } } } catch (e) {}
       return { x: city.x - 13500, y: city.y - 14500 };
+    }
+    var AS191 = null;
+    function assayXY() {
+      if (AS191) return AS191;
+      try { if (window.TOWN133) { var L = TOWN133.towns() || []; for (var i = 0; i < L.length; i++) if (L[i] && L[i].name === 'EUREKA' && L[i].b) { var B = L[i].b.filter(function (q) { return q.k === 'assay'; })[0]; if (B) { AS191 = { x: B.x, y: B.y + 100, bx: B.x, by: B.y, real: 1 }; return AS191; } } } } catch (e) {}
+      var e = eureka(); return { x: e.x, y: e.y + 60, real: 0 };
     }
     function placeXY(at) {
       if (typeof city === 'undefined' || !city) return { x: px, y: py };
@@ -11540,12 +11613,13 @@ window.B137 = (function () {
       if (at === 'station') { var d10 = dustwater(); return { x: d10.x + 16400, y: d10.y + 500 }; }
       if (at === 'gate') { var d11 = dustwater(); return { x: d11.x + 18200, y: d11.y + 500 }; }
       if (at === 'diggings') { var e = eureka(); return { x: e.x + 1200, y: e.y + 800 }; }
+      if (at === 'assay') { var a = assayXY(); return { x: a.x, y: a.y }; }
       return { x: city.x, y: city.y };
     }
     function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
     function charId(need) { return String(need).replace(/\d+$/, ''); }
 
-    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, t: 0 };
+    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, t: 0 };
     function talksDone() { var d = chDef(); for (var i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return false; return true; }
     function actOK() {
       var d = chDef(); if (!d) return true;
@@ -11554,7 +11628,7 @@ window.B137 = (function () {
       if (d.do === 'arrive') { var s = scenePos(); if (Math.hypot(px - s.x, py - s.y) < 280) { ST.flags['act' + d.id] = 1; save(); return true; } return false; }
       return !!(ACT.id === d.id && ACT.done);
     }
-    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; }
+    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; }
     function setupAct() {
       var d = chDef(); clearAct(); ACT.id = d.id; ACT.kind = d.do || ''; ACT.done = !!ST.flags['act' + d.id];
       if (ACT.done || !ST.on) return;
@@ -11627,11 +11701,14 @@ window.B137 = (function () {
         });
       } else if (d.do === 'pan') {
         [[-320, 70], [20, -100], [340, 60]].forEach(function (o) { ACT.pans.push({ x: s.x + o[0], y: s.y + o[1], got: 0 }); });
+      } else if (d.do === 'file') {
+        [[-120, -20, 'scale', 'ASSAY SCALE'], [120, -30, 'ledger', 'CLAIM LEDGER'], [20, 80, 'notice', 'NOTICE BOARD']].forEach(function (o) { ACT.files.push({ x: s.x + o[0], y: s.y + o[1], kind: o[2], label: o[3], got: 0 }); });
       }
     }
     function completeAct() {
       var d = chDef(); if (!d) return;
       ACT.done = true; ST.flags['act' + d.id] = 1; ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.marks = []; ACT.coach = null;
+      (ACT.files || []).forEach(function (k) { k.got = 1; });
       if (ACT.wagon) ACT.wagon.ex = ACT.wagon.x;
       save(); finishChapter();
     }
@@ -11718,6 +11795,10 @@ window.B137 = (function () {
       } else if (d.do === 'pan') {
         ACT.pans.forEach(function (k) { if (!k.got && Math.hypot(k.x - px, k.y - py) < 56) k.got = 1; });
         if (ACT.pans.length && ACT.pans.every(function (k) { return k.got; })) completeAct();
+      } else if (d.do === 'file') {
+        var nf = ACT.files.filter(function (k) { return !k.got; })[0]; /* strictly in order: only the next step counts */
+        if (nf && Math.hypot(nf.x - px, nf.y - py) < 56) nf.got = 1;
+        if (ACT.files.length && ACT.files.every(function (k) { return k.got; })) completeAct();
       }
     }
     function moveFoes(dt, goal) {
@@ -11755,6 +11836,7 @@ window.B137 = (function () {
         else if (d.do === 'bar') { if (ACT.bar && !ACT.bar.cleared) t = { x: ACT.bar.x, y: ACT.bar.y, label: 'YARD BAR' }; else if (ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' }; }
         else if (d.do === 'gate') { var vg = ACT.foes.filter(function (q) { return q.hp > 0; })[0]; if (vg) t = { x: vg.x, y: vg.y, label: "VANE'S GANG" }; else if (ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' }; }
         else if (d.do === 'pan') { var pb = ACT.pans.filter(function (q) { return !q.got; })[0]; if (pb) t = { x: pb.x, y: pb.y, label: 'GRAVEL BAR' }; }
+        else if (d.do === 'file') { var fb = ACT.files.filter(function (q) { return !q.got; })[0]; if (fb) t = { x: fb.x, y: fb.y, label: fb.label }; }
         else if (d.do === 'wagon' && ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' };
         else if (d.do === 'arrive') t = { x: s.x, y: s.y, label: lab };
         if (t) return t;
@@ -12286,6 +12368,48 @@ window.B137 = (function () {
       c.fillText('THE DIGGINGS', sx, sy - 168);
       c.restore();
     }
+    function drawAssay(c, sx, sy) {
+      c.save();
+      c.fillStyle = 'rgba(150,110,70,.55)'; c.fillRect(sx - 250, sy - 62, 500, 14);
+      c.strokeStyle = 'rgba(90,60,30,.5)'; c.lineWidth = 1; for (var i = -250; i <= 250; i += 25) { c.beginPath(); c.moveTo(sx + i, sy - 62); c.lineTo(sx + i, sy - 48); c.stroke(); }
+      if (!(AS191 && AS191.real)) {
+        c.fillStyle = '#6a3e1c'; c.fillRect(sx - 62, sy - 120, 124, 22); c.fillStyle = '#f3e6c4'; c.font = 'bold 11px monospace'; c.textAlign = 'center'; c.fillText('ASSAY OFFICE', sx, sy - 104);
+        c.fillStyle = '#4a2a10'; c.fillRect(sx - 58, sy - 98, 4, 36); c.fillRect(sx + 54, sy - 98, 4, 36);
+      }
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center';
+      c.fillText('THE ASSAY', sx + 180, sy - 51);
+      c.restore();
+    }
+    function drawFile(c, k, sx, sy) {
+      var nx = (ACT.files || []).filter(function (q) { return !q.got; })[0], live = nx === k;
+      c.save(); c.translate(sx, sy);
+      c.fillStyle = 'rgba(40,25,10,.22)'; c.beginPath(); c.ellipse(0, 4, 30, 7, 0, 0, 7); c.fill();
+      if (k.kind === 'scale') {
+        c.fillStyle = '#7a4a24'; c.fillRect(-26, -18, 52, 18); c.fillStyle = '#5a3418'; c.fillRect(-22, 0, 5, 4); c.fillRect(17, 0, 5, 4);
+        c.fillStyle = '#b08a3a'; c.fillRect(-2, -48, 4, 30); c.fillRect(-8, -20, 16, 3);
+        var tilt = k.got ? 0.12 : 0; c.save(); c.translate(0, -48); c.rotate(tilt); c.fillRect(-22, -2, 44, 3);
+        c.strokeStyle = '#8a6a2a'; c.lineWidth = 1; [-20, 20].forEach(function (x) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x - 6, 12); c.moveTo(x, 0); c.lineTo(x + 6, 12); c.stroke(); c.fillStyle = '#c8a050'; c.beginPath(); c.ellipse(x, 13, 8, 2.6, 0, 0, 7); c.fill(); });
+        if (k.got) { c.fillStyle = '#e8c040'; c.beginPath(); c.ellipse(20, 11, 5, 2, 0, 0, 7); c.fill(); }
+        c.restore();
+      } else if (k.kind === 'ledger') {
+        c.fillStyle = '#b8322a'; c.beginPath(); c.moveTo(-34, -60); c.lineTo(34, -60); c.lineTo(30, -50); c.lineTo(-30, -50); c.closePath(); c.fill();
+        c.fillStyle = '#f3e6c4'; for (var j = -30; j < 30; j += 12) c.fillRect(j, -60, 6, 10);
+        c.fillStyle = '#4a2a10'; c.fillRect(-30, -50, 3, 32); c.fillRect(27, -50, 3, 32);
+        c.fillStyle = '#7a4a24'; c.fillRect(-28, -20, 56, 20); c.fillStyle = '#5a3418'; c.fillRect(-24, 0, 5, 4); c.fillRect(19, 0, 5, 4);
+        c.fillStyle = '#4a2a14'; c.fillRect(-18, -26, 36, 6); c.fillStyle = '#f8f0dc'; c.fillRect(-16, -30, 15, 8); c.fillRect(1, -30, 15, 8);
+        c.strokeStyle = '#8a7a62'; c.lineWidth = 0.6; for (var r = 0; r < 3; r++) { c.beginPath(); c.moveTo(-14, -28 + r * 2.2); c.lineTo(-3, -28 + r * 2.2); c.moveTo(3, -28 + r * 2.2); c.lineTo(14, -28 + r * 2.2); c.stroke(); }
+        if (k.got) { c.strokeStyle = '#1a2a6a'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(4, -23.5); c.quadraticCurveTo(8, -27, 10, -24); c.quadraticCurveTo(12, -22, 15, -25); c.stroke(); }
+      } else {
+        c.fillStyle = '#5a3418'; c.fillRect(-20, -58, 4, 58); c.fillRect(16, -58, 4, 58);
+        c.fillStyle = '#9a6a3a'; c.fillRect(-26, -62, 52, 34); c.strokeStyle = '#4a2a10'; c.lineWidth = 2; c.strokeRect(-26, -62, 52, 34);
+        c.fillStyle = '#e8dcc0'; c.fillRect(-20, -58, 12, 14); c.fillRect(9, -56, 11, 10);
+        if (k.got) { c.fillStyle = '#fff8e4'; c.fillRect(-6, -60, 16, 22); c.fillStyle = '#2a1a0a'; c.fillRect(-3, -56, 10, 1.5); c.fillRect(-3, -52, 10, 1); c.fillRect(-3, -49, 8, 1); c.fillStyle = '#b8322a'; c.beginPath(); c.arc(4, -43, 3, 0, 7); c.fill(); }
+      }
+      c.fillStyle = k.got ? '#2a6a2a' : live ? '#2a1a0a' : 'rgba(42,26,10,.5)'; c.font = 'bold 10px monospace'; c.textAlign = 'center';
+      var n = (ACT.files || []).indexOf(k) + 1, dn = { scale: 'WEIGHED', ledger: 'SIGNED', notice: 'POSTED' };
+      c.fillText(k.got ? dn[k.kind] : (n + ' \u00b7 ' + k.label), 0, -70);
+      c.restore();
+    }
     function drawPan(c, k, sx, sy) {
       c.save(); c.translate(sx, sy);
       c.fillStyle = '#c4a878'; c.beginPath(); c.ellipse(0, 12, 38, 14, 0, 0, 7); c.fill();
@@ -12334,6 +12458,8 @@ window.B137 = (function () {
       if (ACT.kind === 'gate' && vis(scenePos())) drawPrison(c, scenePos().x - camX, scenePos().y - camY);
       if (ACT.kind === 'pan' && vis(scenePos())) drawDiggings(c, scenePos().x - camX, scenePos().y - camY);
       (ACT.pans || []).forEach(function (k) { if (vis(k)) drawPan(c, k, k.x - camX, k.y - camY); });
+      if (ACT.kind === 'file' && vis(scenePos())) drawAssay(c, scenePos().x - camX, scenePos().y - camY);
+      (ACT.files || []).forEach(function (k) { if (vis(k)) drawFile(c, k, k.x - camX, k.y - camY); });
       if (ACT.ferry && vis(ACT.ferry)) drawFerry(c, ACT.ferry, ACT.ferry.x - camX, ACT.ferry.y - camY);
       if (ACT.wagon && vis(ACT.wagon) && window.ART153) try { ART153.wagonFig(c, ACT.wagon, ACT.wagon.x - camX, ACT.wagon.y - camY); c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('PRISON WAGON', ACT.wagon.x - camX, ACT.wagon.y - camY - 92); } catch (e) {}
       ACT.foes.forEach(function (f) { if (vis(f)) drawFoe(c, f, f.x - camX, f.y - camY); });
@@ -12567,7 +12693,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8], ch9done: !!ST.done[9], ch10done: !!ST.done[10], ch11done: !!ST.done[11], ch12done: !!ST.done[12], ch13done: !!ST.done[13], ch14done: !!ST.done[14], ch15done: !!ST.done[15], ch16done: !!ST.done[16], ch17done: !!ST.done[17], ch18done: !!ST.done[18], ch19done: !!ST.done[19] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8], ch9done: !!ST.done[9], ch10done: !!ST.done[10], ch11done: !!ST.done[11], ch12done: !!ST.done[12], ch13done: !!ST.done[13], ch14done: !!ST.done[14], ch15done: !!ST.done[15], ch16done: !!ST.done[16], ch17done: !!ST.done[17], ch18done: !!ST.done[18], ch19done: !!ST.done[19], ch20done: !!ST.done[20] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
@@ -12591,7 +12717,7 @@ window.B137 = (function () {
       folkNode: folkNode,
       modeBtn: function () { return !!document.querySelector('.mode[data-mode=story]'); },
       dlgOn: function () { return dlg.style.display === 'block'; },
-      scene: function () { var d = chDef(), p = scenePos(); return { at: d.at, x: p.x, y: p.y, label: d.mark, cast: (d.cast || []).slice(), do: d.do, actDone: actOK(), n: ST.chars.length, ids: ST.chars.map(function (c) { return c.id; }), fromHome: (typeof city !== 'undefined' && city) ? Math.hypot(p.x - city.x, p.y - city.y) : 0, cattle: ACT.cattle.length, foes: ACT.foes.filter(function (f) { return f.hp > 0; }).length, foeNames: ACT.foes.map(function (f) { return f.name; }), stakes: ACT.stakes.length, pans: (ACT.pans || []).length, pansDetail: (ACT.pans || []).map(function (k) { return { x: k.x, y: k.y, got: !!k.got }; }), marks: ACT.marks.length, coach: !!ACT.coach, wagon: ACT.wagon ? { x: ACT.wagon.x, y: ACT.wagon.y, ex: ACT.wagon.ex } : null, ferry: ACT.ferry ? { x: ACT.ferry.x, y: ACT.ferry.y, ramp: !!ACT.ferry.ramp } : null, log: ACT.log ? { x: ACT.log.x, y: ACT.log.y, cleared: !!ACT.log.cleared } : null, slide: ACT.slide ? { x: ACT.slide.x, y: ACT.slide.y, cleared: !!ACT.slide.cleared } : null, pump: ACT.pump ? { x: ACT.pump.x, y: ACT.pump.y, cleared: !!ACT.pump.cleared } : null, wire: ACT.wire ? { x: ACT.wire.x, y: ACT.wire.y, cleared: !!ACT.wire.cleared } : null, span: ACT.span ? { x: ACT.span.x, y: ACT.span.y, cleared: !!ACT.span.cleared } : null, bar: ACT.bar ? { x: ACT.bar.x, y: ACT.bar.y, cleared: !!ACT.bar.cleared } : null }; },
+      scene: function () { var d = chDef(), p = scenePos(); return { at: d.at, x: p.x, y: p.y, label: d.mark, cast: (d.cast || []).slice(), do: d.do, actDone: actOK(), n: ST.chars.length, ids: ST.chars.map(function (c) { return c.id; }), fromHome: (typeof city !== 'undefined' && city) ? Math.hypot(p.x - city.x, p.y - city.y) : 0, cattle: ACT.cattle.length, foes: ACT.foes.filter(function (f) { return f.hp > 0; }).length, foeNames: ACT.foes.map(function (f) { return f.name; }), stakes: ACT.stakes.length, pans: (ACT.pans || []).length, pansDetail: (ACT.pans || []).map(function (k) { return { x: k.x, y: k.y, got: !!k.got }; }), files: (ACT.files || []).length, filesDetail: (ACT.files || []).map(function (k) { return { kind: k.kind, label: k.label, got: !!k.got, x: k.x, y: k.y }; }), marks: ACT.marks.length, coach: !!ACT.coach, wagon: ACT.wagon ? { x: ACT.wagon.x, y: ACT.wagon.y, ex: ACT.wagon.ex } : null, ferry: ACT.ferry ? { x: ACT.ferry.x, y: ACT.ferry.y, ramp: !!ACT.ferry.ramp } : null, log: ACT.log ? { x: ACT.log.x, y: ACT.log.y, cleared: !!ACT.log.cleared } : null, slide: ACT.slide ? { x: ACT.slide.x, y: ACT.slide.y, cleared: !!ACT.slide.cleared } : null, pump: ACT.pump ? { x: ACT.pump.x, y: ACT.pump.y, cleared: !!ACT.pump.cleared } : null, wire: ACT.wire ? { x: ACT.wire.x, y: ACT.wire.y, cleared: !!ACT.wire.cleared } : null, span: ACT.span ? { x: ACT.span.x, y: ACT.span.y, cleared: !!ACT.span.cleared } : null, bar: ACT.bar ? { x: ACT.bar.x, y: ACT.bar.y, cleared: !!ACT.bar.cleared } : null }; },
       marker: function () { var m = marker(); return m ? { x: m.x, y: m.y, label: m.label } : null; },
       gotoScene: function () { var p = scenePos(); px = p.x; py = p.y + 40; try { moveId = null; targetX = px; targetY = py; } catch (e) {} actOK(); return { x: px, y: py }; },
       finishAct: function () { var d = chDef(); if (!d || d.do === 'meet') return actOK(); if (d.do === 'arrive') { ST.flags['act' + d.id] = 1; save(); finishChapter(); return true; } if (ACT.id !== d.id) setupAct(); completeAct(); return true; },
@@ -12621,7 +12747,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, then The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -12641,5 +12767,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --></body>
 </html>
