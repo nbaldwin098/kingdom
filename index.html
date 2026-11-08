@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9896,7 +9896,8 @@ window.B137 = (function () {
       { id: 21, title: 'The Corners', year: 1, need: ['brann21', 'creed21', 'pike'] },
       { id: 22, title: 'The Sluice', year: 1, need: ['brann22', 'creed22', 'bale'] },
       { id: 23, title: 'The Race', year: 1, need: ['brann23', 'creed23'] },
-      { id: 24, title: 'The Shovel', year: 1, need: ['brann24', 'creed24'] }
+      { id: 24, title: 'The Shovel', year: 1, need: ['brann24', 'creed24'] },
+      { id: 25, title: 'The Haul', year: 1, need: ['brann25', 'creed25'] }
     ];
 
     var NODES = {
@@ -11634,6 +11635,42 @@ window.B137 = (function () {
         { t: "Right.", next: 'end' }
       ] },
 
+      brann_ch25: { who: 'brann', say: "That's color in the riffles. Six sacks of black sand and gold, and the only scale that counts is the Eureka ore scale down the road. The grade is rutted. Lean on the load wrong and it spills.", replies: [
+        { t: "How do I keep it up?", next: 'brann_ch25_how', rel: { brann: 1 } },
+        { t: "Let's haul it.", next: 'brann_ch25_set', rel: { brann: 1 } }
+      ] },
+      brann_ch25_friend: { who: 'brann', say: "Partner, the sacks are tied on and the mule's ready. Walk beside the cart to the scale house and keep the load level.", replies: [
+        { t: "How do I keep it up?", next: 'brann_ch25_how', rel: { brann: 1 } },
+        { t: "Let's haul it.", next: 'brann_ch25_set', rel: { brann: 1 } }
+      ] },
+      brann_ch25_how: { who: 'brann', say: "Stay at the mule's shoulder and the cart rolls. When the load tips, step to the high side and lean your weight on it. Watch the gauge over the cart.", replies: [
+        { t: "High side. Got it.", next: 'end', flag: 'met_brann25' }
+      ] },
+      brann_ch25_set: { who: 'brann', say: "Walk beside the cart, stay on the high side when she leans. Don't let more than a sack or two go.", replies: [
+        { t: "To the scale.", next: 'end', flag: 'met_brann25' }
+      ] },
+      brann_ch25_again: { who: 'brann', say: "Beside the cart, high side when it tips. Scale house is down the Eureka road.", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
+
+      creed_ch25: { who: 'creed', say: "Six sacks, tied and ready. Road to Eureka's all ruts and washouts. The load shifts, and it'll throw a sack if you let it lean. Stand on the high side and lean on it. I've done it with a drunk mule.", replies: [
+        { t: "High side, then.", next: 'creed_ch25_set', rel: { creed: 1 } },
+        { t: "Can't I just rush it?", next: 'creed_ch25_fast' }
+      ] },
+      creed_ch25_friend: { who: 'creed', say: "Partner. Mule's hitched, sacks are lashed. Walk with her and lean on the high side when she tips.", replies: [
+        { t: "High side, then.", next: 'creed_ch25_set', rel: { creed: 1 } },
+        { t: "Can't I just rush it?", next: 'creed_ch25_fast' }
+      ] },
+      creed_ch25_set: { who: 'creed', say: "That's it. Keep her level and she'll roll right onto the scale.", replies: [
+        { t: "Level to the scale.", next: 'end', flag: 'met_creed25', rel: { creed: 1 } }
+      ] },
+      creed_ch25_fast: { who: 'creed', say: "You rush, she tips. Slow and level beats fast and spilled.", replies: [
+        { t: "Slow and level.", next: 'end', flag: 'met_creed25' }
+      ] },
+      creed_ch25_again: { who: 'creed', say: "Walk beside her, lean high. The scale's at the end of the road.", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
+
       judge_ch9: { who: 'judge', say: "I wrote it. Brant inked it. Now it belongs to Keene, and that's the hardest part of my job \u2014 letting go of a sentence and watching what a city does with it. The wagon's in the yard. Whatever it means to Dustwater, it means it by morning.", replies: [
         { t: "You wrote it fair.", next: 'end', flag: 'judge_ch9', rel: { judge: 1 } },
         { t: "The city will live with it.", next: 'end', flag: 'judge_ch9' }
@@ -11784,10 +11821,11 @@ window.B137 = (function () {
       21: { cast: ['brann', 'creed', 'pike'], at: 'diggings', do: 'corners', mark: 'THE CORNERS' },
       22: { cast: ['brann', 'creed', 'bale'], at: 'diggings', do: 'sluice', mark: 'THE SLUICE' },
       23: { cast: ['brann', 'creed'], at: 'diggings', do: 'race', mark: 'THE RACE' },
-      24: { cast: ['brann', 'creed'], at: 'diggings', do: 'shovel', mark: 'THE SHOVEL' }
+      24: { cast: ['brann', 'creed'], at: 'diggings', do: 'shovel', mark: 'THE SHOVEL' },
+      25: { cast: ['brann', 'creed'], at: 'diggings', do: 'haul', mark: 'THE HAUL' }
     };
     CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
-    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]] };
+    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]] };
     var GENERIC = [[-90, -30], [95, -10], [10, 105]];
     var DW = null;
     var EU = null;
@@ -11831,7 +11869,7 @@ window.B137 = (function () {
     function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
     function charId(need) { return String(need).replace(/\d+$/, ''); }
 
-    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, t: 0 };
+    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, t: 0 };
     function talksDone() { var d = chDef(); for (var i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return false; return true; }
     function actOK() {
       var d = chDef(); if (!d) return true;
@@ -11840,7 +11878,7 @@ window.B137 = (function () {
       if (d.do === 'arrive') { var s = scenePos(); if (Math.hypot(px - s.x, py - s.y) < 280) { ST.flags['act' + d.id] = 1; save(); return true; } return false; }
       return !!(ACT.id === d.id && ACT.done);
     }
-    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; }
+    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; }
     function setupAct() {
       var d = chDef(); clearAct(); ACT.id = d.id; ACT.kind = d.do || ''; ACT.done = !!ST.flags['act' + d.id];
       if (ACT.done || !ST.on) return;
@@ -11922,6 +11960,10 @@ window.B137 = (function () {
       } else if (d.do === 'race') {
         var rx0 = s.x + 50, ry0 = s.y + 160, rx1 = s.x - 300, ry1 = s.y - 200;
         ACT.race = { x: rx0, y: ry0, sx: rx0, sy: ry0, ex: rx1, ey: ry1, len: Math.hypot(rx1 - rx0, ry1 - ry0), cut: 0, flow: 0 };
+      } else if (d.do === 'haul') {
+        var hdx = -1200, hdy = -800, hl = Math.hypot(hdx, hdy);
+        ACT.haul = { x: s.x + 60, y: s.y + 120, ux: hdx / hl, uy: hdy / hl, len: 820, d: 0, lean: 0, sacks: 6, spills: 0, spillT: 0, rut: 0, go: 0 };
+        ACT.haul.x0 = ACT.haul.x; ACT.haul.y0 = ACT.haul.y;
       } else if (d.do === 'shovel') {
         ACT.shovel = { x: s.x + 50, y: s.y + 160, n: 0, need: 10, miss: 0, ph: 0, flash: 0, flashT: 0, pile: 1 };
       }
@@ -11934,6 +11976,7 @@ window.B137 = (function () {
       (ACT.sluices || []).forEach(function (k) { k.got = 1; if (k.kind === 'gravel') k.held = 1; });
       if (ACT.race) { ACT.race.cut = ACT.race.len; ACT.race.flow = ACT.race.len; }
       if (ACT.shovel) ACT.shovel.n = ACT.shovel.need;
+      if (ACT.haul) ACT.haul.d = ACT.haul.len;
       if (ACT.wagon) ACT.wagon.ex = ACT.wagon.x;
       save(); finishChapter();
     }
@@ -12060,6 +12103,21 @@ window.B137 = (function () {
           }
         }
         if (ACT.sluices.length && ACT.sluices.every(function (k) { return k.got; })) completeAct();
+      } else if (d.do === 'haul') {
+        var H = ACT.haul;
+        if (H && H.d < H.len) {
+          var hcx = H.x0 + H.ux * H.d, hcy = H.y0 + H.uy * H.d;
+          var ax = (px - hcx) * H.ux + (py - hcy) * H.uy, lat = -(px - hcx) * H.uy + (py - hcy) * H.ux;
+          var near = Math.hypot(px - hcx, py - hcy) < 190 && ax > -60;
+          H.go = near ? 1 : 0;
+          if (near) H.d = Math.min(H.len, H.d + 95 * dt);
+          H.rut = 0.55 * Math.sin(H.d / 70) + 0.35 * Math.sin(H.d / 23 + 1);
+          var cnt = near ? Math.max(-1, Math.min(1, lat / 45)) * 1.5 : 0;
+          H.lean += (H.rut * 0.9 - cnt * Math.sign(H.rut || 1) * 0 - cnt) * dt;
+          if (Math.abs(H.lean) > 1) { H.sacks = Math.max(1, H.sacks - 1); H.spills++; H.spillT = 0.8; H.lean = 0; }
+          if (H.spillT > 0) H.spillT -= dt;
+          if (H.d >= H.len) completeAct();
+        }
       } else if (d.do === 'shovel') {
         var SV = ACT.shovel;
         if (SV) { SV.ph += dt * 2.4; if (SV.flashT > 0) SV.flashT -= dt; }
@@ -12124,6 +12182,7 @@ window.B137 = (function () {
         else if (d.do === 'pan') { var pb = ACT.pans.filter(function (q) { return !q.got; })[0]; if (pb) t = { x: pb.x, y: pb.y, label: 'GRAVEL BAR' }; }
         else if (d.do === 'file') { var fb = ACT.files.filter(function (q) { return !q.got; })[0]; if (fb) t = { x: fb.x, y: fb.y, label: fb.label }; }
         else if (d.do === 'corners') { var pc = ACT.corners.filter(function (q) { return q.was && !q.up; })[0]; var fc = ACT.corners.filter(function (q) { return !q.up; })[0]; var kc = pc || fc; if (kc) t = { x: kc.x, y: kc.y, label: pc ? 'PULLED POST' : kc.label }; }
+        else if (d.do === 'haul') { var HH = ACT.haul; if (HH) { var hmx = HH.x0 + HH.ux * HH.d, hmy = HH.y0 + HH.uy * HH.d; if (Math.hypot(px - hmx, py - hmy) > 190) t = { x: hmx, y: hmy, label: 'ORE CART' }; else t = { x: HH.x0 + HH.ux * HH.len, y: HH.y0 + HH.uy * HH.len, label: 'ORE SCALE' }; } }
         else if (d.do === 'shovel') { var SV2 = ACT.shovel; if (SV2) t = { x: SV2.x, y: SV2.y, label: Math.hypot(SV2.x - px, SV2.y - py) < 130 ? 'SWING ON THE GREEN' : 'SLUICE BOX' }; }
         else if (d.do === 'race') { var RR = ACT.race; if (RR) { if (RR.cut < RR.len) { var rf = RR.cut / RR.len; t = { x: RR.sx + (RR.ex - RR.sx) * rf, y: RR.sy + (RR.ey - RR.sy) * rf, label: RR.cut > 0 ? 'RACE HEAD' : 'START THE RACE' }; } else t = { x: RR.sx, y: RR.sy, label: 'WATCH THE WATER' }; } }
         else if (d.do === 'sluice') { var sb = ACT.sluices.filter(function (q) { return !q.got; })[0]; if (sb) { if (sb.kind === 'gravel' && sb.held) { var bx = ACT.sluices.filter(function (q) { return q.kind === 'box'; })[0]; t = bx ? { x: bx.x, y: bx.y, label: 'RUN THE BOX' } : { x: sb.x, y: sb.y, label: sb.label }; } else t = { x: sb.x, y: sb.y, label: sb.label }; } }
@@ -12725,6 +12784,41 @@ window.B137 = (function () {
       c.fillText(R.flow >= R.len ? 'WATER IN' : (R.cut >= R.len ? 'WATER COMING' : 'HEAD RACE'), bx, by - 22);
       c.restore();
     }
+    function drawHaul(c, H, camX0, camY0) {
+      var ex = H.x0 + H.ux * H.len - camX0, ey = H.y0 + H.uy * H.len - camY0, bx = H.x0 - camX0, by = H.y0 - camY0;
+      c.save(); c.lineCap = 'round';
+      c.strokeStyle = '#b89a68'; c.lineWidth = 46; c.beginPath(); c.moveTo(bx, by); c.lineTo(ex, ey); c.stroke();
+      c.strokeStyle = '#8a6c40'; c.lineWidth = 3;
+      [-12, 12].forEach(function (o) { c.beginPath(); c.moveTo(bx - H.uy * o, by + H.ux * o); c.lineTo(ex - H.uy * o, ey + H.ux * o); c.stroke(); });
+      c.restore();
+      c.save(); c.translate(ex, ey);
+      c.fillStyle = 'rgba(40,25,10,.25)'; c.beginPath(); c.ellipse(0, 18, 46, 12, 0, 0, 7); c.fill();
+      c.fillStyle = '#6a4a28'; c.fillRect(-36, -4, 72, 18);
+      c.fillStyle = '#8a8a8a'; c.fillRect(-30, -10, 60, 8);
+      c.fillStyle = '#4a3418'; c.fillRect(-4, -40, 8, 30);
+      c.fillStyle = '#d8b030'; c.fillRect(-26, -48, 52, 8);
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('EUREKA ORE SCALE', 0, -56);
+      c.restore();
+      var cx = H.x0 + H.ux * H.d - camX0, cy = H.y0 + H.uy * H.d - camY0;
+      c.save(); c.translate(cx, cy);
+      c.fillStyle = 'rgba(40,25,10,.25)'; c.beginPath(); c.ellipse(0, 22, 36, 9, 0, 0, 7); c.fill();
+      c.fillStyle = '#3a2410'; c.beginPath(); c.arc(-18, 18, 9, 0, 7); c.arc(18, 18, 9, 0, 7); c.fill();
+      c.fillStyle = '#c8a878'; c.beginPath(); c.arc(-18, 18, 3, 0, 7); c.arc(18, 18, 3, 0, 7); c.fill();
+      c.save(); c.rotate(-H.lean * 0.35);
+      c.fillStyle = '#7a4a24'; c.fillRect(-30, -4, 60, 18);
+      for (var i = 0; i < H.sacks; i++) { c.fillStyle = i % 2 ? '#d8c490' : '#c8b078'; c.beginPath(); c.ellipse(-20 + (i % 3) * 20, -10 - Math.floor(i / 3) * 12, 10, 8, 0, 0, 7); c.fill(); }
+      c.restore();
+      c.fillStyle = '#8a5a32'; c.beginPath(); c.ellipse(-H.ux * 0 - 46 * Math.sign(H.ux || 1) * 0 + 44 * H.ux, 44 * H.uy - 4, 14, 10, 0, 0, 7); c.fill();
+      var gx = -40, gy = -52, gw = 80, gh = 10;
+      c.fillStyle = 'rgba(30,18,6,.85)'; c.fillRect(gx - 3, gy - 3, gw + 6, gh + 6);
+      c.fillStyle = '#9a3a2a'; c.fillRect(gx, gy, gw, gh);
+      c.fillStyle = '#3aa03a'; c.fillRect(gx + gw * 0.3, gy, gw * 0.4, gh);
+      c.fillStyle = '#f4ecd0'; c.fillRect(gx + gw * (0.5 + 0.5 * Math.max(-1, Math.min(1, H.lean))) - 2, gy - 4, 4, gh + 8);
+      c.font = 'bold 10px monospace'; c.textAlign = 'center';
+      c.fillStyle = H.spillT > 0 ? '#b8322a' : '#2a1a0a';
+      c.fillText(H.spillT > 0 ? 'SACK SPILLED' : H.lean > 0.35 ? 'RIGHT SIDE HIGH - STAND ON IT' : H.lean < -0.35 ? 'LEFT SIDE HIGH - STAND ON IT' : 'LOAD LEVEL ' + H.sacks + '/6', 0, gy - 8);
+      c.restore();
+    }
     function drawShovel(c, SV, sx, sy) {
       drawSluiceBox(c, { got: 1 }, { got: 1 }, null, sx, sy + 30);
       var run = SV.n / SV.need;
@@ -12901,7 +12995,7 @@ window.B137 = (function () {
       if (ACT.kind === 'bar' && vis(scenePos())) drawStation(c, scenePos().x - camX, scenePos().y - camY);
       if (ACT.bar && vis(ACT.bar)) drawBar(c, ACT.bar, ACT.bar.x - camX, ACT.bar.y - camY);
       if (ACT.kind === 'gate' && vis(scenePos())) drawPrison(c, scenePos().x - camX, scenePos().y - camY);
-      if ((ACT.kind === 'pan' || ACT.kind === 'corners' || ACT.kind === 'sluice' || ACT.kind === 'race' || ACT.kind === 'shovel') && vis(scenePos())) drawDiggings(c, scenePos().x - camX, scenePos().y - camY);
+      if ((ACT.kind === 'pan' || ACT.kind === 'corners' || ACT.kind === 'sluice' || ACT.kind === 'race' || ACT.kind === 'shovel' || ACT.kind === 'haul') && vis(scenePos())) drawDiggings(c, scenePos().x - camX, scenePos().y - camY);
       (ACT.pans || []).forEach(function (k) { if (vis(k)) drawPan(c, k, k.x - camX, k.y - camY); });
       if (ACT.kind === 'file' && vis(scenePos())) drawAssay(c, scenePos().x - camX, scenePos().y - camY);
       (ACT.files || []).forEach(function (k) { if (vis(k)) drawFile(c, k, k.x - camX, k.y - camY); });
@@ -12911,6 +13005,7 @@ window.B137 = (function () {
         drawSluiceBox(c, bxR, { got: 1 }, null, bxR.x - camX, bxR.y - camY + 30);
         drawRace(c, ACT.race, camX, camY);
       }
+      if (ACT.kind === 'haul' && ACT.haul) drawHaul(c, ACT.haul, camX, camY);
       if (ACT.kind === 'shovel' && ACT.shovel) drawShovel(c, ACT.shovel, ACT.shovel.x - camX, ACT.shovel.y - camY);
       if (ACT.kind === 'sluice') {
         var boxS = (ACT.sluices || []).filter(function (q) { return q.kind === 'box'; })[0];
@@ -13177,11 +13272,13 @@ window.B137 = (function () {
       folkNode: folkNode,
       modeBtn: function () { return !!document.querySelector('.mode[data-mode=story]'); },
       dlgOn: function () { return dlg.style.display === 'block'; },
-      scene: function () { var d = chDef(), p = scenePos(); return { at: d.at, x: p.x, y: p.y, label: d.mark, cast: (d.cast || []).slice(), do: d.do, actDone: actOK(), n: ST.chars.length, ids: ST.chars.map(function (c) { return c.id; }), fromHome: (typeof city !== 'undefined' && city) ? Math.hypot(p.x - city.x, p.y - city.y) : 0, cattle: ACT.cattle.length, shovel: ACT.shovel ? { n: ACT.shovel.n, need: ACT.shovel.need, miss: ACT.shovel.miss } : null, race: ACT.race ? { cut: ACT.race.cut, len: ACT.race.len, flow: ACT.race.flow, sx: ACT.race.sx, sy: ACT.race.sy, ex: ACT.race.ex, ey: ACT.race.ey } : null, foes: ACT.foes.filter(function (f) { return f.hp > 0; }).length, foeNames: ACT.foes.map(function (f) { return f.name; }), stakes: ACT.stakes.length, pans: (ACT.pans || []).length, pansDetail: (ACT.pans || []).map(function (k) { return { x: k.x, y: k.y, got: !!k.got }; }), files: (ACT.files || []).length, filesDetail: (ACT.files || []).map(function (k) { return { kind: k.kind, label: k.label, got: !!k.got, x: k.x, y: k.y }; }), corners: (ACT.corners || []).length, cornersDetail: (ACT.corners || []).map(function (k) { return { x: k.x, y: k.y, up: !!k.up, was: !!k.was, label: k.label }; }), sluices: (ACT.sluices || []).length, sluicesDetail: (ACT.sluices || []).map(function (k) { return { kind: k.kind, label: k.label, got: !!k.got, held: !!k.held, x: k.x, y: k.y }; }), marks: ACT.marks.length, coach: !!ACT.coach, wagon: ACT.wagon ? { x: ACT.wagon.x, y: ACT.wagon.y, ex: ACT.wagon.ex } : null, ferry: ACT.ferry ? { x: ACT.ferry.x, y: ACT.ferry.y, ramp: !!ACT.ferry.ramp } : null, log: ACT.log ? { x: ACT.log.x, y: ACT.log.y, cleared: !!ACT.log.cleared } : null, slide: ACT.slide ? { x: ACT.slide.x, y: ACT.slide.y, cleared: !!ACT.slide.cleared } : null, pump: ACT.pump ? { x: ACT.pump.x, y: ACT.pump.y, cleared: !!ACT.pump.cleared } : null, wire: ACT.wire ? { x: ACT.wire.x, y: ACT.wire.y, cleared: !!ACT.wire.cleared } : null, span: ACT.span ? { x: ACT.span.x, y: ACT.span.y, cleared: !!ACT.span.cleared } : null, bar: ACT.bar ? { x: ACT.bar.x, y: ACT.bar.y, cleared: !!ACT.bar.cleared } : null }; },
+      scene: function () { var d = chDef(), p = scenePos(); return { at: d.at, x: p.x, y: p.y, label: d.mark, cast: (d.cast || []).slice(), do: d.do, actDone: actOK(), n: ST.chars.length, ids: ST.chars.map(function (c) { return c.id; }), fromHome: (typeof city !== 'undefined' && city) ? Math.hypot(p.x - city.x, p.y - city.y) : 0, cattle: ACT.cattle.length, haulState: ACT.haul ? { d: ACT.haul.d, len: ACT.haul.len, sacks: ACT.haul.sacks, spills: ACT.haul.spills } : null, shovel: ACT.shovel ? { n: ACT.shovel.n, need: ACT.shovel.need, miss: ACT.shovel.miss } : null, race: ACT.race ? { cut: ACT.race.cut, len: ACT.race.len, flow: ACT.race.flow, sx: ACT.race.sx, sy: ACT.race.sy, ex: ACT.race.ex, ey: ACT.race.ey } : null, foes: ACT.foes.filter(function (f) { return f.hp > 0; }).length, foeNames: ACT.foes.map(function (f) { return f.name; }), stakes: ACT.stakes.length, pans: (ACT.pans || []).length, pansDetail: (ACT.pans || []).map(function (k) { return { x: k.x, y: k.y, got: !!k.got }; }), files: (ACT.files || []).length, filesDetail: (ACT.files || []).map(function (k) { return { kind: k.kind, label: k.label, got: !!k.got, x: k.x, y: k.y }; }), corners: (ACT.corners || []).length, cornersDetail: (ACT.corners || []).map(function (k) { return { x: k.x, y: k.y, up: !!k.up, was: !!k.was, label: k.label }; }), sluices: (ACT.sluices || []).length, sluicesDetail: (ACT.sluices || []).map(function (k) { return { kind: k.kind, label: k.label, got: !!k.got, held: !!k.held, x: k.x, y: k.y }; }), marks: ACT.marks.length, coach: !!ACT.coach, wagon: ACT.wagon ? { x: ACT.wagon.x, y: ACT.wagon.y, ex: ACT.wagon.ex } : null, ferry: ACT.ferry ? { x: ACT.ferry.x, y: ACT.ferry.y, ramp: !!ACT.ferry.ramp } : null, log: ACT.log ? { x: ACT.log.x, y: ACT.log.y, cleared: !!ACT.log.cleared } : null, slide: ACT.slide ? { x: ACT.slide.x, y: ACT.slide.y, cleared: !!ACT.slide.cleared } : null, pump: ACT.pump ? { x: ACT.pump.x, y: ACT.pump.y, cleared: !!ACT.pump.cleared } : null, wire: ACT.wire ? { x: ACT.wire.x, y: ACT.wire.y, cleared: !!ACT.wire.cleared } : null, span: ACT.span ? { x: ACT.span.x, y: ACT.span.y, cleared: !!ACT.span.cleared } : null, bar: ACT.bar ? { x: ACT.bar.x, y: ACT.bar.y, cleared: !!ACT.bar.cleared } : null }; },
       marker: function () { var m = marker(); return m ? { x: m.x, y: m.y, label: m.label } : null; },
       gotoScene: function () { var p = scenePos(); px = p.x; py = p.y + 40; try { moveId = null; targetX = px; targetY = py; } catch (e) {} actOK(); return { x: px, y: py }; },
       finishAct: function () { var d = chDef(); if (!d || d.do === 'meet') return actOK(); if (d.do === 'arrive') { ST.flags['act' + d.id] = 1; save(); finishChapter(); return true; } if (ACT.id !== d.id) setupAct(); completeAct(); return true; },
       shovel: function () { return shovelSwing(); },
+      haul: function () { var H = ACT.haul; if (!H) return null; var cx = H.x0 + H.ux * H.d, cy = H.y0 + H.uy * H.d; return { d: H.d, len: H.len, lean: H.lean, sacks: H.sacks, spills: H.spills, cx: cx, cy: cy, ux: H.ux, uy: H.uy, ex: H.x0 + H.ux * H.len, ey: H.y0 + H.uy * H.len, rut: H.rut }; },
+      haulLean: function (v) { if (ACT.haul) ACT.haul.lean = v; },
       shovelPh: function (p) { if (ACT.shovel) ACT.shovel.ph = p; },
       teleport: function (x, y) { px = x; py = y; try { moveId = null; targetX = px; targetY = py; } catch (e) {} return { x: px, y: py }; },
       talksDone: talksDone
@@ -13210,7 +13307,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
