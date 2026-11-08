@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, then The Crossing: after the wash, Flint's ferry on the Little Pine is the last water before the long dry run, and the prison wagon has to get across.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, then The Landing: after the ferry, the prison wagon sits on the far bank, and a felled cottonwood blocks the first dry mile of prison road.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170-v182: STORY MODE - one scene per chapter at a real place (STORY180), walk-up TALK, named cast =====
+  // ===== v170-v183: STORY MODE - one scene per chapter at a real place (STORY180), walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -9849,7 +9849,9 @@ window.B137 = (function () {
       { id: 'mercer', name: 'Quin Mercer', title: 'Territorial Escort', role: 'guard', age: 34, fem: 0, ox: 220, oy: -300, face: -1, from: 10 },
       { id: 'lynch', name: 'Dora Lynch', title: 'Water-Stop Keeper', role: 'woman', age: 43, fem: 1, ox: -120, oy: -320, face: 1, from: 10 },
       { id: 'flint', name: 'Ira Flint', title: 'Ferryman', role: 'farmer', age: 56, fem: 0, ox: 500, oy: -280, face: 1, from: 11 },
-      { id: 'harlow', name: 'June Harlow', title: 'Cable Hand', role: 'woman', age: 28, fem: 1, ox: -400, oy: -260, face: -1, from: 11 }
+      { id: 'harlow', name: 'June Harlow', title: 'Cable Hand', role: 'woman', age: 28, fem: 1, ox: -400, oy: -260, face: -1, from: 11 },
+      { id: 'colt', name: 'Bess Colt', title: 'Landing Keeper', role: 'woman', age: 46, fem: 1, ox: 560, oy: -200, face: 1, from: 12 },
+      { id: 'riggs', name: 'Cole Riggs', title: 'Territorial Outrider', role: 'guard', age: 38, fem: 0, ox: -460, oy: -180, face: -1, from: 12 }
     ];
 
     var CHAPTERS = [
@@ -9863,7 +9865,8 @@ window.B137 = (function () {
       { id: 8, title: 'The Sentence', year: 1, need: ['keene', 'brant', 'judge8'] },
       { id: 9, title: 'The Wagon', year: 1, need: ['holley', 'crane', 'keene9'] },
       { id: 10, title: 'The Road', year: 1, need: ['mercer', 'lynch', 'keene10'] },
-      { id: 11, title: 'The Crossing', year: 1, need: ['flint', 'harlow', 'mercer11'] }
+      { id: 11, title: 'The Crossing', year: 1, need: ['flint', 'harlow', 'mercer11'] },
+      { id: 12, title: 'The Landing', year: 1, need: ['colt', 'riggs', 'mercer12'] }
     ];
 
     var NODES = {
@@ -10874,6 +10877,66 @@ window.B137 = (function () {
         { t: "Good.", next: 'end' }
       ] },
 
+      colt: { who: 'colt', say: "Bess Colt. I keep the east landing — water, a shed, and the first dry mile of prison road. Flint just put your wagon on my bank. Three men with a saw dropped a cottonwood across the track at first light. You riding that box east, or watching the willows?", replies: [
+        { t: "I'll ride the wagon east with it.", next: 'colt_ride', rel: { colt: 1 } },
+        { t: "I'll watch the willows until it's past.", next: 'colt_watch' },
+        { t: "I'll haul that log myself first.", next: 'colt_log' }
+      ] },
+      colt_ride: { who: 'colt', say: "Then stay with the box, same as you did on the ferry. I don't move a wagon over a tree that size — you'll have to walk up and put a shoulder on it. Once it's off the road, Holley can roll. Those three are still in my willows. Don't linger.", replies: [
+        { t: "I'll clear the log and stay with it.", next: 'end', flag: 'met_colt', rel: { colt: 1 } }
+      ] },
+      colt_watch: { who: 'colt', say: "Willows are yours, then. I'll keep an eye on the shed. The log still has to come off the road before Holley can move. Walk up and haul it. I don't water mules that are sitting behind a tree.", replies: [
+        { t: "I'll haul the log first.", next: 'end', flag: 'met_colt' }
+      ] },
+      colt_log: { who: 'colt', say: "That's the job I needed done. Fresh cut — not a storm-fall. Those three with the saw went downstream into the cottonwoods. If they meant to stop the wagon, you'll want that log off and Holley rolling before they come back to finish it.", replies: [
+        { t: "I'll haul it.", next: 'end', flag: 'met_colt' }
+      ] },
+      colt_again: { who: 'colt', say: "Log first, then the road. I don't water a wagon sitting behind a tree.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      riggs: { who: 'riggs', say: "Cole Riggs. Territorial outrider — the prison sent me west to meet Holley's wagon. I found the road blocked. Fresh cut, not weather. The men who dropped it are still in those willows. You clearing that log, or am I doing it alone?", replies: [
+        { t: "I'll ride east with the wagon.", next: 'riggs_ride', rel: { riggs: 1 } },
+        { t: "I'll watch the willows until it's past.", next: 'riggs_watch' },
+        { t: "I'll haul that log myself first.", next: 'riggs_log' }
+      ] },
+      riggs_ride: { who: 'riggs', say: "Then stay left of the box. That cottonwood doesn't move itself — walk up and roll it off the track. Once the road's open I'll take the point toward the prison. If those three show themselves, I'll see them first.", replies: [
+        { t: "Log first. Then we roll.", next: 'end', flag: 'met_riggs', rel: { riggs: 1 } }
+      ] },
+      riggs_watch: { who: 'riggs', say: "Fair. I'll hold the point if you hold the trees. The wagon still needs that log off the road before Holley can move. Haul it, then watch your ground.", replies: [
+        { t: "I'll haul it and watch.", next: 'end', flag: 'met_riggs' }
+      ] },
+      riggs_log: { who: 'riggs', say: "Good. Walk up and put your weight on it — it's thicker than it looks. I'll cover the willows while you work. After that, same as the ferry: stay close and Holley rolls.", replies: [
+        { t: "I'll haul the log.", next: 'end', flag: 'met_riggs' }
+      ] },
+      riggs_again: { who: 'riggs', say: "Log first. Then the road. I'll be where the box is.", replies: [
+        { t: "Understood.", next: 'end' }
+      ] },
+
+      mercer_ch12: { who: 'mercer', say: "We're across. Flint cranked us over and the box is still shut. Far bank's Colt's landing — first dry mile of prison road. Riggs is here from the prison. Talk to both of them, then get that cottonwood off the track so Holley can roll.", replies: [
+        { t: "I'll ride the wagon east with it.", next: 'mercer_ch12_ride', rel: { mercer: 1 } },
+        { t: "I'll watch the willows until it's past.", next: 'mercer_ch12_watch' },
+        { t: "I'll haul that log myself first.", next: 'mercer_ch12_log' }
+      ] },
+      mercer_ch12_friend: { who: 'mercer', say: "You rode the ferry with me. Box is still shut, and we're on the far bank. Colt keeps this landing; Riggs rode out from the prison to meet us. There's a felled cottonwood on the road — those three with the saw didn't waste the morning. Talk to Colt and Riggs, then we move it.", replies: [
+        { t: "I'll ride the wagon east with it.", next: 'mercer_ch12_ride', rel: { mercer: 1 } },
+        { t: "I'll watch the willows until it's past.", next: 'mercer_ch12_watch' },
+        { t: "I'll haul that log myself first.", next: 'mercer_ch12_log' }
+      ] },
+      mercer_ch12_ride: { who: 'mercer', say: "Then stay left of the box, same as the wash and the ferry. That log doesn't roll itself — walk up and put a shoulder on it. Once it's clear, Holley can move. I'll be with the wagon.", replies: [
+        { t: "Log, then the wagon.", next: 'end', flag: 'met_mercer12', rel: { mercer: 1 } }
+      ] },
+      mercer_ch12_watch: { who: 'mercer', say: "Willows, then. Keep your eyes on the cottonwoods — Colt saw the same three men Harlow warned us about. The wagon still needs that log off the road. Haul it, then hold your ground.", replies: [
+        { t: "I'll haul it and hold.", next: 'end', flag: 'met_mercer12' }
+      ] },
+      mercer_ch12_log: { who: 'mercer', say: "That's the first job. Walk to the tree and put a shoulder on it. Until that log's off the track the wagon sits, even if you stand next to it. After that, same as the ferry — stay close and Holley rolls.", replies: [
+        { t: "I'll haul the log.", next: 'end', flag: 'met_mercer12' }
+      ] },
+      mercer_ch12_again: { who: 'mercer', say: "Log first. Then the road. I'll be where the box is.", replies: [
+        { t: "Good.", next: 'end' }
+      ] },
+
+
       judge_ch9: { who: 'judge', say: "I wrote it. Brant inked it. Now it belongs to Keene, and that's the hardest part of my job \u2014 letting go of a sentence and watching what a city does with it. The wagon's in the yard. Whatever it means to Dustwater, it means it by morning.", replies: [
         { t: "You wrote it fair.", next: 'end', flag: 'judge_ch9', rel: { judge: 1 } },
         { t: "The city will live with it.", next: 'end', flag: 'judge_ch9' }
@@ -11011,7 +11074,8 @@ window.B137 = (function () {
       8: { cast: ['keene', 'brant', 'judge'], at: 'court', do: 'arrive', mark: 'DUSTWATER COURT' },
       9: { cast: ['holley', 'crane', 'keene'], at: 'yard', do: 'wagon', mark: 'THE YARD' },
       10: { cast: ['mercer', 'lynch', 'keene'], at: 'stop', do: 'wagon', mark: 'WATER STOP' },
-      11: { cast: ['flint', 'harlow', 'mercer'], at: 'crossing', do: 'ferry', mark: 'THE CROSSING' }
+      11: { cast: ['flint', 'harlow', 'mercer'], at: 'crossing', do: 'ferry', mark: 'THE CROSSING' },
+      12: { cast: ['colt', 'riggs', 'mercer'], at: 'landing', do: 'log', mark: 'THE LANDING' }
     };
     CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
     var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]] };
@@ -11032,12 +11096,13 @@ window.B137 = (function () {
       if (at === 'yard') { var d2 = dustwater(); return { x: d2.x + 180, y: d2.y + 120 }; }
       if (at === 'stop') { var d3 = dustwater(); return { x: d3.x + 2800, y: d3.y + 40 }; }
       if (at === 'crossing') { var d4 = dustwater(); return { x: d4.x + 5600, y: d4.y + 180 }; }
+      if (at === 'landing') { var d5 = dustwater(); return { x: d5.x + 7400, y: d5.y + 260 }; }
       return { x: city.x, y: city.y };
     }
     function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
     function charId(need) { return String(need).replace(/\d+$/, ''); }
 
-    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, t: 0 };
+    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, t: 0 };
     function talksDone() { var d = chDef(); for (var i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return false; return true; }
     function actOK() {
       var d = chDef(); if (!d) return true;
@@ -11046,7 +11111,7 @@ window.B137 = (function () {
       if (d.do === 'arrive') { var s = scenePos(); if (Math.hypot(px - s.x, py - s.y) < 280) { ST.flags['act' + d.id] = 1; save(); return true; } return false; }
       return !!(ACT.id === d.id && ACT.done);
     }
-    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; }
+    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; }
     function setupAct() {
       var d = chDef(); clearAct(); ACT.id = d.id; ACT.kind = d.do || ''; ACT.done = !!ST.flags['act' + d.id];
       if (ACT.done || !ST.on) return;
@@ -11074,6 +11139,12 @@ window.B137 = (function () {
         ACT.wagon = { k: 'money', x: s.x - 220, y: s.y + 80, f: 1, ph: 0, ex: s.x + 300 };
         ACT.ferry = { x: s.x + 300, y: s.y + 80, ramp: 0 };
         [[420, -80], [540, 40], [480, 200]].forEach(function (o) {
+          ACT.foes.push({ x: s.x + o[0], y: s.y + o[1], hp: 3, f: -1, role: 'archer', hitT: 0, name: 'RIVER MAN' });
+        });
+      } else if (d.do === 'log') {
+        ACT.wagon = { k: 'money', x: s.x - 200, y: s.y + 80, f: 1, ph: 0, ex: s.x + 720 };
+        ACT.log = { x: s.x + 260, y: s.y + 80, cleared: 0 };
+        [[500, -100], [680, 30], [580, 210]].forEach(function (o) {
           ACT.foes.push({ x: s.x + o[0], y: s.y + o[1], hp: 3, f: -1, role: 'archer', hitT: 0, name: 'RIVER MAN' });
         });
       }
@@ -11123,6 +11194,12 @@ window.B137 = (function () {
         if (fy && fy.ramp && w && Math.hypot(w.x - px, w.y - py) < 240 && w.x < w.ex) { w.x = Math.min(w.ex, w.x + 70 * dt); w.ph += dt * 6; }
         moveFoes(dt, ACT.wagon);
         if (fy && fy.ramp && w && w.x >= w.ex) completeAct();
+      } else if (d.do === 'log') {
+        var lg = ACT.log, w = ACT.wagon;
+        if (lg && !lg.cleared && Math.hypot(lg.x - px, lg.y - py) < 60) lg.cleared = 1;
+        if (lg && lg.cleared && w && Math.hypot(w.x - px, w.y - py) < 240 && w.x < w.ex) { w.x = Math.min(w.ex, w.x + 70 * dt); w.ph += dt * 6; }
+        moveFoes(dt, ACT.wagon);
+        if (lg && lg.cleared && w && w.x >= w.ex) completeAct();
       }
     }
     function moveFoes(dt, goal) {
@@ -11152,6 +11229,7 @@ window.B137 = (function () {
         else if (d.do === 'coach') { var g = ACT.foes.filter(function (q) { return q.hp > 0; })[0]; if (g) t = { x: g.x, y: g.y, label: 'VANE GANG' }; }
         else if (d.do === 'track') { var m = ACT.marks[ACT.mi]; if (m) t = { x: m.x, y: m.y, label: 'TRACKS' }; }
         else if (d.do === 'ferry') { if (ACT.ferry && !ACT.ferry.ramp) t = { x: ACT.ferry.x, y: ACT.ferry.y, label: 'FERRY RAMP' }; else if (ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' }; }
+        else if (d.do === 'log') { if (ACT.log && !ACT.log.cleared) t = { x: ACT.log.x, y: ACT.log.y, label: 'FELLED TREE' }; else if (ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' }; }
         else if (d.do === 'wagon' && ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' };
         else if (d.do === 'arrive') t = { x: s.x, y: s.y, label: lab };
         if (t) return t;
@@ -11210,6 +11288,41 @@ window.B137 = (function () {
       c.fillStyle = '#b8322a'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText(f.name, sx, sy - 58);
       c.fillStyle = '#3a2410'; c.fillRect(sx - 15, sy - 54, 30, 4); c.fillStyle = '#d84a2a'; c.fillRect(sx - 15, sy - 54, 10 * Math.max(0, f.hp), 4);
     }
+    function drawLog(c, lg, sx, sy) {
+      c.save();
+      c.translate(sx, sy);
+      if (lg.cleared) { c.translate(48, 52); c.rotate(0.62); }
+      c.fillStyle = '#6a4424'; c.strokeStyle = '#3a2410'; c.lineWidth = 2;
+      c.beginPath(); c.ellipse(0, 0, 78, 14, 0, 0, 7); c.fill(); c.stroke();
+      c.fillStyle = '#8a6238';
+      c.beginPath(); c.ellipse(-70, 0, 12, 12, 0, 0, 7); c.fill(); c.stroke();
+      c.strokeStyle = '#5a3820'; c.lineWidth = 1;
+      c.beginPath(); c.ellipse(-70, 0, 7, 7, 0, 0, 7); c.stroke();
+      c.beginPath(); c.ellipse(-70, 0, 3, 3, 0, 0, 7); c.stroke();
+      c.strokeStyle = '#4a3018'; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(20, -8); c.lineTo(38, -28); c.moveTo(-10, 8); c.lineTo(-28, 26); c.stroke();
+      c.restore();
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center';
+      c.fillText(lg.cleared ? 'ROAD CLEAR' : 'FELLED COTTONWOOD', sx, sy - 36);
+    }
+    function drawLanding(c, sx, sy) {
+      c.save();
+      c.fillStyle = '#8a6238'; c.strokeStyle = '#3a2410'; c.lineWidth = 2;
+      c.fillRect(sx - 36, sy - 48, 52, 36); c.strokeRect(sx - 36, sy - 48, 52, 36);
+      c.fillStyle = '#6a3a1c';
+      c.beginPath(); c.moveTo(sx - 42, sy - 48); c.lineTo(sx - 10, sy - 72); c.lineTo(sx + 22, sy - 48); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = '#6a7a82';
+      c.fillRect(sx + 24, sy - 22, 36, 10); c.strokeRect(sx + 24, sy - 22, 36, 10);
+      c.fillStyle = 'rgba(70,130,160,.45)'; c.fillRect(sx + 26, sy - 20, 32, 6);
+      [[-90, 30], [110, -40], [70, 70]].forEach(function (o) {
+        c.fillStyle = 'rgba(62,98,54,.55)';
+        c.beginPath(); c.ellipse(sx + o[0], sy + o[1] - 24, 22, 34, 0, 0, 7); c.fill();
+        c.fillStyle = '#5a3a20'; c.fillRect(sx + o[0] - 3, sy + o[1] - 8, 6, 18);
+      });
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center';
+      c.fillText('EAST LANDING', sx, sy - 82);
+      c.restore();
+    }
     function drawFerry(c, fy, sx, sy) {
       c.save();
       c.fillStyle = 'rgba(62,118,148,.55)';
@@ -11241,6 +11354,8 @@ window.B137 = (function () {
       ACT.marks.forEach(function (m, i) { if (i >= ACT.mi && vis(m)) drawTrack(c, m.x - camX, m.y - camY, i === ACT.mi); });
       ACT.cattle.forEach(function (o) { if (vis(o)) drawCow(c, o, o.x - camX, o.y - camY); });
       if (ACT.coach && vis(ACT.coach) && window.ART153) try { ART153.wagonFig(c, ACT.coach, ACT.coach.x - camX, ACT.coach.y - camY); } catch (e) {}
+      if (ACT.kind === 'log' && vis(scenePos())) drawLanding(c, scenePos().x - camX, scenePos().y - camY);
+      if (ACT.log && vis(ACT.log)) drawLog(c, ACT.log, ACT.log.x - camX, ACT.log.y - camY);
       if (ACT.ferry && vis(ACT.ferry)) drawFerry(c, ACT.ferry, ACT.ferry.x - camX, ACT.ferry.y - camY);
       if (ACT.wagon && vis(ACT.wagon) && window.ART153) try { ART153.wagonFig(c, ACT.wagon, ACT.wagon.x - camX, ACT.wagon.y - camY); c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('PRISON WAGON', ACT.wagon.x - camX, ACT.wagon.y - camY - 92); } catch (e) {}
       ACT.foes.forEach(function (f) { if (vis(f)) drawFoe(c, f, f.x - camX, f.y - camY); });
@@ -11474,7 +11589,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8], ch9done: !!ST.done[9], ch10done: !!ST.done[10], ch11done: !!ST.done[11] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8], ch9done: !!ST.done[9], ch10done: !!ST.done[10], ch11done: !!ST.done[11], ch12done: !!ST.done[12] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
@@ -11498,7 +11613,7 @@ window.B137 = (function () {
       folkNode: folkNode,
       modeBtn: function () { return !!document.querySelector('.mode[data-mode=story]'); },
       dlgOn: function () { return dlg.style.display === 'block'; },
-      scene: function () { var d = chDef(), p = scenePos(); return { at: d.at, x: p.x, y: p.y, label: d.mark, cast: (d.cast || []).slice(), do: d.do, actDone: actOK(), n: ST.chars.length, ids: ST.chars.map(function (c) { return c.id; }), fromHome: (typeof city !== 'undefined' && city) ? Math.hypot(p.x - city.x, p.y - city.y) : 0, cattle: ACT.cattle.length, foes: ACT.foes.filter(function (f) { return f.hp > 0; }).length, stakes: ACT.stakes.length, marks: ACT.marks.length, coach: !!ACT.coach, wagon: ACT.wagon ? { x: ACT.wagon.x, y: ACT.wagon.y, ex: ACT.wagon.ex } : null, ferry: ACT.ferry ? { x: ACT.ferry.x, y: ACT.ferry.y, ramp: !!ACT.ferry.ramp } : null }; },
+      scene: function () { var d = chDef(), p = scenePos(); return { at: d.at, x: p.x, y: p.y, label: d.mark, cast: (d.cast || []).slice(), do: d.do, actDone: actOK(), n: ST.chars.length, ids: ST.chars.map(function (c) { return c.id; }), fromHome: (typeof city !== 'undefined' && city) ? Math.hypot(p.x - city.x, p.y - city.y) : 0, cattle: ACT.cattle.length, foes: ACT.foes.filter(function (f) { return f.hp > 0; }).length, stakes: ACT.stakes.length, marks: ACT.marks.length, coach: !!ACT.coach, wagon: ACT.wagon ? { x: ACT.wagon.x, y: ACT.wagon.y, ex: ACT.wagon.ex } : null, ferry: ACT.ferry ? { x: ACT.ferry.x, y: ACT.ferry.y, ramp: !!ACT.ferry.ramp } : null, log: ACT.log ? { x: ACT.log.x, y: ACT.log.y, cleared: !!ACT.log.cleared } : null }; },
       marker: function () { var m = marker(); return m ? { x: m.x, y: m.y, label: m.label } : null; },
       gotoScene: function () { var p = scenePos(); px = p.x; py = p.y + 40; try { moveId = null; targetX = px; targetY = py; } catch (e) {} actOK(); return { x: px, y: py }; },
       finishAct: function () { var d = chDef(); if (!d || d.do === 'meet') return actOK(); if (d.do === 'arrive') { ST.flags['act' + d.id] = 1; save(); finishChapter(); return true; } if (ACT.id !== d.id) setupAct(); completeAct(); return true; },
@@ -11528,7 +11643,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, then The Crossing: after the wash, Flint\u2019s ferry on the Little Pine is the last water before the long dry run, and the prison wagon has to get across.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, then The Landing: after the ferry, the prison wagon sits on the far bank, and a felled cottonwood blocks the first dry mile of prison road.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -11548,5 +11663,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --></body>
 </html>
