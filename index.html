@@ -6643,7 +6643,6 @@ window.B137 = (function () {
       R.seg.forEach(function (G) { var dx = G[2] - G[0], dy = G[3] - G[1], L = Math.hypot(dx, dy); if (!L) return; var ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
         // clip the segment to the view
         var t0 = 0, t1 = L; [[ux, G[0], x0 - 60, x1 + 60], [uy, G[1], y0 - 60, y1 + 60]].forEach(function (A) { if (Math.abs(A[0]) < 1e-9) { if (A[1] < A[2] || A[1] > A[3]) { t0 = 1; t1 = 0; } return; } var a = (A[2] - A[1]) / A[0], b = (A[3] - A[1]) / A[0]; t0 = Math.max(t0, Math.min(a, b)); t1 = Math.min(t1, Math.max(a, b)); }); if (t1 <= t0) return;
-        for (var t = Math.ceil(t0 / 36) * 36; t < t1; t += 36) { var X = G[0] + ux * t - camX, Y = G[1] + uy * t - camY; if (!lakeAt(X + camX, Y + camY)) continue; c.fillStyle = 'rgba(20,40,60,.25)'; c.beginPath(); c.ellipse(X, Y + 14, 22, 6, 0, 0, 7); c.fill(); c.fillStyle = '#5a3818'; c.fillRect(X - nx * 15 - 3, Y - ny * 15, 6, 16); c.fillRect(X + nx * 15 - 3, Y + ny * 15, 6, 16); c.strokeStyle = '#7a5028'; c.lineWidth = 16; c.beginPath(); c.moveTo(X - ux * 19, Y - uy * 19); c.lineTo(X + ux * 19, Y + uy * 19); c.stroke(); } /* v158 trestle */
         c.strokeStyle = '#6b4520'; c.lineWidth = 6; c.beginPath(); for (var t = Math.ceil(t0 / 18) * 18; t < t1; t += 18) { var X = G[0] + ux * t - camX, Y = G[1] + uy * t - camY; c.moveTo(X - nx * 11, Y - ny * 11); c.lineTo(X + nx * 11, Y + ny * 11); } c.stroke();
         c.strokeStyle = '#4a4a4a'; c.lineWidth = 3; [-6, 6].forEach(function (o) { c.beginPath(); c.moveTo(G[0] + ux * t0 + nx * o - camX, G[1] + uy * t0 + ny * o - camY); c.lineTo(G[0] + ux * t1 + nx * o - camX, G[1] + uy * t1 + ny * o - camY); c.stroke(); }); });
       R.st.forEach(function (S) { if (!(S.home || S.halt) || S.x < x0 - 200 || S.x > x1 + 200 || S.y < y0 - 200 || S.y > y1 + 200) return; c.fillStyle = '#8a5a2e'; c.fillRect(S.x - 70 - camX, S.y - 34 - camY, 140, 22); c.fillStyle = '#5a3818'; c.fillRect(S.x - 60 - camX, S.y - 80 - camY, 6, 48); c.fillRect(S.x + 54 - camX, S.y - 80 - camY, 6, 48); c.fillStyle = '#f3e3c3'; c.fillRect(S.x - 64 - camX, S.y - 96 - camY, 128, 18); c.strokeStyle = '#3b2410'; c.lineWidth = 2; c.strokeRect(S.x - 64 - camX, S.y - 96 - camY, 128, 18); c.fillStyle = '#3b2410'; c.font = 'bold ' + (S.home ? 11 : 9) + 'px Georgia,serif'; c.textAlign = 'center'; c.fillText(S.home ? 'HOMESTEAD HALT' : (S.name.length > 14 ? S.name.slice(0, 13) + '.' : S.name) + ' HALT', S.x - camX, S.y - 83 - camY); c.textAlign = 'left'; });
@@ -7266,6 +7265,7 @@ window.B137 = (function () {
   (function () { var lt = 0; var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); try { if (!started || MODE !== 'duel') return; var n = performance.now(); if (n - lt < 500) return; lt = n;
       var h0 = factions[0] && factions[0].hallObj; if (h0 && h0.hp > 0 && (h0.max || 0) < 380) { h0.hp += 380 - (h0.max || 0); h0.max = 380; } units.forEach(function (u) { if (u.f !== 'me' && u.royal && !u.b156 && u.hp > 0) { u.b156 = 1; u.hp *= 4.5; /* v158 tune toward 5-8 min */ } });
       var f = factions[0]; if (f && f.alive && !f.posse156 && Math.hypot(f.x - px, f.y - py) < 2500) { f.posse156 = 1; for (var i = 0; i < 4; i++) { var u = spawnUnit(f.id, i < 2 ? 'k' : 's', f.x + (i - 1.5) * 60, f.y + 160); units.push(u); } showToast('THE CPU POSSE RIDES OUT TO MEET YOU'); }
+      if (f && f.alive && f.posse156) { var RR = units.filter(function (u) { return u.royal && u.f === f.id && u.hp > 0; }); if (RR.length === 1) { RR[0].last = 1; if (!f.rally159) { f.rally159 = 1; for (var i2 = 0; i2 < 4; i2++) { var u2 = spawnUnit(f.id, i2 < 1 ? 'k' : 's', RR[0].x + (i2 - 1.5) * 50, RR[0].y + 90); units.push(u2); } showToast('THE CROWN RALLIES - ' + (RR[0].royal === 'K' ? 'THE KING' : 'THE QUEEN') + ' CALLS THE LAST GUARD'); } } } /* v159 */
     } catch (e) {} }; })();
 
   // v156: bodyguards - in 1V1 a CPU royal shrugs off hero-scaled hits (max 3 per hit), and with 3+ of its soldiers within 220px takes 50% (not in a last stand); thin the guard first
@@ -7293,6 +7293,49 @@ window.B137 = (function () {
     } catch (e) { if (!window.E158b) { window.E158b = 1; console.warn(e); } } return r; };
     window.LIFE158 = { dk: dk };
   })();
+
+  // ===== v159: CPU royals are easy to spot in 1V1 - a bouncing crown arrow over them, and an edge arrow when off screen =====
+  (function () { var _du = drawUnits; drawUnits = function (camX, camY) { var r = _du.apply(this, arguments); try { if (!started || MODE !== 'duel') return r; var c = ctx, t = performance.now() / 1000, vw = W / zoom, vh = H / zoom;
+      var R = units.filter(function (u) { return u.royal && u.f !== 'me' && u.hp > 0; }); window.ROY159 = R.length; window.ROYW159 = [vw, vh];
+      if (R.length === 1) R[0].last = 1;
+      R.forEach(function (u, ri) { var sx = u.x - camX, sy = u.y - camY, dx = u.x - px, dy = u.y - py, nm = (u.royal === 'K' ? 'KING' : 'QUEEN') + (R.length === 1 ? ' - LAST ONE!' : '');
+        if (Math.abs(dx) < vw / 2 - 16 && Math.abs(dy) < vh / 2 - 16) { var bnc = Math.sin(t * 5) * 5, y = sy - 92 + bnc; c.fillStyle = R.length === 1 ? '#e02020' : '#d08020'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.beginPath(); c.moveTo(sx, y + 16); c.lineTo(sx - 11, y); c.lineTo(sx + 11, y); c.closePath(); c.fill(); c.stroke(); c.font = 'bold 11px monospace'; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = '#fff'; c.strokeText('\u265b ' + nm, sx, y - 4); c.fillStyle = '#2a1a0a'; c.fillText('\u265b ' + nm, sx, y - 4); c.textAlign = 'left'; }
+        else if (Math.hypot(dx, dy) < 4500) { var a = Math.atan2(dy, dx), k = Math.min((vw / 2 - 70 / zoom) / Math.abs(Math.cos(a) || 1e-6), (vh / 2 - 80 / zoom) / Math.abs(Math.sin(a) || 1e-6)), X = W / 2 + Math.cos(a) * k, Y = H / 2 + Math.sin(a) * k;
+          c.save(); c.translate(X, Y); c.rotate(a); c.fillStyle = R.length === 1 ? '#e02020' : '#d08020'; c.strokeStyle = '#fff'; c.lineWidth = 2 / zoom; c.beginPath(); c.moveTo(18 / zoom, 0); c.lineTo(-8 / zoom, -11 / zoom); c.lineTo(-8 / zoom, 11 / zoom); c.closePath(); c.fill(); c.stroke(); c.restore();
+          c.font = 'bold ' + Math.max(9, 10 / zoom) + 'px monospace'; c.textAlign = 'center'; c.lineWidth = 3 / zoom; c.strokeStyle = '#fff'; var lb = '\u265b ' + (u.royal === 'K' ? 'KING' : 'QUEEN') + (R.length === 1 ? ' - LAST ONE!' : '') + ' ' + (Math.hypot(dx, dy) / 1000).toFixed(1) + 'K'; c.strokeText(lb, X, Y + 26 / zoom + ri * 13 / zoom); c.fillStyle = '#2a1a0a'; c.fillText(lb, X, Y + 26 / zoom + ri * 13 / zoom); c.textAlign = 'left'; } });
+    } catch (e) { if (!window.E159) { window.E159 = 1; console.warn(e); } } return r; }; })();
+
+  // v159: rail trestle bridges drawn above the water layer (water art covered the rails on lakes)
+  (function () { var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); try { if (MODE !== 'free' || !window.MAP136) return; var R = MAP136.rail(); if (!R || !R.seg) return; var x0 = px - innerWidth / (2 * zoom) - 100, x1 = px + innerWidth / (2 * zoom) + 100, y0 = py - innerHeight / (2 * zoom) - 100, y1 = py + innerHeight / (2 * zoom) + 100, P = [];
+      R.seg.forEach(function (G) { var dx = G[2] - G[0], dy = G[3] - G[1], L = Math.hypot(dx, dy); if (!L) return; if (Math.max(G[0], G[2]) < x0 || Math.min(G[0], G[2]) > x1 || Math.max(G[1], G[3]) < y0 || Math.min(G[1], G[3]) > y1) return; var ux = dx / L, uy = dy / L;
+        for (var t = 0; t < L; t += 18) { var X = G[0] + ux * t, Y = G[1] + uy * t; if (X < x0 || X > x1 || Y < y0 || Y > y1) continue; if (zone(X, Y) > 0 || zone(X + uy * 14, Y - ux * 14) > 0 || zone(X - uy * 14, Y + ux * 14) > 0) P.push([X, Y, ux, uy, Math.round(t / 18)]); } });
+      if (!P.length) return; window.BRIDGE159 = P.length;
+      items.push({ y: py - 1e5, x: px, y2: py - 1e5, fn: function () { var c = ctx, ox = px - W / 2, oy = py - H / 2;
+        P.forEach(function (q) { var X = q[0] - ox, Y = q[1] - oy, ux = q[2], uy = q[3], nx = -uy, ny = ux; if (q[4] % 2 === 0) { c.fillStyle = 'rgba(20,40,60,.3)'; c.beginPath(); c.ellipse(X, Y + 18, 16, 4, 0, 0, 7); c.fill(); c.fillStyle = '#4a2e12'; c.fillRect(X - nx * 15 - 2.5, Y - ny * 15, 5, 18); c.fillRect(X + nx * 15 - 2.5, Y + ny * 15, 5, 18); }
+          c.strokeStyle = '#7a5028'; c.lineWidth = 30; c.beginPath(); c.moveTo(X - ux * 10, Y - uy * 10); c.lineTo(X + ux * 10, Y + uy * 10); c.stroke(); });
+        P.forEach(function (q) { var X = q[0] - ox, Y = q[1] - oy, nx = -q[3], ny = q[2]; c.strokeStyle = '#5a3818'; c.lineWidth = 5; c.beginPath(); c.moveTo(X - nx * 12, Y - ny * 12); c.lineTo(X + nx * 12, Y + ny * 12); c.stroke(); c.strokeStyle = '#4a4a4a'; c.lineWidth = 3; [-6, 6].forEach(function (o) { c.beginPath(); c.moveTo(X + nx * o - q[2] * 10, Y + ny * o - q[3] * 10); c.lineTo(X + nx * o + q[2] * 10, Y + ny * o + q[3] * 10); c.stroke(); }); });
+        c.strokeStyle = '#3b2410'; c.lineWidth = 2; [-1, 1].forEach(function (sd) { c.beginPath(); P.forEach(function (q, k) { var X = q[0] - ox - q[3] * 17 * sd, Y = q[1] - oy + q[2] * 17 * sd - 6; if (k === 0 || q[4] - P[k - 1][4] > 1) c.moveTo(X, Y); else c.lineTo(X, Y); }); c.stroke(); }); } });
+    } catch (e) { if (!window.E159b) { window.E159b = 1; console.warn(e); } } }; })();
+
+  // v159: life - horses hitched at every saloon rail (tails swish, heads dip), a sleeping cat on the general store porch
+  (function () { function horse(c, x, y, f, k, t) { c.save(); c.translate(x, y); c.scale(f, 1); var col = ['#6b3f1d', '#2a1a0a', '#a0703a', '#d8c8a8'][k % 4], hd = Math.max(0, Math.sin(t * 0.7 + k * 2)) * 6, tl = Math.sin(t * 3 + k) * 0.4;
+      c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(0, 0, 22, 4, 0, 0, 7); c.fill(); c.fillStyle = col; c.fillRect(-14, -22, 4, 22); c.fillRect(-6, -22, 4, 22); c.fillRect(6, -22, 4, 22); c.fillRect(12, -22, 4, 22);
+      c.beginPath(); c.ellipse(0, -28, 20, 10, 0, 0, 7); c.fill(); c.save(); c.translate(16, -32); c.rotate(-0.6 + hd * 0.08); c.fillRect(0, -5, 18, 9); c.fillRect(14, -6, 9, 12); c.restore(); c.save(); c.translate(-19, -32); c.rotate(0.9 + tl); c.fillStyle = '#2a1a0a'; c.fillRect(-2, 0, 4, 18); c.restore(); c.fillStyle = '#8a2a1a'; c.fillRect(-6, -40, 12, 6); c.restore(); }
+    function cat(c, x, y, t) { c.save(); c.translate(x, y); var br = 1 + Math.sin(t * 1.5) * 0.05; c.fillStyle = 'rgba(0,0,0,.16)'; c.beginPath(); c.ellipse(0, 2, 12, 3, 0, 0, 7); c.fill();
+      c.fillStyle = '#c4783a'; c.beginPath(); c.ellipse(0, -5, 11, 6 * br, 0, 0, 7); c.fill(); c.beginPath(); c.arc(9, -8, 5, 0, 7); c.fill();
+      c.beginPath(); c.moveTo(6, -11); c.lineTo(5, -16); c.lineTo(9, -12); c.closePath(); c.fill(); c.beginPath(); c.moveTo(11, -12); c.lineTo(14, -16); c.lineTo(14, -10); c.closePath(); c.fill();
+      c.fillStyle = '#2a1a0a'; c.fillRect(7, -9, 3, 0.8); c.fillRect(11, -9, 3, 0.8); c.strokeStyle = '#a06030'; c.lineWidth = 2; c.beginPath(); c.moveTo(-10, -4); c.quadraticCurveTo(-18, -12, -7, -13); c.stroke(); c.restore(); }
+    var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); try { if (MODE !== 'free' || !window.TOWN133) return; var L = TOWN133.towns(), x0 = px - innerWidth / (2 * zoom) - 200, x1 = px + innerWidth / (2 * zoom) + 200, y0 = py - innerHeight / (2 * zoom) - 200, y1 = py + innerHeight / (2 * zoom) + 300, nh = 0, nc = 0;
+      L.forEach(function (t) { var s = t.saloon; if (s && s.x > x0 && s.x < x1 && s.y > y0 && s.y < y1) { var rx = s.x + (s.w || 120) * 0.5 + 40, ry = s.y + 30;
+        items.push({ y: ry - 2, x: rx, y2: ry - 2, fn: function (sx, sy) { var c = ctx; c.fillStyle = '#5a3818'; c.fillRect(sx - 4, sy - 30, 5, 30); c.fillRect(sx + 120, sy - 30, 5, 30); c.fillRect(sx - 4, sy - 30, 129, 5); } });
+        for (var k = 0; k < 2 + (t.d.pop > 15 ? 1 : 0); k++) (function (k) { nh++; items.push({ y: ry + 6, x: rx + 22 + k * 45, y2: ry + 6, fn: function (sx, sy) { horse(ctx, sx, sy, k % 2 ? -1 : 1, k + (t.id | 0), performance.now() / 1000); } }); })(k); }
+        var g = t.b.filter(function (b) { return b.k === 'general'; })[0];
+        if (g && g.x > x0 && g.x < x1 && g.y > y0 && g.y < y1) { nc++; items.push({ y: g.y + 2, x: g.x - 40, y2: g.y + 2, fn: function (sx, sy) { ctx.save(); ctx.translate(sx, sy); ctx.scale(1.35, 1.35); cat(ctx, 0, 0, performance.now() / 1000); ctx.restore(); } }); } });
+      window.HORSE159 = nh; window.CAT159 = nc;
+    } catch (e) { if (!window.E159c) { window.E159c = 1; console.warn(e); } } }; })();
+
+  // v159: the town/person label steps below a toast instead of covering it
+  setInterval(function () { var e = document.getElementById('pp133'); if (e) e.style.top = toastT > 0 ? (innerHeight < 500 ? '24%' : '19%') : '12%'; }, 200);
 
   requestAnimationFrame(frame);
 </script>
@@ -7334,5 +7377,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --></body>
 </html>
