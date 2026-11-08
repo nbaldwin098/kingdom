@@ -7981,6 +7981,162 @@ window.B137 = (function () {
     window.LIFE163 = { polish: function () { return window.BAR163 || 0; }, stack: function () { return window.GROC163 || 0; } };
   })();
 
+  // ===== v164: town life - piano player at the saloon piano =====
+  (function () {
+    var BOX = null, HANDS = null, OVER = [], NOTES = [];
+
+    function pianoSpr() {
+      if (BOX) return BOX;
+      var cv = document.createElement('canvas'); cv.width = 72; cv.height = 58;
+      var g = cv.getContext('2d'), i;
+      g.translate(8, 50);
+      g.fillStyle = 'rgba(40,25,10,.22)';
+      g.beginPath(); g.ellipse(26, 2, 30, 5, 0, 0, 7); g.fill();
+      g.fillStyle = '#2a1a0a'; g.fillRect(44, -14, 16, 4);
+      g.fillStyle = '#6b4520'; g.fillRect(45, -13, 14, 2);
+      g.fillStyle = '#5a3818'; g.fillRect(46, -12, 3, 12); g.fillRect(55, -12, 3, 12);
+      g.fillStyle = '#3b2410'; g.fillRect(0, -38, 50, 30);
+      g.fillStyle = '#5a3818'; g.fillRect(2, -36, 46, 26);
+      g.fillStyle = '#8a5a2e'; g.fillRect(3, -35, 5, 24);
+      g.strokeStyle = 'rgba(42,26,10,.35)'; g.lineWidth = 1;
+      for (i = -30; i < -10; i += 5) { g.beginPath(); g.moveTo(8, i); g.lineTo(46, i); g.stroke(); }
+      g.fillStyle = '#2a1a0a'; g.fillRect(-2, -42, 54, 6);
+      g.fillStyle = '#6b4520'; g.fillRect(0, -41, 50, 3);
+      g.fillStyle = '#3b2410'; g.fillRect(16, -54, 20, 13);
+      g.fillStyle = '#efe8d8'; g.fillRect(18, -52, 16, 9);
+      g.fillStyle = '#5a3818'; g.fillRect(20, -50, 12, 1.1); g.fillRect(20, -47, 9, 1.1);
+      g.fillStyle = '#c9a46e'; g.fillRect(40, -50, 3, 9);
+      g.fillStyle = '#ffe86a';
+      g.beginPath(); g.arc(41.5, -52, 2.1, 0, 7); g.fill();
+      g.fillStyle = '#2a1a0a'; g.fillRect(-5, -16, 60, 9);
+      g.fillStyle = '#1a1008'; g.fillRect(-4, -15, 58, 7);
+      for (i = 0; i < 14; i++) {
+        g.fillStyle = '#efe8d8'; g.fillRect(-3 + i * 4.05, -14.5, 3.5, 6.4);
+        g.strokeStyle = '#3b2410'; g.lineWidth = 0.5; g.strokeRect(-3 + i * 4.05, -14.5, 3.5, 6.4);
+      }
+      g.fillStyle = '#1a1008';
+      for (i = 0; i < 13; i++) {
+        if (i % 7 === 2 || i % 7 === 6) continue;
+        g.fillRect(-0.6 + i * 4.05, -14.5, 2.3, 3.8);
+      }
+      g.fillStyle = '#3b2410'; g.fillRect(3, -8, 5, 8); g.fillRect(38, -8, 5, 8);
+      g.fillStyle = '#c9a46e'; g.fillRect(18, -3, 4, 3); g.fillRect(26, -3, 4, 3);
+      BOX = cv;
+      return BOX;
+    }
+
+    function handSpr() {
+      if (HANDS) return HANDS;
+      HANDS = [];
+      var ai, cv, g, y1, y2;
+      for (ai = 0; ai < 8; ai++) {
+        cv = document.createElement('canvas'); cv.width = 36; cv.height = 20;
+        g = cv.getContext('2d');
+        y1 = Math.sin(ai / 7 * Math.PI * 2) * 3.2;
+        y2 = Math.sin(ai / 7 * Math.PI * 2 + 1.7) * 3.2;
+        g.fillStyle = '#e0b088';
+        g.beginPath(); g.ellipse(11, 12 + y1, 6.2, 3.6, -0.2, 0, 7); g.fill();
+        g.beginPath(); g.ellipse(24, 12 + y2, 6.2, 3.6, 0.15, 0, 7); g.fill();
+        g.fillStyle = '#c09068';
+        g.fillRect(8, 10 + y1, 1.4, 4); g.fillRect(12, 10 + y1, 1.4, 4);
+        g.fillRect(21, 10 + y2, 1.4, 4); g.fillRect(25, 10 + y2, 1.4, 4);
+        HANDS.push(cv);
+      }
+      return HANDS;
+    }
+
+    function workHour(hr) {
+      return hr >= 7.6 && hr < 18 && !(hr >= 12 && hr < 13);
+    }
+
+    function canTake(p) {
+      if (!p.doing) return true;
+      if (p.doing.indexOf('WORKING AT THE') === 0) return true;
+      if (p.doing === 'PLAYING THE PIANO') return true;
+      if (p.doing === 'ROLLING A HOOP' || p.doing === 'PLAYING HOPSCOTCH' || p.doing === 'PLAYING TAG') return true;
+      return false;
+    }
+
+    function pianoAt(s) {
+      return { x: s.x - (s.w || 200) * 0.32, y: s.y + 30 };
+    }
+
+    var _pf = pushFactionItems;
+    pushFactionItems = function (items) {
+      try {
+        if (MODE === 'free' && window.TOWN133) {
+          TOWN133.towns().forEach(function (t) {
+            if (t.kids161) t.kids161 = t.kids161.filter(function (p) { return p.job !== 'PIANO PLAYER'; });
+          });
+        }
+      } catch (e) {}
+      _pf.apply(this, arguments);
+      OVER = [];
+      try {
+        if (MODE === 'free' && window.TOWN133) {
+          var L = TOWN133.towns(), now = performance.now() / 1000, hr = 12;
+          try { hr = CLOCK133.hour(); } catch (e) {}
+          var work = workHour(hr);
+          var x0 = px - innerWidth / (2 * zoom) - 220, x1 = px + innerWidth / (2 * zoom) + 220;
+          var y0 = py - innerHeight / (2 * zoom) - 200, y1 = py + innerHeight / (2 * zoom) + 320;
+          var np = 0, nb = 0;
+          L.forEach(function (t) {
+            if (t.box && (t.box.x1 < x0 || t.box.x0 > x1 || t.box.y1 < y0 || t.box.y0 > y1)) return;
+            var saloon = t.saloon || null;
+            (t.b || []).forEach(function (b) { if (b.k === 'saloon') saloon = b; });
+            if (!saloon) return;
+            var pos = pianoAt(saloon);
+            if (pos.x >= x0 && pos.x <= x1 && pos.y >= y0 && pos.y <= y1) {
+              nb++;
+              OVER.push({ k: 'piano', x: pos.x, y: pos.y });
+            }
+            if (!work) return;
+            (t.P || []).forEach(function (p) {
+              if (p.job !== 'PIANO PLAYER') return;
+              if (!canTake(p)) return;
+              p.doing = 'PLAYING THE PIANO';
+              p.x = pos.x + 18;
+              p.y = pos.y + 2;
+              p.f = -1;
+              p.mv = false; p.path = []; p.in = false;
+              if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) return;
+              np++;
+              OVER.push({ k: 'hands', x: pos.x + 6, y: pos.y - 4, ang: (Math.sin(now * 9 + (p.ph || 0)) + 1) * 0.5 });
+              if (Math.random() < 0.05) NOTES.push({ x: pos.x + (Math.random() - 0.3) * 36, y: pos.y - 48, l: 1, s: Math.random() < 0.5 ? '\u266a' : '\u266b' });
+            });
+          });
+          window.PIANO164 = np; window.PIANO164N = nb;
+        }
+      } catch (e) { if (!window.E164) { window.E164 = 1; console.warn(e); } }
+    };
+
+    var _du = drawUnits;
+    drawUnits = function (camX, camY) {
+      var r = _du.apply(this, arguments);
+      try {
+        var c = ctx, i, o, sx, sy, ai;
+        for (i = 0; i < OVER.length; i++) {
+          o = OVER[i]; sx = o.x - camX; sy = o.y - camY;
+          if (o.k === 'piano') {
+            c.drawImage(pianoSpr(), sx - 8, sy - 50);
+          } else if (o.k === 'hands') {
+            ai = Math.max(0, Math.min(7, (o.ang * 7 + 0.5) | 0));
+            c.drawImage(handSpr()[ai], sx - 4, sy - 18);
+          }
+        }
+        NOTES.forEach(function (n) {
+          n.l -= 0.012; n.y -= 0.55; n.x += Math.sin(n.l * 8) * 0.45;
+          c.fillStyle = 'rgba(40,20,10,' + n.l.toFixed(2) + ')';
+          c.font = 'bold 15px serif';
+          c.fillText(n.s, n.x - camX, n.y - camY);
+        });
+        NOTES = NOTES.filter(function (n) { return n.l > 0; });
+      } catch (e) { if (!window.E164b) { window.E164b = 1; console.warn(e); } }
+      return r;
+    };
+    window.LIFE164 = { play: function () { return window.PIANO164 || 0; }, boxes: function () { return window.PIANO164N || 0; } };
+  })();
+
   requestAnimationFrame(frame);
 </script>
 
@@ -8021,5 +8177,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --></body>
 </html>
