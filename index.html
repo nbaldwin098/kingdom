@@ -8550,7 +8550,9 @@ window.B137 = (function () {
             var pos = yardAt(liv);
             if (pos.x < x0 || pos.x > x1 || pos.y < y0 || pos.y > y1) return;
             nh++;
-            OVER.push({ k: 'horse', x: pos.x + 10, y: pos.y, col: (t.id || 0) % 4, fi: (now * 2 + (t.ph || 0)) % 4 | 0 });
+            var seed = 0, nm = t.name || String(t.id || 'L'), si;
+            for (si = 0; si < nm.length; si++) seed += nm.charCodeAt(si);
+            OVER.push({ k: 'horse', x: pos.x + 10, y: pos.y, col: seed % 4, fi: ((now * 2) | 0) & 3 });
             OVER.push({ k: 'prop', x: pos.x - 18, y: pos.y + 6 });
             if (!work) return;
             var p = pickFarrier(t);
@@ -8581,10 +8583,10 @@ window.B137 = (function () {
             c.drawImage(propSpr(), sx - 12, sy - 34);
           } else if (o.k === 'horse') {
             if (!horses) horses = horseSpr();
-            c.drawImage(horses[o.col][o.fi], sx - 60, sy - 80);
+            c.drawImage(horses[((o.col % 4) + 4) % 4][o.fi & 3], sx - 60, sy - 80);
           } else if (o.k === 'farrier') {
             if (!fars) fars = farrierSpr();
-            c.drawImage(fars[o.ai], sx - 30, sy - 62);
+            c.drawImage(fars[Math.max(0, Math.min(7, o.ai | 0))], sx - 30, sy - 62);
             if (o.swing > 0.82 && SPARKS.length < 40) {
               SPARKS.push({
                 x: o.x + 22, y: o.y - 10,
