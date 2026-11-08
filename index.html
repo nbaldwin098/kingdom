@@ -751,10 +751,11 @@ window.B137 = (function () {
     smith: function (c) { shadow(c, 70); planks(c, -60, -60, 120, 60, '#7a6a5a'); P(c, [[-66, -60], [-66, -74], [66, -74], [66, -60]], '#5a3a2a'); sign(c, 0, -86, 76, 'SMITHY'); R(c, -40, -44, 44, 44, '#2a1a10'); E(c, -18, -12, 12, 6, '#e8802a', false); E(c, -18, -12, 6, 3, '#f8d040', false); R(c, 22, -22, 22, 8, '#4a4a52'); R(c, 28, -14, 10, 14, '#4a4a52'); R(c, 40, -110, 12, 50, '#8a7a6a'); },
     gunsmith: function (c) { shadow(c, 70); planks(c, -60, -64, 120, 64, '#8a6a4a'); P(c, [[-64, -64], [-64, -88], [64, -88], [64, -64]], '#6a4a2a'); sign(c, 0, -76, 66, 'GUNS', '#efe0b0', '#7a1a1a'); R(c, -14, -44, 28, 44, '#3a2414'); win(c, -50, -48, 24, 26); win(c, 26, -48, 24, 26); R(c, -48, -36, 20, 2, '#3a3a3a', false); R(c, 28, -36, 20, 2, '#3a3a3a', false); },
     mine: function (c) { shadow(c, 70); P(c, [[-70, 0], [-46, -44], [-10, -62], [30, -54], [70, 0]], '#9a7a5a'); P(c, [[-46, -44], [-10, -62], [-20, -30]], '#b0906a', false); R(c, -24, -46, 48, 46, '#7a4a28'); R(c, -18, -40, 36, 40, '#1a1008'); R(c, -26, -50, 52, 6, '#6a3a1a'); R(c, -40, -3, 80, 3, '#5a5a62', false); R(c, 12, -16, 22, 12, '#6a5a4a'); E(c, 16, -3, 3, 3, '#3a3a3a'); E(c, 30, -3, 3, 3, '#3a3a3a'); E(c, 22, -18, 6, 3, '#d4a017', false); },
+    coalmine: function (c) { shadow(c, 76); P(c, [[-74, 0], [-50, -40], [-16, -70], [28, -56], [76, 0]], '#5a4a3a'); P(c, [[-50, -40], [-16, -70], [-24, -28]], '#7a6550', false); R(c, -22, -52, 46, 52, '#6a3a1a'); R(c, -16, -46, 34, 46, '#1a1410'); R(c, -24, -58, 50, 7, '#5a3018'); R(c, -8, -108, 8, 52, '#5a3a22'); R(c, -32, -112, 56, 9, '#4a2a16'); R(c, -48, -8, 28, 12, '#2a2420'); R(c, 24, -8, 34, 12, '#3a322c'); E(c, 30, -2, 4, 3, '#5a5a62'); E(c, 44, -2, 4, 3, '#5a5a62'); },
     refinery: function (c) { shadow(c, 80); R(c, -64, -44, 40, 44, '#8a8a92'); R(c, -14, -72, 40, 72, '#9a9aa2'); c.fillStyle = '#6a6a72'; for (var y = -66; y < 0; y += 10) c.fillRect(-14, y, 40, 1.5); R(c, 36, -130, 12, 130, '#a8342a'); R(c, 36, -116, 12, 6, '#efe8d8', false); R(c, 36, -90, 12, 6, '#efe8d8', false); E(c, -44, -48, 20, 6, '#7a7a82'); R(c, -64, -30, 40, 2, '#5a5a62', false); }
   });
-  Object.assign(DIM, { farm: [170, 120, 85, 108], well: [90, 100, 45, 90], market: [170, 120, 85, 108], barracks: [170, 110, 85, 96], oilwell: [180, 120, 90, 108], stable: [190, 100, 95, 90], outpost: [90, 190, 45, 180], church: [140, 190, 70, 180], school: [150, 130, 75, 120], smith: [150, 130, 75, 118], gunsmith: [150, 110, 75, 98], mine: [160, 80, 80, 70], refinery: [170, 150, 85, 138] });
-  var LBL = { oilwell: 'OIL DERRICK', stable: 'STABLE', outpost: 'OUTPOST', school: 'SCHOOL', smith: 'BLACKSMITH', gunsmith: 'GUNSMITH', mine: 'MINE', refinery: 'REFINERY', church: 'CHURCH', farm: 'FARM' };
+  Object.assign(DIM, { farm: [170, 120, 85, 108], well: [90, 100, 45, 90], market: [170, 120, 85, 108], barracks: [170, 110, 85, 96], oilwell: [180, 120, 90, 108], stable: [190, 100, 95, 90], outpost: [90, 190, 45, 180], church: [140, 190, 70, 180], school: [150, 130, 75, 120], smith: [150, 130, 75, 118], gunsmith: [150, 110, 75, 98], mine: [160, 80, 80, 70], coalmine: [170, 110, 85, 96], refinery: [170, 150, 85, 138] });
+  var LBL = { oilwell: 'OIL DERRICK', stable: 'STABLE', outpost: 'OUTPOST', school: 'SCHOOL', smith: 'BLACKSMITH', gunsmith: 'GUNSMITH', mine: 'MINE', coalmine: 'COAL MINE', refinery: 'REFINERY', church: 'CHURCH', farm: 'FARM' };
   function house2(c, w, h, body, rf, acc) { shadow(c, w * 0.7); planks(c, -w / 2, -h, w, h, body); P(c, [[-w / 2 - 8, -h], [0, -h - h * 0.8], [w / 2 + 8, -h]], rf); R(c, -7, -24, 14, 24, '#5a3018'); win(c, -w / 2 + 8, -h + 10, 12, 12); win(c, w / 2 - 20, -h + 10, 12, 12); if (acc) { c.fillStyle = acc; c.fillRect(-w / 2, -h - 1, w, 3); } }
   Object.assign(ART, {
     post: function (c) { house2(c, 100, 62, '#6a8aa8', '#4a3a2a'); sign(c, 0, -72, 74, 'POST', '#efe0b0'); R(c, 30, -24, 12, 16, '#3c5a94'); },
@@ -3801,7 +3802,7 @@ window.B137 = (function () {
       var own = terrOf(px, py), ok = !own || own === s;
       ordP.appendChild(el('h3', 'BUILD WHERE YOU STAND'));
       ordP.appendChild(row(own === s ? 'YOUR LAND' : own ? 'CLAIMED BY ' + (facOf(own) ? facOf(own).name : 'ANOTHER REALM') + ' - CANNOT BUILD' : 'UNCLAIMED LAND - BUILDING HERE CLAIMS IT'));
-      ['farm', 'lumber', 'quarry', 'house', 'well', 'outpost', 'stable', 'barracks', 'prison', 'granary', 'bank', 'market', 'post', 'school', 'mine', 'oilwell', 'refinery', 'smith', 'gunsmith', 'tailor'].forEach(function (k) { var c = newCostOf(s, k); ordP.appendChild(row(ENAME[k], btn(cstr(c), function () { var b = orderAt(s, k, px, py - 40); for (var rr = 1; !b && rr <= 4 && canPay(s, newCostOf(s, k)); rr++) for (var aa = 0; !b && aa < 8; aa++) { var ax = px + Math.cos(aa * 0.785 + rr) * rr * 70, ay = py - 40 + Math.sin(aa * 0.785 + rr) * rr * 70; if (!own || terrOf(ax, ay) === s) b = orderAt(s, k, ax, ay); } /* v124: nudge to the nearest free spot */ showToast(b ? ENAME[k] + ' ORDERED HERE' : 'NO ROOM HERE - RIDE A LITTLE AWAY'); }, !ok || !canPay(s, c) || s.jobs.length >= 3))); });
+      ['farm', 'lumber', 'quarry', 'house', 'well', 'outpost', 'stable', 'barracks', 'prison', 'granary', 'bank', 'market', 'post', 'school', 'mine', 'coalmine', 'oilwell', 'refinery', 'smith', 'gunsmith', 'tailor'].forEach(function (k) { var c = newCostOf(s, k); ordP.appendChild(row(ENAME[k], btn(cstr(c), function () { var b = orderAt(s, k, px, py - 40); for (var rr = 1; !b && rr <= 4 && canPay(s, newCostOf(s, k)); rr++) for (var aa = 0; !b && aa < 8; aa++) { var ax = px + Math.cos(aa * 0.785 + rr) * rr * 70, ay = py - 40 + Math.sin(aa * 0.785 + rr) * rr * 70; if (!own || terrOf(ax, ay) === s) b = orderAt(s, k, ax, ay); } /* v124: nudge to the nearest free spot */ showToast(b ? ENAME[k] + ' ORDERED HERE' : 'NO ROOM HERE - RIDE A LITTLE AWAY'); }, !ok || !canPay(s, c) || s.jobs.length >= 3))); });
     }
   }
   var _ur32 = typeof updateRes === 'function' ? updateRes : null;
@@ -6066,11 +6067,12 @@ window.B137 = (function () {
   Object.keys(EB).forEach(function (k) { if (EB[k].c && EB[k].c.wood) EB[k].c.wood = Math.max(1, Math.round(EB[k].c.wood * 0.1)); });
   EB.tailor = { c: { wood: 3, stone: 15 }, w: 45 }; ENAME.tailor = 'TAILOR';
   EB.mine = { c: { wood: 3, stone: 10 }, w: 50 }; ENAME.mine = 'MINE';
+  EB.coalmine = { c: { wood: 3, stone: 8 }, w: 50 }; ENAME.coalmine = 'COAL MINE';
   EB.oilwell = { c: { wood: 4, stone: 20, gold: 10 }, w: 60 }; ENAME.oilwell = 'OIL DERRICK';
   EB.refinery = { c: { wood: 4, stone: 40, gold: 20 }, w: 80 }; ENAME.refinery = 'REFINERY';
   EB.smith = { c: { wood: 3, stone: 20 }, w: 50 }; ENAME.smith = 'BLACKSMITH';
   EB.gunsmith = { c: { wood: 3, stone: 30, gold: 15 }, w: 70 }; ENAME.gunsmith = 'GUNSMITH';
-  var NEWK = ['mine', 'oilwell', 'refinery', 'smith', 'gunsmith', 'tailor'];
+  var NEWK = ['mine', 'coalmine', 'oilwell', 'refinery', 'smith', 'gunsmith', 'tailor'];
   function H(s) { var x = (s.x || 0) + (s.id ? String(s.id).length * 977 : 0), y = s.y || 0; return hash2(Math.floor(x / 97), Math.floor(y / 89)); }
   function ty(s) { if (s === ME_S) return 'mixed'; if (!s.ty131) { var h = H(s); s.ty131 = h < 0.3 ? 'farm' : h < 0.55 ? 'oil' : h < 0.8 ? 'gold' : 'mixed'; } return s.ty131; }
   function stock(s) { if (!s.g131) { s.g131 = {}; var t = TY[ty(s)]; GK.forEach(function (k, i) { var h = hash2(i * 31 + Math.floor(H(s) * 1000), 7); s.g131[k] = s === ME_S ? 0 : Math.round((t.sup[k] ? 40 + 40 * h : 4 + 14 * h) / (G[k].p > 20 ? 3 : 1)); }); } return s.g131; }
@@ -6384,7 +6386,7 @@ window.B137 = (function () {
   // ===== v135 CORE LOOP (GEN135): generals haul goods to the vault, every build needs a free general, goblins raid vaults, walls are gone =====
   (function () {
     var VW = 58, VT = 92, VB = 22, ARM = 9, SPD = 150, RAWG = ['iron', 'coal', 'crude', 'wheat', 'corn', 'cotton', 'cattle', 'spice', 'berries'];
-    var OUT = { farm: ['crop', 'food'], lumber: ['wood'], quarry: ['stone'], well: ['water'], mine: ['gold', 'iron', 'coal'], oilwell: ['crude'], ranch: ['food'] };
+    var OUT = { farm: ['crop', 'food'], lumber: ['wood'], quarry: ['stone'], well: ['water'], mine: ['gold', 'iron', 'coal'], coalmine: ['coal'], oilwell: ['crude'], ranch: ['food'] };
     var LOAD = { food: 14, wood: 12, stone: 10, water: 14, gold: 5, iron: 6, coal: 6, crude: 6, crop: 6 };
     var RN = { food: 'FOOD', wood: 'WOOD', stone: 'STONE', water: 'WATER', gold: 'GOLD', iron: 'IRON', coal: 'COAL', crude: 'CRUDE', crop: 'CROP' };
     var STAT = { me: {}, cpu: {} }, GB = new WeakMap(), TV = [], ARROWS = [], warnT = 0, clock = 0;
@@ -6423,6 +6425,7 @@ window.B137 = (function () {
       s.gen135.forEach(function (g) {
         if (g.pop) { g.pop.t -= dt; if (g.pop.t <= 0) g.pop = null; }
         if (g.hunt141 && g !== builder && window.WILD141) { GB.delete(g); g.ji = -1; WILD141.genHunt(s, g, dt, vp, moveTo, deposit); return; }
+        if (g.coal169 && g !== builder && window.COAL169) { GB.delete(g); g.ji = -1; COAL169.genMine(s, g, dt, vp, moveTo, deposit); return; }
         var b = jobB(s, g);
         if (!b) {
           if (g === builder) { var p = bldPos(s, job); if (moveTo(g, p.x + 60, p.y + 30, dt)) { g.st = 'build'; g.ph += dt * 14; } else g.st = 'tobuild'; return; }
@@ -9026,7 +9029,8 @@ window.B137 = (function () {
           for (j = 0; j < p.length; j++) best = Math.min(best, Math.hypot(p[j].x - city.x, p[j].y - city.y));
         }
         return best;
-      }
+      },
+      raw: function () { return TRAINS; }
     };
   })();
 
@@ -9401,6 +9405,398 @@ window.B137 = (function () {
     };
   })();
 
+  // ===== v169: COAL - seams, coal mine, general coal job, HUD coal, fuels steel and trains =====
+  (function () {
+    var SPR = {}, CACHE = null, CKEY = '', drawn = 0, POPS = [], steelT = 0;
+
+    function mk(key, w, h, ox, oy, fn) {
+      if (SPR[key]) return SPR[key];
+      var cv = document.createElement('canvas'); cv.width = Math.ceil(w * 2); cv.height = Math.ceil(h * 2);
+      var c = cv.getContext('2d'); c.scale(2, 2); c.translate(ox, oy); c.lineJoin = 'round'; c.lineCap = 'round';
+      try { fn(c); } catch (e) {}
+      try { if (window.HD153) HD153(cv, { rim: 2 }); } catch (e) {}
+      return (SPR[key] = { cv: cv, w: w, h: h, ox: ox, oy: oy });
+    }
+    function putS(c, e, x, y, sx, sy) { c.drawImage(e.cv, x - e.ox * sx, y - e.oy * sy, e.w * sx, e.h * sy); }
+
+    function seamSpr() {
+      return mk('seam169', 150, 88, 75, 80, function (c) {
+        c.fillStyle = 'rgba(40,28,16,.22)'; c.beginPath(); c.ellipse(0, 4, 58, 12, 0, 0, 7); c.fill();
+        c.fillStyle = '#6a5848';
+        c.beginPath(); c.moveTo(-62, 4); c.lineTo(-48, -28); c.lineTo(-18, -46); c.lineTo(16, -38); c.lineTo(44, -22); c.lineTo(64, 4); c.closePath(); c.fill();
+        c.fillStyle = '#8a7460';
+        c.beginPath(); c.moveTo(-48, -28); c.lineTo(-18, -46); c.lineTo(-26, -18); c.closePath(); c.fill();
+        c.strokeStyle = '#2a1a0a'; c.lineWidth = 1.2;
+        c.beginPath(); c.moveTo(-62, 4); c.lineTo(-48, -28); c.lineTo(-18, -46); c.lineTo(16, -38); c.lineTo(44, -22); c.lineTo(64, 4); c.closePath(); c.stroke();
+        var bits = [[-28, -8, 10], [-8, -18, 8], [12, -10, 11], [30, -4, 7], [-40, 0, 6], [4, 2, 9]];
+        var i, b;
+        for (i = 0; i < bits.length; i++) {
+          b = bits[i];
+          c.fillStyle = i % 2 ? '#3a322c' : '#2a2420';
+          c.beginPath(); c.ellipse(b[0], b[1], b[2], b[2] * 0.62, 0.2, 0, 7); c.fill();
+          c.strokeStyle = '#1a1410'; c.lineWidth = 0.8; c.stroke();
+        }
+        c.fillStyle = '#c8b080'; c.font = 'bold 9px monospace'; c.textAlign = 'center';
+        c.fillText('COAL', 0, -52);
+      });
+    }
+
+    function mineSpr() {
+      return mk('mine169', 190, 150, 95, 138, function (c) {
+        c.fillStyle = 'rgba(40,28,16,.22)'; c.beginPath(); c.ellipse(0, 6, 72, 14, 0, 0, 7); c.fill();
+        c.fillStyle = '#5a4a3a';
+        c.beginPath(); c.moveTo(-78, 6); c.lineTo(-58, -36); c.lineTo(-20, -64); c.lineTo(22, -52); c.lineTo(58, -24); c.lineTo(80, 6); c.closePath(); c.fill();
+        c.fillStyle = '#7a6550';
+        c.beginPath(); c.moveTo(-58, -36); c.lineTo(-20, -64); c.lineTo(-30, -22); c.closePath(); c.fill();
+        c.strokeStyle = '#2a1a0a'; c.lineWidth = 1.25;
+        c.beginPath(); c.moveTo(-78, 6); c.lineTo(-58, -36); c.lineTo(-20, -64); c.lineTo(22, -52); c.lineTo(58, -24); c.lineTo(80, 6); c.closePath(); c.stroke();
+        c.fillStyle = '#6a3a1a'; c.fillRect(-26, -70, 54, 70);
+        c.fillStyle = '#1a1410'; c.fillRect(-20, -62, 42, 62);
+        c.fillStyle = '#5a3018'; c.fillRect(-28, -76, 58, 8);
+        c.fillStyle = '#5a3a22'; c.fillRect(-8, -124, 10, 50);
+        c.fillRect(-36, -128, 66, 10);
+        c.fillStyle = '#4a2a16'; c.fillRect(-40, -132, 74, 6);
+        c.strokeStyle = '#2a1a0a'; c.lineWidth = 1.1; c.strokeRect(-26, -70, 54, 70); c.strokeRect(-36, -128, 66, 10);
+        var bits = [[-44, -4, 12], [36, -2, 14], [18, 4, 8], [-18, 6, 10]];
+        var i, b;
+        for (i = 0; i < bits.length; i++) {
+          b = bits[i];
+          c.fillStyle = i % 2 ? '#3a322c' : '#2a2420';
+          c.beginPath(); c.ellipse(b[0], b[1], b[2], b[2] * 0.58, 0.15, 0, 7); c.fill();
+        }
+        c.fillStyle = '#c8b080'; c.font = 'bold 10px monospace'; c.textAlign = 'center';
+        c.fillText('COAL MINE', 0, -140);
+      });
+    }
+
+    try {
+      EB.coalmine = { c: { wood: 3, stone: 8 }, w: 50 };
+      ENAME.coalmine = 'COAL MINE';
+      if (typeof MAXL !== 'undefined') MAXL.coalmine = 5;
+      if (typeof DIM !== 'undefined') DIM.coalmine = [170, 110, 85, 96];
+      if (typeof LBL !== 'undefined') LBL.coalmine = 'COAL MINE';
+      if (window.GEN135 && GEN135.OUT) GEN135.OUT.coalmine = ['coal'];
+    } catch (e) {}
+
+    function coalOf(s) {
+      if (!s) return 0;
+      try { return ECON131.stock(s).coal || 0; } catch (e) { return (s.g131 && s.g131.coal) || 0; }
+    }
+    function addCoal(s, n) {
+      if (!s || !(n > 0)) return;
+      try { var g = ECON131.stock(s); g.coal = (g.coal || 0) + n; } catch (e) { s.g131 = s.g131 || {}; s.g131.coal = (s.g131.coal || 0) + n; }
+    }
+    function takeCoal(s, n) {
+      var have = coalOf(s), use = Math.min(have, n);
+      if (!(use > 0)) return 0;
+      try { ECON131.stock(s).coal -= use; } catch (e) { if (s.g131) s.g131.coal -= use; }
+      return use;
+    }
+
+    function nearTown(x, y, pad) {
+      try {
+        if (!window.TOWN133) return false;
+        var T = TOWN133.towns(), i;
+        for (i = 0; i < T.length; i++) if (Math.hypot(T[i].x - x, T[i].y - y) < pad) return true;
+      } catch (e) {}
+      return false;
+    }
+
+    function okSpot(x, y, list) {
+      try { if (typeof isLand === 'function' && !isLand(x, y)) return false; } catch (e) {}
+      try { if (window.MTN168 && MTN168.hit(x, y)) return false; } catch (e) {}
+      if (typeof city !== 'undefined' && city && Math.hypot(x - city.x, y - city.y) < 380) return false;
+      if (nearTown(x, y, 850)) return false;
+      var i;
+      for (i = 0; i < list.length; i++) if (Math.hypot(list[i].x - x, list[i].y - y) < 640) return false;
+      return true;
+    }
+
+    function settle(x, y, list) {
+      var offs = [[0, 0], [90, 40], [-90, 50], [130, -40], [-70, -90], [180, 20], [-160, 80], [40, 150], [-200, -30], [220, -80], [60, -160], [-40, 190]];
+      var i, xx, yy;
+      for (i = 0; i < offs.length; i++) {
+        xx = x + offs[i][0]; yy = y + offs[i][1];
+        if (okSpot(xx, yy, list)) return { x: xx, y: yy };
+      }
+      return null;
+    }
+
+    function build() {
+      if (typeof city === 'undefined' || !city) return [];
+      var hx = city.x, hy = city.y, out = [], i, p, c, raw;
+      raw = [
+        { dx: 820, dy: -280, mine: 1 },
+        { dx: -1180, dy: 540, mine: 0 },
+        { dx: 2460, dy: 1760, mine: 1 },
+        { dx: -2720, dy: -1540, mine: 0 },
+        { dx: 4180, dy: -880, mine: 0 },
+        { dx: -3520, dy: 2380, mine: 1 },
+        { dx: 1640, dy: 3280, mine: 0 },
+        { dx: -480, dy: -3360, mine: 0 }
+      ];
+      for (i = 0; i < raw.length; i++) {
+        p = settle(hx + raw[i].dx, hy + raw[i].dy, out);
+        if (!p) continue;
+        out.push({ x: p.x, y: p.y, mine: raw[i].mine, rich: raw[i].mine ? 1.4 : 1 });
+      }
+      try {
+        if (window.MTN168 && typeof MODE !== 'undefined' && MODE === 'free') {
+          var R = MTN168.list() || [], r, k, foot;
+          for (i = 0; i < R.length; i++) {
+            r = R[i];
+            foot = [[380, 260], [-400, 220], [0, 420], [280, -340]];
+            for (k = 0; k < foot.length; k++) {
+              p = settle(r.x + foot[k][0], r.y + foot[k][1], out);
+              if (p) { out.push({ x: p.x, y: p.y, mine: 1, rich: 1.5 }); break; }
+            }
+          }
+        }
+      } catch (e) {}
+      return out;
+    }
+
+    function seams() {
+      if (typeof city === 'undefined' || !city) return [];
+      var key = (typeof MODE === 'undefined' ? '?' : MODE) + ':' + city.x + ':' + city.y, tk = '0';
+      try { tk = String((window.MTN168 && MTN168.n()) || 0); } catch (e) {}
+      key += ':' + tk;
+      if (CACHE && CKEY === key) return CACHE;
+      CKEY = key; CACHE = build();
+      return CACHE;
+    }
+
+    function nearestSeam(x, y) {
+      var L = seams(), best = null, bd = 1e9, i, d;
+      for (i = 0; i < L.length; i++) {
+        d = Math.hypot(L[i].x - x, L[i].y - y);
+        if (d < bd) { bd = d; best = L[i]; }
+      }
+      return best;
+    }
+
+    function nearSeam(x, y, r) {
+      var L = seams(), i;
+      for (i = 0; i < L.length; i++) if (Math.hypot(L[i].x - x, L[i].y - y) < r) return L[i];
+      return null;
+    }
+
+    function genMine(s, g, dt, vp, moveTo, deposit) {
+      if (g.c) {
+        g.st = 'home';
+        if (moveTo(g, vp.x, vp.y + 36, dt)) deposit(s, g);
+        return;
+      }
+      var seam = g.seam169;
+      if (!seam || seams().indexOf(seam) < 0) { seam = nearestSeam(g.x, g.y); g.seam169 = seam; }
+      if (!seam) { g.st = 'idle'; moveTo(g, vp.x + 80, vp.y + 50, dt); return; }
+      var tx = seam.x + 34, ty = seam.y + 22;
+      if (g.st === 'work') {
+        g.t -= dt; g.ph += dt * 6;
+        if (g.t <= 0) { g.ck = 'coal'; g.c = 6 * (seam.rich || 1); g.st = 'home'; }
+      } else if (moveTo(g, tx, ty, dt)) {
+        g.st = 'work'; g.t = 4;
+      } else g.st = 'out';
+    }
+
+    var _ur = updateRes;
+    updateRes = function () {
+      _ur.apply(this, arguments);
+      try {
+        if (!ME_S || !resEl) return;
+        if (resEl.textContent.indexOf('COAL') < 0) resEl.textContent += '  COAL ' + fmt(Math.floor(coalOf(ME_S)));
+      } catch (e) {}
+    };
+
+    var _es = econStep;
+    econStep = function (s, dt) {
+      _es(s, dt);
+      try {
+        if (!s || !s.res || !(dt > 0)) return;
+        var n = typeof lvSum === 'function' ? lvSum(s, 'coalmine') : 0;
+        if (!n) return;
+        var g = ECON131.stock(s), hasT = g.tools > 0.5, fed = s.res.food > 2, fm = (fed ? 1 : 0.35) * (hasT ? 1 : 0.5);
+        g.coal += 0.08 * n * fm * dt;
+        s.res.food = Math.max(0, s.res.food - 0.01 * n * dt);
+        if (hasT) g.tools -= 0.0015 * n * dt;
+      } catch (e) {}
+    };
+
+    var _a = window.ACT126;
+    window.ACT126 = function (s, b, a) {
+      if (_a) _a(s, b, a);
+      try {
+        if (b && b.k === 'coalmine' && b.L > 0) {
+          var g = ECON131.stock(s);
+          a.info = (a.info ? a.info + ' · ' : '') + 'COAL ' + Math.floor(g.coal || 0) + (s.res.food > 2 ? '' : ' · HUNGRY - SLOW') + (g.tools > 0.5 ? '' : ' · NO TOOLS - SLOW');
+        }
+      } catch (e) {}
+    };
+
+    var _cb = typeof cityBuilding === 'function' ? cityBuilding : null;
+    if (_cb) cityBuilding = function (c, b, x, y) {
+      var k = b.kind || b.k;
+      if (k === 'coalmine') {
+        try { putS(c, mineSpr(), x, y, 1, 1); } catch (e) {}
+        c.fillStyle = '#2a1a0a'; c.font = 'bold 13px monospace'; c.textAlign = 'center';
+        c.fillText(ENAME.coalmine || 'COAL MINE', x, y + 18);
+        return;
+      }
+      return _cb.apply(this, arguments);
+    };
+
+    var _si = shopItems;
+    shopItems = function () {
+      var it = _si.apply(this, arguments);
+      try {
+        it.forEach(function (x) {
+          if (!x.label) return;
+          if (x.label.indexOf('SMITHIES MAKE 1 STEEL') >= 0) x.label = x.label.replace('SMITHIES MAKE 1 STEEL FROM 2 STONE / 15s', 'SMITHIES FORGE 1 STEEL FROM 1 COAL + (1 ORE OR 2 STONE) / 15s');
+          if (x.label.indexOf('SMITHIES SMELT') >= 0) x.label = x.label.replace('SMITHIES SMELT 1 ORE -> 1 STEEL (OR 2 STONE)', 'SMITHIES SMELT 1 COAL + 1 ORE -> 1 STEEL (OR 1 COAL + 2 STONE)');
+        });
+        var s = ME_S;
+        if (s && s.gen135) {
+          var cn = s.gen135.filter(function (g) { return g.coal169; }).length;
+          var idle = s.gen135.filter(function (g) { return !g.coal169 && !g.hunt141 && !(window.GEN135 && GEN135.job(s, g)); });
+          it.push({ label: 'COAL JOB: ' + (idle.length ? 'SEND AN IDLE GENERAL TO MINE COAL' : 'NO IDLE GENERAL') + ' · MINERS ' + cn + ' · COAL ' + Math.floor(coalOf(s)), btn: 'MINE', dis: !idle.length, act: function () { idle[0].coal169 = 1; showToast('GENERAL IS NOW A COAL MINER - BRINGS COAL TO THE VAULT'); } });
+          if (cn) it.push({ label: 'CALL A COAL MINER BACK TO BUILD AND WORK', btn: 'RECALL', act: function () { var g = s.gen135.filter(function (q) { return q.coal169; })[0]; g.coal169 = 0; g.seam169 = null; showToast('COAL MINER RECALLED'); } });
+        }
+      } catch (e) {}
+      return it;
+    };
+
+    var _at = attack;
+    attack = function () {
+      var r = _at.apply(this, arguments);
+      try {
+        if (!started || !ME_S) return r;
+        var s = nearSeam(px, py, 92);
+        if (s && (!s.hitT || performance.now() - s.hitT > 480)) {
+          s.hitT = performance.now();
+          addCoal(ME_S, 1);
+          POPS.push({ x: s.x, y: s.y - 54, t: 1.2, s: '+1 COAL' });
+          try { updateRes(); } catch (e) {}
+          try { sfx('mine', s.x, s.y); } catch (e) {}
+        }
+      } catch (e) {}
+      return r;
+    };
+
+    var _pf = pushFactionItems;
+    pushFactionItems = function (items) {
+      _pf.apply(this, arguments);
+      drawn = 0;
+      if (typeof started === 'undefined' || !started) return;
+      try {
+        var z = (typeof zoom === 'number' && zoom > 0) ? zoom : 1;
+        var vw = innerWidth / (2 * z) + 240, vh = innerHeight / (2 * z) + 200;
+        var L = seams(), i, s;
+        for (i = 0; i < L.length; i++) {
+          s = L[i];
+          if (Math.abs(s.x - px) > vw || Math.abs(s.y - py) > vh) continue;
+          drawn++;
+          (function (seam) {
+            items.push({ y: seam.y, x: seam.x, y2: seam.y, fn: function (sx, sy) {
+              putS(ctx, seam.mine ? mineSpr() : seamSpr(), sx, sy, 1, 1);
+            } });
+          })(s);
+        }
+        POPS.forEach(function (p) {
+          items.push({ y: p.y + 1800, x: p.x, y2: p.y, fn: function (sx, sy) {
+            ctx.save(); ctx.globalAlpha = Math.min(1, p.t); ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center';
+            ctx.lineWidth = 3; ctx.strokeStyle = '#2a1a0a'; ctx.strokeText(p.s, sx, sy - 1800);
+            ctx.fillStyle = '#e8d090'; ctx.fillText(p.s, sx, sy - 1800); ctx.restore();
+          } });
+        });
+        window.COAL169D = drawn;
+      } catch (e) { if (!window.E169) { window.E169 = 1; console.warn(e); } }
+    };
+
+    var _dm = drawMinimap;
+    drawMinimap = function () {
+      _dm.apply(this, arguments);
+      try {
+        if (typeof started === 'undefined' || !started) return;
+        var Rng = 2000, sc = 75 / Rng, L = seams(), i, a, b;
+        mctx.save();
+        mctx.beginPath(); mctx.arc(75, 75, 75, 0, 7); mctx.clip();
+        for (i = 0; i < L.length; i++) {
+          a = 75 + (L[i].x - px) * sc; b = 75 + (L[i].y - py) * sc;
+          if (a < -8 || a > 158 || b < -8 || b > 158) continue;
+          mctx.fillStyle = '#3a322c';
+          mctx.fillRect(a - 2, b - 2, 4, 4);
+        }
+        mctx.restore();
+      } catch (e) {}
+    };
+
+    var _uw = updateWolves;
+    updateWolves = function (dt) {
+      try { if (window.LIFE143) LIFE143.steelT = 0; } catch (e) {}
+      try {
+        if (window.TRAIN167 && TRAIN167.raw) {
+          var ts = TRAIN167.raw(), i, t, out = coalOf(ME_S) < 0.05;
+          window.COAL169SLOW = out ? 1 : 0;
+          for (i = 0; i < ts.length; i++) {
+            t = ts[i];
+            if (t._spd0 == null) t._spd0 = t.spd || 260;
+            t.spd = out ? t._spd0 * 0.35 : t._spd0;
+          }
+        }
+      } catch (e) {}
+      _uw.apply(this, arguments);
+      try {
+        dt = dt || 0;
+        if (POPS.length) POPS = POPS.filter(function (p) { p.t -= dt; p.y -= 18 * dt; return p.t > 0; });
+        if (started && ME_S) {
+          try {
+            var g0 = ECON131.stock(ME_S);
+            if (!g0.started169) { g0.started169 = 1; if ((g0.coal || 0) < 10) g0.coal = 10; try { updateRes(); } catch (e2) {} }
+          } catch (e) {}
+          if (typeof MODE !== 'undefined' && MODE === 'free') {
+            var nT = 0;
+            try { nT = TRAIN167.n(); } catch (e) {}
+            if (nT && coalOf(ME_S) > 0) takeCoal(ME_S, 0.012 * nT * dt);
+          }
+          steelT += dt;
+          if (steelT > 15) {
+            steelT = 0;
+            var n = ME_S.bld.filter(function (b) { return (b.k === 'smith' || b.k === 'blacksmith') && b.L > 0; }).length, i;
+            for (i = 0; i < n; i++) {
+              if (coalOf(ME_S) < 1) break;
+              if ((ME_S.ore144 || 0) >= 1 || stone >= 2) {
+                takeCoal(ME_S, 1);
+                if ((ME_S.ore144 || 0) >= 1) ME_S.ore144--;
+                else stone -= 2;
+                ME_S.steel142 = (ME_S.steel142 || 0) + 1;
+              }
+            }
+            if (n) { try { updateRes(); if (window.SG142 && SG142.lab) SG142.lab(); } catch (e) {} }
+          }
+        }
+      } catch (e) { if (!window.E169) { window.E169 = 1; console.warn(e); } }
+    };
+
+    window.COAL169 = {
+      n: function () { return seams().length; },
+      list: function () {
+        return seams().map(function (s) { return { x: s.x, y: s.y, mine: s.mine ? 1 : 0, rich: s.rich || 1 }; });
+      },
+      nearHome: function () {
+        if (typeof city === 'undefined' || !city) return 1e9;
+        var L = seams(), best = 1e9, i;
+        for (i = 0; i < L.length; i++) best = Math.min(best, Math.hypot(L[i].x - city.x, L[i].y - city.y));
+        return best;
+      },
+      mines: function () { var n = 0, L = seams(), i; for (i = 0; i < L.length; i++) if (L[i].mine) n++; return n; },
+      coal: function () { return coalOf(ME_S); },
+      hud: function () { return resEl ? resEl.textContent : ''; },
+      genMine: genMine,
+      slow: function () { return window.COAL169SLOW || 0; },
+      drawn: function () { return window.COAL169D || 0; }
+    };
+  })();
+
   requestAnimationFrame(frame);
 </script>
 
@@ -9441,5 +9837,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --></body>
 </html>
