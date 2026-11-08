@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, then The Grade: Crowe wants a strip of land for his railroad.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, then The Showdown: Red Vane hits the railroad payroll.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170-v172: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
+  // ===== v170-v173: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -9833,13 +9833,16 @@ window.B137 = (function () {
       { id: 'ike', name: 'Ike Pell', title: 'Wrangler', role: 'farmer', age: 29, fem: 0, ox: -240, oy: -90, face: 1, from: 2 },
       { id: 'dutch', name: 'Dutch Harlan', title: 'Rustler', role: 'guard', age: 38, fem: 0, ox: 90, oy: 280, face: -1, from: 2 },
       { id: 'vera', name: 'Vera Pike', title: 'Surveyor', role: 'woman', age: 34, fem: 1, ox: -300, oy: 190, face: 1, from: 3 },
-      { id: 'jed', name: 'Jed Calder', title: 'Homesteader', role: 'farmer', age: 46, fem: 0, ox: -350, oy: 10, face: -1, from: 3 }
+      { id: 'jed', name: 'Jed Calder', title: 'Homesteader', role: 'farmer', age: 46, fem: 0, ox: -350, oy: 10, face: -1, from: 3 },
+      { id: 'lila', name: 'Lila Finch', title: 'Witness', role: 'woman', age: 27, fem: 1, ox: 240, oy: 80, face: -1, from: 4 },
+      { id: 'kit', name: 'Kit Rourke', title: 'Gunhand', role: 'guard', age: 33, fem: 0, ox: -40, oy: 340, face: 1, from: 4 }
     ];
 
     var CHAPTERS = [
       { id: 1, title: 'The Claim', year: 1, need: ['widow', 'sheriff', 'vane'] },
       { id: 2, title: 'The Rustlers', year: 1, need: ['ike', 'dutch', 'sheriff2'] },
-      { id: 3, title: 'The Grade', year: 1, need: ['baron3', 'vera', 'jed'] }
+      { id: 3, title: 'The Grade', year: 1, need: ['baron3', 'vera', 'jed'] },
+      { id: 4, title: 'The Showdown', year: 1, need: ['lila', 'kit', 'vane4'] }
     ];
 
     var NODES = {
@@ -10126,6 +10129,83 @@ window.B137 = (function () {
       vane_ch3: { who: 'vane', say: "A baron with a pen is still a thief. Difference is he files first. You want trouble that pays, wait till the payroll car comes down that new grade.", replies: [
         { t: "I'm not robbing a train.", next: 'end', flag: 'vane_ch3' },
         { t: "I'll keep that in mind.", next: 'end', flag: 'vane_ch3' }
+      ] },
+
+      lila: { who: 'lila', say: "You the new claim? Thank God. I'm Lila Finch. I was on the south coach this morning \u2014 railroad payroll boxed under the seat. Red Vane and another man stopped us at the ridge. They took the box and left us the horses, which I suppose was manners.", replies: [
+        { t: "Are you hurt?", next: 'lila_hurt', rel: { lila: 1 } },
+        { t: "Which way did they ride?", next: 'lila_where' },
+        { t: "Did you tell the sheriff?", next: 'lila_law' }
+      ] },
+      lila_hurt: { who: 'lila', say: "Bruised pride and a ripped sleeve. The shotgun messenger wasn't so lucky \u2014 he's with Boone if he's anywhere. Vane's man rode a bay and called himself Kit. They didn't go far. Vane said this country still has a reckoning coming.", replies: [
+        { t: "I'll find them.", next: 'end', flag: 'met_lila' }
+      ] },
+      lila_where: { who: 'lila', say: "Back toward the south ridge \u2014 same ground folks say Vane likes. The other one, Kit Rourke, peeled off closer to your claim. Like he wanted to be found.", replies: [
+        { t: "I'll look for him.", next: 'end', flag: 'met_lila' }
+      ] },
+      lila_law: { who: 'lila', say: "I found Boone on the trail. He's angry enough to chew nails, but he hasn't got a posse. He said if you were still on this claim, you might be the only help he's got.", replies: [
+        { t: "I'll talk to him.", next: 'end', flag: 'met_lila' }
+      ] },
+      lila_again: { who: 'lila', say: "I ain't getting back on a coach till that box is found or Vane's in the ground. Your porch is as safe as anywhere.", replies: [
+        { t: "Stay as long as you need.", next: 'end', rel: { lila: 1 } },
+        { t: "I'll handle it.", next: 'end' }
+      ] },
+
+      kit: { who: 'kit', say: "That's close enough. Kit Rourke. I ride with Red Vane. He wants a word with the tenderfoot who planted a stake under his ridge. You can walk up there like a guest, or you can ride with Boone and come as trouble.", replies: [
+        { t: "Where is he?", next: 'kit_where' },
+        { t: "Tell Vane I'm not interested.", next: 'kit_refuse', rel: { kit: -1 } },
+        { t: "What's he offering?", next: 'kit_offer' }
+      ] },
+      kit_where: { who: 'kit', say: "South ridge, same place he watched you from the day you arrived. He's got the payroll box and a question. I wouldn't keep him waiting, and I wouldn't bring a crowd unless you mean to use it.", replies: [
+        { t: "I'll go.", next: 'end', flag: 'met_kit' }
+      ] },
+      kit_refuse: { who: 'kit', say: "Your funeral, or his. Either way I'll be there. Vane doesn't repeat an invitation.", replies: [
+        { t: "We'll see.", next: 'end', flag: 'met_kit', rel: { kit: -1 } }
+      ] },
+      kit_offer: { who: 'kit', say: "A cut of Crowe's gold, and a promise this claim stays yours if you stay out of what comes next. Or you stand with Boone and we treat you like the law. Simple as that.", replies: [
+        { t: "I'll hear it from Vane.", next: 'end', flag: 'met_kit' }
+      ] },
+      kit_again: { who: 'kit', say: "Ridge is still south. Vane's still on it. Clock's still running.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      vane_ch4: { who: 'vane', say: "You came. Good. I told you this claim was only yours till someone harder wanted it. I don't want the dirt \u2014 I want the road it sits on. Crowe's payroll is in that box. Boone wants me in a cell. You want to pick a side, pick it now.", replies: [
+        { t: "You're coming in. Boone's waiting.", next: 'vane_ch4_law', rel: { vane: -1 } },
+        { t: "I'll take a cut and forget the box.", next: 'vane_ch4_cut' },
+        { t: "Put the box down and ride out. That's the only deal.", next: 'vane_ch4_face' }
+      ] },
+      vane_ch4_friend: { who: 'vane', say: "You didn't spit in my face the first time. I'll remember that. Crowe's payroll is in that box. Boone's riding himself ragged. You can take a cut and look away, or you can try to walk me into town. Choose.", replies: [
+        { t: "You're coming in. Boone's waiting.", next: 'vane_ch4_law', rel: { vane: -1 } },
+        { t: "I'll take a cut and forget the box.", next: 'vane_ch4_cut' },
+        { t: "Put the box down and ride out. That's the only deal.", next: 'vane_ch4_face' }
+      ] },
+      vane_ch4_law: { who: 'vane', say: "Then we do this the hard way. I'll be on this ridge when you come back with more than talk. Bring Boone if he can still sit a horse.", replies: [
+        { t: "I'll be back.", next: 'end', flag: 'met_vane4', rel: { vane: -1, sheriff: 1 } }
+      ] },
+      vane_ch4_cut: { who: 'vane', say: "Smarter than you looked the day I found you. A third of the box, and your claim stays off my list. Boone asks, you saw dust and nothing else.", replies: [
+        { t: "We're done.", next: 'end', flag: 'met_vane4', rel: { vane: 1, kit: 1, sheriff: -1, baron: -1, lila: -1 } }
+      ] },
+      vane_ch4_face: { who: 'vane', say: "You want the lion and you want him housebroken. Fine. I'll cache the box and I'll ride \u2014 for now. Don't confuse that with me being gone.", replies: [
+        { t: "Just ride.", next: 'end', flag: 'met_vane4' }
+      ] },
+      vane_ch4_again: { who: 'vane', say: "You already said your piece. The ridge remembers.", replies: [
+        { t: "So do I.", next: 'end' }
+      ] },
+
+      sheriff_ch4: { who: 'sheriff', say: "Lila Finch already told you, or she will. Vane hit Crowe's payroll coach on the south road. I've got a wounded messenger and no posse. If you're still the neighbor who said they'd keep the peace, I need you on that ridge.", replies: [
+        { t: "I'll bring him in.", next: 'end', flag: 'sheriff_ch4', rel: { sheriff: 1 } },
+        { t: "I'll see what I find.", next: 'end', flag: 'sheriff_ch4' }
+      ] },
+      sheriff_ch4_friend: { who: 'sheriff', say: "You told me you'd keep the peace. This is what that costs now. Vane hit the payroll coach. Lila Finch walked away; the messenger didn't walk far. I need you on the south ridge.", replies: [
+        { t: "I'll bring him in.", next: 'end', flag: 'sheriff_ch4', rel: { sheriff: 1 } },
+        { t: "I'll see what I find.", next: 'end', flag: 'sheriff_ch4' }
+      ] },
+      widow_ch4: { who: 'widow', say: "First rustlers, then Crowe's stakes, now Vane with a stolen box on the ridge I can see from my porch. This country's trying to eat us, neighbor.", replies: [
+        { t: "I'll end it.", next: 'end', flag: 'widow_ch4', rel: { widow: 1 } },
+        { t: "I'll do what I can.", next: 'end', flag: 'widow_ch4' }
+      ] },
+      baron_ch4: { who: 'baron', say: "That box was wages for the men laying my grade. Vane didn't rob a bank \u2014 he robbed a railroad. I pay for results, not speeches.", replies: [
+        { t: "I'll get it back.", next: 'end', flag: 'baron_ch4', rel: { baron: 1 } },
+        { t: "That's between you and Vane.", next: 'end', flag: 'baron_ch4' }
       ] }
 
     };
@@ -10397,7 +10477,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
@@ -10446,7 +10526,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, then The Grade: Crowe wants land for his railroad.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, then The Showdown: Red Vane hits the railroad payroll.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
