@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, then The Verdict: the jury comes back.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, then The Sentence: Hattie passes sentence, and Dustwater has to live with it.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170-v176: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
+  // ===== v170-v177: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -9841,7 +9841,9 @@ window.B137 = (function () {
       { id: 'judge', name: 'Hattie Voss', title: 'Circuit Judge', role: 'woman', age: 54, fem: 1, ox: 360, oy: -20, face: -1, from: 6 },
       { id: 'croft', name: 'Silas Croft', title: 'Defense Counsel', role: 'merchant', age: 47, fem: 0, ox: 10, oy: -170, face: 1, from: 6 },
       { id: 'hale', name: 'Ned Hale', title: 'Jury Foreman', role: 'merchant', age: 51, fem: 0, ox: 330, oy: 140, face: 1, from: 7 },
-      { id: 'clara', name: 'Clara Bell', title: 'Gazette Editor', role: 'woman', age: 31, fem: 1, ox: -220, oy: -200, face: -1, from: 7 }
+      { id: 'clara', name: 'Clara Bell', title: 'Gazette Editor', role: 'woman', age: 31, fem: 1, ox: -220, oy: -200, face: -1, from: 7 },
+      { id: 'keene', name: 'Wade Keene', title: 'Territorial Warden', role: 'guard', age: 50, fem: 0, ox: 420, oy: 60, face: 1, from: 8 },
+      { id: 'brant', name: 'Ivy Brant', title: 'Court Clerk', role: 'woman', age: 36, fem: 1, ox: 80, oy: -240, face: -1, from: 8 }
     ];
 
     var CHAPTERS = [
@@ -9851,7 +9853,8 @@ window.B137 = (function () {
       { id: 4, title: 'The Showdown', year: 1, need: ['lila', 'kit', 'vane4'] },
       { id: 5, title: 'The Posse', year: 1, need: ['tess', 'wren', 'sheriff5'] },
       { id: 6, title: 'The Trial', year: 1, need: ['judge', 'croft', 'tess6'] },
-      { id: 7, title: 'The Verdict', year: 1, need: ['hale', 'clara', 'judge7'] }
+      { id: 7, title: 'The Verdict', year: 1, need: ['hale', 'clara', 'judge7'] },
+      { id: 8, title: 'The Sentence', year: 1, need: ['keene', 'brant', 'judge8'] }
     ];
 
     var NODES = {
@@ -10549,6 +10552,141 @@ window.B137 = (function () {
         { t: "I'll keep that in mind.", next: 'end', flag: 'preacher_ch7', rel: { preacher: 1 } },
         { t: "The court has spoken, or it will.", next: 'end', flag: 'preacher_ch7' }
       ] }
+,
+
+      judge_ch8: { who: 'judge', say: "The jury wrote what it wrote. Now I have to pass sentence, and Dustwater has to live with it. I want you in the room when I do \u2014 a sentence without the witness is just another rumor. Wade Keene, the territorial warden, brought the prison wagon; he'll carry out whatever I write, territorial prison or the rope. Ivy Brant will put it in the ledger so it outlasts Clara's paper.", replies: [
+        { t: "I'll stand with whatever you write.", next: 'judge_ch8_stand', rel: { judge: 1 } },
+        { t: "Send him to prison. Not the rope.", next: 'judge_ch8_prison' },
+        { t: "Stay it a day. Let the street cool.", next: 'judge_ch8_stay' }
+      ] },
+      judge_ch8_friend: { who: 'judge', say: "You were in that box when I asked, and you stood there when Hale read it. The jury's wording is fixed. Now I have to pass sentence, and Dustwater has to live with it. I want the same witness in the room. Talk to Wade Keene \u2014 the territorial warden who brought the wagon \u2014 and Ivy Brant, who'll write it in the ledger. Prison or the rope: I write it, they carry it, and this city lives with it.", replies: [
+        { t: "I'll stand with whatever you write.", next: 'judge_ch8_stand', rel: { judge: 1 } },
+        { t: "Send him to prison. Not the rope.", next: 'judge_ch8_prison' },
+        { t: "Stay it a day. Let the street cool.", next: 'judge_ch8_stay' }
+      ] },
+      judge_ch8_stand: { who: 'judge', say: "Then stay close. Talk to Keene so he knows the wagon isn't a rumor, and to Brant so the ledger matches what I say in the room. I don't want the street writing a sentence of its own.", replies: [
+        { t: "I'll find them.", next: 'end', flag: 'met_judge8' }
+      ] },
+      judge_ch8_prison: { who: 'judge', say: "That's a request I can hear. A territorial cell is still a sentence \u2014 and it keeps this city from making a picnic out of a rope. Talk to Keene; the wagon is his. Talk to Brant; the ledger is hers. I'll write what the law and the room can both survive.", replies: [
+        { t: "I'll talk to them.", next: 'end', flag: 'met_judge8' }
+      ] },
+      judge_ch8_stay: { who: 'judge', say: "A day is a long time for a gallery that already picked a side. I can hold the gavel that long if the street doesn't pick up a rope of its own. Talk to Keene and to Brant. If I stay it, I still want it written down so nobody claims I never meant to finish.", replies: [
+        { t: "I'll find them.", next: 'end', flag: 'met_judge8' }
+      ] },
+      judge_ch8_again: { who: 'judge', say: "Keene has the wagon. Brant has the ledger. The room is waiting on a sentence.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      keene: { who: 'keene', say: "Wade Keene. Territorial warden. I don't decide if a man's guilty \u2014 twelve strangers already did that, and Hattie writes what it costs. I take men to the territorial prison, or I stand them at the gallows. The wagon's in the yard either way. You got an opinion about where the law ought to end?", replies: [
+        { t: "End it at the wagon. Prison, not a rope.", next: 'keene_wagon', rel: { keene: 1 } },
+        { t: "If she writes the rope, you do it.", next: 'keene_rope' },
+        { t: "That's hers to write, not mine.", next: 'keene_hers' }
+      ] },
+      keene_wagon: { who: 'keene', say: "A wagon's slower than a hanging and quieter than a crowd. I've hauled worse men than Vane east and seen them live long enough to get old in a cell. If Hattie writes prison, I'll have him on the boards by night. If she writes the other thing, I still show up. That's the job.", replies: [
+        { t: "I'll remember that.", next: 'end', flag: 'met_keene' }
+      ] },
+      keene_rope: { who: 'keene', say: "Then you and the gallery agree on something. I don't cheer it and I don't flinch from it. A rope is a sentence same as a cell \u2014 just shorter, and it teaches a city the wrong kind of hunger if they're not careful. I'll stand where she points.", replies: [
+        { t: "Understood.", next: 'end', flag: 'met_keene' }
+      ] },
+      keene_hers: { who: 'keene', say: "That's the right order. Jury writes guilt. Judge writes the cost. I carry it. You were the witness \u2014 you don't have to pick the hardware. Just be in the room so nobody says it happened in secret.", replies: [
+        { t: "I will.", next: 'end', flag: 'met_keene', rel: { keene: 1 } }
+      ] },
+      keene_again: { who: 'keene', say: "Wagon or gallows. I don't leave till she writes it down.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      brant: { who: 'brant', say: "Ivy Brant. I keep the court ledger. Clara Bell can fill a Gazette and the gallery can shout till the windows rattle \u2014 paper yellows and shouting dies. This book is what outlasts both. When Hattie speaks the sentence, I write it. How do you want it to read?", replies: [
+        { t: "Write it plain. Just the sentence.", next: 'brant_plain' },
+        { t: "Write the city's mood with it.", next: 'brant_mood' },
+        { t: "Who is the record even for?", next: 'brant_who' }
+      ] },
+      brant_plain: { who: 'brant', say: "Plain is how a ledger stays honest. Date, name, what the judge said. No headlines, no moral. Clara can sell copies of the rest. If you haven't talked to Hattie and to Keene, do it \u2014 I don't write a sentence nobody spoke.", replies: [
+        { t: "That's all I ask.", next: 'end', flag: 'met_brant' }
+      ] },
+      brant_mood: { who: 'brant', say: "I can note the gallery was loud, or that the street wanted a hanging before Hale even stood up. That's history too, if you write it as weather and not as a sermon. I'll keep Hattie's words on their own line.", replies: [
+        { t: "Write it that way.", next: 'end', flag: 'met_brant', rel: { brant: 1 } }
+      ] },
+      brant_who: { who: 'brant', say: "For the next judge who rides this circuit. For a widow who wants to know a court finished what it started. For Vane's people, if he has any left. Not for Clara's subscribers and not for men who only showed up to see a rope. A ledger outlasts a mood.", replies: [
+        { t: "Then write it for them.", next: 'end', flag: 'met_brant', rel: { brant: 1 } }
+      ] },
+      brant_again: { who: 'brant', say: "The page is marked. I'm waiting on Hattie's words, not yours.", replies: [
+        { t: "Understood.", next: 'end' }
+      ] },
+
+      vane_ch8: { who: 'vane', say: "So now it's a sentence. Hale already did his part \u2014 he just wouldn't say it where I could watch your face. Keene brought a wagon and a rope, which is a hell of a pair of options. You going to stand there while Hattie picks which one I ride?", replies: [
+        { t: "I'll hear what she writes.", next: 'end', flag: 'vane_ch8', rel: { vane: -1 } },
+        { t: "Prison would let you live.", next: 'vane_ch8_soft' },
+        { t: "I haven't heard it yet.", next: 'end', flag: 'vane_ch8' }
+      ] },
+      vane_ch8_friend: { who: 'vane', say: "You didn't pile on when they asked. That still counts for something while Keene oils his hinges. If Hattie writes the rope, don't look surprised. If she writes a cell, don't wait for Tess to invent a reason I never reach it.", replies: [
+        { t: "I'll hear what she writes.", next: 'end', flag: 'vane_ch8', rel: { vane: -1 } },
+        { t: "Prison would let you live.", next: 'vane_ch8_soft' },
+        { t: "I haven't heard it yet.", next: 'end', flag: 'vane_ch8' }
+      ] },
+      vane_ch8_soft: { who: 'vane', say: "Living in a territorial cell isn't living. It's just slower. Still, slower's a kind of luck I didn't expect from this city. Don't congratulate yourself till Brant writes it down.", replies: [
+        { t: "We'll see.", next: 'end', flag: 'vane_ch8', rel: { vane: 1 } }
+      ] },
+      vane_ch8_again: { who: 'vane', say: "The waiting didn't get kinder when they changed the word from verdict to sentence.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      tess_ch8: { who: 'tess', say: "A sentence is only as good as the street that lets it happen. If Hattie writes prison, I walk Vane to Keene's wagon and I keep the gallery off him. If she writes the rope, I keep the picnic from starting early. Either way I need you visible \u2014 not behind the church while Dustwater decides it knows better than a judge.", replies: [
+        { t: "I'll be there.", next: 'end', flag: 'tess_ch8', rel: { tess: 1 } },
+        { t: "The court already has my word.", next: 'end', flag: 'tess_ch8' }
+      ] },
+      tess_ch8_friend: { who: 'tess', say: "You rode and you spoke and you stood for the reading. Now I need you in that room when Hattie picks wagon or rope. A marshal can hold a crowd for a sentence or lose it in the time it takes Brant to dip a pen. Don't make me do that without the witness they came to stare at.", replies: [
+        { t: "I'll be there.", next: 'end', flag: 'tess_ch8', rel: { tess: 1 } },
+        { t: "The court already has my word.", next: 'end', flag: 'tess_ch8' }
+      ] },
+
+      clara_ch8: { who: 'clara', say: "Verdict was the easy headline. Sentence is the one that sticks. I can print a wagon heading east or a rope in the yard \u2014 both sell papers. Brant thinks her ledger outlasts me. Maybe it does. I still write what Dustwater tells itself it did.", replies: [
+        { t: "Write the sentence straight.", next: 'end', flag: 'clara_ch8', rel: { clara: 1 } },
+        { t: "The ledger can have the last word.", next: 'end', flag: 'clara_ch8' }
+      ] },
+
+      hale_ch8: { who: 'hale', say: "We wrote what we wrote. That's finished. Hattie's part is the cost, and I don't envy her. I sat with twelve people who wanted to go home. Now the city has to live with the wording they made me carry. I'll stand there when she speaks it. You should too.", replies: [
+        { t: "I'll stand there.", next: 'end', flag: 'hale_ch8', rel: { hale: 1 } },
+        { t: "I'll hear it.", next: 'end', flag: 'hale_ch8' }
+      ] },
+
+      croft_ch8: { who: 'croft', say: "A sentence is where a defense counsel finds out if the work meant anything. Prison I can call mercy and still sleep. A rope I can call the law and still hate the sound. Brant will write whichever one Hattie says. I already did my talking.", replies: [
+        { t: "You gave him a fair shake.", next: 'end', flag: 'croft_ch8', rel: { croft: 1 } },
+        { t: "We'll see what she writes.", next: 'end', flag: 'croft_ch8' }
+      ] },
+
+      sheriff_ch8: { who: 'sheriff', say: "Red Mesa sent a man. Dustwater already heard Hale read the paper. What I care about now is the sentence getting carried out by Keene, not by a crowd with a spare rope. Be in the room when Hattie writes it.", replies: [
+        { t: "I'll stand there.", next: 'end', flag: 'sheriff_ch8', rel: { sheriff: 1 } },
+        { t: "I'll hear it.", next: 'end', flag: 'sheriff_ch8' }
+      ] },
+      sheriff_ch8_friend: { who: 'sheriff', say: "You told me you'd keep the peace. This is the last of it \u2014 Hattie writing a cost, Keene waiting with a wagon, and a street that already picked its favorite ending. Don't let the gallery write a second sentence out there.", replies: [
+        { t: "I'll stand there.", next: 'end', flag: 'sheriff_ch8', rel: { sheriff: 1 } },
+        { t: "I'll hear it.", next: 'end', flag: 'sheriff_ch8' }
+      ] },
+
+      widow_ch8: { who: 'widow', say: "A city I never asked for is about to name the price on a man who stood on my ridge. I hope Hattie remembers he left people breathing. I hope Brant writes it plain, and I hope Clara doesn't turn a sentence into a story that isn't ours.", replies: [
+        { t: "I'll keep it honest.", next: 'end', flag: 'widow_ch8', rel: { widow: 1 } },
+        { t: "I'll listen.", next: 'end', flag: 'widow_ch8' }
+      ] },
+      baron_ch8: { who: 'baron', say: "A verdict without a sentence is a lecture. If Hattie puts him in Keene's wagon, the next man still thinks twice. If she writes a rope, the next man thinks three times. I paid wages on that coach. I'll live with whichever one keeps the line running.", replies: [
+        { t: "The court will finish it.", next: 'end', flag: 'baron_ch8', rel: { baron: 1 } },
+        { t: "A rope isn't the only kind of cost.", next: 'end', flag: 'baron_ch8' }
+      ] },
+      lila_ch8: { who: 'lila', say: "I said what I saw. Hale said what the twelve decided. Now Hattie names the cost, and I have to live in the same country as whatever she writes. Stand there when she does. I don't want to hear the sentence from Clara's paper two days later.", replies: [
+        { t: "You won't hear it alone.", next: 'end', flag: 'lila_ch8', rel: { lila: 1 } },
+        { t: "I'll be there.", next: 'end', flag: 'lila_ch8' }
+      ] },
+      kit_ch8: { who: 'kit', say: "Warden with a wagon. Clerk with a book. Judge with a pen. Cute how civilized a hanging can look. You pick the law, you help them feel clean about whatever Hattie writes. You pick him, you hope the wagon beats the rope.", replies: [
+        { t: "I'm with the court.", next: 'end', flag: 'kit_ch8', rel: { kit: -1 } },
+        { t: "I'm waiting on the wording.", next: 'end', flag: 'kit_ch8' }
+      ] },
+      wren_ch8: { who: 'wren', say: "Tracks got him into that dock. A sentence gets him out of this city, one way or the other. My part ended at the wash. Keene's part starts when Hattie points. You were on that ridge \u2014 you ought to hear the cost the same way you heard the coach stop.", replies: [
+        { t: "I will.", next: 'end', flag: 'wren_ch8', rel: { wren: 1 } },
+        { t: "I'll hear it.", next: 'end', flag: 'wren_ch8' }
+      ] },
+      preacher_ch8: { who: 'preacher', say: "A sentence can punish a man without teaching a city to love a rope. If they ask you what comes next, give them the truth and a little room for mercy. Dustwater will have to live with Hattie's words longer than any hymn I can raise.", replies: [
+        { t: "I'll keep that in mind.", next: 'end', flag: 'preacher_ch8', rel: { preacher: 1 } },
+        { t: "The court will finish what it started.", next: 'end', flag: 'preacher_ch8' }
+      ] }
 
     };
 
@@ -10819,7 +10957,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
@@ -10868,7 +11006,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, then The Verdict: the jury comes back.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, then The Sentence: Hattie passes sentence, and Dustwater has to live with it.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -10888,5 +11026,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --></body>
 </html>
