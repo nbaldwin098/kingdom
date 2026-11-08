@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170-v180: STORY MODE - one scene per chapter at a real place (STORY180), walk-up TALK, named cast =====
+  // ===== v170-v181: STORY MODE - one scene per chapter at a real place (STORY180), walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -9845,7 +9845,9 @@ window.B137 = (function () {
       { id: 'keene', name: 'Wade Keene', title: 'Territorial Warden', role: 'guard', age: 50, fem: 0, ox: 420, oy: 60, face: 1, from: 8 },
       { id: 'brant', name: 'Ivy Brant', title: 'Court Clerk', role: 'woman', age: 36, fem: 1, ox: 80, oy: -240, face: -1, from: 8 },
       { id: 'holley', name: 'Reed Holley', title: 'Prison Wagon Driver', role: 'farmer', age: 45, fem: 0, ox: 380, oy: 230, face: -1, from: 9 },
-      { id: 'crane', name: 'Otis Crane', title: 'Hangman', role: 'guard', age: 57, fem: 0, ox: -340, oy: -150, face: 1, from: 9 }
+      { id: 'crane', name: 'Otis Crane', title: 'Hangman', role: 'guard', age: 57, fem: 0, ox: -340, oy: -150, face: 1, from: 9 },
+      { id: 'mercer', name: 'Quin Mercer', title: 'Territorial Escort', role: 'guard', age: 34, fem: 0, ox: 220, oy: -300, face: -1, from: 10 },
+      { id: 'lynch', name: 'Dora Lynch', title: 'Water-Stop Keeper', role: 'woman', age: 43, fem: 1, ox: -120, oy: -320, face: 1, from: 10 }
     ];
 
     var CHAPTERS = [
@@ -9857,7 +9859,8 @@ window.B137 = (function () {
       { id: 6, title: 'The Trial', year: 1, need: ['judge', 'croft', 'tess6'] },
       { id: 7, title: 'The Verdict', year: 1, need: ['hale', 'clara', 'judge7'] },
       { id: 8, title: 'The Sentence', year: 1, need: ['keene', 'brant', 'judge8'] },
-      { id: 9, title: 'The Wagon', year: 1, need: ['holley', 'crane', 'keene9'] }
+      { id: 9, title: 'The Wagon', year: 1, need: ['holley', 'crane', 'keene9'] },
+      { id: 10, title: 'The Road', year: 1, need: ['mercer', 'lynch', 'keene10'] }
     ];
 
     var NODES = {
@@ -10750,6 +10753,65 @@ window.B137 = (function () {
         { t: "I know.", next: 'end' }
       ] },
 
+      keene_ch10: { who: 'keene', say: "Sunup. The wagon rolls east on the dry-wash road, unless Hattie's paper says the rope \u2014 then Dustwater watches what the rope does and Holley drives home empty. Quin Mercer rides shotgun beside the box either way he's needed. Dora Lynch keeps the water stop at the second creek; Holley waters there or not at all. Talk to Mercer and Lynch before the dust goes up.", replies: [
+        { t: "I'll ride the road with the wagon.", next: 'keene_ch10_road', rel: { keene: 1 } },
+        { t: "If it's the rope, I'll stay and watch the city.", next: 'keene_ch10_rope' },
+        { t: "I'll see Mercer and Lynch either way.", next: 'keene_ch10_both' }
+      ] },
+      keene_ch10_friend: { who: 'keene', say: "You held the wagon with me all night. Now it moves. East on the road, past Lynch's water stop at the second creek, Mercer riding shotgun \u2014 or Crane's beam and a city watching what the rope does. I want you on the road or in the street, not in between. Talk to Mercer and Lynch first.", replies: [
+        { t: "I'll ride the road with the wagon.", next: 'keene_ch10_road', rel: { keene: 1 } },
+        { t: "If it's the rope, I'll stay and watch the city.", next: 'keene_ch10_rope' },
+        { t: "I'll see Mercer and Lynch either way.", next: 'keene_ch10_both' }
+      ] },
+      keene_ch10_road: { who: 'keene', say: "Then ride left of the box, where Holley can see you and the hills can't. Mercer takes the right. Lynch has the troughs at the second creek \u2014 past her it's the dry wash Sam Wren warned about. Shake both their hands before we roll.", replies: [
+        { t: "I'll see them both.", next: 'end', flag: 'met_keene10', rel: { keene: 1 } }
+      ] },
+      keene_ch10_rope: { who: 'keene', say: "Then you stand in the street and see what a rope does to a city that asked for it. Mercer holds the crowd back from Crane's beam. Lynch rode in last night \u2014 Holley sent word he wouldn't need her water. Talk to them both. They'll want a witness who isn't drunk.", replies: [
+        { t: "I'll talk to them.", next: 'end', flag: 'met_keene10' }
+      ] },
+      keene_ch10_both: { who: 'keene', say: "Good. Mercer knows the road and the crowd both. Lynch knows the water and everybody who's stopped at it for twenty years. Whatever happens this morning, those two will be telling it for a long time. Make sure they tell it right.", replies: [
+        { t: "I will.", next: 'end', flag: 'met_keene10' }
+      ] },
+      keene_ch10_again: { who: 'keene', say: "Dust's up or the street's quiet. Either way, it's done by noon.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      mercer: { who: 'mercer', say: "Quin Mercer. Territorial escort \u2014 the territory pays me to sit beside Holley with a ten-gauge across my knees. If the wagon rolls east I ride with it. If it's the rope, I keep the crowd back from Crane's beam so nobody gets a closer look than they paid for. Which are you hoping for?", replies: [
+        { t: "East. Alive.", next: 'mercer_east', rel: { mercer: 1 } },
+        { t: "Whatever she wrote.", next: 'mercer_wrote' },
+        { t: "Who'd stop a prison wagon?", next: 'mercer_who' }
+      ] },
+      mercer_east: { who: 'mercer', say: "Most folks want a show. Good to hear somebody wants a delivery. Ride on Holley's left and keep your eyes on the banks, not the box. Vane won't do anything. It's his friends I'm paid for.", replies: [
+        { t: "Left side. Eyes up.", next: 'end', flag: 'met_mercer', rel: { mercer: 1 } }
+      ] },
+      mercer_wrote: { who: 'mercer', say: "Fair answer. I don't pick either. I just make sure the thing that was written is the thing that happens \u2014 not something a mob writes over the top of it.", replies: [
+        { t: "Then we want the same thing.", next: 'end', flag: 'met_mercer' }
+      ] },
+      mercer_who: { who: 'mercer', say: "Men who owe Vane, men who hate him, and men who heard there's a strongbox in every territorial wagon. There isn't. Doesn't stop them. The dry wash past Lynch's water is where they usually try.", replies: [
+        { t: "I'll remember the wash.", next: 'end', flag: 'met_mercer' }
+      ] },
+      mercer_again: { who: 'mercer', say: "Shells in, hammer down. I'm where Keene put me.", replies: [
+        { t: "Good.", next: 'end' }
+      ] },
+
+      lynch: { who: 'lynch', say: "Dora Lynch. I keep the troughs at the second creek east of here \u2014 last sweet water before the dry wash. Every wagon, stage and cattle drive on that road drinks at my place. Holley's watered his mules there nine years. So tell me straight: is he coming through, or did he send me word for nothing?", replies: [
+        { t: "He's coming through. I'll be with him.", next: 'lynch_coming', rel: { lynch: 1 } },
+        { t: "If it's the rope, he won't need the water.", next: 'lynch_rope' },
+        { t: "What's past your place?", next: 'lynch_wash' }
+      ] },
+      lynch_coming: { who: 'lynch', say: "Then I'll have the troughs full and coffee on. I'll tell you what I tell every driver \u2014 water the mules, don't linger, and be through the wash before the sun's straight up. Shadows on those banks are where the trouble sits.", replies: [
+        { t: "Full troughs, no lingering.", next: 'end', flag: 'met_lynch', rel: { lynch: 1 } }
+      ] },
+      lynch_rope: { who: 'lynch', say: "That's what his note said. So I rode in to see it, because twenty years of watering men on that road and I've never once seen how the other end goes. I don't like it. I'm here anyway.", replies: [
+        { t: "Stand with me, then.", next: 'end', flag: 'met_lynch' }
+      ] },
+      lynch_wash: { who: 'lynch', say: "Two miles of dry wash with banks taller than a man on a horse. No water, no shade, no way out but forward. I've buried two drivers who stopped in it. Don't stop in it.", replies: [
+        { t: "We won't stop.", next: 'end', flag: 'met_lynch' }
+      ] },
+      lynch_again: { who: 'lynch', say: "Troughs don't fill themselves. I'll be at the creek or in the street, wherever the morning puts me.", replies: [
+        { t: "Understood.", next: 'end' }
+      ] },
+
       judge_ch9: { who: 'judge', say: "I wrote it. Brant inked it. Now it belongs to Keene, and that's the hardest part of my job \u2014 letting go of a sentence and watching what a city does with it. The wagon's in the yard. Whatever it means to Dustwater, it means it by morning.", replies: [
         { t: "You wrote it fair.", next: 'end', flag: 'judge_ch9', rel: { judge: 1 } },
         { t: "The city will live with it.", next: 'end', flag: 'judge_ch9' }
@@ -10885,7 +10947,8 @@ window.B137 = (function () {
       6: { cast: ['judge', 'croft', 'tess'], at: 'court', do: 'arrive', mark: 'DUSTWATER COURT' },
       7: { cast: ['hale', 'clara', 'judge'], at: 'court', do: 'arrive', mark: 'DUSTWATER COURT' },
       8: { cast: ['keene', 'brant', 'judge'], at: 'court', do: 'arrive', mark: 'DUSTWATER COURT' },
-      9: { cast: ['holley', 'crane', 'keene'], at: 'yard', do: 'wagon', mark: 'THE YARD' }
+      9: { cast: ['holley', 'crane', 'keene'], at: 'yard', do: 'wagon', mark: 'THE YARD' },
+      10: { cast: ['mercer', 'lynch', 'keene'], at: 'stop', do: 'wagon', mark: 'WATER STOP' }
     };
     CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
     var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]] };
@@ -10904,6 +10967,7 @@ window.B137 = (function () {
       if (at === 'wash') return { x: city.x - 3500, y: city.y + 2800 };
       if (at === 'court') { var d = dustwater(); return { x: d.x + 40, y: d.y - 80 }; }
       if (at === 'yard') { var d2 = dustwater(); return { x: d2.x + 180, y: d2.y + 120 }; }
+      if (at === 'stop') { var d3 = dustwater(); return { x: d3.x + 2800, y: d3.y + 40 }; }
       return { x: city.x, y: city.y };
     }
     function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
@@ -10935,7 +10999,13 @@ window.B137 = (function () {
       } else if (d.do === 'track') {
         for (i = 0; i < 3; i++) ACT.marks.push({ x: s.x + 220 + i * 260, y: s.y + 160 + i * 150 });
       } else if (d.do === 'wagon') {
-        ACT.wagon = { k: 'money', x: s.x + 60, y: s.y + 160, f: 1, ph: 0, ex: s.x + 60 + 650 };
+        var span = d.id === 10 ? 900 : 650;
+        ACT.wagon = { k: 'money', x: s.x + 60, y: s.y + 160, f: 1, ph: 0, ex: s.x + 60 + span };
+        if (d.id === 10) {
+          [[560, 70], [820, -130], [740, 210]].forEach(function (o) {
+            ACT.foes.push({ x: s.x + o[0], y: s.y + o[1], hp: 3, f: -1, role: 'archer', hitT: 0, name: 'WASH RIDER' });
+          });
+        }
       }
     }
     function completeAct() {
@@ -10975,6 +11045,7 @@ window.B137 = (function () {
       } else if (d.do === 'wagon') {
         var w = ACT.wagon;
         if (w && Math.hypot(w.x - px, w.y - py) < 240 && w.x < w.ex) { w.x = Math.min(w.ex, w.x + 70 * dt); w.ph += dt * 6; }
+        if (d.id === 10) moveFoes(dt, ACT.wagon);
         if (w && w.x >= w.ex) completeAct();
       }
     }
@@ -11303,7 +11374,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8], ch9done: !!ST.done[9] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8], ch9done: !!ST.done[9], ch10done: !!ST.done[10] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
