@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, then The Trial: Dustwater court wants Vane.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, then The Verdict: the jury comes back.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170-v175: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
+  // ===== v170-v176: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -9839,7 +9839,9 @@ window.B137 = (function () {
       { id: 'tess', name: 'Tess Quill', title: 'Dustwater Marshal', role: 'v2captain_v2', age: 39, fem: 1, ox: 280, oy: 200, face: -1, from: 5 },
       { id: 'wren', name: 'Sam Wren', title: 'Tracker', role: 'archer', age: 42, fem: 0, ox: -180, oy: 300, face: 1, from: 5 },
       { id: 'judge', name: 'Hattie Voss', title: 'Circuit Judge', role: 'woman', age: 54, fem: 1, ox: 360, oy: -20, face: -1, from: 6 },
-      { id: 'croft', name: 'Silas Croft', title: 'Defense Counsel', role: 'merchant', age: 47, fem: 0, ox: 10, oy: -170, face: 1, from: 6 }
+      { id: 'croft', name: 'Silas Croft', title: 'Defense Counsel', role: 'merchant', age: 47, fem: 0, ox: 10, oy: -170, face: 1, from: 6 },
+      { id: 'hale', name: 'Ned Hale', title: 'Jury Foreman', role: 'merchant', age: 51, fem: 0, ox: 330, oy: 140, face: 1, from: 7 },
+      { id: 'clara', name: 'Clara Bell', title: 'Gazette Editor', role: 'woman', age: 31, fem: 1, ox: -220, oy: -200, face: -1, from: 7 }
     ];
 
     var CHAPTERS = [
@@ -9848,7 +9850,8 @@ window.B137 = (function () {
       { id: 3, title: 'The Grade', year: 1, need: ['baron3', 'vera', 'jed'] },
       { id: 4, title: 'The Showdown', year: 1, need: ['lila', 'kit', 'vane4'] },
       { id: 5, title: 'The Posse', year: 1, need: ['tess', 'wren', 'sheriff5'] },
-      { id: 6, title: 'The Trial', year: 1, need: ['judge', 'croft', 'tess6'] }
+      { id: 6, title: 'The Trial', year: 1, need: ['judge', 'croft', 'tess6'] },
+      { id: 7, title: 'The Verdict', year: 1, need: ['hale', 'clara', 'judge7'] }
     ];
 
     var NODES = {
@@ -10421,6 +10424,130 @@ window.B137 = (function () {
       preacher_ch6: { who: 'preacher', say: "A court can punish a man without becoming the thing it hates. If they ask you for blood, give them the truth instead. Mercy isn't weakness. It just costs more in front of a crowd.", replies: [
         { t: "I'll keep that in mind.", next: 'end', flag: 'preacher_ch6', rel: { preacher: 1 } },
         { t: "Justice first.", next: 'end', flag: 'preacher_ch6' }
+      ] },
+
+      judge_ch7: { who: 'judge', say: "The jury's back. Twelve people who've been sitting on this since dawn, and they want you in the room when Ned Hale reads it. A verdict without the witness who started this is just paper. After that, Clara Bell from the Gazette will write whatever Dustwater decides to become.", replies: [
+        { t: "I'll hear the verdict.", next: 'judge_ch7_hear', rel: { judge: 1 } },
+        { t: "What does the city expect?", next: 'judge_ch7_expect' },
+        { t: "What if they let him go?", next: 'judge_ch7_free' }
+      ] },
+      judge_ch7_friend: { who: 'judge', say: "You spoke when I asked. The jury noticed. They're back now \u2014 Ned Hale will read it, and Clara Bell is already sharpening a pencil for the Gazette. Dustwater will answer this in the street whether we like the wording or not.", replies: [
+        { t: "I'll hear the verdict.", next: 'judge_ch7_hear', rel: { judge: 1 } },
+        { t: "What does the city expect?", next: 'judge_ch7_expect' },
+        { t: "What if they let him go?", next: 'judge_ch7_free' }
+      ] },
+      judge_ch7_hear: { who: 'judge', say: "Good. Talk to Hale so the reading is witnessed, and to Clara so the city hears it from someone who was in the room. I don't want a rumor standing in for a verdict.", replies: [
+        { t: "I'll find them.", next: 'end', flag: 'met_judge7' }
+      ] },
+      judge_ch7_expect: { who: 'judge', say: "Half of them want a hanging they can toast. The other half want to believe a court still means something this far from a capital. What you said in that box is already in their heads. Hale reads it. Clara prints it. That's how a city answers.", replies: [
+        { t: "I'll talk to them.", next: 'end', flag: 'met_judge7' }
+      ] },
+      judge_ch7_free: { who: 'judge', say: "Then the gallery will have opinions louder than the gavel. Talk to Hale and to Clara. If they turn him loose, Dustwater will decide whether that's mercy or a mistake \u2014 and they won't wait for my permission.", replies: [
+        { t: "I'll hear them first.", next: 'end', flag: 'met_judge7' }
+      ] },
+      judge_ch7_again: { who: 'judge', say: "Hale has the paper. Clara has the ink. The room is waiting.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      hale: { who: 'hale', say: "Ned Hale. I speak for the twelve. We sat with what you said, what Lila Finch said, and what Croft poked holes in. A jury doesn't get to hide. I'm about to read this in front of Hattie \u2014 and in front of you, if you'll stand there.", replies: [
+        { t: "Read it. I'll stand there.", next: 'hale_stand', rel: { hale: 1 } },
+        { t: "Which way did they lean?", next: 'hale_lean' },
+        { t: "The city will riot either way.", next: 'hale_riot' }
+      ] },
+      hale_stand: { who: 'hale', say: "Then you'll hear it the same time the gallery does. After that, Clara Bell will write the version that rides the train. Whatever we decided, it came from the ridge, the coach, and the words you chose \u2014 not from a newspaper that got here first.", replies: [
+        { t: "I'll remember that.", next: 'end', flag: 'met_hale' }
+      ] },
+      hale_lean: { who: 'hale', say: "I won't preview a verdict like a saloon bet. I'll say this: men who took the stand got weighed heavier than men who hid in the hallway. You want the wording, you stand in the room. Clara will print whatever leaks if you don't.", replies: [
+        { t: "Then I'll stand there.", next: 'end', flag: 'met_hale' }
+      ] },
+      hale_riot: { who: 'hale', say: "Maybe. That's Clara's problem and Tess Quill's, not the jury's. We were asked if he took that box at gunpoint. We answered. The street can have its own meeting after.", replies: [
+        { t: "Understood.", next: 'end', flag: 'met_hale' }
+      ] },
+      hale_again: { who: 'hale', say: "The paper's still in my pocket until Hattie says rise. Don't make me read it twice.", replies: [
+        { t: "I won't.", next: 'end' }
+      ] },
+
+      clara: { who: 'clara', say: "Clara Bell, Dustwater Gazette. The city doesn't wait for a gavel to decide what it thinks \u2014 it waits for type. I can print a hanging, a hung jury, or a man walking out that door. What I write tonight is how Dustwater answers. You were in that room. So?", replies: [
+        { t: "Print what the jury said, nothing extra.", next: 'clara_straight' },
+        { t: "Tell them the court held.", next: 'clara_held' },
+        { t: "Why does the paper get the last word?", next: 'clara_why' }
+      ] },
+      clara_straight: { who: 'clara', say: "Clean copy. That's rarer than gold out here. I'll take Hale's wording and leave the gallery's shouting in the hallway, where it belongs. Talk to the judge if you haven't \u2014 she wants a witness when it's read.", replies: [
+        { t: "That's all I ask.", next: 'end', flag: 'met_clara' }
+      ] },
+      clara_held: { who: 'clara', say: "Then that's the headline: the court held. Vane's name goes under it, not over it. Some will call that civilization. Some will call it a missed hanging. I'll spell both.", replies: [
+        { t: "Print it that way.", next: 'end', flag: 'met_clara', rel: { clara: 1 } }
+      ] },
+      clara_why: { who: 'clara', say: "Because a verdict nobody hears is a secret, and secrets start fires. I ride the same trains Crowe does. By week's end every depot from Red Mesa to the river will know what Dustwater did in that room. Better they know it straight.", replies: [
+        { t: "Then write it straight.", next: 'end', flag: 'met_clara', rel: { clara: 1 } }
+      ] },
+      clara_again: { who: 'clara', say: "Ink dries faster than a rumor. Don't give me a reason to rewrite it.", replies: [
+        { t: "I won't.", next: 'end' }
+      ] },
+
+      vane_ch7: { who: 'vane', say: "Twelve strangers deciding if I hang. Funny country. You can stand there and watch Hale read it, or you can remember I asked you more than once not to put a ribbon on this.", replies: [
+        { t: "I'll hear what they decided.", next: 'end', flag: 'vane_ch7', rel: { vane: -1 } },
+        { t: "If they turn you loose, ride far.", next: 'vane_ch7_soft' },
+        { t: "I haven't heard it yet.", next: 'end', flag: 'vane_ch7' }
+      ] },
+      vane_ch7_friend: { who: 'vane', say: "You didn't decorate when they asked. That's more than this city usually gives a man like me. If Hale reads guilty, don't pretend you didn't know how galleries work. If he reads the other way, don't wait around for Tess to change her mind.", replies: [
+        { t: "I'll hear what they decided.", next: 'end', flag: 'vane_ch7', rel: { vane: -1 } },
+        { t: "If they turn you loose, ride far.", next: 'vane_ch7_soft' },
+        { t: "I haven't heard it yet.", next: 'end', flag: 'vane_ch7' }
+      ] },
+      vane_ch7_soft: { who: 'vane', say: "I might. Or I might not. A city that can't make up its mind is a city I can still use. Don't write me a farewell you haven't earned.", replies: [
+        { t: "We'll see.", next: 'end', flag: 'vane_ch7', rel: { vane: 1 } }
+      ] },
+      vane_ch7_again: { who: 'vane', say: "The walls are the same. The waiting is worse.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      tess_ch7: { who: 'tess', say: "A verdict is only as good as the street that hears it. If Hale reads guilty, I keep him. If he doesn't, I still have a city that wanted a hanging. Clara will print whichever one makes people buy the paper. I need you visible when it's read \u2014 not hiding behind the church.", replies: [
+        { t: "I'll be there.", next: 'end', flag: 'tess_ch7', rel: { tess: 1 } },
+        { t: "The court already has my word.", next: 'end', flag: 'tess_ch7' }
+      ] },
+      tess_ch7_friend: { who: 'tess', say: "You rode and you spoke. Now I need you in that room when Hale stands up. A marshal can hold a crowd or lose it in the time it takes to read a sentence. Don't make me do that without the witness they came to stare at.", replies: [
+        { t: "I'll be there.", next: 'end', flag: 'tess_ch7', rel: { tess: 1 } },
+        { t: "The court already has my word.", next: 'end', flag: 'tess_ch7' }
+      ] },
+
+      croft_ch7: { who: 'croft', say: "A jury coming back this fast means they either agreed early or got tired of arguing. Either way, Clara Bell will turn it into a parable by morning. I did my work. The rest is whether Dustwater still believes a defense counsel is a person and not a traitor.", replies: [
+        { t: "You gave him a fair shake.", next: 'end', flag: 'croft_ch7', rel: { croft: 1 } },
+        { t: "We'll see what they wrote.", next: 'end', flag: 'croft_ch7' }
+      ] },
+
+      sheriff_ch7: { who: 'sheriff', say: "Red Mesa sent a man. Dustwater gets to decide if that was worth the ride. I can live with a conviction. I can live with an acquittal I don't like. What I can't live with is a city that answers a court with a rope of its own. Be in the room.", replies: [
+        { t: "I'll stand there.", next: 'end', flag: 'sheriff_ch7', rel: { sheriff: 1 } },
+        { t: "I'll hear it.", next: 'end', flag: 'sheriff_ch7' }
+      ] },
+      sheriff_ch7_friend: { who: 'sheriff', say: "You told me you'd keep the peace. This is the last mile of that \u2014 slower, louder, and with a scrap of paper Hale's been folding in his pocket. Don't let the gallery write a second verdict in the street.", replies: [
+        { t: "I'll stand there.", next: 'end', flag: 'sheriff_ch7', rel: { sheriff: 1 } },
+        { t: "I'll hear it.", next: 'end', flag: 'sheriff_ch7' }
+      ] },
+
+      widow_ch7: { who: 'widow', say: "A city I never asked for is about to write the ending on a man who stood on my ridge. I hope they remember the cattle and the coach, and I hope they remember he left people breathing. Don't let Clara turn this into a story that isn't ours.", replies: [
+        { t: "I'll keep it honest.", next: 'end', flag: 'widow_ch7', rel: { widow: 1 } },
+        { t: "I'll listen.", next: 'end', flag: 'widow_ch7' }
+      ] },
+      baron_ch7: { who: 'baron', say: "Wages or a legend \u2014 that's the choice in front of twelve shopkeepers. If they hold him, the next man thinks twice before stopping one of my coaches. If they don't, I'll remember who spoke softly in that box.", replies: [
+        { t: "The court will answer.", next: 'end', flag: 'baron_ch7', rel: { baron: 1 } },
+        { t: "Property isn't the only thing that got taken.", next: 'end', flag: 'baron_ch7' }
+      ] },
+      lila_ch7: { who: 'lila', say: "I already said what I saw. Now a jury says what that was worth. If they call him guilty I can sleep. If they don't, I still have to walk this country knowing I told the truth and it wasn't enough. Stand there when Hale reads it. I don't want to be the only one who hears it straight.", replies: [
+        { t: "You won't be alone.", next: 'end', flag: 'lila_ch7', rel: { lila: 1 } },
+        { t: "I'll be there.", next: 'end', flag: 'lila_ch7' }
+      ] },
+      kit_ch7: { who: 'kit', say: "A foreman with a scrap of paper. Cute. The road already knew what Vane was. The city just wants to feel clean about it. You pick the law, you help them look civilized. You pick him, you help Clara sell extra copies of a scandal.", replies: [
+        { t: "I'm with the court.", next: 'end', flag: 'kit_ch7', rel: { kit: -1 } },
+        { t: "I'm waiting on the wording.", next: 'end', flag: 'kit_ch7' }
+      ] },
+      wren_ch7: { who: 'wren', say: "Tracks got him into that dock. Ink gets him out, or it doesn't. My part ended at the wash. Hale's part starts when he stands up. You were on that ridge \u2014 you ought to hear the sentence the same way you heard the coach stop.", replies: [
+        { t: "I will.", next: 'end', flag: 'wren_ch7', rel: { wren: 1 } },
+        { t: "I'll hear it.", next: 'end', flag: 'wren_ch7' }
+      ] },
+      preacher_ch7: { who: 'preacher', say: "A verdict can punish a man without teaching a city to love a hanging. If they ask you what comes next, give them the truth and a little room for mercy. Dustwater will answer louder than any hymn I can raise.", replies: [
+        { t: "I'll keep that in mind.", next: 'end', flag: 'preacher_ch7', rel: { preacher: 1 } },
+        { t: "The court has spoken, or it will.", next: 'end', flag: 'preacher_ch7' }
       ] }
 
     };
@@ -10692,7 +10819,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
@@ -10741,7 +10868,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, then The Trial: Dustwater court wants Vane.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, then The Verdict: the jury comes back.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -10761,5 +10888,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --></body>
 </html>
