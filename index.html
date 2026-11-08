@@ -7809,6 +7809,178 @@ window.B137 = (function () {
     window.LIFE162 = { beat: function () { return window.BEAT162 || 0; }, greet: function () { return window.GREET162 || 0; } };
   })();
 
+  // ===== v163: town life - bartender polishing glasses; grocer stacking crates =====
+  (function () {
+    var GLASS = null, CRATES = null, OVER = [];
+
+    function glassSpr() {
+      if (GLASS) return GLASS;
+      GLASS = [];
+      var fi, ai, cv, g, wipe;
+      for (fi = 0; fi < 2; fi++) {
+        for (ai = 0; ai < 8; ai++) {
+          cv = document.createElement('canvas'); cv.width = 44; cv.height = 48;
+          g = cv.getContext('2d');
+          wipe = -0.95 + (ai / 7) * 1.9;
+          g.translate(22, 24);
+          g.scale(fi === 0 ? 1 : -1, 1);
+          g.fillStyle = '#3b2410'; g.fillRect(4, 0, 9, 14);
+          g.fillStyle = '#8a5a2e'; g.fillRect(5, 1, 7, 3);
+          g.fillStyle = '#e0b088';
+          g.beginPath(); g.arc(12, 16, 5, 0, 7); g.fill();
+          g.fillStyle = '#e8d8b0';
+          g.beginPath();
+          g.moveTo(6, -2); g.lineTo(4.5, 18); g.lineTo(19.5, 18); g.lineTo(18, -2);
+          g.closePath(); g.fill();
+          g.fillStyle = '#c07828';
+          g.beginPath();
+          g.moveTo(5.6, 8); g.lineTo(5, 17.2); g.lineTo(19, 17.2); g.lineTo(18.4, 8);
+          g.closePath(); g.fill();
+          g.fillStyle = '#f5ecd4'; g.fillRect(8, 0, 2.4, 16);
+          g.fillStyle = '#d4b46a'; g.fillRect(5.5, -4, 13, 3.2);
+          g.save();
+          g.translate(12, 6);
+          g.rotate(wipe);
+          g.fillStyle = '#efe8d8'; g.fillRect(-2, -14, 12, 9);
+          g.fillStyle = '#c45a2e'; g.fillRect(-1, -13, 10, 3);
+          g.fillStyle = '#c9a46e'; g.fillRect(7, -12, 3, 6);
+          g.restore();
+          GLASS.push(cv);
+        }
+      }
+      return GLASS;
+    }
+
+    function crateBox(g, x, y, w, h) {
+      g.fillStyle = '#8a5a2e'; g.fillRect(x, y - h, w, h);
+      g.fillStyle = '#c9a46e'; g.fillRect(x + 1, y - h + 1, w - 2, 2.2);
+      g.fillStyle = '#6b4520'; g.fillRect(x + 1, y - h * 0.5 - 1, w - 2, 2);
+      g.fillStyle = '#5a3818'; g.fillRect(x, y - 2, w, 2);
+      g.fillRect(x + 2, y - h + 1, 1.6, h - 2);
+      g.fillRect(x + w - 3.6, y - h + 1, 1.6, h - 2);
+      g.fillStyle = '#3b2410';
+      g.fillRect(x + 1.6, y - h + 2, 1.2, 1.2);
+      g.fillRect(x + w - 3.2, y - h + 2, 1.2, 1.2);
+    }
+
+    function crateSpr() {
+      if (CRATES) return CRATES;
+      CRATES = [];
+      var liftX = [14, 12, 8, 2, -6, -14, -18, -18];
+      var liftY = [0, -2, -12, -22, -28, -26, -24, -24];
+      var fi, ai, cv, g;
+      for (fi = 0; fi < 2; fi++) {
+        for (ai = 0; ai < 8; ai++) {
+          cv = document.createElement('canvas'); cv.width = 56; cv.height = 52;
+          g = cv.getContext('2d');
+          g.translate(28, 40);
+          g.scale(fi === 0 ? 1 : -1, 1);
+          crateBox(g, -18, 0, 16, 12);
+          crateBox(g, -18, -12, 16, 12);
+          crateBox(g, liftX[ai], liftY[ai], 16, 12);
+          if (ai >= 1 && ai <= 5) {
+            g.fillStyle = '#e0b088';
+            g.beginPath(); g.arc(liftX[ai] + 3, liftY[ai] - 4, 3.2, 0, 7); g.fill();
+            g.beginPath(); g.arc(liftX[ai] + 13, liftY[ai] - 4, 3.2, 0, 7); g.fill();
+          }
+          CRATES.push(cv);
+        }
+      }
+      return CRATES;
+    }
+
+    function workHour(hr) {
+      return hr >= 7.6 && hr < 18 && !(hr >= 12 && hr < 13);
+    }
+
+    function canTake(p, mine) {
+      if (!p.doing) return true;
+      if (p.doing.indexOf('WORKING AT THE') === 0) return true;
+      if (p.doing === 'SWEEPING THE BOARDWALK') return true;
+      if (p.doing === mine) return true;
+      return false;
+    }
+
+    var _pf = pushFactionItems;
+    pushFactionItems = function (items) {
+      OVER = [];
+      try {
+        if (MODE === 'free' && window.TOWN133) {
+          var L = TOWN133.towns(), now = performance.now() / 1000, hr = 12;
+          try { hr = CLOCK133.hour(); } catch (e) {}
+          var work = workHour(hr);
+          var x0 = px - innerWidth / (2 * zoom) - 220, x1 = px + innerWidth / (2 * zoom) + 220;
+          var y0 = py - innerHeight / (2 * zoom) - 200, y1 = py + innerHeight / (2 * zoom) + 320;
+          var nb = 0, ng = 0;
+          if (work) L.forEach(function (t) {
+            if (t.box && (t.box.x1 < x0 || t.box.x0 > x1 || t.box.y1 < y0 || t.box.y0 > y1)) return;
+            var saloon = t.saloon || null, store = null;
+            (t.b || []).forEach(function (b) {
+              if (b.k === 'saloon') saloon = b;
+              if (b.k === 'general') store = b;
+            });
+            var keepers = [], clerks = [];
+            (t.P || []).forEach(function (p) {
+              if (p.job === 'SHOPKEEPER') keepers.push(p);
+              else if (p.job === 'CLERK') clerks.push(p);
+            });
+            var grocers = keepers.length ? keepers : clerks;
+            (t.P || []).forEach(function (p) {
+              if (p.job !== 'BARKEEP' || !saloon) return;
+              if (!canTake(p, 'POLISHING GLASSES')) return;
+              p.doing = 'POLISHING GLASSES';
+              p.x = saloon.x + Math.sin(now * 0.22 + (p.ph || 0)) * 5;
+              p.y = saloon.y + 32;
+              p.f = Math.sin(now * 0.38 + (p.ph || 0)) >= 0 ? 1 : -1;
+              p.mv = false; p.path = []; p.in = false;
+              if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) return;
+              nb++;
+              OVER.push({ k: 'glass', x: p.x, y: p.y, face: p.f < 0 ? -1 : 1, ang: (Math.sin(now * 4.2 + (p.ph || 0)) + 1) * 0.5 });
+            });
+            grocers.forEach(function (p) {
+              if (!store) return;
+              if (!canTake(p, 'STACKING CRATES')) return;
+              var lift = ((now * 0.7 + (p.ph || 0)) % 1);
+              p.doing = 'STACKING CRATES';
+              p.x = store.x + (store.w || 100) * 0.32 + Math.sin(now * 0.35 + (p.ph || 0)) * 3;
+              p.y = store.y + 16;
+              p.f = Math.sin(now * 0.28 + (p.ph || 0)) >= 0 ? 1 : -1;
+              p.mv = lift > 0.15 && lift < 0.85;
+              p.path = []; p.in = false;
+              if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) return;
+              ng++;
+              OVER.push({ k: 'crate', x: p.x, y: p.y, face: p.f < 0 ? -1 : 1, ang: lift });
+            });
+          });
+          window.BAR163 = nb; window.GROC163 = ng;
+        }
+      } catch (e) { if (!window.E163) { window.E163 = 1; console.warn(e); } }
+      _pf.apply(this, arguments);
+    };
+
+    var _du = drawUnits;
+    drawUnits = function (camX, camY) {
+      var r = _du.apply(this, arguments);
+      try {
+        var c = ctx, i, o, sx, sy, ai, spr;
+        for (i = 0; i < OVER.length; i++) {
+          o = OVER[i]; sx = o.x - camX; sy = o.y - camY;
+          if (o.k === 'glass') {
+            ai = Math.max(0, Math.min(7, (o.ang * 7 + 0.5) | 0));
+            spr = glassSpr()[(o.face < 0 ? 8 : 0) + ai];
+            c.drawImage(spr, sx + o.face * 10 - 22, sy - 50);
+          } else if (o.k === 'crate') {
+            ai = Math.max(0, Math.min(7, (o.ang * 7 + 0.5) | 0));
+            spr = crateSpr()[(o.face < 0 ? 8 : 0) + ai];
+            c.drawImage(spr, sx - 28, sy - 40);
+          }
+        }
+      } catch (e) { if (!window.E163b) { window.E163b = 1; console.warn(e); } }
+      return r;
+    };
+    window.LIFE163 = { polish: function () { return window.BAR163 || 0; }, stack: function () { return window.GROC163 || 0; } };
+  })();
+
   requestAnimationFrame(frame);
 </script>
 
@@ -7849,5 +8021,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --></body>
 </html>
