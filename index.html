@@ -9599,13 +9599,32 @@ window.B137 = (function () {
       } else g.st = 'out';
     }
 
+    function paintHud() {
+      try {
+        var e = document.getElementById('res') || resEl;
+        if (!e || !ME_S) return;
+        var label = '  COAL ' + Math.floor(coalOf(ME_S));
+        var n = document.getElementById('coal169hud');
+        if (n && n.parentNode === e) {
+          if (n.textContent !== label) n.textContent = label;
+          return;
+        }
+        n = document.createElement('span');
+        n.id = 'coal169hud';
+        n.textContent = label;
+        e.appendChild(n);
+      } catch (err) {}
+    }
+    try {
+      var resNode = document.getElementById('res') || resEl;
+      if (resNode && typeof MutationObserver !== 'undefined') {
+        new MutationObserver(function () { paintHud(); }).observe(resNode, { childList: true, subtree: true, characterData: true });
+      }
+    } catch (e) {}
     var _ur = updateRes;
     updateRes = function () {
       _ur.apply(this, arguments);
-      try {
-        if (!ME_S || !resEl) return;
-        if (resEl.textContent.indexOf('COAL') < 0) resEl.textContent += '  COAL ' + fmt(Math.floor(coalOf(ME_S)));
-      } catch (e) {}
+      paintHud();
     };
 
     var _es = econStep;
