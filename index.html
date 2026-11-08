@@ -7465,6 +7465,177 @@ window.B137 = (function () {
     window.LIFE160 = { sparks: function () { return SPARKS.length; }, sit: function () { return window.SIT160 || 0; } };
   })();
 
+  // ===== v161: town life - shopkeepers sweep boardwalks; kids play hoop, hopscotch and tag =====
+  (function () {
+    var SWEEP = { SHOPKEEPER: 1, CLERK: 1, TAILOR: 1, SEAMSTRESS: 1, BANKER: 1, TELLER: 1, 'HOTEL KEEPER': 1, MAID: 1, BARKEEP: 1, 'STATION MASTER': 1, ASSAYER: 1 };
+    var YOUTH = { 'SCHOOL KID': 1, APPRENTICE: 1, FARMHAND: 1, 'STABLE HAND': 1, PORTER: 1, COWBOY: 1 };
+    var GRID = null, BROOMS = null, HOOPS = null, OVER = [];
+
+    function hopGridSpr() {
+      if (GRID) return GRID;
+      GRID = document.createElement('canvas'); GRID.width = 102; GRID.height = 28;
+      var g = GRID.getContext('2d');
+      var cells = [[8, 14, 1], [24, 7, 2], [24, 21, 3], [40, 14, 4], [56, 7, 5], [56, 21, 6], [72, 14, 7], [88, 14, 8]];
+      g.strokeStyle = 'rgba(239,232,216,.9)'; g.fillStyle = 'rgba(239,232,216,.22)'; g.lineWidth = 1.2;
+      cells.forEach(function (q) { g.fillRect(q[0] - 7, q[1] - 6, 14, 12); g.strokeRect(q[0] - 7, q[1] - 6, 14, 12); });
+      g.fillStyle = 'rgba(90,56,24,.55)'; g.font = '8px monospace'; g.textAlign = 'center';
+      cells.forEach(function (q) { g.fillText('' + q[2], q[0], q[1] + 3); });
+      return GRID;
+    }
+
+    function broomSpr() {
+      if (BROOMS) return BROOMS;
+      BROOMS = [];
+      var fi, ai, cv, g, ang;
+      for (fi = 0; fi < 2; fi++) {
+        for (ai = 0; ai < 8; ai++) {
+          cv = document.createElement('canvas'); cv.width = 44; cv.height = 48;
+          g = cv.getContext('2d');
+          ang = -0.5 + (ai / 7);
+          g.translate(22, 28);
+          g.scale(fi === 0 ? 1 : -1, 1);
+          g.translate(10, -4);
+          g.rotate(0.85 + ang);
+          g.fillStyle = '#6b4520'; g.fillRect(-1.2, 0, 2.4, 30);
+          g.fillStyle = '#d4b46a';
+          g.beginPath(); g.moveTo(-7, 28); g.lineTo(7, 28); g.lineTo(9, 38); g.lineTo(-9, 38); g.closePath(); g.fill();
+          g.fillStyle = '#8a6a3a';
+          g.fillRect(-6, 30, 1.2, 7); g.fillRect(-3, 30, 1.2, 8); g.fillRect(0, 30, 1.2, 8); g.fillRect(3, 30, 1.2, 7); g.fillRect(5.5, 30, 1.2, 7);
+          g.fillStyle = '#5a3818'; g.fillRect(-3.5, 26, 7, 3);
+          BROOMS.push(cv);
+        }
+      }
+      return BROOMS;
+    }
+
+    function hoopSpr() {
+      if (HOOPS) return HOOPS;
+      HOOPS = [];
+      var i, cv, g;
+      for (i = 0; i < 8; i++) {
+        cv = document.createElement('canvas'); cv.width = 32; cv.height = 32;
+        g = cv.getContext('2d');
+        g.translate(16, 16);
+        g.rotate(i * Math.PI / 4);
+        g.strokeStyle = '#8a5a2e'; g.lineWidth = 2.6; g.beginPath(); g.arc(0, 0, 13, 0, 7); g.stroke();
+        g.strokeStyle = '#d4b46a'; g.lineWidth = 1.2; g.beginPath(); g.arc(0, 0, 10.5, 0, 7); g.stroke();
+        g.strokeStyle = '#5a3818'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(0, -13); g.lineTo(0, -10); g.stroke();
+        HOOPS.push(cv);
+      }
+      return HOOPS;
+    }
+
+    function kidsOf(t) {
+      if (t.kids161) return t.kids161;
+      var out = (t.P || []).filter(function (p) { return p.kid || p.job === 'SCHOOL KID'; });
+      if (out.length < 2) {
+        (t.P || []).forEach(function (p) { if (YOUTH[p.job] && out.indexOf(p) < 0) out.push(p); });
+      }
+      if (out.length < 2) {
+        (t.P || []).slice().sort(function (a, b) { return (a.ph || 0) - (b.ph || 0); }).forEach(function (p) {
+          if (out.length >= 2) return;
+          if (out.indexOf(p) >= 0) return;
+          if (SWEEP[p.job] || p.job === 'SHERIFF' || p.job === 'DEPUTY' || p.job === 'PREACHER' || p.job === 'BLACKSMITH') return;
+          out.push(p);
+        });
+      }
+      t.kids161 = out;
+      return out;
+    }
+
+    var _pf = pushFactionItems;
+    pushFactionItems = function (items) {
+      OVER = [];
+      try {
+        if (MODE === 'free' && window.TOWN133) {
+          var L = TOWN133.towns(), now = performance.now() / 1000, hr = 12;
+          try { hr = CLOCK133.hour(); } catch (e) {}
+          var work = hr >= 7.6 && hr < 18 && !(hr >= 12 && hr < 13);
+          var x0 = px - innerWidth / (2 * zoom) - 220, x1 = px + innerWidth / (2 * zoom) + 220;
+          var y0 = py - innerHeight / (2 * zoom) - 200, y1 = py + innerHeight / (2 * zoom) + 320;
+          var ns = 0, np = 0;
+          if (work) L.forEach(function (t) {
+            if (t.box && (t.box.x1 < x0 || t.box.x0 > x1 || t.box.y1 < y0 || t.box.y0 > y1)) return;
+            (t.P || []).forEach(function (p) {
+              if (!SWEEP[p.job] || !p.wk) return;
+              if (p.doing && p.doing.indexOf('WORKING AT THE') !== 0 && p.doing !== 'SWEEPING THE BOARDWALK') return;
+              var w = p.wk;
+              p.doing = 'SWEEPING THE BOARDWALK';
+              p.x = w.x + Math.sin(now * 0.65 + p.ph) * Math.min(50, (w.w || 120) * 0.32);
+              p.y = w.y + 16;
+              p.f = Math.cos(now * 0.65 + p.ph) >= 0 ? 1 : -1;
+              p.mv = true; p.path = []; p.in = false;
+              if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) return;
+              ns++;
+              OVER.push({ k: 'broom', x: p.x, y: p.y, face: p.f < 0 ? -1 : 1, ang: Math.sin(now * 5 + p.v) * 0.5 });
+            });
+            var streetY = (t.streetY && t.streetY[0]) || t.y;
+            kidsOf(t).forEach(function (p, i) {
+              var kind = i % 3;
+              if (kind === 0) {
+                p.doing = 'ROLLING A HOOP';
+                var span = Math.max(80, ((t.east || (t.x + 200)) - (t.west || (t.x - 200))) * 0.22);
+                p.x = t.x + Math.sin(now * 0.55 + p.ph) * span;
+                p.y = streetY + 14 + ((p.ph || 0) % 1) * 6;
+                p.f = Math.cos(now * 0.55 + p.ph) >= 0 ? 1 : -1;
+              } else if (kind === 1) {
+                p.doing = 'PLAYING HOPSCOTCH';
+                p.hx161 = p.hx161 || (t.x + (((p.ph || 0.4) * 97) % 1 - 0.5) * 160);
+                var hop = Math.abs(Math.sin(now * 2.6 + p.ph));
+                var step = Math.floor(((now * 0.85 + p.ph) % 8));
+                p.x = p.hx161 + step * 11;
+                p.y = streetY + 20 - hop * 9;
+                p.f = 1;
+              } else {
+                p.doing = 'PLAYING TAG';
+                p.x = t.x + Math.sin(now * 1.15 + p.ph * 2) * 88;
+                p.y = streetY + 12 + Math.cos(now * 1.35 + p.ph) * 20;
+                p.f = Math.cos(now * 1.15 + p.ph * 2) >= 0 ? 1 : -1;
+              }
+              p.mv = true; p.path = []; p.in = false;
+              if (kind === 1) {
+                if (p.hx161 >= x0 && p.hx161 <= x1 && streetY + 20 >= y0 && streetY + 20 <= y1) {
+                  np++;
+                  OVER.push({ k: 'grid', x: p.hx161, y: streetY + 20 });
+                } else if (p.x >= x0 && p.x <= x1 && p.y >= y0 && p.y <= y1) np++;
+                return;
+              }
+              if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) return;
+              np++;
+              if (kind === 0) OVER.push({ k: 'hoop', x: p.x, y: p.y, face: p.f < 0 ? -1 : 1, t: now });
+            });
+          });
+          window.SWEEP161 = ns; window.PLAY161 = np;
+        }
+      } catch (e) { if (!window.E161) { window.E161 = 1; console.warn(e); } }
+      _pf.apply(this, arguments);
+    };
+
+    var _du = drawUnits;
+    drawUnits = function (camX, camY) {
+      var r = _du.apply(this, arguments);
+      try {
+        var c = ctx, i, o, sx, sy, ai, spr;
+        for (i = 0; i < OVER.length; i++) {
+          o = OVER[i]; sx = o.x - camX; sy = o.y - camY;
+          if (o.k === 'broom') {
+            ai = Math.max(0, Math.min(7, ((o.ang + 0.5) * 7 + 0.5) | 0));
+            spr = broomSpr()[(o.face < 0 ? 8 : 0) + ai];
+            c.drawImage(spr, sx - 22, sy - 28);
+          } else if (o.k === 'hoop') {
+            ai = Math.floor((o.face < 0 ? -o.t : o.t) * 32 / Math.PI) % 8;
+            if (ai < 0) ai += 8;
+            c.drawImage(hoopSpr()[ai], sx + o.face * 20 - 16, sy - 29);
+          } else if (o.k === 'grid') {
+            c.drawImage(hopGridSpr(), sx - 8, sy - 12);
+          }
+        }
+      } catch (e) { if (!window.E161b) { window.E161b = 1; console.warn(e); } }
+      return r;
+    };
+    window.LIFE161 = { sweep: function () { return window.SWEEP161 || 0; }, play: function () { return window.PLAY161 || 0; } };
+  })();
+
   requestAnimationFrame(frame);
 </script>
 
@@ -7505,5 +7676,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --></body>
 </html>
