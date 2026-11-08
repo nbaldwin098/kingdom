@@ -7636,6 +7636,179 @@ window.B137 = (function () {
     window.LIFE161 = { sweep: function () { return window.SWEEP161 || 0; }, play: function () { return window.PLAY161 || 0; } };
   })();
 
+  // ===== v162: town life - sheriff walks a beat; preacher greets at the church doors =====
+  (function () {
+    var STAR = null, BATONS = null, WAVES = null, OVER = [];
+
+    function starSpr() {
+      if (STAR) return STAR;
+      STAR = [];
+      var i, cv, g, s, an, rr;
+      for (i = 0; i < 4; i++) {
+        cv = document.createElement('canvas'); cv.width = 22; cv.height = 22;
+        g = cv.getContext('2d');
+        g.translate(11, 11);
+        g.fillStyle = i >= 2 ? '#ffe680' : '#e8b428';
+        g.beginPath();
+        for (s = 0; s < 10; s++) {
+          an = s * Math.PI / 5 - Math.PI / 2;
+          rr = s % 2 ? 4.0 : 9.2;
+          if (s === 0) g.moveTo(Math.cos(an) * rr, Math.sin(an) * rr);
+          else g.lineTo(Math.cos(an) * rr, Math.sin(an) * rr);
+        }
+        g.closePath(); g.fill();
+        g.strokeStyle = '#5a3818'; g.lineWidth = 0.85; g.stroke();
+        g.fillStyle = '#8a5a14';
+        g.beginPath(); g.arc(0, 0, 1.6, 0, 7); g.fill();
+        if (i % 2) {
+          g.fillStyle = 'rgba(255,250,220,.75)';
+          g.beginPath(); g.arc(-2, -2.2, 1.8, 0, 7); g.fill();
+        }
+        STAR.push(cv);
+      }
+      return STAR;
+    }
+
+    function batonSpr() {
+      if (BATONS) return BATONS;
+      BATONS = [];
+      var fi, ai, cv, g, ang;
+      for (fi = 0; fi < 2; fi++) {
+        for (ai = 0; ai < 8; ai++) {
+          cv = document.createElement('canvas'); cv.width = 36; cv.height = 44;
+          g = cv.getContext('2d');
+          ang = -0.55 + (ai / 7) * 1.1;
+          g.translate(18, 14);
+          g.scale(fi === 0 ? 1 : -1, 1);
+          g.rotate(0.35 + ang);
+          g.fillStyle = '#3b2410'; g.fillRect(-2.4, -1, 4.8, 29);
+          g.fillStyle = '#8a5a2e'; g.fillRect(-1.7, 1, 3.4, 24);
+          g.fillStyle = '#5a3818'; g.fillRect(-0.5, 2, 1, 20);
+          g.fillStyle = '#3b2410'; g.fillRect(-2.6, 25, 5.2, 5);
+          g.fillStyle = '#c9a46e'; g.fillRect(-2.8, -3, 5.6, 5);
+          BATONS.push(cv);
+        }
+      }
+      return BATONS;
+    }
+
+    function waveSpr() {
+      if (WAVES) return WAVES;
+      WAVES = [];
+      var fi, ai, cv, g, lift;
+      for (fi = 0; fi < 2; fi++) {
+        for (ai = 0; ai < 8; ai++) {
+          cv = document.createElement('canvas'); cv.width = 44; cv.height = 52;
+          g = cv.getContext('2d');
+          lift = -0.15 + (ai / 7) * 1.35;
+          g.translate(22, 30);
+          g.scale(fi === 0 ? 1 : -1, 1);
+          g.fillStyle = '#3b2410';
+          g.fillRect(-17, -5, 8, 11);
+          g.fillStyle = '#efe8d8';
+          g.fillRect(-16, -4, 2.2, 9);
+          g.fillRect(-11.4, -4, 1.6, 9);
+          g.fillStyle = '#c8a040';
+          g.fillRect(-17, -6, 8, 2);
+          g.save();
+          g.translate(9, -12);
+          g.rotate(-1.05 - lift);
+          g.fillStyle = '#2a1a0a'; g.fillRect(-2.6, 0, 5.2, 20);
+          g.fillStyle = '#5a3818'; g.fillRect(-1.6, 1, 3.2, 16);
+          g.fillStyle = '#e0b088';
+          g.beginPath(); g.arc(0, 22, 4, 0, 7); g.fill();
+          g.restore();
+          WAVES.push(cv);
+        }
+      }
+      return WAVES;
+    }
+
+    function workHour(hr) {
+      return hr >= 7.6 && hr < 18 && !(hr >= 12 && hr < 13);
+    }
+
+    var _pf = pushFactionItems;
+    pushFactionItems = function (items) {
+      OVER = [];
+      try {
+        if (MODE === 'free' && window.TOWN133) {
+          var L = TOWN133.towns(), now = performance.now() / 1000, hr = 12;
+          try { hr = CLOCK133.hour(); } catch (e) {}
+          var work = workHour(hr);
+          var x0 = px - innerWidth / (2 * zoom) - 220, x1 = px + innerWidth / (2 * zoom) + 220;
+          var y0 = py - innerHeight / (2 * zoom) - 200, y1 = py + innerHeight / (2 * zoom) + 320;
+          var nb = 0, ng = 0;
+          if (work) L.forEach(function (t) {
+            if (t.box && (t.box.x1 < x0 || t.box.x0 > x1 || t.box.y1 < y0 || t.box.y0 > y1)) return;
+            var streetY = (t.streetY && t.streetY[0]) || t.y;
+            var span = Math.max(140, ((t.east || (t.x + 280)) - (t.west || (t.x - 280))) * 0.38);
+            var church = null;
+            (t.b || []).forEach(function (b) { if (b.k === 'church') church = b; });
+            (t.P || []).forEach(function (p) {
+              if (p.job === 'SHERIFF' || p.job === 'DEPUTY') {
+                if (p.doing && p.doing.indexOf('WORKING AT THE') !== 0 && p.doing !== 'WALKING A BEAT') return;
+                var beat = now * 0.32 + (p.ph || 0) * 5;
+                var frac = (beat / 2) % 1;
+                var pausing = frac > 0.82;
+                var param = pausing ? (Math.floor(beat / 2) + 0.82) * 2 : beat;
+                p.doing = 'WALKING A BEAT';
+                p.x = t.x + Math.sin(param + (p.ph || 0)) * span;
+                p.y = streetY + 6 + (p.job === 'DEPUTY' ? 8 : 0) + ((p.ph || 0) % 1) * 5;
+                p.f = pausing ? (Math.sin(now * 1.7 + p.ph) >= 0 ? 1 : -1) : (Math.cos(param + (p.ph || 0)) >= 0 ? 1 : -1);
+                p.mv = !pausing; p.path = []; p.in = false;
+                if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) return;
+                nb++;
+                OVER.push({ k: 'star', x: p.x, y: p.y, face: p.f < 0 ? -1 : 1, gleam: ((now * 3 + p.v) % 2) < 1 ? 1 : 0 });
+                OVER.push({ k: 'baton', x: p.x, y: p.y, face: p.f < 0 ? -1 : 1, ang: pausing ? 0.1 : Math.sin(now * 5.2 + p.v) * 0.5 });
+                return;
+              }
+              if (p.job === 'PREACHER' && church) {
+                if (p.doing && p.doing.indexOf('WORKING AT THE') !== 0 && p.doing !== 'GREETING AT THE CHURCH DOORS') return;
+                var greet = Math.sin(now * 1.55 + (p.ph || 0)) > -0.05;
+                p.doing = 'GREETING AT THE CHURCH DOORS';
+                p.x = church.x + Math.sin(now * 0.25 + (p.ph || 0)) * 6;
+                p.y = church.y + 34;
+                p.f = Math.sin(now * 0.4 + (p.ph || 0)) >= 0 ? 1 : -1;
+                p.mv = false; p.path = []; p.in = false;
+                if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) return;
+                ng++;
+                OVER.push({ k: 'wave', x: p.x, y: p.y, face: p.f < 0 ? -1 : 1, ang: greet ? (0.35 + Math.sin(now * 5 + p.ph) * 0.5) : -0.2 });
+              }
+            });
+          });
+          window.BEAT162 = nb; window.GREET162 = ng;
+        }
+      } catch (e) { if (!window.E162) { window.E162 = 1; console.warn(e); } }
+      _pf.apply(this, arguments);
+    };
+
+    var _du = drawUnits;
+    drawUnits = function (camX, camY) {
+      var r = _du.apply(this, arguments);
+      try {
+        var c = ctx, i, o, sx, sy, ai, spr;
+        for (i = 0; i < OVER.length; i++) {
+          o = OVER[i]; sx = o.x - camX; sy = o.y - camY;
+          if (o.k === 'star') {
+            spr = starSpr()[(o.gleam ? 2 : 0) + (((o.x + o.y) | 0) % 2)];
+            c.drawImage(spr, sx + o.face * 4 - 11, sy - 38);
+          } else if (o.k === 'baton') {
+            ai = Math.max(0, Math.min(7, ((o.ang + 0.5) * 7 + 0.5) | 0));
+            spr = batonSpr()[(o.face < 0 ? 8 : 0) + ai];
+            c.drawImage(spr, sx + o.face * 6 - 18, sy - 30);
+          } else if (o.k === 'wave') {
+            ai = Math.max(0, Math.min(7, ((o.ang + 0.2) / 1.05 * 7 + 0.5) | 0));
+            spr = waveSpr()[(o.face < 0 ? 8 : 0) + ai];
+            c.drawImage(spr, sx - 22, sy - 42);
+          }
+        }
+      } catch (e) { if (!window.E162b) { window.E162b = 1; console.warn(e); } }
+      return r;
+    };
+    window.LIFE162 = { beat: function () { return window.BEAT162 || 0; }, greet: function () { return window.GREET162 || 0; } };
+  })();
+
   requestAnimationFrame(frame);
 </script>
 
@@ -7676,5 +7849,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --></body>
 </html>
