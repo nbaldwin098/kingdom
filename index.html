@@ -11842,7 +11842,7 @@ window.B137 = (function () {
       } else if (d.do === 'corners') {
         [[-280, -220, 'NW CORNER'], [280, -220, 'NE CORNER'], [280, 220, 'SE CORNER'], [-280, 220, 'SW CORNER']].forEach(function (o) { ACT.corners.push({ x: s.x + o[0], y: s.y + o[1], up: 0, was: 0, label: o[2] }); });
       } else if (d.do === 'sluice') {
-        [[40, 50, 'box', 'SLUICE BOX'], [-230, -10, 'riffles', 'RIFFLES'], [270, -80, 'gravel', 'GRAVEL LOAD']].forEach(function (o) { ACT.sluices.push({ x: s.x + o[0], y: s.y + o[1], kind: o[2], label: o[3], got: 0, held: 0 }); });
+        [[50, 160, 'box', 'SLUICE BOX'], [-230, -10, 'riffles', 'RIFFLES'], [270, -80, 'gravel', 'GRAVEL LOAD']].forEach(function (o) { ACT.sluices.push({ x: s.x + o[0], y: s.y + o[1], kind: o[2], label: o[3], got: 0, held: 0 }); });
       }
     }
     function completeAct() {
