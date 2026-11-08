@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, then The Posse: Boone wants Vane in Dustwater.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, then The Trial: Dustwater court wants Vane.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170-v174: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
+  // ===== v170-v175: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -9837,7 +9837,9 @@ window.B137 = (function () {
       { id: 'lila', name: 'Lila Finch', title: 'Witness', role: 'woman', age: 27, fem: 1, ox: 240, oy: 80, face: -1, from: 4 },
       { id: 'kit', name: 'Kit Rourke', title: 'Gunhand', role: 'guard', age: 33, fem: 0, ox: -40, oy: 340, face: 1, from: 4 },
       { id: 'tess', name: 'Tess Quill', title: 'Dustwater Marshal', role: 'v2captain_v2', age: 39, fem: 1, ox: 280, oy: 200, face: -1, from: 5 },
-      { id: 'wren', name: 'Sam Wren', title: 'Tracker', role: 'archer', age: 42, fem: 0, ox: -180, oy: 300, face: 1, from: 5 }
+      { id: 'wren', name: 'Sam Wren', title: 'Tracker', role: 'archer', age: 42, fem: 0, ox: -180, oy: 300, face: 1, from: 5 },
+      { id: 'judge', name: 'Hattie Voss', title: 'Circuit Judge', role: 'woman', age: 54, fem: 1, ox: 360, oy: -20, face: -1, from: 6 },
+      { id: 'croft', name: 'Silas Croft', title: 'Defense Counsel', role: 'merchant', age: 47, fem: 0, ox: 10, oy: -170, face: 1, from: 6 }
     ];
 
     var CHAPTERS = [
@@ -9845,7 +9847,8 @@ window.B137 = (function () {
       { id: 2, title: 'The Rustlers', year: 1, need: ['ike', 'dutch', 'sheriff2'] },
       { id: 3, title: 'The Grade', year: 1, need: ['baron3', 'vera', 'jed'] },
       { id: 4, title: 'The Showdown', year: 1, need: ['lila', 'kit', 'vane4'] },
-      { id: 5, title: 'The Posse', year: 1, need: ['tess', 'wren', 'sheriff5'] }
+      { id: 5, title: 'The Posse', year: 1, need: ['tess', 'wren', 'sheriff5'] },
+      { id: 6, title: 'The Trial', year: 1, need: ['judge', 'croft', 'tess6'] }
     ];
 
     var NODES = {
@@ -10309,6 +10312,115 @@ window.B137 = (function () {
       kit_ch5: { who: 'kit', say: "A posse. Fancy. Vane's been hunted by worse and he's still eating supper. You pick the law, you pick a fight. You pick him, you pick a different one.", replies: [
         { t: "I'm riding with Boone.", next: 'end', flag: 'kit_ch5', rel: { kit: -1 } },
         { t: "I'm not picking a fight I don't have to.", next: 'end', flag: 'kit_ch5' }
+      ] },
+
+      tess_ch6: { who: 'tess', say: "We got Vane to Dustwater. Judge Hattie Voss is sitting the case, and Silas Croft is speaking for him \u2014 city-appointed, which he hates almost as much as Vane does. The court needs someone who saw the coach and the ridge. That's you.", replies: [
+        { t: "I'll take the stand.", next: 'tess_ch6_stand', rel: { tess: 1 } },
+        { t: "What does the city want?", next: 'tess_ch6_want' },
+        { t: "What if I stay quiet?", next: 'tess_ch6_quiet' }
+      ] },
+      tess_ch6_friend: { who: 'tess', say: "You rode when I asked. Now I need you in that box. We brought Vane in. Judge Hattie Voss wants a witness who was there, not a marshal who heard about it. Croft will try to make you sound uncertain. Don't let him.", replies: [
+        { t: "I'll take the stand.", next: 'tess_ch6_stand', rel: { tess: 1 } },
+        { t: "What does the city want?", next: 'tess_ch6_want' },
+        { t: "What if I stay quiet?", next: 'tess_ch6_quiet' }
+      ] },
+      tess_ch6_stand: { who: 'tess', say: "Good. Talk to the judge so she can call you proper, and to Croft so he can't say he never met you. Lila Finch will speak too, if she hasn't already. I want him held \u2014 not buried on a story that falls apart.", replies: [
+        { t: "I'll find them.", next: 'end', flag: 'met_tess6' }
+      ] },
+      tess_ch6_want: { who: 'tess', say: "The city wants a conviction that sticks. Crowe wants his wages and a lesson. Boone wants the law to look like it still works this far out. I want Vane in a cell that isn't a suggestion. What you say in that box decides which of those they get.", replies: [
+        { t: "I'll talk to the judge.", next: 'end', flag: 'met_tess6' }
+      ] },
+      tess_ch6_quiet: { who: 'tess', say: "Then the jury hears Lila and whoever Crowe paid to sit in the gallery. Quiet isn't mercy \u2014 it's letting other people write it. If you've got a reason to hold back, tell Hattie or tell Croft. Don't tell the hallway.", replies: [
+        { t: "I'll hear them first.", next: 'end', flag: 'met_tess6' }
+      ] },
+      tess_ch6_again: { who: 'tess', say: "Hattie has the gavel. Croft has his notes. The stand doesn't wait.", replies: [
+        { t: "Understood.", next: 'end' }
+      ] },
+
+      judge: { who: 'judge', say: "Judge Hattie Voss. Dustwater's court, not Red Mesa's porch. Red Vane stands accused of taking a railroad payroll at gunpoint. The territory wants a verdict. I want a witness who was on that ridge, not a rumor. That appears to be you.", replies: [
+        { t: "I'll tell the court what I saw.", next: 'judge_truth', rel: { judge: 1 } },
+        { t: "I want to hear both sides first.", next: 'judge_both' },
+        { t: "I'm not sure I should speak.", next: 'judge_quiet' }
+      ] },
+      judge_truth: { who: 'judge', say: "Then you'll take the stand when I call you. Talk to Marshal Quill about the warrant, and to Silas Croft \u2014 he speaks for the accused, whether the city likes it or not. I don't hang a man on applause.", replies: [
+        { t: "I'll find them.", next: 'end', flag: 'met_judge' }
+      ] },
+      judge_both: { who: 'judge', say: "Good. A court that only hears one story isn't a court. Tess Quill has the city's case. Croft has Vane's. Listen to both, then you'll speak under oath, not under someone else's hat.", replies: [
+        { t: "I will.", next: 'end', flag: 'met_judge' }
+      ] },
+      judge_quiet: { who: 'judge', say: "Silence is an answer too, and juries notice it. If you saw that coach, the court needs it said. If you didn't, say that. What I won't have is a witness who hides in the hallway. Talk to Quill and Croft, then decide in the open.", replies: [
+        { t: "I'll hear them.", next: 'end', flag: 'met_judge' }
+      ] },
+      judge_again: { who: 'judge', say: "The docket doesn't wait on a maybe. Quill, Croft, then the box.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      croft: { who: 'croft', say: "Silas Croft. The city appointed me to speak for Red Vane, which tells you what they already think of him. A hanging's cheaper than a trial if the witness is eager. What are you going to say when Hattie calls you?", replies: [
+        { t: "The truth as I saw it.", next: 'croft_truth' },
+        { t: "I'll speak carefully.", next: 'croft_careful' },
+        { t: "Why take his case?", next: 'croft_why' }
+      ] },
+      croft_truth: { who: 'croft', say: "Truth is a wide word. Did you see him take the box, or did you hear Boone say he did? The jury will ask. If you've got a kinder version, I can use it. If you don't, I'll still make them prove it.", replies: [
+        { t: "I'll remember that.", next: 'end', flag: 'met_croft' }
+      ] },
+      croft_careful: { who: 'croft', say: "Careful is how men stay out of graves and off scaffolds. I'm not asking you to lie. I'm asking you not to decorate. Tess wants a clean conviction. I want a fair one. Those are not the same speech.", replies: [
+        { t: "Understood.", next: 'end', flag: 'met_croft', rel: { croft: 1 } }
+      ] },
+      croft_why: { who: 'croft', say: "Because a city that only hangs the men it already hates stops being a city. Vane's no saint. Neither is a railroad that calls wages 'property' and a man's life a lesson. Talk to the judge if you haven't. She'll have you in that box either way.", replies: [
+        { t: "I'll talk to her.", next: 'end', flag: 'met_croft', rel: { croft: 1 } }
+      ] },
+      croft_again: { who: 'croft', say: "The jury's already picking out their Sunday hats. Don't make my work harder than it is.", replies: [
+        { t: "I won't.", next: 'end' }
+      ] },
+
+      vane_ch6: { who: 'vane', say: "A city's court is just a prettier rope. They'll ask you what you saw on that ridge and they'll dress it up as justice. You can hang me proper, or you can remember I gave you a choice more than once.", replies: [
+        { t: "I'll tell it straight.", next: 'end', flag: 'vane_ch6', rel: { vane: -1 } },
+        { t: "I'll speak for you if the truth allows it.", next: 'vane_ch6_soft' },
+        { t: "I haven't decided.", next: 'end', flag: 'vane_ch6' }
+      ] },
+      vane_ch6_friend: { who: 'vane', say: "You didn't put a rope on me when you could have. Don't start now in front of a crowd that already bought tickets. Croft's the only man in that room who isn't hungry. Use him, or don't \u2014 but don't pretend this is about the truth.", replies: [
+        { t: "I'll tell it straight.", next: 'end', flag: 'vane_ch6', rel: { vane: -1 } },
+        { t: "I'll speak for you if the truth allows it.", next: 'vane_ch6_soft' },
+        { t: "I haven't decided.", next: 'end', flag: 'vane_ch6' }
+      ] },
+      vane_ch6_soft: { who: 'vane', say: "That's more than I usually get. Don't decorate and don't confess for me. If they ask about the box, say what you saw \u2014 not what Boone wished you'd seen.", replies: [
+        { t: "I can do that.", next: 'end', flag: 'vane_ch6', rel: { vane: 1 } }
+      ] },
+      vane_ch6_again: { who: 'vane', say: "The walls here are thicker than Red Mesa's. That's the only kindness in it.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      sheriff_ch6: { who: 'sheriff', say: "Dustwater's court is the real thing \u2014 a judge, a jury, and a gallery that came for a show. I brought what I could. The rest is what you say when Hattie asks. Don't make me look like I rode all this way for nothing.", replies: [
+        { t: "I'll do right by it.", next: 'end', flag: 'sheriff_ch6', rel: { sheriff: 1 } },
+        { t: "I'll say what I saw.", next: 'end', flag: 'sheriff_ch6' }
+      ] },
+      sheriff_ch6_friend: { who: 'sheriff', say: "You told me you'd keep the peace. This is the city's version of that \u2014 slower, louder, and with better chairs. Vane's in the dock. What you say in front of Hattie is the last mile of the ride we started on your claim.", replies: [
+        { t: "I'll do right by it.", next: 'end', flag: 'sheriff_ch6', rel: { sheriff: 1 } },
+        { t: "I'll say what I saw.", next: 'end', flag: 'sheriff_ch6' }
+      ] },
+      widow_ch6: { who: 'widow', say: "A city trial for a man who stood on my ridge. I hope they remember he also left people alive. I hope they remember the cattle and the coach, too. Don't let Dustwater turn this into a story that isn't ours.", replies: [
+        { t: "I'll keep it honest.", next: 'end', flag: 'widow_ch6', rel: { widow: 1 } },
+        { t: "I'll be careful.", next: 'end', flag: 'widow_ch6' }
+      ] },
+      baron_ch6: { who: 'baron', say: "At last, a court that understands property. That box was wages. I want them back, and I want Vane held so the next man thinks twice before stopping one of my coaches. Testify like you mean it.", replies: [
+        { t: "He'll answer for the box.", next: 'end', flag: 'baron_ch6', rel: { baron: 1 } },
+        { t: "That's the court's decision, not mine.", next: 'end', flag: 'baron_ch6' }
+      ] },
+      lila_ch6: { who: 'lila', say: "I'm taking the stand. I saw the coach stop and I saw Vane's face. If you saw the same ridge I did, say so. If you saw something else, say that too \u2014 but don't leave me alone in that box.", replies: [
+        { t: "You won't be alone.", next: 'end', flag: 'lila_ch6', rel: { lila: 1 } },
+        { t: "I'll say what I saw.", next: 'end', flag: 'lila_ch6' }
+      ] },
+      kit_ch6: { who: 'kit', say: "A city jury trying Red Vane. Cute. They didn't see the road. They saw a newspaper. You pick the law, you help them hang him. You pick him, you help Croft poke holes. Either way somebody's going to remember your name.", replies: [
+        { t: "I'm with the court.", next: 'end', flag: 'kit_ch6', rel: { kit: -1 } },
+        { t: "I'm not here to hang anyone.", next: 'end', flag: 'kit_ch6' }
+      ] },
+      wren_ch6: { who: 'wren', say: "Tracks don't lie in a courtroom, but lawyers do. I can tell Hattie which wash he used and when. That's all a tracker is good for once the irons are on. The rest is you and Lila.", replies: [
+        { t: "Your trail still matters.", next: 'end', flag: 'wren_ch6', rel: { wren: 1 } },
+        { t: "I'll remember that.", next: 'end', flag: 'wren_ch6' }
+      ] },
+      preacher_ch6: { who: 'preacher', say: "A court can punish a man without becoming the thing it hates. If they ask you for blood, give them the truth instead. Mercy isn't weakness. It just costs more in front of a crowd.", replies: [
+        { t: "I'll keep that in mind.", next: 'end', flag: 'preacher_ch6', rel: { preacher: 1 } },
+        { t: "Justice first.", next: 'end', flag: 'preacher_ch6' }
       ] }
 
     };
@@ -10580,7 +10692,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
@@ -10629,7 +10741,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, then The Posse: Boone wants Vane in Dustwater.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, then The Trial: Dustwater court wants Vane.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -10649,5 +10761,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --></body>
 </html>
