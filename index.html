@@ -2473,7 +2473,7 @@ window.B137 = (function () {
               np++;
               OVER.push({ k: 'fan', x: pos.x + s.dx * 0.55, y: pos.y + s.dy * 0.35 - 2, i: i % 4 });
               OVER.push({ k: 'hand', x: pos.x + s.dx * 0.4, y: pos.y + s.dy * 0.2 - 4, ang: (Math.sin(now * 5 + (p.ph || 0) + i) + 1) * 0.5 });
-              if (Math.random() < 0.03) {
+              if (Math.random() < 0.012) {
                 FLY.push({ x: pos.x + s.dx * 0.6, y: pos.y + s.dy * 0.4 - 8, tx: pos.x + (Math.random() - 0.5) * 10, ty: pos.y - 2, l: 1, red: Math.random() < 0.5 });
               }
             });
@@ -2491,7 +2491,7 @@ window.B137 = (function () {
         for (i = 0; i < OVER.length; i++) {
           o = OVER[i]; sx = o.x - camX; sy = o.y - camY;
           if (o.k === 'table') {
-            c.drawImage(tableSpr(), sx - 46, sy - 36);
+            c.drawImage(tableSpr(), sx - 56, sy - 32, 112, 76);
           } else if (o.k === 'fan') {
             c.drawImage(cardFanSpr()[o.i], sx - 14, sy - 16);
           } else if (o.k === 'hand') {
@@ -2500,10 +2500,14 @@ window.B137 = (function () {
           }
         }
         FLY.forEach(function (n) {
-          n.l -= 0.03;
-          n.x += (n.tx - n.x) * 0.12;
-          n.y += (n.ty - n.y) * 0.12;
-          card(c, n.x - camX, n.y - camY, (1 - n.l) * 0.8, 1, n.red);
+          n.l -= 0.04;
+          n.x += (n.tx - n.x) * 0.14;
+          n.y += (n.ty - n.y) * 0.14;
+          c.save();
+          c.translate(n.x - camX, n.y - camY);
+          c.rotate((1 - n.l) * 0.8);
+          c.drawImage(cardFanSpr()[n.red ? 0 : 1], -14, -16);
+          c.restore();
         });
         FLY = FLY.filter(function (n) { return n.l > 0; });
       } catch (e) { if (!window.E165b) { window.E165b = 1; console.warn(e); } }
