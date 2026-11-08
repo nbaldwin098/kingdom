@@ -8336,6 +8336,280 @@ window.B137 = (function () {
     window.LIFE165 = { play: function () { return window.CARD165 || 0; }, tables: function () { return window.CARD165T || 0; } };
   })();
 
+  // ===== v166: town life - farrier shoeing a horse at the livery =====
+  (function () {
+    var HRS = null, FAR = null, PROP = null, OVER = [], SPARKS = [];
+
+    function horseSpr() {
+      if (HRS) return HRS;
+      HRS = [];
+      var cols = ['#6b3f1d', '#8a5a30', '#a0703a', '#c4a070'];
+      var mane = ['#3b2410', '#4a2a14', '#5a3818', '#8a6a3a'];
+      var ci, fi, cv, g, col, hd;
+      for (ci = 0; ci < 4; ci++) {
+        HRS[ci] = [];
+        col = cols[ci];
+        for (fi = 0; fi < 4; fi++) {
+          cv = document.createElement('canvas'); cv.width = 124; cv.height = 90;
+          g = cv.getContext('2d');
+          g.translate(60, 80);
+          hd = fi * 0.045;
+          g.fillStyle = 'rgba(40,25,10,.22)';
+          g.beginPath(); g.ellipse(0, 2, 38, 7, 0, 0, 7); g.fill();
+          g.fillStyle = col;
+          g.fillRect(-28, -26, 5, 26);
+          g.fillRect(-17, -26, 5.5, 26);
+          g.fillRect(10, -26, 5, 26);
+          g.fillStyle = '#3b2410';
+          g.fillRect(-29, -3, 7, 4);
+          g.fillRect(-18, -3, 7, 4);
+          g.fillRect(9, -3, 7, 4);
+          g.save();
+          g.translate(20, -24);
+          g.rotate(-0.92 - fi * 0.05);
+          g.fillStyle = col;
+          g.fillRect(-3, 0, 5.5, 15);
+          g.save();
+          g.translate(0, 15);
+          g.rotate(0.95);
+          g.fillRect(-3, 0, 5, 12);
+          g.fillStyle = '#3b2410';
+          g.fillRect(-4, 10, 7, 4);
+          g.strokeStyle = '#9a9a9a'; g.lineWidth = 1.5;
+          g.beginPath(); g.arc(0, 13, 4.2, 0.15, 2.98); g.stroke();
+          g.restore();
+          g.restore();
+          g.fillStyle = col;
+          g.beginPath(); g.ellipse(-2, -32, 29, 14, 0, 0, 7); g.fill();
+          g.fillStyle = 'rgba(40,25,10,.16)';
+          g.beginPath(); g.ellipse(-2, -26, 23, 7, 0, 0, 7); g.fill();
+          g.fillStyle = '#efe8d8';
+          g.beginPath(); g.ellipse(8, -36, 5, 3.2, 0, 0, 7); g.fill();
+          g.save();
+          g.translate(22, -40);
+          g.rotate(-0.52 + hd);
+          g.fillStyle = col;
+          g.fillRect(0, -6, 20, 11);
+          g.fillRect(16, -8, 14, 13);
+          g.beginPath(); g.moveTo(18, -8); g.lineTo(16, -16); g.lineTo(22, -8); g.fill();
+          g.fillStyle = mane[ci];
+          g.fillRect(-2, -8, 19, 4);
+          g.fillStyle = '#2a1a0a';
+          g.fillRect(26, -5, 2.4, 2.4);
+          if (ci === 0 || ci === 3) {
+            g.fillStyle = '#efe8d8';
+            g.fillRect(28, -6, 3, 9);
+          }
+          g.fillStyle = '#8a6a3a';
+          g.fillRect(18, -1, 12, 2);
+          g.restore();
+          g.save();
+          g.translate(-29, -36);
+          g.rotate(0.72 + (fi % 2 ? 0.12 : 0));
+          g.fillStyle = mane[ci];
+          g.fillRect(-2, 0, 5, 22);
+          g.restore();
+          HRS[ci].push(cv);
+        }
+      }
+      return HRS;
+    }
+
+    function farrierSpr() {
+      if (FAR) return FAR;
+      FAR = [];
+      var i, cv, g, ang;
+      for (i = 0; i < 8; i++) {
+        cv = document.createElement('canvas'); cv.width = 76; cv.height = 70;
+        g = cv.getContext('2d');
+        g.translate(30, 62);
+        ang = -1.2 + (i / 7) * 1.55;
+        g.fillStyle = 'rgba(40,25,10,.2)';
+        g.beginPath(); g.ellipse(4, 1, 16, 4, 0, 0, 7); g.fill();
+        g.fillStyle = '#4a3a2a';
+        g.fillRect(-8, -16, 6, 16);
+        g.fillRect(4, -14, 6, 14);
+        g.fillStyle = '#3b2410';
+        g.fillRect(-9, -3, 8, 4);
+        g.fillRect(3, -3, 8, 4);
+        g.fillStyle = '#6b4520';
+        g.beginPath(); g.moveTo(-7, -28); g.lineTo(-11, -8); g.lineTo(12, -8); g.lineTo(7, -28); g.fill();
+        g.fillStyle = '#8a5a2e';
+        g.fillRect(-6, -18, 14, 3);
+        g.save();
+        g.translate(2, -26);
+        g.rotate(0.62);
+        g.fillStyle = '#a84a32';
+        g.fillRect(-7, -16, 14, 18);
+        g.fillStyle = '#a84a32';
+        g.fillRect(5, -2, 16, 4);
+        g.fillStyle = '#e0b088';
+        g.fillRect(19, -3, 5, 5);
+        g.fillStyle = '#e0b088';
+        g.beginPath(); g.arc(1, -22, 6, 0, 7); g.fill();
+        g.fillStyle = '#2a1a0a';
+        g.fillRect(2.2, -23, 2, 2);
+        g.fillStyle = '#5a3818';
+        g.fillRect(-10, -26, 20, 3);
+        g.fillRect(-5, -33, 11, 8);
+        g.fillRect(-6, -26, 13, 2);
+        g.save();
+        g.translate(3, -6);
+        g.rotate(ang);
+        g.fillStyle = '#a84a32';
+        g.fillRect(-2, -14, 4, 15);
+        g.fillStyle = '#e0b088';
+        g.fillRect(-3, -17, 5, 4);
+        g.fillStyle = '#6b4520';
+        g.fillRect(-1.4, -32, 2.8, 16);
+        g.fillStyle = '#8a8a8a';
+        g.fillRect(-7, -36, 14, 6);
+        g.fillStyle = '#d0d0d0';
+        g.fillRect(-6, -35, 12, 2);
+        g.restore();
+        g.restore();
+        FAR.push(cv);
+      }
+      return FAR;
+    }
+
+    function propSpr() {
+      if (PROP) return PROP;
+      var cv = document.createElement('canvas'); cv.width = 70; cv.height = 40;
+      var g = cv.getContext('2d');
+      g.translate(12, 34);
+      g.fillStyle = '#5a3818';
+      g.fillRect(-3, -16, 4, 16);
+      g.fillRect(10, -16, 4, 16);
+      g.fillRect(-6, -18, 20, 4);
+      g.fillStyle = '#8a5a2e';
+      g.fillRect(-5, -20, 18, 3);
+      g.strokeStyle = '#8a8a8a';
+      g.lineWidth = 2;
+      g.beginPath(); g.arc(4, -22, 5, 0.2, 2.95); g.stroke();
+      g.translate(28, 0);
+      g.fillStyle = '#8a5a2e'; g.fillRect(0, -12, 18, 12);
+      g.fillStyle = '#c9a46e'; g.fillRect(1, -11, 16, 2);
+      g.fillStyle = '#6b4520'; g.fillRect(1, -7, 16, 2);
+      g.fillStyle = '#5a3818'; g.fillRect(0, -2, 18, 2);
+      g.fillStyle = '#8a8a8a';
+      g.lineWidth = 1.6;
+      g.beginPath(); g.arc(6, 2, 4.5, 0.2, 2.95); g.stroke();
+      g.beginPath(); g.arc(16, 3, 4, 0.15, 3); g.stroke();
+      PROP = cv;
+      return PROP;
+    }
+
+    function workHour(hr) {
+      return hr >= 7.6 && hr < 18 && !(hr >= 12 && hr < 13);
+    }
+
+    function canTake(p) {
+      if (!p.doing) return true;
+      if (p.doing.indexOf('WORKING AT THE') === 0) return true;
+      if (p.doing === 'SHOEING A HORSE') return true;
+      if (p.doing === 'TENDING THE HOUSE') return true;
+      return false;
+    }
+
+    function yardAt(b) {
+      return { x: b.x + (b.w || 200) * 0.16, y: b.y + 56 };
+    }
+
+    function pickFarrier(t) {
+      if (t.shoe166) return t.shoe166;
+      var order = ['LIVERY OWNER', 'STABLE HAND', 'BLACKSMITH', 'APPRENTICE'];
+      var i, j, p, found = null;
+      for (i = 0; i < order.length && !found; i++) {
+        for (j = 0; j < (t.P || []).length; j++) {
+          p = t.P[j];
+          if (p && p.job === order[i] && !p.kid) { found = p; break; }
+        }
+      }
+      t.shoe166 = found;
+      return found;
+    }
+
+    var _pf = pushFactionItems;
+    pushFactionItems = function (items) {
+      _pf.apply(this, arguments);
+      OVER = [];
+      try {
+        if (MODE === 'free' && window.TOWN133) {
+          var L = TOWN133.towns(), hr = 12, now = performance.now() / 1000;
+          try { hr = CLOCK133.hour(); } catch (e) {}
+          var work = workHour(hr);
+          var x0 = px - innerWidth / (2 * zoom) - 220, x1 = px + innerWidth / (2 * zoom) + 220;
+          var y0 = py - innerHeight / (2 * zoom) - 200, y1 = py + innerHeight / (2 * zoom) + 320;
+          var np = 0, nh = 0;
+          L.forEach(function (t) {
+            if (t.box && (t.box.x1 < x0 || t.box.x0 > x1 || t.box.y1 < y0 || t.box.y0 > y1)) return;
+            var liv = null;
+            (t.b || []).forEach(function (b) { if (b.k === 'livery') liv = b; });
+            if (!liv) return;
+            var pos = yardAt(liv);
+            if (pos.x < x0 || pos.x > x1 || pos.y < y0 || pos.y > y1) return;
+            nh++;
+            OVER.push({ k: 'horse', x: pos.x + 10, y: pos.y, col: (t.id || 0) % 4, fi: (now * 2 + (t.ph || 0)) % 4 | 0 });
+            OVER.push({ k: 'prop', x: pos.x - 18, y: pos.y + 6 });
+            if (!work) return;
+            var p = pickFarrier(t);
+            if (!p || !canTake(p)) return;
+            p.doing = 'SHOEING A HORSE';
+            p.x = pos.x + 18;
+            p.y = pos.y + 4;
+            p.f = 1;
+            p.mv = false; p.path = []; p.in = true;
+            np++;
+            var swing = (Math.sin(now * 8 + (p.ph || 0)) + 1) * 0.5;
+            OVER.push({ k: 'farrier', x: pos.x + 16, y: pos.y + 2, ai: Math.max(0, Math.min(7, (swing * 7 + 0.5) | 0)), swing: swing });
+          });
+          window.SHOE166 = np; window.SHOE166H = nh;
+        }
+      } catch (e) { if (!window.E166) { window.E166 = 1; console.warn(e); } }
+    };
+
+    var _du = drawUnits;
+    drawUnits = function (camX, camY) {
+      var r = _du.apply(this, arguments);
+      try {
+        var c = ctx, i, o, horses, fars, sx, sy;
+        for (i = 0; i < OVER.length; i++) {
+          o = OVER[i];
+          sx = o.x - camX; sy = o.y - camY;
+          if (o.k === 'prop') {
+            c.drawImage(propSpr(), sx - 12, sy - 34);
+          } else if (o.k === 'horse') {
+            if (!horses) horses = horseSpr();
+            c.drawImage(horses[o.col][o.fi], sx - 60, sy - 80);
+          } else if (o.k === 'farrier') {
+            if (!fars) fars = farrierSpr();
+            c.drawImage(fars[o.ai], sx - 30, sy - 62);
+            if (o.swing > 0.82 && SPARKS.length < 40) {
+              SPARKS.push({
+                x: o.x + 22, y: o.y - 10,
+                vx: 20 + Math.random() * 40, vy: -40 - Math.random() * 50,
+                l: 0.28 + Math.random() * 0.25,
+                col: Math.random() < 0.4 ? '#ffe86a' : (Math.random() < 0.5 ? '#ff9020' : '#ff5010')
+              });
+            }
+          }
+        }
+        SPARKS.forEach(function (s) {
+          s.x += s.vx / 60; s.y += s.vy / 60; s.vy += 90 / 60; s.l -= 0.02;
+          if (s.l > 0) {
+            c.fillStyle = s.col; c.globalAlpha = Math.min(1, s.l * 2.4);
+            c.beginPath(); c.arc(s.x - camX, s.y - camY, 1.4 + s.l * 1.2, 0, 7); c.fill();
+            c.globalAlpha = 1;
+          }
+        });
+        SPARKS = SPARKS.filter(function (s) { return s.l > 0; });
+      } catch (e) { if (!window.E166b) { window.E166b = 1; console.warn(e); } }
+      return r;
+    };
+    window.LIFE166 = { shoe: function () { return window.SHOE166 || 0; }, horses: function () { return window.SHOE166H || 0; } };
+  })();
+
   requestAnimationFrame(frame);
 </script>
 
@@ -8376,5 +8650,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --></body>
 </html>
