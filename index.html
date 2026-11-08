@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. Chapter 1: you ride in with nothing but a stake and a general. Folk teach you how this country works.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. Chapter 1, The Claim: you ride in with a stake and a general. Chapter 2, The Rustlers: the sheriff and cattle thieves test you.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170: STORY MODE - chapter 1 at the homestead, walk-up TALK, named cast =====
+  // ===== v170/v171: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -9829,11 +9829,14 @@ window.B137 = (function () {
       { id: 'vane', name: 'Red Vane', title: 'Outlaw', role: 'archer', age: 36, fem: 0, ox: -80, oy: 220, face: 1 },
       { id: 'preacher', name: 'Amos Gill', title: 'Preacher', role: 'priest', age: 58, fem: 0, ox: 200, oy: -40, face: -1 },
       { id: 'smith', name: 'Holt Brennan', title: 'Blacksmith', role: 'blacksmith', age: 44, fem: 0, ox: 140, oy: 120, face: 1 },
-      { id: 'baron', name: 'Elias Crowe', title: 'Railroad Baron', role: 'merchant', age: 52, fem: 0, ox: -280, oy: 80, face: 1 }
+      { id: 'baron', name: 'Elias Crowe', title: 'Railroad Baron', role: 'merchant', age: 52, fem: 0, ox: -280, oy: 80, face: 1 },
+      { id: 'ike', name: 'Ike Pell', title: 'Wrangler', role: 'farmer', age: 29, fem: 0, ox: -240, oy: -90, face: 1, from: 2 },
+      { id: 'dutch', name: 'Dutch Harlan', title: 'Rustler', role: 'guard', age: 38, fem: 0, ox: 90, oy: 280, face: -1, from: 2 }
     ];
 
     var CHAPTERS = [
-      { id: 1, title: 'The Claim', year: 1, need: ['widow', 'sheriff', 'vane'] }
+      { id: 1, title: 'The Claim', year: 1, need: ['widow', 'sheriff', 'vane'] },
+      { id: 2, title: 'The Rustlers', year: 1, need: ['ike', 'dutch', 'sheriff2'] }
     ];
 
     var NODES = {
@@ -9953,6 +9956,92 @@ window.B137 = (function () {
       ] },
       baron_again: { who: 'baron', say: "The line won't wait. When you're ready to move goods, the train will be.", replies: [
         { t: "Until then.", next: 'end' }
+      ] },
+
+      sheriff_ch2: { who: 'sheriff', say: "I rode back for a reason. Rustlers hit Martha's remaining herd two nights ago \u2014 about twenty head, driven toward the dry wash south of here.", replies: [
+        { t: "I'll help you track them.", next: 'sheriff_ch2_help', rel: { sheriff: 1, widow: 1 } },
+        { t: "That's her trouble, not mine.", next: 'sheriff_ch2_cold' },
+        { t: "You think Red Vane's behind it?", next: 'sheriff_ch2_vane' }
+      ] },
+      sheriff_ch2_friend: { who: 'sheriff', say: "You told me you'd keep the peace. I need that now. Rustlers hit Martha's remaining herd two nights ago \u2014 about twenty head, driven toward the dry wash south of here.", replies: [
+        { t: "I'll help you track them.", next: 'sheriff_ch2_help', rel: { sheriff: 1, widow: 1 } },
+        { t: "That's her trouble, not mine.", next: 'sheriff_ch2_cold' },
+        { t: "You think Red Vane's behind it?", next: 'sheriff_ch2_vane' }
+      ] },
+      sheriff_ch2_help: { who: 'sheriff', say: "Good. Ike Pell, her wrangler, saw the tracks. Talk to him, then decide what you do when you find the camp. I want those cattle back \u2014 and the men if you can take them without a war.", replies: [
+        { t: "I'll find Ike.", next: 'end', flag: 'met_sheriff2' }
+      ] },
+      sheriff_ch2_cold: { who: 'sheriff', say: "It's the country's trouble. Rustlers who hit one claim hit the next. Ike Pell saw the tracks \u2014 he'll tell you whether you want to hear it or not.", replies: [
+        { t: "I'll hear him out.", next: 'end', flag: 'met_sheriff2' }
+      ] },
+      sheriff_ch2_vane: { who: 'sheriff', say: "Maybe. Vane likes trouble, but rustling cattle is slower work than he usually picks. Ike Pell saw riders. Talk to him before you go pointing at anyone.", replies: [
+        { t: "I'll talk to Ike first.", next: 'end', flag: 'met_sheriff2' }
+      ] },
+      sheriff_ch2_again: { who: 'sheriff', say: "You talked to Harlan, or you will. Whatever you decide, I'll hear about it. The herd either comes home or it doesn't.", replies: [
+        { t: "Understood.", next: 'end' }
+      ] },
+
+      ike: { who: 'ike', say: "You're the new claim? I'm Ike Pell \u2014 I ride for Martha Kane. Two nights back I heard cattle moving after dark. Tracks went south toward the wash. Four riders, maybe five. One of them sat a paint horse I'd know anywhere \u2014 Dutch Harlan's.", replies: [
+        { t: "Where's the camp?", next: 'ike_camp' },
+        { t: "Did you tell the sheriff?", next: 'ike_law' },
+        { t: "Why come to me?", next: 'ike_why' }
+      ] },
+      ike_camp: { who: 'ike', say: "South of here, down in the dry wash past the ridge. Dutch won't talk pretty, but he talks. Martha wants those cattle more than she wants a hanging.", replies: [
+        { t: "I'll ride down there.", next: 'end', flag: 'met_ike' }
+      ] },
+      ike_law: { who: 'ike', say: "Boone already knows. He wants the herd back without turning this into a shooting match if he can help it. Your call when you find Dutch.", replies: [
+        { t: "I'll find him.", next: 'end', flag: 'met_ike' }
+      ] },
+      ike_why: { who: 'ike', say: "Martha said you held your ground with Vane. Figured you might hold it with rustlers too. South wash. You'll smell the herd before you see the fire.", replies: [
+        { t: "I'll take a look.", next: 'end', flag: 'met_ike', rel: { ike: 1 } }
+      ] },
+      ike_again: { who: 'ike', say: "Dutch is still down in that wash unless you already moved him. Those cattle won't come home on their own.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      dutch: { who: 'dutch', say: "That's far enough. Name's Dutch Harlan. These cattle wandered and I was kind enough to gather them. You the new claim?", replies: [
+        { t: "Those are Martha Kane's cattle. Drive them back.", next: 'dutch_demand', rel: { dutch: -1 } },
+        { t: "The sheriff knows you're here.", next: 'dutch_law' },
+        { t: "Maybe we can make a deal.", next: 'dutch_deal' }
+      ] },
+      dutch_demand: { who: 'dutch', say: "Brave. I'll tell you what I told Boone's last deputy \u2014 the frontier don't do receipts. You want a fight, you'll get one. You want the herd, bring gold or bring more men.", replies: [
+        { t: "This isn't over.", next: 'end', flag: 'met_dutch' }
+      ] },
+      dutch_law: { who: 'dutch', say: "Boone can know all he likes. Law's thin and the wash is long. You riding for him, or you riding for yourself?", replies: [
+        { t: "I'm riding for the law.", next: 'dutch_end_law' },
+        { t: "I'm riding for myself.", next: 'dutch_end_self' }
+      ] },
+      dutch_end_law: { who: 'dutch', say: "Then we understand each other. Next time you come down here, don't come alone.", replies: [
+        { t: "I won't have to.", next: 'end', flag: 'met_dutch', rel: { dutch: -1, sheriff: 1 } }
+      ] },
+      dutch_end_self: { who: 'dutch', say: "Smart. The frontier pays the ones who pick their fights. Don't get in my way and I might forget your face.", replies: [
+        { t: "We'll see.", next: 'end', flag: 'met_dutch' }
+      ] },
+      dutch_deal: { who: 'dutch', say: "Now you're talking. Ten head go back to Kane so Boone stops chewing my ear. The rest I move on. You keep your mouth shut, I forget your claim exists.", replies: [
+        { t: "Drive all of them back.", next: 'dutch_demand', rel: { dutch: -1 } },
+        { t: "Deal. Ten head go back.", next: 'dutch_deal_yes' },
+        { t: "No deal.", next: 'dutch_nodeal' }
+      ] },
+      dutch_deal_yes: { who: 'dutch', say: "A man who can count. Ten head walk home at dusk. You didn't see the rest. We never had this talk.", replies: [
+        { t: "We're done here.", next: 'end', flag: 'met_dutch', rel: { dutch: 1, sheriff: -1, widow: -1 } }
+      ] },
+      dutch_nodeal: { who: 'dutch', say: "Then you've wasted both our time. The wash is long. Ride out before I change my mind about letting you.", replies: [
+        { t: "I'm going.", next: 'end', flag: 'met_dutch' }
+      ] },
+      dutch_again: { who: 'dutch', say: "Still poking around? The offer, or the warning \u2014 whichever you heard \u2014 still stands.", replies: [
+        { t: "I'll be back.", next: 'end' }
+      ] },
+
+      widow_ch2: { who: 'widow', say: "Ike told you, or he will. Those cattle were the last of what my husband built. I don't need a hero. I need them back.", replies: [
+        { t: "I'll get them back.", next: 'end', flag: 'widow_ch2', rel: { widow: 1 } },
+        { t: "I'll see what I can do.", next: 'end', flag: 'widow_ch2' }
+      ] },
+      vane_ch2: { who: 'vane', say: "Harlan? Small-time. If you're going to make enemies, pick bigger ones. Or pick him and get it over with.", replies: [
+        { t: "I'll handle it my way.", next: 'end', flag: 'vane_ch2' },
+        { t: "You know him?", next: 'vane_ch2_know' }
+      ] },
+      vane_ch2_know: { who: 'vane', say: "I know a thief who thinks a paint horse makes him a legend. It doesn't. Don't confuse him with me.", replies: [
+        { t: "I won't.", next: 'end', flag: 'vane_ch2' }
       ] }
     };
 
@@ -9984,17 +10073,24 @@ window.B137 = (function () {
         var d = JSON.parse(localStorage.getItem(KEY) || 'null');
         if (!d) return;
         ST.ch = d.ch || 1; ST.rel = d.rel || {}; ST.met = d.met || {}; ST.flags = d.flags || {}; ST.done = d.done || {};
+        if (ST.done[1] && ST.ch < 2) {
+          for (var i = 0; i < CHAPTERS.length; i++) if (CHAPTERS[i].id === 2) { ST.ch = 2; break; }
+        }
       } catch (e) {}
     }
     function save() {
       try { localStorage.setItem(KEY, JSON.stringify({ ch: ST.ch, rel: ST.rel, met: ST.met, flags: ST.flags, done: ST.done })); } catch (e) {}
     }
-    function chDef() { return CHAPTERS[0]; }
+    function chDef() {
+      for (var i = 0; i < CHAPTERS.length; i++) if (CHAPTERS[i].id === ST.ch) return CHAPTERS[i];
+      return CHAPTERS[CHAPTERS.length - 1] || CHAPTERS[0];
+    }
 
     function place() {
       ST.chars = [];
       if (!ST.on || typeof city === 'undefined' || !city) return;
       CAST.forEach(function (c) {
+        if (c.from && c.from > ST.ch) return;
         var ch = {};
         Object.keys(c).forEach(function (k) { ch[k] = c[k]; });
         ch.x = city.x + c.ox; ch.y = city.y + c.oy; ch.here = 1; ch.ph = Math.random() * 6;
@@ -10057,12 +10153,19 @@ window.B137 = (function () {
 
     function applyRel(r) { if (!r) return; Object.keys(r).forEach(function (k) { ST.rel[k] = (ST.rel[k] || 0) + r[k]; }); }
 
-    function finishCh1() {
-      var need = chDef().need, i;
-      for (i = 0; i < need.length; i++) if (!ST.met[need[i]]) return;
-      if (!ST.done[1]) ST.done[1] = 1;
-      ST.flags.ch1done = 1;
+    function finishChapter() {
+      var d = chDef(), i, nxt = null;
+      if (!d) return;
+      for (i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return;
+      if (!ST.done[d.id]) ST.done[d.id] = 1;
+      ST.flags['ch' + d.id + 'done'] = 1;
+      for (i = 0; i < CHAPTERS.length; i++) if (CHAPTERS[i].id === d.id + 1) nxt = CHAPTERS[i];
+      if (nxt && ST.ch < nxt.id) ST.ch = nxt.id;
       save();
+      place();
+      try {
+        if (typeof MODE_NAMES !== 'undefined') MODE_NAMES.free = ST.on ? ('STORY \u00b7 ' + chDef().title.toUpperCase()) : FREE_NAME;
+      } catch (e) {}
     }
 
     function openNode(id, folk) {
@@ -10097,7 +10200,7 @@ window.B137 = (function () {
         ST.met[id] = 1; ST.flags[r.flag] = 1;
       }
       save();
-      finishCh1();
+      finishChapter();
       if (!r.next || r.next === 'end') { closeDlg(); return; }
       openNode(r.next, ST.node && ST.node.folk);
     }
@@ -10105,8 +10208,15 @@ window.B137 = (function () {
     function startTalk(n) {
       if (!n) return;
       if (n.kind === 'story' && n.ch) {
-        var id = n.ch.id;
-        openNode((ST.met[id] && NODES[id + '_again']) ? id + '_again' : id);
+        var id = n.ch.id, nid = id;
+        if (ST.ch >= 2 && NODES[id + '_ch2'] && !ST.met[id + '2'] && !ST.met[id + '_ch2'] && !ST.flags[id + '_ch2']) {
+          nid = (id === 'sheriff' && (ST.rel.sheriff || 0) > 0) ? 'sheriff_ch2_friend' : (id + '_ch2');
+        } else if (ST.ch >= 2 && ST.met[id] && NODES[id + '_ch2_again']) {
+          nid = id + '_ch2_again';
+        } else if (ST.met[id] && NODES[id + '_again']) {
+          nid = id + '_again';
+        }
+        openNode(nid);
       } else if (n.kind === 'folk') openNode('folk', n.p);
     }
 
@@ -10189,7 +10299,10 @@ window.B137 = (function () {
 
     window.STORY170 = {
       on: function () { return !!ST.on; },
-      chapter: function () { var d = chDef(); return { id: ST.ch, title: d.title, done: !!ST.done[1], need: d.need.slice() }; },
+      chapter: function () {
+        var d = chDef() || { id: ST.ch, title: '?', need: [] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2] };
+      },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
         if (typeof city === 'undefined' || !city || !ST.chars.length) return 1e9;
@@ -10237,7 +10350,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. Chapter 1: you arrive with a stake and a general. Folk teach you how this country works.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, then The Rustlers: folk teach you, then rustlers hit the widow\'s herd.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -10257,5 +10370,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --></body>
 </html>
