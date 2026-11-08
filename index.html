@@ -8916,7 +8916,7 @@ window.B137 = (function () {
     }
 
     function drawPart(p, sx, sy) {
-      var c = ctx; c.save(); c.translate(sx, sy); c.rotate(p.ang);
+      var c = ctx; c.save(); c.translate(sx, sy); c.rotate(p.ang); if (Math.cos(p.ang) < 0) c.scale(1, -1); /*FLIP168*/
       var moving = !p.stop && !p.robbed;
       if (p.k === 'loco') {
         put(c, locoSpr(), 0, 0);
@@ -9070,5 +9070,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v167-trains --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --></body>
 </html>
