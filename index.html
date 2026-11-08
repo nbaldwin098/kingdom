@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170-v178: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
+  // ===== v170-v180: STORY MODE - one scene per chapter at a real place (STORY180), walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -10875,16 +10875,220 @@ window.B137 = (function () {
       return CHAPTERS[CHAPTERS.length - 1] || CHAPTERS[0];
     }
 
+    /* STORY180: scenes. Each chapter happens at one real place with only its 1-3 people, and has something to DO. */
+    var SCENE = {
+      1: { cast: ['widow', 'sheriff', 'vane'], at: 'home', do: 'meet', mark: 'THE CLAIM' },
+      2: { cast: ['ike', 'dutch', 'sheriff'], at: 'ranch', do: 'herd', mark: 'KANE RANCH' },
+      3: { cast: ['baron', 'vera', 'jed'], at: 'grade', do: 'stakes', mark: 'THE GRADE' },
+      4: { cast: ['lila', 'kit', 'vane'], at: 'southroad', do: 'coach', mark: 'SOUTH ROAD' },
+      5: { cast: ['tess', 'wren', 'sheriff'], at: 'wash', do: 'track', mark: 'SOUTH WASH' },
+      6: { cast: ['judge', 'croft', 'tess'], at: 'court', do: 'arrive', mark: 'DUSTWATER COURT' },
+      7: { cast: ['hale', 'clara', 'judge'], at: 'court', do: 'arrive', mark: 'DUSTWATER COURT' },
+      8: { cast: ['keene', 'brant', 'judge'], at: 'court', do: 'arrive', mark: 'DUSTWATER COURT' },
+      9: { cast: ['holley', 'crane', 'keene'], at: 'yard', do: 'wagon', mark: 'THE YARD' }
+    };
+    CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
+    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]] };
+    var GENERIC = [[-90, -30], [95, -10], [10, 105]];
+    var DW = null;
+    function dustwater() {
+      if (DW) return DW;
+      try { if (window.TOWN133) { var L = TOWN133.towns() || []; for (var i = 0; i < L.length; i++) if (L[i] && L[i].name === 'DUSTWATER') { DW = { x: L[i].x, y: L[i].y }; return DW; } } } catch (e) {}
+      return { x: city.x - 33000, y: city.y + 26000 };
+    }
+    function placeXY(at) {
+      if (typeof city === 'undefined' || !city) return { x: px, y: py };
+      if (at === 'ranch') return { x: city.x - 1800, y: city.y - 400 };
+      if (at === 'grade') return { x: city.x + 2400, y: city.y - 800 };
+      if (at === 'southroad') return { x: city.x + 150, y: city.y + 2400 };
+      if (at === 'wash') return { x: city.x - 3500, y: city.y + 2800 };
+      if (at === 'court') { var d = dustwater(); return { x: d.x + 40, y: d.y - 80 }; }
+      if (at === 'yard') { var d2 = dustwater(); return { x: d2.x + 180, y: d2.y + 120 }; }
+      return { x: city.x, y: city.y };
+    }
+    function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
+    function charId(need) { return String(need).replace(/\d+$/, ''); }
+
+    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], marks: [], mi: 0, coach: null, wagon: null, t: 0 };
+    function talksDone() { var d = chDef(); for (var i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return false; return true; }
+    function actOK() {
+      var d = chDef(); if (!d) return true;
+      if (ST.flags['act' + d.id]) return true;
+      if (d.do === 'meet') return talksDone();
+      if (d.do === 'arrive') { var s = scenePos(); if (Math.hypot(px - s.x, py - s.y) < 280) { ST.flags['act' + d.id] = 1; save(); return true; } return false; }
+      return !!(ACT.id === d.id && ACT.done);
+    }
+    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; }
+    function setupAct() {
+      var d = chDef(); clearAct(); ACT.id = d.id; ACT.kind = d.do || ''; ACT.done = !!ST.flags['act' + d.id];
+      if (ACT.done || !ST.on) return;
+      var s = scenePos(), i;
+      if (d.do === 'herd') {
+        ACT.pen = { x: s.x - 170, y: s.y - 110 };
+        [[360, 120], [470, -60], [300, 300]].forEach(function (o, k) { ACT.cattle.push({ x: s.x + o[0], y: s.y + o[1], f: -1, ph: k * 2, col: ['#8a5a32', '#c8a070', '#6a4a2e'][k] }); });
+        [[560, 60], [420, 380]].forEach(function (o) { ACT.foes.push({ x: s.x + o[0], y: s.y + o[1], hp: 3, f: -1, role: 'guard', hitT: 0, name: 'RUSTLER' }); });
+      } else if (d.do === 'stakes') {
+        [[-300, 60], [20, -90], [330, 50]].forEach(function (o) { ACT.stakes.push({ x: s.x + o[0], y: s.y + o[1], got: 0 }); });
+      } else if (d.do === 'coach') {
+        ACT.coach = { k: 'coach', x: s.x + 60, y: s.y + 40, f: 1, ph: 0 };
+        [[-480, 160], [520, -140], [-380, -260]].forEach(function (o) { ACT.foes.push({ x: s.x + o[0], y: s.y + o[1], hp: 3, f: 1, role: 'archer', hitT: 0, name: 'VANE GANG' }); });
+      } else if (d.do === 'track') {
+        for (i = 0; i < 3; i++) ACT.marks.push({ x: s.x + 220 + i * 260, y: s.y + 160 + i * 150 });
+      } else if (d.do === 'wagon') {
+        ACT.wagon = { k: 'money', x: s.x + 60, y: s.y + 160, f: 1, ph: 0, ex: s.x + 60 + 650 };
+      }
+    }
+    function completeAct() {
+      var d = chDef(); if (!d) return;
+      ACT.done = true; ST.flags['act' + d.id] = 1; ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.marks = []; ACT.coach = null;
+      if (ACT.wagon) ACT.wagon.ex = ACT.wagon.x;
+      save(); finishChapter();
+    }
+    var lastU = 0;
+    function updAct() {
+      var now = performance.now(), dt = Math.min(0.1, (now - (lastU || now)) / 1000); lastU = now;
+      if (!ST.on) return;
+      var d = chDef(); if (!d || ACT.id !== d.id) return;
+      if (d.do === 'arrive') { if (!ST.flags['act' + d.id] && actOK()) finishChapter(); return; }
+      if (ACT.done) return;
+      var i, a;
+      if (d.do === 'herd') {
+        var penned = 0;
+        ACT.cattle.forEach(function (c) {
+          var dx = c.x - px, dy = c.y - py, r = Math.hypot(dx, dy);
+          if (r < 150 && r > 1) { c.x += dx / r * 120 * dt; c.y += dy / r * 120 * dt; c.f = dx < 0 ? -1 : 1; c.ph += dt * 10; }
+          if (Math.hypot(c.x - ACT.pen.x, c.y - ACT.pen.y) < 150) penned++;
+        });
+        moveFoes(dt, null);
+        var alive = ACT.foes.filter(function (f) { return f.hp > 0; }).length;
+        if (penned >= ACT.cattle.length || alive === 0) completeAct();
+      } else if (d.do === 'stakes') {
+        ACT.stakes.forEach(function (k) { if (!k.got && Math.hypot(k.x - px, k.y - py) < 50) k.got = 1; });
+        if (ACT.stakes.every(function (k) { return k.got; })) completeAct();
+      } else if (d.do === 'coach') {
+        moveFoes(dt, ACT.coach);
+        if (ACT.foes.every(function (f) { return f.hp <= 0; })) completeAct();
+      } else if (d.do === 'track') {
+        var m = ACT.marks[ACT.mi];
+        if (m && Math.hypot(m.x - px, m.y - py) < 60) ACT.mi++;
+        if (ACT.mi >= ACT.marks.length) completeAct();
+      } else if (d.do === 'wagon') {
+        var w = ACT.wagon;
+        if (w && Math.hypot(w.x - px, w.y - py) < 240 && w.x < w.ex) { w.x = Math.min(w.ex, w.x + 70 * dt); w.ph += dt * 6; }
+        if (w && w.x >= w.ex) completeAct();
+      }
+    }
+    function moveFoes(dt, goal) {
+      ACT.foes.forEach(function (f) {
+        if (f.hp <= 0) return;
+        var tx = goal ? goal.x : px, ty = goal ? goal.y : py, dx = tx - f.x, dy = ty - f.y, r = Math.hypot(dx, dy);
+        var near = goal ? 70 : 95, far = goal ? 1e9 : 450;
+        if (r > near && r < far) { f.x += dx / r * 55 * dt; f.y += dy / r * 55 * dt; f.f = dx < 0 ? -1 : 1; }
+      });
+    }
+    function hitFoes(x, y, R, p) {
+      var n = 0; if (!ST.on || ACT.done) return 0;
+      ACT.foes.forEach(function (f) { if (f.hp > 0 && Math.hypot(f.x - x, f.y - y) < R) { f.hp -= p; f.hitT = performance.now(); n++; } });
+      return n;
+    }
+    try { var _atk180 = attack; attack = function () { var r = _atk180.apply(this, arguments); try { if (typeof started === 'undefined' || started) hitFoes(px + (typeof face !== 'undefined' ? face : 1) * 40, py, 140, 1); } catch (e) {} return r; }; } catch (e) {}
+    try { if (window.WILD141 && WILD141.hitAt) { var _ha180 = WILD141.hitAt; WILD141.hitAt = function (x, y, rx, ry, p) { var n = _ha180.apply(this, arguments); try { n += hitFoes(x, y + 20, Math.max(rx, 30) + 20, p || 1); } catch (e) {} return n; }; } } catch (e) {}
+
+    function marker() {
+      if (!ST.on || typeof city === 'undefined' || !city) return null;
+      var d = chDef(), s = scenePos(), lab = d.mark || d.title.toUpperCase();
+      if (Math.hypot(px - s.x, py - s.y) > 900) return { x: s.x, y: s.y, label: lab };
+      if (!actOK() && ACT.id === d.id) {
+        var t = null;
+        if (d.do === 'herd') { var c = ACT.cattle.filter(function (q) { return Math.hypot(q.x - ACT.pen.x, q.y - ACT.pen.y) >= 150; })[0]; var f = ACT.foes.filter(function (q) { return q.hp > 0; })[0]; t = f ? { x: f.x, y: f.y, label: 'RUSTLERS' } : c ? { x: c.x, y: c.y, label: 'STRAY CATTLE' } : null; }
+        else if (d.do === 'stakes') { var k = ACT.stakes.filter(function (q) { return !q.got; })[0]; if (k) t = { x: k.x, y: k.y, label: 'SURVEY STAKE' }; }
+        else if (d.do === 'coach') { var g = ACT.foes.filter(function (q) { return q.hp > 0; })[0]; if (g) t = { x: g.x, y: g.y, label: 'VANE GANG' }; }
+        else if (d.do === 'track') { var m = ACT.marks[ACT.mi]; if (m) t = { x: m.x, y: m.y, label: 'TRACKS' }; }
+        else if (d.do === 'wagon' && ACT.wagon) t = { x: ACT.wagon.x, y: ACT.wagon.y, label: 'PRISON WAGON' };
+        else if (d.do === 'arrive') t = { x: s.x, y: s.y, label: lab };
+        if (t) return t;
+      }
+      for (var i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) { var ch = byId(charId(d.need[i])); if (ch) return { x: ch.x, y: ch.y, label: ch.name.toUpperCase() }; }
+      return null;
+    }
+    function drawCompass() {
+      var m = marker(); if (!m) return;
+      var dx = m.x - px, dy = m.y - py, dist = Math.hypot(dx, dy), z = (typeof zoom !== 'undefined' && zoom) || 1;
+      var W2 = cv.width / (window.devicePixelRatio || 1), H2 = cv.height / (window.devicePixelRatio || 1);
+      if (Math.abs(dx) * z < W2 / 2 - 30 && Math.abs(dy) * z < H2 / 2 - 30) return;
+      var c = ctx, a = Math.atan2(dy, dx), rx = W2 / 2 - 60, ry = H2 < 500 ? H2 / 2 - 64 : H2 / 2 - 132, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
+      var X = W2 / 2 + Math.cos(a) * t, Y = H2 / 2 + Math.sin(a) * t, cc = window.__cc79;
+      if (cc && performance.now() - cc.t < 120 && Math.abs(X - cc.X) < 100 && Math.abs(Y - cc.Y) < 58) { if (Math.abs(Math.sin(a)) > 0.6) X = cc.X + (X >= cc.X ? 110 : -110); else Y = cc.Y + (Y >= cc.Y ? 64 : -64); }
+      try { var av = COMPAV151(X, Y); X = av[0]; Y = av[1]; } catch (e) {}
+      try { var th = document.getElementById('topHud'), r = th && th.getBoundingClientRect(); if (r && r.width > 0 && X > r.left - 22 && X < r.right + 22 && Y - 22 < r.bottom) Y = r.bottom + 24; } catch (e) {}
+      c.save(); c.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0); c.translate(X, Y);
+      c.fillStyle = '#b8322a'; c.strokeStyle = '#ffe9b8'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 18, 0, 6.3); c.fill(); c.stroke();
+      c.rotate(a); c.fillStyle = '#ffe9b8'; c.beginPath(); c.moveTo(17, 0); c.lineTo(6, -7); c.lineTo(6, 7); c.closePath(); c.fill(); c.rotate(-a);
+      c.fillStyle = '#ffe9b8'; c.beginPath(); for (var i = 0; i < 5; i++) { var q = -Math.PI / 2 + i * 2.513; c.lineTo(Math.cos(q) * 7, Math.sin(q) * 7); q += 1.257; c.lineTo(Math.cos(q) * 3, Math.sin(q) * 3); } c.closePath(); c.fill();
+      var lbl = m.label + ' ' + (dist / 1000).toFixed(1) + 'K'; c.font = 'bold 10px monospace'; c.textAlign = 'center';
+      var w = c.measureText(lbl).width + 8; c.fillStyle = 'rgba(243,230,196,.92)'; c.fillRect(-w / 2, 22, w, 14); c.fillStyle = '#2a1a0a'; c.fillText(lbl, 0, 33); c.restore();
+      window.__sc180 = { X: X, Y: Y, t: performance.now() };
+    }
+    try { var _mw180 = drawMiniWorld; drawMiniWorld = function () { var r = _mw180.apply(this, arguments); try { if (ST.on) drawCompass(); } catch (e) { if (!window.E180) { window.E180 = 1; console.warn(e); } } return r; }; } catch (e) {}
+
+    function drawCow(c, o, sx, sy) {
+      c.save(); c.translate(sx, sy); c.scale(o.f || 1, 1); c.strokeStyle = '#3a2410'; c.lineWidth = 1.2;
+      c.fillStyle = 'rgba(40,25,10,.22)'; c.beginPath(); c.ellipse(0, 1, 20, 5, 0, 0, 7); c.fill();
+      var sw = Math.sin(o.ph || 0) * 3; c.fillStyle = '#5a3a20'; [-12, -7, 8, 13].forEach(function (lx, i) { c.fillRect(lx + (i % 2 ? sw : -sw) * 0.4, -12, 3, 12); });
+      c.fillStyle = o.col || '#8a5a32'; c.beginPath(); c.ellipse(0, -18, 18, 9, 0, 0, 7); c.fill(); c.stroke();
+      c.fillStyle = '#f4ead4'; c.beginPath(); c.ellipse(-4, -20, 6, 4, 0.3, 0, 7); c.fill();
+      c.fillStyle = o.col || '#8a5a32'; c.beginPath(); c.ellipse(19, -22, 7, 6, 0, 0, 7); c.fill(); c.stroke();
+      c.strokeStyle = '#e8dcc0'; c.lineWidth = 2; c.beginPath(); c.moveTo(16, -27); c.lineTo(12, -32); c.moveTo(22, -27); c.lineTo(26, -32); c.stroke();
+      c.fillStyle = '#2a1a0a'; c.fillRect(21, -24, 1.8, 1.8); c.restore();
+    }
+    function drawPen(c, sx, sy) {
+      c.save(); c.strokeStyle = '#7a5232'; c.lineWidth = 4; c.strokeRect(sx - 110, sy - 60, 220, 120);
+      c.fillStyle = '#6a4424'; for (var i = 0; i <= 6; i++) { c.fillRect(sx - 112 + i * 36.6, sy - 72, 5, 16); c.fillRect(sx - 112 + i * 36.6, sy + 48, 5, 16); }
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('KANE PEN', sx, sy - 78); c.restore();
+    }
+    function drawStake(c, k, sx, sy) {
+      c.save(); c.fillStyle = '#8a6038'; c.fillRect(sx - 2, sy - 34, 4, 34); c.strokeStyle = '#3a2410'; c.lineWidth = 1; c.strokeRect(sx - 2, sy - 34, 4, 34);
+      c.fillStyle = k.got ? '#3a8a3a' : '#d84a2a'; c.beginPath(); c.moveTo(sx + 2, sy - 34); c.lineTo(sx + 18, sy - 29); c.lineTo(sx + 2, sy - 24); c.closePath(); c.fill(); c.restore();
+    }
+    function drawTrack(c, sx, sy, cur) {
+      c.save(); c.fillStyle = cur ? 'rgba(90,50,20,.85)' : 'rgba(90,50,20,.35)';
+      for (var i = 0; i < 4; i++) { c.beginPath(); c.ellipse(sx - 18 + i * 12, sy + (i % 2 ? 5 : -5), 5, 3, 0.4, 0, 7); c.fill(); }
+      c.restore();
+    }
+    function drawFoe(c, f, sx, sy) {
+      if (f.hp <= 0) { c.save(); c.fillStyle = '#6a4a2a'; c.fillRect(sx - 14, sy - 6, 28, 6); c.restore(); return; }
+      try { var im = window.ART137 && ART137.spr(f.role); if (im && typeof dspr === 'function') dspr(ctx, im, sx, sy, 50, f.f || 1); } catch (e) {}
+      if (f.hitT && performance.now() - f.hitT < 150) { c.save(); c.fillStyle = 'rgba(255,60,40,.45)'; c.beginPath(); c.arc(sx, sy - 24, 20, 0, 7); c.fill(); c.restore(); }
+      c.fillStyle = '#b8322a'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText(f.name, sx, sy - 58);
+      c.fillStyle = '#3a2410'; c.fillRect(sx - 15, sy - 54, 30, 4); c.fillStyle = '#d84a2a'; c.fillRect(sx - 15, sy - 54, 10 * Math.max(0, f.hp), 4);
+    }
+    function drawAct(camX, camY) {
+      if (!ST.on || ACT.id !== ST.ch) return;
+      var c = ctx, z = (typeof zoom !== 'undefined' && zoom) || 1, Wv = (typeof W !== 'undefined' ? W : 1280) / (2 * z) + 160;
+      function vis(o) { return Math.abs(o.x - px) < Wv && Math.abs(o.y - py) < Wv; }
+      if (ACT.pen && ACT.kind === 'herd' && !ACT.done && vis(ACT.pen)) drawPen(c, ACT.pen.x - camX, ACT.pen.y - camY);
+      ACT.stakes.forEach(function (k) { if (vis(k)) drawStake(c, k, k.x - camX, k.y - camY); });
+      ACT.marks.forEach(function (m, i) { if (i >= ACT.mi && vis(m)) drawTrack(c, m.x - camX, m.y - camY, i === ACT.mi); });
+      ACT.cattle.forEach(function (o) { if (vis(o)) drawCow(c, o, o.x - camX, o.y - camY); });
+      if (ACT.coach && vis(ACT.coach) && window.ART153) try { ART153.wagonFig(c, ACT.coach, ACT.coach.x - camX, ACT.coach.y - camY); } catch (e) {}
+      if (ACT.wagon && vis(ACT.wagon) && window.ART153) try { ART153.wagonFig(c, ACT.wagon, ACT.wagon.x - camX, ACT.wagon.y - camY); c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('PRISON WAGON', ACT.wagon.x - camX, ACT.wagon.y - camY - 92); } catch (e) {}
+      ACT.foes.forEach(function (f) { if (vis(f)) drawFoe(c, f, f.x - camX, f.y - camY); });
+      var m = marker(); if (m && Math.abs(m.x - px) < Wv && Math.abs(m.y - py) < Wv) { var b = Math.sin(performance.now() / 200) * 4; c.save(); c.fillStyle = '#b8322a'; c.strokeStyle = '#ffe9b8'; c.lineWidth = 1.5; c.beginPath(); var mx = m.x - camX, my = m.y - camY - 78 + b; c.moveTo(mx - 8, my - 10); c.lineTo(mx + 8, my - 10); c.lineTo(mx, my); c.closePath(); c.fill(); c.stroke(); c.restore(); }
+    }
+
     function place() {
-      ST.chars = [];
+      ST.chars = []; clearAct(); ACT.id = 0; ACT.done = false;
       if (!ST.on || typeof city === 'undefined' || !city) return;
-      CAST.forEach(function (c) {
-        if (c.from && c.from > ST.ch) return;
+      var d = chDef(), s = scenePos(), sp = SPOTS[d.id] || GENERIC;
+      (d.cast || []).slice(0, 3).forEach(function (id, i) {
+        var c = null; for (var k = 0; k < CAST.length; k++) if (CAST[k].id === id) c = CAST[k];
+        if (!c) return;
         var ch = {};
         Object.keys(c).forEach(function (k) { ch[k] = c[k]; });
-        ch.x = city.x + c.ox; ch.y = city.y + c.oy; ch.here = 1; ch.ph = Math.random() * 6;
+        ch.x = s.x + sp[i][0]; ch.y = s.y + sp[i][1]; ch.here = 1; ch.ph = Math.random() * 6; ch.face = sp[i][0] > 0 ? -1 : 1;
         ST.chars.push(ch);
       });
+      setupAct();
     }
 
     function byId(id) { for (var i = 0; i < ST.chars.length; i++) if (ST.chars[i].id === id) return ST.chars[i]; return null; }
@@ -10946,6 +11150,7 @@ window.B137 = (function () {
       var d = chDef(), i, nxt = null;
       if (!d) return;
       for (i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return;
+      if (!actOK()) return; /* STORY180: the scene action must be done too */
       if (!ST.done[d.id]) ST.done[d.id] = 1;
       ST.flags['ch' + d.id + 'done'] = 1;
       for (i = 0; i < CHAPTERS.length; i++) if (CHAPTERS[i].id === d.id + 1) nxt = CHAPTERS[i];
@@ -11059,6 +11264,7 @@ window.B137 = (function () {
     var _du = drawUnits;
     drawUnits = function (camX, camY) {
       var r = _du.apply(this, arguments);
+      try { updAct(); drawAct(camX, camY); } catch (e) { if (!window.E180) { window.E180 = 1; console.warn(e); } }
       try { drawChars(camX, camY); } catch (e) { if (!window.E170) { window.E170 = 1; console.warn(e); } }
       return r;
     };
@@ -11120,7 +11326,12 @@ window.B137 = (function () {
       drawn: function () { return ST.drawn; },
       folkNode: folkNode,
       modeBtn: function () { return !!document.querySelector('.mode[data-mode=story]'); },
-      dlgOn: function () { return dlg.style.display === 'block'; }
+      dlgOn: function () { return dlg.style.display === 'block'; },
+      scene: function () { var d = chDef(), p = scenePos(); return { at: d.at, x: p.x, y: p.y, label: d.mark, cast: (d.cast || []).slice(), do: d.do, actDone: actOK(), n: ST.chars.length, ids: ST.chars.map(function (c) { return c.id; }), fromHome: (typeof city !== 'undefined' && city) ? Math.hypot(p.x - city.x, p.y - city.y) : 0, cattle: ACT.cattle.length, foes: ACT.foes.filter(function (f) { return f.hp > 0; }).length, stakes: ACT.stakes.length, marks: ACT.marks.length, coach: !!ACT.coach, wagon: ACT.wagon ? { x: ACT.wagon.x, y: ACT.wagon.y, ex: ACT.wagon.ex } : null }; },
+      marker: function () { var m = marker(); return m ? { x: m.x, y: m.y, label: m.label } : null; },
+      gotoScene: function () { var p = scenePos(); px = p.x; py = p.y + 40; try { moveId = null; targetX = px; targetY = py; } catch (e) {} actOK(); return { x: px, y: py }; },
+      finishAct: function () { var d = chDef(); if (!d || d.do === 'meet') return actOK(); if (d.do === 'arrive') { ST.flags['act' + d.id] = 1; save(); finishChapter(); return true; } if (ACT.id !== d.id) setupAct(); completeAct(); return true; },
+      talksDone: talksDone
     };
   })();
 
@@ -11166,5 +11377,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --></body>
 </html>
