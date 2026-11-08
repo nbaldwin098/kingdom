@@ -9326,11 +9326,11 @@ window.B137 = (function () {
           for (j = 0; j < r.peaks.length; j++) {
             p = r.peaks[j];
             if (Math.abs(p.x - px) > vw || Math.abs(p.y - py) > vh) continue;
+            drawn++;
             (function (pk) {
               items.push({ y: pk.y, x: pk.x, y2: pk.y, fn: function (sx, sy) {
                 if (pk.saddle) putS(ctx, saddleSpr(), sx, sy, pk.w / 260, pk.h / 110);
                 else putS(ctx, mtnSpr(pk.v), sx, sy, pk.w / 340, pk.h / 280);
-                drawn++;
               } });
             })(p);
           }
@@ -9340,12 +9340,12 @@ window.B137 = (function () {
               (function (tn, sd) {
                 var x = tn.x + tn.ux * sd * (r.hw + 8), y = tn.y + tn.uy * sd * (r.hw + 8);
                 if (Math.abs(x - px) > vw || Math.abs(y - py) > vh) return;
+                drawn++;
                 items.push({ y: y + 6, x: x, y2: y + 6, fn: function (sx, sy) {
                   var c = ctx;
                   c.save(); c.translate(sx, sy); c.rotate(Math.atan2(tn.uy, tn.ux) + (sd > 0 ? 0 : Math.PI));
                   putS(c, portalSpr(), 0, 0, 1, 1);
                   c.restore();
-                  drawn++;
                 } });
               })(t, side);
             }
