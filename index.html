@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, then The Sentence: Hattie passes sentence, and Dustwater has to live with it.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, then The Wagon: Keene's prison wagon waits in the yard, and Dustwater learns whether Vane rides east or the rope is made ready.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9817,7 +9817,7 @@ window.B137 = (function () {
     };
   })();
 
-  // ===== v170-v177: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
+  // ===== v170-v178: STORY MODE - chapters at the homestead, walk-up TALK, named cast =====
   (function () {
     var KEY = 'kingdom-story-v170';
     var ST = { on: false, ch: 1, rel: {}, met: {}, flags: {}, done: {}, chars: [], node: null, who: null, drawn: 0 };
@@ -9843,7 +9843,9 @@ window.B137 = (function () {
       { id: 'hale', name: 'Ned Hale', title: 'Jury Foreman', role: 'merchant', age: 51, fem: 0, ox: 330, oy: 140, face: 1, from: 7 },
       { id: 'clara', name: 'Clara Bell', title: 'Gazette Editor', role: 'woman', age: 31, fem: 1, ox: -220, oy: -200, face: -1, from: 7 },
       { id: 'keene', name: 'Wade Keene', title: 'Territorial Warden', role: 'guard', age: 50, fem: 0, ox: 420, oy: 60, face: 1, from: 8 },
-      { id: 'brant', name: 'Ivy Brant', title: 'Court Clerk', role: 'woman', age: 36, fem: 1, ox: 80, oy: -240, face: -1, from: 8 }
+      { id: 'brant', name: 'Ivy Brant', title: 'Court Clerk', role: 'woman', age: 36, fem: 1, ox: 80, oy: -240, face: -1, from: 8 },
+      { id: 'holley', name: 'Reed Holley', title: 'Prison Wagon Driver', role: 'farmer', age: 45, fem: 0, ox: 380, oy: 230, face: -1, from: 9 },
+      { id: 'crane', name: 'Otis Crane', title: 'Hangman', role: 'guard', age: 57, fem: 0, ox: -340, oy: -150, face: 1, from: 9 }
     ];
 
     var CHAPTERS = [
@@ -9854,7 +9856,8 @@ window.B137 = (function () {
       { id: 5, title: 'The Posse', year: 1, need: ['tess', 'wren', 'sheriff5'] },
       { id: 6, title: 'The Trial', year: 1, need: ['judge', 'croft', 'tess6'] },
       { id: 7, title: 'The Verdict', year: 1, need: ['hale', 'clara', 'judge7'] },
-      { id: 8, title: 'The Sentence', year: 1, need: ['keene', 'brant', 'judge8'] }
+      { id: 8, title: 'The Sentence', year: 1, need: ['keene', 'brant', 'judge8'] },
+      { id: 9, title: 'The Wagon', year: 1, need: ['holley', 'crane', 'keene9'] }
     ];
 
     var NODES = {
@@ -10686,7 +10689,144 @@ window.B137 = (function () {
       preacher_ch8: { who: 'preacher', say: "A sentence can punish a man without teaching a city to love a rope. If they ask you what comes next, give them the truth and a little room for mercy. Dustwater will have to live with Hattie's words longer than any hymn I can raise.", replies: [
         { t: "I'll keep that in mind.", next: 'end', flag: 'preacher_ch8', rel: { preacher: 1 } },
         { t: "The court will finish what it started.", next: 'end', flag: 'preacher_ch8' }
+      ] },
+
+      keene_ch9: { who: 'keene', say: "The wagon's in the yard and the mules are fed. Whatever Hattie wrote \u2014 a cell back east, the rope, or one more day \u2014 it comes down to my boards or Crane's beam by morning. Reed Holley drives east if it's prison. Otis Crane has the rope ready if it isn't. Dustwater wants to know which, and I want the witness standing where they can see him.", replies: [
+        { t: "I'll ride east with the wagon.", next: 'keene_ch9_east', rel: { keene: 1 } },
+        { t: "If it's the rope, I'll stand for it.", next: 'keene_ch9_rope' },
+        { t: "Hold the wagon overnight. Let the street cool.", next: 'keene_ch9_hold' }
+      ] },
+      keene_ch9_friend: { who: 'keene', say: "You stood in the room when she wrote it. Now it's mine to carry. The wagon's in the yard, Holley's checking the axle, and Crane walked the beam twice this morning like a man who hopes he won't need it. Prison east, the rope, or one more night \u2014 Dustwater finds out which when I move. I'd like you close when I do.", replies: [
+        { t: "I'll ride east with the wagon.", next: 'keene_ch9_east', rel: { keene: 1 } },
+        { t: "If it's the rope, I'll stand for it.", next: 'keene_ch9_rope' },
+        { t: "Hold the wagon overnight. Let the street cool.", next: 'keene_ch9_hold' }
+      ] },
+      keene_ch9_east: { who: 'keene', say: "Good. A wagon with a witness riding beside it doesn't get stopped by men who think they know better than a judge. Talk to Holley \u2014 he's the one who'll be on the box for three hundred miles. And talk to Crane, so he hears it from somebody other than the saloon that he can coil that rope back up.", replies: [
+        { t: "I'll see them both.", next: 'end', flag: 'met_keene9', rel: { keene: 1 } }
+      ] },
+      keene_ch9_rope: { who: 'keene', say: "Then you'll see it done right, not done hungry. Crane's careful. That's the only mercy a rope has. Talk to him so he knows the witness is there, and talk to Holley \u2014 if the wagon goes back empty, he'll want to hear why from somebody who was in the room.", replies: [
+        { t: "I'll talk to them.", next: 'end', flag: 'met_keene9' }
+      ] },
+      keene_ch9_hold: { who: 'keene', say: "One night. I can lock the wagon and post a man on it. A street cools or it boils \u2014 we'll know by sunup. Talk to Holley and Crane anyway. If the city comes for the wagon tonight, I want both of them knowing your face.", replies: [
+        { t: "One night, then.", next: 'end', flag: 'met_keene9' }
+      ] },
+      keene_ch9_again: { who: 'keene', say: "Wagon's locked. Holley's on the box, Crane's by the beam. Morning settles it.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      holley: { who: 'holley', say: "Reed Holley. I drive the territorial wagon \u2014 iron box on oak wheels, two mules that don't care who's inside. Three hundred miles east to the prison if that's what Hattie wrote. I've hauled men who sang the whole way and men who never said a word. Which kind is Vane?", replies: [
+        { t: "The quiet kind. Keep him that way.", next: 'holley_quiet' },
+        { t: "Watch the road. Not everyone wants him to arrive.", next: 'holley_road', rel: { holley: 1 } },
+        { t: "Maybe the wagon goes back empty.", next: 'holley_empty' }
+      ] },
+      holley_quiet: { who: 'holley', say: "Quiet's easy. Quiet I can feed and water and talk to about the weather. It's the crowd at the edge of town I worry about. If you see Keene, tell him I greased the axle twice.", replies: [
+        { t: "I'll tell him.", next: 'end', flag: 'met_holley' }
+      ] },
+      holley_road: { who: 'holley', say: "I know. There's a dry wash past the second water stop where men have waited before. I keep a shotgun under the seat and a lantern I never light. Thanks for saying it plain \u2014 most folks just ask if the mules bite.", replies: [
+        { t: "Ride careful.", next: 'end', flag: 'met_holley', rel: { holley: 1 } }
+      ] },
+      holley_empty: { who: 'holley', say: "Then I'll drive three hundred miles back with a box full of nothing and a sour story to tell at every stop. It's happened. I don't take it personal. A rope is Crane's business, not mine.", replies: [
+        { t: "Fair enough.", next: 'end', flag: 'met_holley' }
+      ] },
+      holley_again: { who: 'holley', say: "Mules are hitched. I'm waiting on Keene's nod.", replies: [
+        { t: "Understood.", next: 'end' }
+      ] },
+
+      crane: { who: 'crane', say: "Otis Crane. I tie the knot when a judge writes it, and I tie it right so it's over quick. I don't drink the night before and I don't come to the saloon after. People think I like it. I don't. I like it done clean. You here to watch, or to talk me out of a job?", replies: [
+        { t: "I'm here to see it done right, whatever it is.", next: 'crane_right', rel: { crane: 1 } },
+        { t: "I hope you coil that rope back up.", next: 'crane_coil' },
+        { t: "Does the crowd ever get to you?", next: 'crane_crowd' }
+      ] },
+      crane_right: { who: 'crane', say: "That's all I ask of anybody. If it's prison, I walk home and nobody remembers my name. If it's the rope, I make sure the city doesn't get a show. Either way I'd rather the witness was there than a picnic.", replies: [
+        { t: "I'll be there.", next: 'end', flag: 'met_crane', rel: { crane: 1 } }
+      ] },
+      crane_coil: { who: 'crane', say: "So do I, most days. A rope coiled is a good morning. But I don't write sentences \u2014 I just carry the heavy end of them. Talk to Keene. He knows which way the wagon faces.", replies: [
+        { t: "I will.", next: 'end', flag: 'met_crane' }
+      ] },
+      crane_crowd: { who: 'crane', say: "The crowd's the worst of it. Folks who never met the man bring their children and a lunch. I've told a mother to go home before. She didn't. Dustwater's no different from anywhere \u2014 that's why Keene keeps me and the wagon in the same yard.", replies: [
+        { t: "Then keep it clean.", next: 'end', flag: 'met_crane' }
+      ] },
+      crane_again: { who: 'crane', say: "The beam's checked. Whether it's needed is up to Keene's wagon.", replies: [
+        { t: "I know.", next: 'end' }
+      ] },
+
+      judge_ch9: { who: 'judge', say: "I wrote it. Brant inked it. Now it belongs to Keene, and that's the hardest part of my job \u2014 letting go of a sentence and watching what a city does with it. The wagon's in the yard. Whatever it means to Dustwater, it means it by morning.", replies: [
+        { t: "You wrote it fair.", next: 'end', flag: 'judge_ch9', rel: { judge: 1 } },
+        { t: "The city will live with it.", next: 'end', flag: 'judge_ch9' }
+      ] },
+      judge_ch9_friend: { who: 'judge', say: "You stood there when I said it, and you didn't flinch. That matters more than you know. It's Keene's now \u2014 the wagon, Holley, Crane, all of it. I'll sit in my window and watch which way the dust goes.", replies: [
+        { t: "You wrote it fair.", next: 'end', flag: 'judge_ch9', rel: { judge: 1 } },
+        { t: "The city will live with it.", next: 'end', flag: 'judge_ch9' }
+      ] },
+      vane_ch9: { who: 'vane', say: "Iron box with a drover named Holley, or a man named Crane who doesn't drink the night before. That's what's left of me \u2014 a choice of carpenters. Either way the wagon's in the yard and I can hear the mules from here.", replies: [
+        { t: "It's what she wrote.", next: 'end', flag: 'vane_ch9', rel: { vane: -1 } },
+        { t: "East is still living.", next: 'end', flag: 'vane_ch9', rel: { vane: 1 } }
+      ] },
+      vane_ch9_friend: { who: 'vane', say: "You came back. Most folks only come back for the rope. If it's the wagon, tell Holley I don't sing. If it's the other thing, tell Crane I said to make it quick.", replies: [
+        { t: "I'll tell them.", next: 'end', flag: 'vane_ch9', rel: { vane: 1 } },
+        { t: "It's what she wrote.", next: 'end', flag: 'vane_ch9' }
+      ] },
+      tess_ch9: { who: 'tess', say: "Keene's wagon moves at first light, east or to the beam. My job is the street between the yard and the edge of town. I've got deputies on the roofs and nobody's drinking past ten. If you're riding along, ride where people can see you.", replies: [
+        { t: "I'll ride where they can see me.", next: 'end', flag: 'tess_ch9', rel: { tess: 1 } },
+        { t: "Keep the street quiet.", next: 'end', flag: 'tess_ch9' }
+      ] },
+      tess_ch9_friend: { who: 'tess', say: "You've held up your end every step of this. One more morning. Keene moves the wagon, I hold the street, you stay visible. If anybody tries to make a second sentence out there, I want them looking at you and me both.", replies: [
+        { t: "I'll ride where they can see me.", next: 'end', flag: 'tess_ch9', rel: { tess: 1 } },
+        { t: "Keep the street quiet.", next: 'end', flag: 'tess_ch9' }
+      ] },
+      clara_ch9: { who: 'clara', say: "I've got two front pages set in type \u2014 VANE RIDES EAST and DUSTWATER HANGS ITS OUTLAW. Whichever way the wagon turns, I pull the other one apart. Holley won't talk to me. Crane won't even look at me.", replies: [
+        { t: "Print the one that happens.", next: 'end', flag: 'clara_ch9', rel: { clara: 1 } },
+        { t: "Leave Crane alone.", next: 'end', flag: 'clara_ch9' }
+      ] },
+      hale_ch9: { who: 'hale', say: "I walked past the yard this morning. Saw the wagon. Saw the beam. Twelve of us put him there, and now I can't stop walking past it. I'll be glad when it's gone, either way it goes.", replies: [
+        { t: "You did your part.", next: 'end', flag: 'hale_ch9', rel: { hale: 1 } },
+        { t: "So will the city.", next: 'end', flag: 'hale_ch9' }
+      ] },
+      croft_ch9: { who: 'croft', say: "Nothing left for counsel to do but watch the wagon. I asked Keene if I could ride as far as the first water stop. He said no. Said a lawyer on a prison wagon looks like an appeal.", replies: [
+        { t: "You did what you could.", next: 'end', flag: 'croft_ch9', rel: { croft: 1 } },
+        { t: "Keene's right.", next: 'end', flag: 'croft_ch9' }
+      ] },
+      brant_ch9: { who: 'brant', say: "The sentence is in the book. Next line is blank till Keene tells me what happened to it \u2014 delivered east, carried out, or held a night. I'll write that too. The ledger doesn't stop at the judge.", replies: [
+        { t: "Write it plain.", next: 'end', flag: 'brant_ch9', rel: { brant: 1 } },
+        { t: "I'll tell you what I see.", next: 'end', flag: 'brant_ch9' }
+      ] },
+      sheriff_ch9: { who: 'sheriff', say: "Red Mesa's done its part. I'm only here to see the wagon off and ride home. Whatever it is, I want it to happen in daylight with Keene's hand on it, not some rope a drunk found behind the livery.", replies: [
+        { t: "Daylight and Keene.", next: 'end', flag: 'sheriff_ch9', rel: { sheriff: 1 } },
+        { t: "Then we ride home.", next: 'end', flag: 'sheriff_ch9' }
+      ] },
+      sheriff_ch9_friend: { who: 'sheriff', say: "You kept the peace from my county to this yard. One more morning and we ride home to Red Mesa. Watch the edges of the crowd \u2014 that's where the trouble always starts.", replies: [
+        { t: "Daylight and Keene.", next: 'end', flag: 'sheriff_ch9', rel: { sheriff: 1 } },
+        { t: "Then we ride home.", next: 'end', flag: 'sheriff_ch9' }
+      ] },
+      widow_ch9: { who: 'widow', say: "I came to see the wagon. Not for him \u2014 for me. A man stood on my ridge and now he's an iron box or a rope in a city I never wanted to visit. When it's done I'm going home to my cattle and I'm not reading Clara's paper.", replies: [
+        { t: "Go home when it's done.", next: 'end', flag: 'widow_ch9', rel: { widow: 1 } },
+        { t: "I'll see it through.", next: 'end', flag: 'widow_ch9' }
+      ] },
+      widow_ch9_friend: { who: 'widow', say: "You've been with this since my ridge. Stay with it one more morning. Then come help me fix the north fence \u2014 I'd like to talk about anything but wagons.", replies: [
+        { t: "I'll be there for both.", next: 'end', flag: 'widow_ch9', rel: { widow: 1 } },
+        { t: "I'll see it through.", next: 'end', flag: 'widow_ch9' }
+      ] },
+      baron_ch9: { who: 'baron', say: "My line runs east. If Keene wanted, I'd put Vane in a boxcar and have him at the prison in two days instead of two weeks behind Holley's mules. Keene said no. Said a sentence shouldn't ride on a company's freight.", replies: [
+        { t: "Keene's right.", next: 'end', flag: 'baron_ch9' },
+        { t: "The mules will get there.", next: 'end', flag: 'baron_ch9', rel: { baron: 1 } }
+      ] },
+      lila_ch9: { who: 'lila', say: "I couldn't sleep. Kept hearing the mules shift in the yard. I told the truth and now there's a wagon and a beam and a man waiting to find out which. I want to be there. I don't want to watch.", replies: [
+        { t: "Stand by me.", next: 'end', flag: 'lila_ch9', rel: { lila: 1 } },
+        { t: "You don't have to watch.", next: 'end', flag: 'lila_ch9' }
+      ] },
+      kit_ch9: { who: 'kit', say: "A wagon in the yard and a carpenter by the beam. Real civilized. If it rolls east, there's a long road and a lot of dry washes. I'm not saying anything. I'm just saying roads are long.", replies: [
+        { t: "Stay off that road, Kit.", next: 'end', flag: 'kit_ch9', rel: { kit: -1 } },
+        { t: "I heard you.", next: 'end', flag: 'kit_ch9' }
+      ] },
+      wren_ch9: { who: 'wren', say: "I rode the road east once, past the second water stop. Dry wash with high banks \u2014 good place to stop a wagon if you were the kind to do it. I told Holley. He already knew. Good driver.", replies: [
+        { t: "Thanks for telling him.", next: 'end', flag: 'wren_ch9', rel: { wren: 1 } },
+        { t: "Let's hope it stays quiet.", next: 'end', flag: 'wren_ch9' }
+      ] },
+      preacher_ch9: { who: 'preacher', say: "I asked Keene if I could ride beside the wagon or stand beside the beam, whichever it comes to. He said yes to both. A man shouldn't go east alone, and he shouldn't go the other way alone either.", replies: [
+        { t: "Go with him.", next: 'end', flag: 'preacher_ch9', rel: { preacher: 1 } },
+        { t: "Pray for the street too.", next: 'end', flag: 'preacher_ch9' }
       ] }
+
 
     };
 
@@ -10957,7 +11097,7 @@ window.B137 = (function () {
       on: function () { return !!ST.on; },
       chapter: function () {
         var d = chDef() || { id: ST.ch, title: '?', need: [] };
-        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8] };
+        return { id: d.id, title: d.title, done: !!ST.done[d.id], need: (d.need || []).slice(), ch1done: !!ST.done[1], ch2done: !!ST.done[2], ch3done: !!ST.done[3], ch4done: !!ST.done[4], ch5done: !!ST.done[5], ch6done: !!ST.done[6], ch7done: !!ST.done[7], ch8done: !!ST.done[8], ch9done: !!ST.done[9] };
       },
       chars: function () { return ST.chars.map(function (c) { return { id: c.id, name: c.name, title: c.title, x: c.x, y: c.y, here: c.here }; }); },
       nearHome: function () {
@@ -11006,7 +11146,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, then The Sentence: Hattie passes sentence, and Dustwater has to live with it.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, then The Wagon: Keene\u2019s prison wagon waits in the yard, and Dustwater learns whether Vane rides east or the rope is made ready.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -11026,5 +11166,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --></body>
 </html>
