@@ -6731,8 +6731,14 @@ window.B137 = (function () {
     var RB = document.createElement('button'); RB.id = 'rail136'; RB.textContent = '\ud83d\ude82 TAKE THE TRAIN'; RB.style.cssText = css + 'display:none;left:50%;bottom:150px;transform:translateX(-50%);padding:8px 14px'; document.body.appendChild(RB);
     var RP = document.createElement('div'); RP.id = 'railp136'; RP.style.cssText = css + 'display:none;left:50%;top:50%;transform:translate(-50%,-50%);padding:8px;max-height:80vh;overflow:auto;min-width:260px'; document.body.appendChild(RP);
     var MB = document.createElement('button'); MB.id = 'mapb136'; MB.textContent = '\ud83d\uddfa MAP'; MB.style.cssText = css + 'display:none;right:8px;top:64px;padding:4px 8px;font-size:12px'; document.body.appendChild(MB);
-    var MV = document.createElement('canvas'); MV.id = 'map136'; MV.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:80;display:none;background:#d9c59a'; document.body.appendChild(MV);
-    var MX = document.createElement('div'); MX.style.cssText = css + 'display:none;z-index:81;right:10px;top:10px;padding:2px'; MX.innerHTML = '<button data-z="0.6" style="font:bold 18px serif;width:40px">+</button><button data-z="1.6" style="font:bold 18px serif;width:40px">\u2212</button><button data-z="f" title="CLOSE IN ON YOUR FREIGHT" style="font:bold 16px serif;width:40px">\ud83d\ude82</button><button data-z="x" style="font:bold 18px serif;width:40px">\u2715</button>'; document.body.appendChild(MX);
+    var MV = document.createElement('canvas'); MV.id = 'map136'; MV.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9000;display:none;background:#d9c59a;touch-action:none'; document.body.appendChild(MV);
+    /* v214 FULL MAP SCREEN: paper map in a wood frame - drag to pan, pinch / wheel / buttons to zoom, tap a town or a spot to set a waypoint */
+    var MX = document.createElement('div'); MX.id = 'mapui214'; MX.style.display = 'none';
+    MX.innerHTML = '<div id="mapt214"><b>MAP</b><span id="maps214"></span><i id="mapl214">\u25cf TOWN \u00b7 \u2605 HOME \u00b7 \u25a0 DEPOT \u00b7 \u2501 RAIL \u00b7 \u2500 ROAD \u00b7 \u272a WANTED \u00b7 \u2738 STORY</i></div>' +
+      '<button id="mapx214" class="x212" title="CLOSE">\u2715</button>' +
+      '<div id="mapz214"><button data-z="0.6" id="mapzi214" title="ZOOM IN">+</button><button data-z="1.6" id="mapzo214" title="ZOOM OUT">\u2212</button><button data-z="me" id="mapme214" title="CENTRE ON YOU">\u25ce</button><button data-z="f" id="mapf214" title="YOUR FREIGHT">\ud83d\ude82</button></div>' +
+      '<div id="mapw214"><span id="mapwl214"></span><button id="mapwc214" data-z="clr">CLEAR WAYPOINT</button></div>';
+    document.body.appendChild(MX);
     var FADE = document.createElement('div'); FADE.style.cssText = 'position:fixed;inset:0;z-index:90;background:#1a1208;color:#f3e3c3;font:bold 20px Georgia,serif;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .35s'; document.body.appendChild(FADE);
     var STN = null, MAPR = 60000;
     function fare(a, b) { return Math.max(2, Math.round(Math.hypot(a.x - b.x, a.y - b.y) / 1500)); }
@@ -6745,28 +6751,91 @@ window.B137 = (function () {
     RB.onclick = function (e) { if (e) e.stopPropagation(); if (STN) { if (window.RAILCO203) RAILCO203.open(STN); else railPanel(); } };
     window.RAIL136 = { stn: function () { return STN; }, rail: rail, stPos: stPos, RB: RB, FADE: FADE,
       land: function (S) { var p = stPos(S); px = p.x; py = p.y; try { moveId = null; targetX = px; targetY = py; } catch (e) {} try { var V = VEH130(); if (V && V.on) { V.x = px; V.y = py; } } catch (e) {} try { if (typeof steed !== 'undefined' && steed.x != null) { steed.x = px; steed.y = py; } } catch (e) {} window.RIDES136 = (window.RIDES136 || 0) + 1; try { grow(); } catch (e) {} } };
-    function drawMap() { var dpr = window.devicePixelRatio || 1, W = innerWidth, Hh = innerHeight; MV.width = W * dpr; MV.height = Hh * dpr; var c = MV.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); var sc = Math.min(W, Hh) / (2 * MAPR), L = T(), R = rail();
-      function P(x, y) { return [W / 2 + (x - px) * sc, Hh / 2 + (y - py) * sc]; }
-      c.fillStyle = '#d9c59a'; c.fillRect(0, 0, W, Hh); c.strokeStyle = 'rgba(90,60,30,.12)'; c.lineWidth = 1; var gs = 10000; for (var gx = Math.floor((px - W / 2 / sc) / gs) * gs; gx < px + W / 2 / sc; gx += gs) { var a = P(gx, 0); c.beginPath(); c.moveTo(a[0], 0); c.lineTo(a[0], Hh); c.stroke(); } for (var gy = Math.floor((py - Hh / 2 / sc) / gs) * gs; gy < py + Hh / 2 / sc; gy += gs) { var b2 = P(0, gy); c.beginPath(); c.moveTo(0, b2[1]); c.lineTo(W, b2[1]); c.stroke(); }
-      FT.forEach(function (f) { if (!f) return; var a = P(f.x, f.y); if (f.k === 'lake') { c.fillStyle = '#5a8ab0'; c.beginPath(); c.ellipse(a[0], a[1], Math.max(2, f.rx * sc), Math.max(1.5, f.ry * sc), 0, 0, 7); c.fill(); } else if (f.k === 'camp') { c.fillStyle = '#5a7a2a'; c.font = 'bold 11px sans-serif'; c.fillText('\u25b2', a[0] - 4, a[1] + 4); } });
-      c.strokeStyle = '#a07a46'; c.lineWidth = 2.5; L.roads.forEach(function (G) { var a = P(G[0], G[1]), b = P(G[2], G[3]); c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke(); });
-      c.strokeStyle = '#3b3b3b'; c.lineWidth = 2; c.setLineDash([5, 3]); R.seg.forEach(function (G) { var a = P(G[0], G[1]), b = P(G[2], G[3]); c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke(); }); c.setLineDash([]);
-      c.textAlign = 'center'; L.forEach(function (t) { var a = P(t.x, t.y), r = t.d.mini ? 2.5 : 3 + Math.sqrt(t.d.pop); c.fillStyle = t.d.mini ? '#7a5a3a' : '#8a3a24'; c.beginPath(); c.arc(a[0], a[1], r, 0, 7); c.fill(); if (!t.d.mini || MAPR < 25000) { c.fillStyle = '#2a1a0a'; c.font = 'bold ' + (t.d.mini ? 9 : 12) + 'px Georgia,serif'; c.fillText(t.name + (t.d.mini ? '' : ' \u00b7 ' + t.d.pop), a[0], a[1] - r - 4); } });
-      var h = P(city.x, city.y); c.fillStyle = '#1a4a8a'; c.font = 'bold 16px serif'; c.fillText('\u2605', h[0], h[1] + 5); c.font = 'bold 11px Georgia,serif'; c.fillText('HOMESTEAD', h[0], h[1] + 18);
-      try { (factions || []).forEach(function (f) { if (!f || !f.hallObj || f.dead) return; var a = P(f.x, f.y); if (a[0] < 0 || a[0] > W || a[1] < 0 || a[1] > Hh) return; c.fillStyle = '#a02020'; c.fillRect(a[0] - 3, a[1] - 3, 6, 6); }); } catch (e) {}
-      c.fillStyle = '#ffd040'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.beginPath(); c.arc(W / 2, Hh / 2, 6, 0, 7); c.fill(); c.stroke(); c.fillStyle = '#2a1a0a'; c.font = 'bold 13px Georgia,serif'; c.fillText('YOU', W / 2, Hh / 2 - 10);
-      var mk207 = 0; try { if (window.MAPHOOK207) mk207 = MAPHOOK207(c, P, sc, W, Hh) || 0; } catch (e) { if (!window.E207m) { window.E207m = 1; console.warn(e); } } /* v207: your shipments + WANTED notices */
-      c.textAlign = 'left'; c.font = 'bold 12px Georgia,serif'; c.fillStyle = '#2a1a0a'; c.fillText('MAP \u00b7 ' + Math.round(MAPR * 2 / 1000) + 'K ACROSS \u00b7 \u25cf TOWN  \u2605 HOME  \u25a0 KINGDOM  \u25b2 CAMP  - - RAIL' + (mk207 ? '  \u25ac YOUR FREIGHT  \u272a WANTED' : ''), 10, Hh - 10); }
-    function openMap(on) { MV.style.display = MX.style.display = on ? 'block' : 'none'; if (on) { try { if (window.MAPFIT208) MAPR = MAPFIT208(); } catch (e) {} drawMap(); } } /* v208: opens zoomed in around you and your freight */
-    MB.onclick = function () { openMap(MV.style.display !== 'block'); };
-    MX.onclick = function (e) { var z = e.target.getAttribute('data-z'); if (!z) return; if (z === 'x') openMap(false); else if (z === 'f') { try { MAPR = window.MAPFIT208 ? MAPFIT208() : 20000; } catch (e2) {} drawMap(); } else { MAPR = Math.max(6000, Math.min(240000, MAPR * +z)); drawMap(); } };
-    addEventListener('keydown', function (e) { if (!free() || e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; if (e.key === 'm' || e.key === 'M') openMap(MV.style.display !== 'block'); else if (e.key === 'Escape' && MV.style.display === 'block') openMap(false); });
+    var MC = { x: 0, y: 0 }, MW = 0, MH = 0, MD = 0, MLAST = 0, MDIRTY = 1, MLOOP = false;
+    function mapOn() { return MV.style.display === 'block'; }
+    function clampR(r) { return Math.max(1500, Math.min(240000, r)); }
+    function mapSc() { return Math.min(innerWidth, innerHeight) / (2 * MAPR); }
+    function toWorld(X, Y) { var sc = mapSc(); return { x: MC.x + (X - innerWidth / 2) / sc, y: MC.y + (Y - innerHeight / 2) / sc }; }
+    function zoomAt(X, Y, f) { var w = toWorld(X, Y); MAPR = clampR(MAPR * f); var sc = mapSc(); MC.x = w.x - (X - innerWidth / 2) / sc; MC.y = w.y - (Y - innerHeight / 2) / sc; MDIRTY = 1; }
+    function mapTowns() { var L = T(); return L && L.length ? L : (window.MAP214L || []); }
+    function drawMap() { var dpr = window.devicePixelRatio || 1, W = innerWidth, Hh = innerHeight; if (MW !== W || MH !== Hh || MD !== dpr) { MV.width = Math.round(W * dpr); MV.height = Math.round(Hh * dpr); MW = W; MH = Hh; MD = dpr; }
+      var c = MV.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); var sc = mapSc(), L = mapTowns(), R = rail(), cx = MC.x, cy = MC.y, t0 = performance.now(); window.MAP214L = L;
+      var vx0 = cx - W / 2 / sc, vx1 = cx + W / 2 / sc, vy0 = cy - Hh / 2 / sc, vy1 = cy + Hh / 2 / sc, zin = MAPR < 26000, nDrawn = 0;
+      function P(x, y) { return [W / 2 + (x - cx) * sc, Hh / 2 + (y - cy) * sc]; }
+      function inV(x, y, m) { m = (m || 30) / sc; return x > vx0 - m && x < vx1 + m && y > vy0 - m && y < vy1 + m; }
+      function segIn(G) { return Math.max(G[0], G[2]) > vx0 && Math.min(G[0], G[2]) < vx1 && Math.max(G[1], G[3]) > vy0 && Math.min(G[1], G[3]) < vy1; }
+      var LB = []; function lbl(t, x, y, col, f, pr) { LB.push([t, x, y, col || '#2a1a0a', f || 'bold 12px Georgia,serif', pr || 5, LB.length]); }
+      function flushL() { var BX = []; LB.sort(function (a, b) { return b[5] - a[5] || a[6] - b[6]; }); c.textAlign = 'center'; LB.forEach(function (q) { c.font = q[4]; var w = c.measureText(q[0]).width / 2 + 2, fs = parseFloat(/(\d+)px/.exec(q[4])[1]) || 12, bx = [q[1] - w, q[2] - fs * 0.85, q[1] + w, q[2] + fs * 0.25]; if (q[5] < 9 && BX.some(function (o) { return bx[0] < o[2] && bx[2] > o[0] && bx[1] < o[3] && bx[3] > o[1]; })) return; BX.push(bx); c.lineWidth = 3.5; c.strokeStyle = 'rgba(243,227,195,.92)'; c.strokeText(q[0], q[1], q[2]); c.fillStyle = q[3]; c.fillText(q[0], q[1], q[2]); }); LB = []; }
+      var g0 = c.createRadialGradient(W / 2, Hh / 2, Math.min(W, Hh) * 0.2, W / 2, Hh / 2, Math.max(W, Hh) * 0.75); g0.addColorStop(0, '#eedcb2'); g0.addColorStop(1, '#d2b984'); c.fillStyle = g0; c.fillRect(0, 0, W, Hh);
+      c.strokeStyle = 'rgba(90,60,30,.12)'; c.lineWidth = 1; var gs = MAPR > 90000 ? 50000 : MAPR > 18000 ? 10000 : 2000; c.beginPath(); for (var gx = Math.floor(vx0 / gs) * gs; gx < vx1; gx += gs) { var a = P(gx, 0); c.moveTo(a[0], 0); c.lineTo(a[0], Hh); } for (var gy = Math.floor(vy0 / gs) * gs; gy < vy1; gy += gs) { var b2 = P(0, gy); c.moveTo(0, b2[1]); c.lineTo(W, b2[1]); } c.stroke();
+      FT.forEach(function (f) { if (!f || !inV(f.x, f.y, 40)) return; var a = P(f.x, f.y); if (f.k === 'lake') { c.fillStyle = '#6a9ac0'; c.strokeStyle = '#3d6a90'; c.lineWidth = 1; c.beginPath(); c.ellipse(a[0], a[1], Math.max(2, f.rx * sc), Math.max(1.5, f.ry * sc), 0, 0, 7); c.fill(); c.stroke(); } else if (f.k === 'camp') { c.fillStyle = '#5a7a2a'; c.font = 'bold 11px sans-serif'; c.textAlign = 'center'; c.fillText('\u25b2', a[0], a[1] + 4); } else if (f.k === 'ranch' && zin) { c.fillStyle = '#8a5a2e'; c.fillRect(a[0] - 3, a[1] - 3, 6, 6); } });
+      var rw = Math.max(1.6, Math.min(5, 70 * sc)); c.lineCap = 'round'; c.strokeStyle = '#8a6434'; c.lineWidth = rw + 1.6; c.beginPath(); (L.roads || []).forEach(function (G) { if (!segIn(G)) return; var a = P(G[0], G[1]), b = P(G[2], G[3]); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); }); c.stroke(); c.strokeStyle = '#c9a466'; c.lineWidth = rw; c.stroke();
+      c.strokeStyle = '#2e2a26'; c.lineWidth = 2.4; c.beginPath(); R.seg.forEach(function (G) { if (!segIn(G)) return; var a = P(G[0], G[1]), b = P(G[2], G[3]); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); }); c.stroke(); c.strokeStyle = '#f0e2c0'; c.lineWidth = 1; c.setLineDash([3, 5]); c.stroke(); c.setLineDash([]);
+      c.textAlign = 'center'; var stl = [];
+      R.st.forEach(function (S) { var p = stPos(S); if (!inV(p.x, p.y)) return; var a = P(p.x, p.y); c.fillStyle = '#3b2410'; c.fillRect(a[0] - 4, a[1] - 4, 8, 8); c.fillStyle = '#e8b83a'; c.fillRect(a[0] - 2, a[1] - 2, 4, 4); if (zin && MAPR < 12000) stl.push([S.name + (S.home || S.halt ? ' HALT' : ' DEPOT'), a[0], a[1] + 15]); });
+      L.forEach(function (t) { if (!inV(t.x, t.y, 60)) return; nDrawn++; var a = P(t.x, t.y), pop = (t.d && t.d.pop) || 0, mini = t.d && t.d.mini, r = mini ? 3 : 4 + Math.sqrt(pop) * 0.9;
+        c.fillStyle = mini ? '#7a5a3a' : '#9a3a24'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 1.5; c.beginPath(); c.arc(a[0], a[1], r, 0, 7); c.fill(); c.stroke();
+        if (!mini || zin) { lbl(t.name, a[0], a[1] - r - 5, '#2a1a0a', 'bold ' + (mini ? 10 : 13) + 'px Georgia,serif', mini ? 4 : 6); if (!mini && pop) lbl(pop + ' FOLK', a[0], a[1] + r + 12, '#6a4a2a', '10px Georgia,serif', 3); } });
+      stl.forEach(function (s) { lbl(s[0], s[1], s[2], '#3b2410', 'italic 9px Georgia,serif', 2); });
+      try { var h = P(city.x, city.y); c.fillStyle = '#1a4a8a'; c.font = 'bold 18px serif'; c.fillText('\u2605', h[0], h[1] + 6); lbl('HOMESTEAD', h[0], h[1] + 20, '#1a4a8a', 'bold 11px Georgia,serif', 7); } catch (e) {}
+      try { (factions || []).forEach(function (f) { if (!f || !f.hallObj || f.dead || !inV(f.x, f.y)) return; var a = P(f.x, f.y); c.fillStyle = '#a02020'; c.fillRect(a[0] - 3, a[1] - 3, 6, 6); }); } catch (e) {}
+      var mk207 = 0; try { if (window.MAPHOOK207) mk207 = MAPHOOK207(c, P, sc, W, Hh) || 0; } catch (e) { if (!window.E207m) { window.E207m = 1; console.warn(e); } }
+      var ex = { story: null, wp: null, posse: 0, horse: 0, veh: 0 };
+      /* your horse and vehicle when they are not under you */
+      try { if (typeof steed !== 'undefined' && steed && steed.st !== 'ridden' && steed.st !== 'lost' && steed.x != null && Math.hypot(steed.x - px, steed.y - py) > 90 && inV(steed.x, steed.y)) { var hs = P(steed.x, steed.y); c.font = '16px serif'; c.fillText('\ud83d\udc0e', hs[0], hs[1] + 6); lbl('YOUR HORSE', hs[0], hs[1] + 18, '#5a3818', 'bold 9px Georgia,serif'); ex.horse = 1; } } catch (e) {}
+      try { var V = window.VEH130 && VEH130(); if (V && V.k >= 0 && V.x != null && Math.hypot(V.x - px, V.y - py) > 90 && inV(V.x, V.y)) { var vs = P(V.x, V.y); c.font = '15px serif'; c.fillText(V.k >= 8 ? '\u26f5' : '\ud83d\ude99', vs[0], vs[1] + 5); lbl('YOUR RIDE', vs[0], vs[1] + 18, '#5a3818', 'bold 9px Georgia,serif'); ex.veh = 1; } } catch (e) {}
+      /* the posse riding after you */
+      try { if (window.KILL209 && KILL209.act) KILL209.act.forEach(function (q) { if (!q.posse || q.gone || q.st === 'dead' || !inV(q.x, q.y)) return; var a = P(q.x, q.y); c.fillStyle = '#b0281c'; c.strokeStyle = '#fff3d6'; c.lineWidth = 1.2; c.beginPath(); c.arc(a[0], a[1], 4, 0, 7); c.fill(); c.stroke(); ex.posse++; }); } catch (e) {}
+      /* the story scene */
+      try { if (window.STORY170 && STORY170.on()) { var m = STORY170.marker(); if (m) { ex.story = m; var sm = P(m.x, m.y), ins = sm[0] > 14 && sm[0] < W - 14 && sm[1] > 14 && sm[1] < Hh - 14; if (!ins) { sm = [Math.max(24, Math.min(W - 24, sm[0])), Math.max(54, Math.min(Hh - 54, sm[1]))]; }
+        var pu = 0.5 + 0.5 * Math.sin(t0 / 300); c.strokeStyle = 'rgba(184,50,42,' + (0.35 + 0.4 * pu) + ')'; c.lineWidth = 2.5; c.beginPath(); c.arc(sm[0], sm[1], 15 + 4 * pu, 0, 7); c.stroke();
+        c.fillStyle = '#b8322a'; c.strokeStyle = '#ffe9b8'; c.lineWidth = 2; c.beginPath(); c.arc(sm[0], sm[1], 11, 0, 7); c.fill(); c.stroke(); c.fillStyle = '#ffe9b8'; c.font = 'bold 13px serif'; c.fillText('\u2738', sm[0], sm[1] + 5); var meS = P(px, py), nearMe = Math.hypot(meS[0] - sm[0], meS[1] - sm[1]) < 40; lbl('\u2738 ' + (ins ? '' : '\u2192 ') + m.label, sm[0], nearMe ? sm[1] + 34 : sm[1] - 17, '#b8322a', 'bold 11px Georgia,serif', 9); } } } catch (e) {}
+      /* the waypoint */
+      var w = window.WP214 && WP214.get(); if (w) { ex.wp = w; var wa = P(w.x, w.y), wins = wa[0] > 0 && wa[0] < W && wa[1] > 0 && wa[1] < Hh; if (!wins) wa = [Math.max(24, Math.min(W - 24, wa[0])), Math.max(54, Math.min(Hh - 54, wa[1]))];
+        var me = P(px, py); c.strokeStyle = 'rgba(26,74,138,.55)'; c.lineWidth = 2; c.setLineDash([6, 5]); c.beginPath(); c.moveTo(me[0], me[1]); c.lineTo(wa[0], wa[1]); c.stroke(); c.setLineDash([]); WP214.pin(c, wa[0], wa[1], 1.25); lbl(w.label + ' \u00b7 ' + (Math.hypot(w.x - px, w.y - py) / 1000).toFixed(1) + 'K', wa[0], wa[1] - 30, '#1a4a8a', 'bold 11px Georgia,serif', 9); }
+      /* you */
+      var me2 = P(px, py), ks = 0; try { ks = KILL209.state().stars || 0; } catch (e) {} if (me2[0] > -20 && me2[0] < W + 20 && me2[1] > -20 && me2[1] < Hh + 20) { c.fillStyle = '#ffd040'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2.5; c.beginPath(); c.arc(me2[0], me2[1], 7, 0, 7); c.fill(); c.stroke(); lbl('YOU', me2[0], me2[1] - 12, '#2a1a0a', 'bold 13px Georgia,serif', 10); if (ks) lbl('\u2605'.repeat(ks) + ' WANTED', me2[0], me2[1] + 21, '#b0281c', 'bold 11px Georgia,serif', 10); }
+      ex.stars = ks; flushL();
+      /* wood frame + scale bar */
+      c.lineWidth = 10; c.strokeStyle = '#7a4a1c'; c.strokeRect(5, 5, W - 10, Hh - 10); c.lineWidth = 2; c.strokeStyle = '#c9a46a'; c.strokeRect(11, 11, W - 22, Hh - 22);
+      var nice = [500, 1000, 2000, 5000, 10000, 20000, 50000, 100000], sb = nice.filter(function (v) { return v * sc <= 120; }).pop() || 500, sx = W - 24 - sb * sc, sy = Hh - 22; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.beginPath(); c.moveTo(sx, sy - 4); c.lineTo(sx, sy); c.lineTo(sx + sb * sc, sy); c.lineTo(sx + sb * sc, sy - 4); c.stroke(); c.textAlign = 'center'; lbl(sb >= 1000 ? sb / 1000 + 'K' : sb + '', sx + sb * sc / 2, sy - 6, '#2a1a0a', 'bold 10px Georgia,serif', 10); flushL();
+      c.textAlign = 'left';
+      try { document.getElementById('maps214').textContent = ' \u00b7 ' + Math.round(MAPR * 2 / 1000) + 'K ACROSS' + (ks ? ' \u00b7 ' + '\u2605'.repeat(ks) + ' WANTED' + (ex.posse ? ', POSSE ' + ex.posse : '') : ''); } catch (e) {}
+      ex.towns = nDrawn; ex.mk207 = mk207; ex.ms = performance.now() - t0; window.MAPSTAT214 = ex; MLAST = t0; MDIRTY = 0; }
+    function wpBar() { var w = window.WP214 && WP214.get(), l = document.getElementById('mapwl214'), b = document.getElementById('mapwc214'); if (!l) return; l.textContent = w ? '\ud83d\udccd ' + w.label + ' \u00b7 ' + (Math.hypot(w.x - px, w.y - py) / 1000).toFixed(1) + 'K' : 'TAP A TOWN OR A SPOT TO SET A WAYPOINT'; b.style.display = w ? '' : 'none'; }
+    function loop() { if (!mapOn()) { MLOOP = false; return; } var n = performance.now(); if (MDIRTY || n - MLAST > 180) { try { drawMap(); wpBar(); } catch (e) { if (!window.E214d) { window.E214d = 1; console.warn(e); } } } requestAnimationFrame(loop); }
+    function openMap(on) { if (on && !free()) return; MV.style.display = on ? 'block' : 'none'; MX.style.display = on ? 'block' : 'none'; document.body.classList.toggle('map214', !!on);
+      if (on) { MC.x = px; MC.y = py; try { if (window.MAPFIT208) MAPR = MAPFIT208(); } catch (e) {} var w = window.WP214 && WP214.get(); if (w) { var d = Math.max(Math.abs(w.x - px) / Math.max(1, innerWidth / Math.min(innerWidth, innerHeight)), Math.abs(w.y - py)); MAPR = clampR(Math.max(MAPR, d * 1.25 + 1500)); } MDIRTY = 1; drawMap(); wpBar(); if (!MLOOP) { MLOOP = true; requestAnimationFrame(loop); } }
+      window.MAPOPEN214 = (window.MAPOPEN214 || 0) + (on ? 1 : 0); }
+    MB.onclick = function () { openMap(!mapOn()); };
+    MX.addEventListener('click', function (e) { var bt = e.target.closest ? e.target.closest('button') : e.target; if (!bt) return; e.stopPropagation(); if (bt.id === 'mapx214') { openMap(false); return; } var z = bt.getAttribute('data-z'); if (!z) return;
+      if (z === 'f') { MC.x = px; MC.y = py; try { MAPR = window.MAPFIT208 ? MAPFIT208() : 20000; } catch (e2) {} } else if (z === 'me') { MC.x = px; MC.y = py; } else if (z === 'clr') { if (window.WP214) WP214.clear(); } else zoomAt(innerWidth / 2, innerHeight / 2, +z); MDIRTY = 1; drawMap(); wpBar(); });
+    /* drag to pan, two fingers to pinch, wheel to zoom, tap to set a waypoint */
+    var PTR = {}, DRG = null, PCH = null;
+    function ptrs() { return Object.keys(PTR).map(function (k) { return PTR[k]; }); }
+    function mapTap(X, Y) { var sc = mapSc(), best = null, bd = 22; try { var w0 = WP214.get(); if (w0) { var q = [innerWidth / 2 + (w0.x - MC.x) * sc, innerHeight / 2 + (w0.y - MC.y) * sc]; if (Math.hypot(q[0] - X, q[1] - Y - 12) < 16) { WP214.clear(); return; } } } catch (e) {}
+      mapTowns().forEach(function (t) { var d = Math.hypot(innerWidth / 2 + (t.x - MC.x) * sc - X, innerHeight / 2 + (t.y - MC.y) * sc - Y); if (d < bd) { bd = d; best = { x: t.x, y: t.y + 40, label: t.name }; } });
+      if (!best) rail().st.forEach(function (S) { var p = stPos(S), d = Math.hypot(innerWidth / 2 + (p.x - MC.x) * sc - X, innerHeight / 2 + (p.y - MC.y) * sc - Y); if (d < 14 && d < bd) { bd = d; best = { x: p.x, y: p.y, label: S.name + ' DEPOT' }; } });
+      if (!best) { var w = toWorld(X, Y); best = { x: Math.round(w.x), y: Math.round(w.y), label: 'WAYPOINT' }; }
+      if (window.WP214) WP214.set(best.x, best.y, best.label); }
+    MV.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); try { MV.setPointerCapture(e.pointerId); } catch (er) {} PTR[e.pointerId] = { x: e.clientX, y: e.clientY }; var A = ptrs();
+      if (A.length === 1) DRG = { x: e.clientX, y: e.clientY, cx: MC.x, cy: MC.y, moved: false };
+      else if (A.length === 2) { var mx = (A[0].x + A[1].x) / 2, my = (A[0].y + A[1].y) / 2; PCH = { d: Math.max(10, Math.hypot(A[0].x - A[1].x, A[0].y - A[1].y)), r: MAPR, w: toWorld(mx, my) }; if (DRG) DRG.moved = true; } });
+    MV.addEventListener('pointermove', function (e) { if (!PTR[e.pointerId]) return; PTR[e.pointerId] = { x: e.clientX, y: e.clientY }; var A = ptrs();
+      if (PCH && A.length >= 2) { var mx = (A[0].x + A[1].x) / 2, my = (A[0].y + A[1].y) / 2, d = Math.max(10, Math.hypot(A[0].x - A[1].x, A[0].y - A[1].y)); MAPR = clampR(PCH.r * PCH.d / d); var sc = mapSc(); MC.x = PCH.w.x - (mx - innerWidth / 2) / sc; MC.y = PCH.w.y - (my - innerHeight / 2) / sc; MDIRTY = 1; window.PINCH214 = (window.PINCH214 || 0) + 1; return; }
+      if (DRG) { var dx = e.clientX - DRG.x, dy = e.clientY - DRG.y; if (!DRG.moved && Math.hypot(dx, dy) > 8) DRG.moved = true; if (DRG.moved) { var s2 = mapSc(); MC.x = DRG.cx - dx / s2; MC.y = DRG.cy - dy / s2; MDIRTY = 1; } } });
+    function ptrUp(e) { if (!PTR[e.pointerId]) return; delete PTR[e.pointerId]; var A = ptrs();
+      if (PCH) { if (A.length < 2) { PCH = null; DRG = A.length ? { x: A[0].x, y: A[0].y, cx: MC.x, cy: MC.y, moved: true } : null; } return; }
+      if (DRG && !DRG.moved && e.type === 'pointerup') { try { mapTap(e.clientX, e.clientY); } catch (er) { console.warn(er); } MDIRTY = 1; } if (!A.length) DRG = null; }
+    MV.addEventListener('pointerup', ptrUp); MV.addEventListener('pointercancel', ptrUp);
+    MV.addEventListener('wheel', function (e) { e.preventDefault(); zoomAt(e.clientX, e.clientY, e.deltaY > 0 ? 1.18 : 1 / 1.18); }, { passive: false });
+    addEventListener('keydown', function (e) { if (!free() || e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; if (e.key === 'm' || e.key === 'M') openMap(!mapOn()); else if (e.key === 'Escape' && mapOn()) openMap(false); else if (mapOn() && (e.key === '+' || e.key === '=')) zoomAt(innerWidth / 2, innerHeight / 2, 0.75); else if (mapOn() && (e.key === '-' || e.key === '_')) zoomAt(innerWidth / 2, innerHeight / 2, 1.33); });
     var gT = 0;
     setInterval(function () { try { var on = free() && T().length > 0 && (typeof running === 'undefined' || running !== false); MB.style.display = on ? 'block' : 'none'; if (!on) { RB.style.display = 'none'; return; }
-      if (++gT % 4 === 0) { grow(); ranchTowns(); } var R = rail(); STN = null; R.st.forEach(function (S) { var p = stPos(S); if (Math.hypot(p.x - px, p.y - py) < 260) STN = S; }); RB.style.display = STN && RP.style.display !== 'block' && !(window.RAILCO203 && RAILCO203.isOpen()) && !window.RIDING203 ? 'block' : 'none'; if (!STN) RP.style.display = 'none'; if (MV.style.display === 'block') drawMap(); } catch (e) { if (!window.E136c) { window.E136c = 1; console.warn(e); } } }, 250);
+      if (++gT % 4 === 0) { grow(); ranchTowns(); } var R = rail(); STN = null; R.st.forEach(function (S) { var p = stPos(S); if (Math.hypot(p.x - px, p.y - py) < 260) STN = S; }); RB.style.display = STN && RP.style.display !== 'block' && !(window.RAILCO203 && RAILCO203.isOpen()) && !window.RIDING203 ? 'block' : 'none'; if (!STN) RP.style.display = 'none'; } catch (e) { if (!window.E136c) { window.E136c = 1; console.warn(e); } } }, 250);
     // first pass: crossroads saloons on the fixed roads, once the towns exist
     var once = setInterval(function () { if (!free()) return; var L = T(); if (!L.length) return; clearInterval(once); L.slice().forEach(function (t) { if (!t.d.proc && !t.d.mini) saloonFor(t); }); resetWater(); RAIL.key = ''; }, 300);
-    window.MAP136 = { feat: feat, lake: lakeAt, grow: grow, rail: rail, ride: ride, openMap: openMap, mapr: function () { return MAPR; }, stations: function () { return rail().st; }, near: function () { return STN; }, FT: FT, cell: CELL, TC: TC };
+    window.MAP136 = { feat: feat, lake: lakeAt, grow: grow, rail: rail, ride: ride, openMap: openMap, isOpen: function () { return mapOn(); }, view: function () { return { x: MC.x, y: MC.y, r: MAPR }; }, setView: function (x, y, r) { if (x != null) MC.x = x; if (y != null) MC.y = y; if (r) MAPR = clampR(r); MDIRTY = 1; }, zoomAt: zoomAt, tap: function (X, Y) { mapTap(X, Y); MDIRTY = 1; }, toWorld: toWorld, draw: function () { drawMap(); wpBar(); }, mapr: function () { return MAPR; }, stations: function () { return rail().st; }, near: function () { return STN; }, FT: FT, cell: CELL, TC: TC };
   })();
   // ===== v141: BARE STARTS (FREE = hero + 1 general, 1V1 = + a farm each), WILDLIFE + HUNTING (MEAT), hunter generals, build-button needs, goblin camps send raiders =====
   (function () {
@@ -15275,7 +15344,7 @@ window.B137 = (function () {
         var t = st.t, a = P2(t ? t.x : st.x, t ? t.y : st.y), r = t && t.d ? 3 + Math.sqrt(t.d.pop) : 4, x = a[0] + r + 9, y = a[1] + 4; if (x < -40 || x > W + 40 || y < -20 || y > Hh + 20) return; nW++;
         c.fillStyle = '#7a1a1a'; c.strokeStyle = '#fff4d8'; c.lineWidth = 1.5; c.beginPath(); c.arc(x, y, 7, 0, 7); c.fill(); c.stroke();
         c.fillStyle = '#ffe9b8'; c.font = 'bold 10px sans-serif'; c.textAlign = 'center'; c.fillText('\u2605', x, y + 3.5);
-        c.textAlign = 'left'; c.font = 'bold 9px monospace'; var tx = w.q + ' ' + (ECON131.G[w.k] ? ECON131.G[w.k].n : w.k); BX.push([x - 8, y - 8, x + 8, y + 8]); if (!free7(x + 9, y - 6, x + 12 + c.measureText(tx).width, y + 6)) return; c.lineWidth = 3; c.strokeStyle = 'rgba(243,227,195,.9)'; c.strokeText(tx, x + 10, y + 3); c.fillStyle = '#7a1a1a'; c.fillText(tx, x + 10, y + 3); });
+        c.textAlign = 'left'; c.font = 'bold 10px Georgia,serif'; var tx = w.q + ' ' + (ECON131.G[w.k] ? ECON131.G[w.k].n : w.k); BX.push([x - 8, y - 8, x + 8, y + 8]); if (!free7(x + 9, y - 6, x + 12 + c.measureText(tx).width, y + 6)) return; c.lineWidth = 3; c.strokeStyle = 'rgba(243,227,195,.9)'; c.strokeText(tx, x + 10, y + 3); c.fillStyle = '#7a1a1a'; c.fillText(tx, x + 10, y + 3); });
       var runs = []; try { runs = TRAIN167.runs() || []; } catch (e) {}
       groups().forEach(function (g) { var co = COI[g.co] || CO[0], A = stByName(g.from), B = stByName(g.to); if (!A || !B) return; var pa = pos(A), pb = pos(B), u = Math.max(0, Math.min(1, (S.ft - g.dep) / Math.max(1, g.at - g.dep))), x = pa.x + (pb.x - pa.x) * u, y = pa.y + (pb.y - pa.y) * u;
         var tr = runs.filter(function (t) { return t.run === g.key; })[0]; if (tr && tr.parts && tr.parts[0] && tr.parts[0].x != null) { x = tr.parts[0].x; y = tr.parts[0].y; }
@@ -15285,7 +15354,7 @@ window.B137 = (function () {
         c.fillStyle = co.c; c.strokeStyle = '#2a1a0a'; c.lineWidth = 1.5; c.beginPath(); if (c.roundRect) c.roundRect(a[0] - 10, a[1] - 6 + oy, 20, 12, 3); else c.rect(a[0] - 10, a[1] - 6 + oy, 20, 12); c.fill(); c.stroke();
         c.fillStyle = co.c2; c.fillRect(a[0] - 7, a[1] - 1.5 + oy, 14, 3); if (g.ships.some(function (q) { return q.own; })) { c.fillStyle = '#e8b83a'; c.font = 'bold 10px sans-serif'; c.textAlign = 'center'; c.fillText('\u2605', a[0], a[1] - 9); } BX.push([a[0] - 11, a[1] - 7, a[0] + 11, a[1] + 7]);
         var sp = g.ships[0], lb = (u <= 0 ? 'LOADING ' : '') + sp.q + ' ' + (ECON131.G[sp.k] ? ECON131.G[sp.k].n : sp.k) + (g.ships.length > 1 ? ' +' + (g.ships.length - 1) : '');
-        c.font = 'bold 9px monospace'; c.textAlign = 'center'; var lw = c.measureText(lb).width / 2 + 2, ly = a[1] + 19; if (!free7(a[0] - lw, ly - 9, a[0] + lw, ly + 3)) { ly = a[1] - 9; if (!free7(a[0] - lw, ly - 9, a[0] + lw, ly + 3)) return; } c.lineWidth = 3; c.strokeStyle = 'rgba(243,227,195,.9)'; c.strokeText(lb, a[0], ly); c.fillStyle = co.c; c.fillText(lb, a[0], ly); });
+        c.font = 'bold 10px Georgia,serif'; c.textAlign = 'center'; var lw = c.measureText(lb).width / 2 + 2, ly = a[1] + 19; if (!free7(a[0] - lw, ly - 9, a[0] + lw, ly + 3)) { ly = a[1] - 9; if (!free7(a[0] - lw, ly - 9, a[0] + lw, ly + 3)) return; } c.lineWidth = 3; c.strokeStyle = 'rgba(243,227,195,.9)'; c.strokeText(lb, a[0], ly); c.fillStyle = co.c; c.fillText(lb, a[0], ly); });
       c.restore(); window.MAP207 = { wanted: nW, ships: nS }; return nW + nS;
     };
     function wNote(to, k, inSec) { var w = to && k ? wFor(to.name, k) : null; if (!w) return ''; return S.ft + inSec <= w.due ? ' \u00b7 <span style="display:inline" class="dn">\u2605+' + w.bonus + ' WANTED</span>' : ' \u00b7 <span style="display:inline" class="up">\u2605 TOO LATE</span>'; }
@@ -16190,5 +16259,78 @@ body.joyL213 #rcol { left: auto !important; right: calc(var(--pad) + 6px + var(-
       P.raw.st(function () { startMode(P.auto); P.raw.st(function () { $('load213').style.display = 'none'; }, 400); }, 150); })(); }
 })();
 </script><!-- v213-pause -->
+<style id="v214css">/* v214 FULL MAP SCREEN: paper map in a wood frame, same buttons as v212 */
+#map136 { z-index: 9000 !important; touch-action: none; cursor: grab; }
+#mapui214 { position: fixed; inset: 0; z-index: 9001; pointer-events: none; font-family: Georgia, serif; color: var(--i212, #3b2410); }
+#mapui214 > * { pointer-events: auto; position: absolute; }
+#mapt214 { top: calc(16px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: var(--p212, #f3e3c3); border: 3px solid var(--w212, #7a4a1c); border-radius: 10px; padding: 4px 16px 5px; font-size: 15px; text-align: center; white-space: nowrap; box-shadow: 0 2px 6px rgba(60,36,12,.3); pointer-events: none !important; }
+#mapt214 b { letter-spacing: 4px; }
+#mapt214 span { font-size: 12px; font-weight: bold; }
+#mapt214 i { display: block; font-size: 10px; font-style: normal; opacity: .85; margin-top: 1px; }
+#mapx214 { top: calc(16px + env(safe-area-inset-top, 0px)); right: calc(20px + env(safe-area-inset-right, 0px)); min-width: 44px !important; min-height: 40px !important; font-size: 18px !important; }
+#mapz214 { left: calc(20px + env(safe-area-inset-left, 0px)); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; }
+#mapz214 button { width: 46px; height: 42px; padding: 0; background: var(--p212, #f3e3c3); color: var(--i212, #3b2410); border: 3px solid var(--i212, #3b2410); border-radius: 8px; font: bold 21px Georgia, serif; box-shadow: 0 2px 4px rgba(60,36,12,.3); }
+#mapz214 #mapf214 { font-size: 17px; }
+#mapw214 { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: var(--p212, #f3e3c3); border: 3px solid var(--w212, #7a4a1c); border-radius: 10px; padding: 4px 6px 4px 14px; font: bold 13px Georgia, serif; white-space: nowrap; box-shadow: 0 2px 6px rgba(60,36,12,.3); min-height: 34px; max-width: calc(100vw - 230px); }
+#mapwl214 { overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
+#mapwc214 { background: var(--w212, #7a4a1c); color: #fff3d6; border: 2px solid var(--w212d, #4a2a0c); border-radius: 8px; min-height: 34px; padding: 4px 12px; font: bold 12px Georgia, serif; }
+@media (max-height: 480px) { #mapt214 i { display: none; } #mapt214 { padding: 3px 12px; } #mapz214 button { width: 42px; height: 38px; } #mapz214 { gap: 6px; } }
+body.map214 #minimap, body.map214 #mapb136, body.map214 #inv210, body.map214 #rail136, body.map214 #talk170 { visibility: hidden !important; }
+</style>
+<script>
+/* v214 FULL MAP SCREEN: waypoint (saved), a blue waypoint compass beside the story compass, the waypoint pin on the minimap, tap the minimap to open the map */
+(function () {
+  var W = null, KEY = '', ARR = 0;
+  function freeOn() { return typeof MODE !== 'undefined' && MODE === 'free' && typeof started !== 'undefined' && !!started; }
+  function storyOn() { try { return !!(window.STORY170 && STORY170.on()); } catch (e) { return false; } }
+  function key() { return 'kingdom-wp214:' + (typeof MODE !== 'undefined' ? MODE : '?') + (storyOn() ? ':story' : ''); }
+  function load() { KEY = key(); W = null; try { var j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j && isFinite(j.x) && isFinite(j.y)) W = { x: +j.x, y: +j.y, label: String(j.label || 'WAYPOINT').slice(0, 28) }; } catch (e) {} }
+  function save() { try { if (W) localStorage.setItem(KEY, JSON.stringify(W)); else localStorage.removeItem(KEY); } catch (e) {} }
+  function sync() { if (freeOn() && KEY !== key()) load(); }
+  function pin(c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.fillStyle = 'rgba(30,20,10,.3)'; c.beginPath(); c.ellipse(0, 0, 6, 2.5, 0, 0, 7); c.fill();
+    c.fillStyle = '#1a4a8a'; c.strokeStyle = '#fff3d6'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(-3, -6, -9, -10, -9, -16); c.arc(0, -16, 9, Math.PI, 0); c.bezierCurveTo(9, -10, 3, -6, 0, 0); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = '#fff3d6'; c.beginPath(); c.arc(0, -16, 3.4, 0, 7); c.fill(); c.restore(); }
+  window.WP214 = {
+    get: function () { sync(); return W; },
+    set: function (x, y, label) { sync(); W = { x: Math.round(x), y: Math.round(y), label: String(label || 'WAYPOINT').toUpperCase().slice(0, 28) }; save(); window.WPSET214 = (window.WPSET214 || 0) + 1; return W; },
+    clear: function () { sync(); W = null; save(); },
+    pin: pin, key: key, arrived: function () { return ARR; }
+  };
+  /* arriving near the waypoint clears it */
+  setInterval(function () { try { if (!freeOn()) return; sync(); if (W && Math.hypot(W.x - px, W.y - py) < 230) { W = null; save(); ARR++; } } catch (e) {} }, 250);
+  /* the waypoint compass: a blue pin on the screen edge, or a pin on the ground when it is in view */
+  function compass() {
+    if (!freeOn() || !W) return; var dx = W.x - px, dy = W.y - py, dist = Math.hypot(dx, dy), z = (typeof zoom !== 'undefined' && zoom) || 1, dpr = window.devicePixelRatio || 1;
+    var W2 = cv.width / dpr, H2 = cv.height / dpr, c = ctx; c.save(); c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (Math.abs(dx) * z < W2 / 2 - 30 && Math.abs(dy) * z < H2 / 2 - 30) { pin(c, W2 / 2 + dx * z, H2 / 2 + dy * z, 1.3); c.restore(); window.__wp214c = { X: W2 / 2 + dx * z, Y: H2 / 2 + dy * z, on: 1, t: performance.now() }; return; }
+    var a = Math.atan2(dy, dx), rx = W2 / 2 - 60, ry = H2 < 500 ? H2 / 2 - 64 : H2 / 2 - 132, t = Math.min(rx / Math.abs(Math.cos(a) || 1e-6), ry / Math.abs(Math.sin(a) || 1e-6));
+    var X = W2 / 2 + Math.cos(a) * t, Y = H2 / 2 + Math.sin(a) * t;
+    var sc = window.__sc180; if (sc && performance.now() - sc.t < 200 && Math.abs(X - sc.X) < 96 && Math.abs(Y - sc.Y) < 56) { if (Math.abs(Math.sin(a)) > 0.6) X = sc.X + (X >= sc.X ? 104 : -104); else Y = sc.Y + (Y >= sc.Y ? 60 : -60); }
+    try { var av = COMPAV151(X, Y); X = av[0]; Y = av[1]; } catch (e) {}
+    try { var th = document.getElementById('topHud'), r = th && th.getBoundingClientRect(); if (r && r.width > 0 && X > r.left - 22 && X < r.right + 22 && Y - 22 < r.bottom) Y = r.bottom + 24; } catch (e) {}
+    c.translate(X, Y); c.fillStyle = '#1a4a8a'; c.strokeStyle = '#fff3d6'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 18, 0, 6.3); c.fill(); c.stroke();
+    c.rotate(a); c.fillStyle = '#fff3d6'; c.beginPath(); c.moveTo(17, 0); c.lineTo(6, -7); c.lineTo(6, 7); c.closePath(); c.fill(); c.rotate(-a);
+    c.fillStyle = '#fff3d6'; c.beginPath(); c.arc(0, -2, 5.5, Math.PI, 0); c.lineTo(0, 7); c.closePath(); c.fill(); c.fillStyle = '#1a4a8a'; c.beginPath(); c.arc(0, -2, 2, 0, 7); c.fill();
+    var lbl = W.label + ' ' + (dist / 1000).toFixed(1) + 'K'; c.font = 'bold 10px Georgia,serif'; c.textAlign = 'center'; var w = c.measureText(lbl).width + 10;
+    c.fillStyle = 'rgba(243,227,195,.94)'; c.strokeStyle = '#1a4a8a'; c.lineWidth = 1.5; c.fillRect(-w / 2, 22, w, 15); c.strokeRect(-w / 2, 22, w, 15); c.fillStyle = '#1a4a8a'; c.fillText(lbl, 0, 33); c.restore();
+    window.__wp214c = { X: X, Y: Y, a: a, on: 0, t: performance.now(), label: lbl };
+  }
+  try { var _mw = drawMiniWorld; drawMiniWorld = function () { var r = _mw.apply(this, arguments); try { compass(); } catch (e) { if (!window.E214c) { window.E214c = 1; console.warn(e); } } return r; }; } catch (e) {}
+  /* the waypoint pin on the minimap (on the rim when it is further out) */
+  try { var _dm = drawMinimap; drawMinimap = function () { _dm.apply(this, arguments); try { if (!freeOn() || !W) return; var sc = 75 / 2000, x = 75 + (W.x - px) * sc, y = 75 + (W.y - py) * sc, d = Math.hypot(x - 75, y - 75), rim = d > 62;
+      if (rim) { x = 75 + (x - 75) / d * 62; y = 75 + (y - 75) / d * 62; } mctx.save(); mctx.beginPath(); mctx.arc(75, 75, 75, 0, 7); mctx.clip(); pin(mctx, x, y + (rim ? 8 : 0), rim ? 0.75 : 0.9); mctx.restore(); window.MMPIN214 = { x: x, y: y, rim: rim }; } catch (e) {} }; } catch (e) {}
+  /* tap the minimap: the full map in FREE / STORY; in 1V1 it still marches selected troops (and stays quiet with none selected) */
+  window.addEventListener('pointerdown', function (e) {
+    var t = e.target; if (!t || t.id !== 'minimap') return;
+    try {
+      if (typeof MODE !== 'undefined' && MODE === 'free') { e.preventDefault(); e.stopImmediatePropagation(); if (freeOn() && window.MAP136) MAP136.openMap(true); return; }
+      if (typeof units !== 'undefined' && !units.some(function (u) { return u.sel && u.f === 'me' && u.t !== 'c'; })) { e.preventDefault(); e.stopImmediatePropagation(); }
+    } catch (er) {}
+  }, true);
+  /* leaving the game closes the map */
+  setInterval(function () { try { var mv = document.getElementById('map136'); if (mv && mv.style.display === 'block' && !freeOn() && window.MAP136) MAP136.openMap(false); } catch (e) {} }, 400);
+})();
+</script><!-- v214-map -->
+
 </body>
 </html>
