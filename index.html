@@ -2472,11 +2472,13 @@ window.B137 = (function () {
     ME_S = newS('me', city.x, city.y);
     var sv = null; if (MODE === 'free') try { sv = JSON.parse(localStorage.getItem(ECON_KEY) || 'null'); } catch (e) {}
     if (sv && sv.ppl && sv.ppl.length) { ME_S.ppl = sv.ppl.map(function (p) { p.u = null; return p; }); ME_S.bld = sv.bld; ME_S.jobs = ME_S.bld.filter(function (b) { return b.j; }); ME_S.res.water = sv.water || 0; ME_S.hunger = sv.hunger || 0; ME_S.thirst = sv.thirst || 0; }
-    else { wood = 0; stone = 0; gold = 0; food = 0; }
+    else if (!sv) { wood = 0; stone = 0; gold = 0; food = 0; } /* v212: a save with no settlers yet keeps its gold and goods */
+    ME_S.loaded212 = !!sv;
+    try { if (sv && sv.res212) Object.keys(sv.res212).forEach(function (k) { if (typeof sv.res212[k] === 'number' && k !== 'water') ME_S.res[k] = sv.res212[k]; }); } catch (e) {}
     ME_S.ppl.forEach(function (p) { if (p.sol) spawnSoldier(ME_S, p); });
     hallStats(ME_S); if (me && me.hallObj) me.hallObj.hp = me.hallObj.max;
   }
-  function saveEcon() { if (MODE !== 'free' || !ME_S) return; try { localStorage.setItem(ECON_KEY, JSON.stringify({ ppl: ME_S.ppl.map(function (p) { return { n: p.n, sx: p.sx, age: p.age, sol: p.sol, sick: p.sick, sk: p.sk, job: p.job, x: p.x, y: p.y, st: 0, go: 0 }; }), bld: ME_S.bld, water: ME_S.res.water, hunger: ME_S.hunger, thirst: ME_S.thirst })); } catch (e) {} }
+  function saveEcon() { if (MODE !== 'free' || !ME_S) return; try { localStorage.setItem(ECON_KEY, JSON.stringify({ ppl: ME_S.ppl.map(function (p) { return { n: p.n, sx: p.sx, age: p.age, sol: p.sol, sick: p.sick, sk: p.sk, job: p.job, x: p.x, y: p.y, st: 0, go: 0 }; }), bld: ME_S.bld, water: ME_S.res.water, hunger: ME_S.hunger, thirst: ME_S.thirst, res212: (function () { var o = {}; Object.keys(ME_S.res).forEach(function (k) { if (typeof ME_S.res[k] === 'number') o[k] = ME_S.res[k]; }); return o; })() })); } catch (e) {} }
   function econRun(dt) {
     econAcc += dt; planAcc += dt; if (econAcc < 0.5) return; var step = econAcc; econAcc = 0;
     var sets = allSets(); sets.forEach(function (s) { econStep(s, step); });
@@ -5836,7 +5838,7 @@ window.B137 = (function () {
     var _sm = setupMode; setupMode = function (m) { IS.key = ''; IS.l = []; SHIPS = []; CARGO = []; HORSE = false; _sm(m); isles(); ZC.clear(); };
   })();
   // v111: every realm (you and CPU alike) starts a fresh game with a small stash of gold and water
-  (function () { var _bg111 = beginGame; beginGame = function (mode) { _bg111.apply(this, arguments); try { allS75().forEach(function (s) { if (!s || !s.res || s.bld.length > 1) return; /* v130: start with almost nothing */ s.res.gold = 5; s.res.water = 10; s.res.wood = 40; s.res.stone = 10; s.res.food = Math.min(s.res.food || 0, 10); }); updateRes(); var clr130 = function () { try { var mf = ME_S && (ME_S.f || ME_S.id); for (var i = units.length - 1; i >= 0; i--) if (units[i].f === mf && units[i].t !== 'police') units.splice(i, 1); } catch (e) {} }; clr130(); setTimeout(clr130, 50); } catch (e) {} }; })();
+  (function () { var _bg111 = beginGame; beginGame = function (mode) { _bg111.apply(this, arguments); try { allS75().forEach(function (s) { if (!s || !s.res || s.bld.length > 1 || s.loaded212) return; /* v130: start with almost nothing; v212: not over a saved homestead */ s.res.gold = 5; s.res.water = 10; s.res.wood = 40; s.res.stone = 10; s.res.food = Math.min(s.res.food || 0, 10); }); updateRes(); var clr130 = function () { try { var mf = ME_S && (ME_S.f || ME_S.id); for (var i = units.length - 1; i >= 0; i--) if (units[i].f === mf && units[i].t !== 'police') units.splice(i, 1); } catch (e) {} }; clr130(); setTimeout(clr130, 50); } catch (e) {} }; })();
   // armies stop at the border; ships keep to the water; carriers pay for their jets
   var _uu36 = updateUnits; updateUnits = function (dt) {
     _uu36(dt); if (!BOUNDS) return;
@@ -6917,7 +6919,7 @@ window.B137 = (function () {
     function person(c, role, x, y, f, hit) { var m = spr(role, null, false); if (m) { if (hit) c.globalAlpha = 0.5; dsprA(c, m, x, y, 56, f); c.globalAlpha = 1; } }
     var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); if (!inT()) return; try {
       // voting post by the hall
-      items.push({ y: city.y + 60, x: city.x + 230, y2: city.y + 60, fn: function (sx, sy) { var c = ctx; c.fillStyle = '#6b4a26'; c.fillRect(sx - 3, sy - 54, 6, 54); c.fillStyle = '#f2ead8'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.fillRect(sx - 26, sy - 70, 52, 22); c.strokeRect(sx - 26, sy - 70, 52, 22); c.fillStyle = '#b03020'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('VOTE', sx, sy - 55); c.fillStyle = '#7a4a24'; c.fillRect(sx + 8, sy - 22, 18, 16); c.strokeRect(sx + 8, sy - 22, 18, 16); c.fillStyle = '#2a1a0a'; c.fillRect(sx + 12, sy - 22, 10, 2); } });
+      items.push({ y: city.y + 120, x: city.x - 200, y2: city.y + 120, fn: function (sx, sy) { var c = ctx; c.fillStyle = '#6b4a26'; c.fillRect(sx - 3, sy - 54, 6, 54); c.fillStyle = '#f2ead8'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.fillRect(sx - 26, sy - 70, 52, 22); c.strokeRect(sx - 26, sy - 70, 52, 22); c.fillStyle = '#b03020'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('VOTE', sx, sy - 55); c.fillStyle = '#7a4a24'; c.fillRect(sx + 8, sy - 22, 18, 16); c.strokeRect(sx + 8, sy - 22, 18, 16); c.fillStyle = '#2a1a0a'; c.fillRect(sx + 12, sy - 22, 10, 2); } });
       L.law.forEach(function (s) { items.push({ y: s.y, x: s.x, y2: s.y, fn: function (sx, sy) { person(ctx, 'guard', sx, sy, s.f, s.hitT > 0); ctx.fillStyle = '#d4a017'; ctx.beginPath(); for (var i = 0; i < 10; i++) { var a = i * 0.628 - 1.57, r = i % 2 ? 2 : 5; ctx.lineTo(sx + s.f * 4 + Math.cos(a) * r, sy - 38 + Math.sin(a) * r); } ctx.fill(); if (s.shot > 0) { ctx.fillStyle = '#ffd060'; ctx.beginPath(); ctx.arc(sx + s.f * 26, sy - 32, 6, 0, 7); ctx.fill(); } } }); });
       L.riot.forEach(function (r) { items.push({ y: r.y, x: r.x, y2: r.y, fn: function (sx, sy) { person(ctx, r.tool ? 'farmer' : 'villager', sx, sy, r.f, r.hitT > 0); if (r.tool) fork(ctx, sx + r.f * 14, sy - 10); else torch(ctx, sx + r.f * 14, sy - 14); } }); });
       if (L.fish) { var F = L.fish; items.push({ y: F.by, x: F.bx, y2: F.by, fn: function (sx, sy) { var c = ctx, bob = Math.sin(performance.now() / 150) * (F.t < 0.6 ? 4 : 1.5); c.strokeStyle = 'rgba(42,26,10,.7)'; c.lineWidth = 1; c.beginPath(); c.moveTo(sx - (F.bx - px) + face * 10, sy - (F.by - py) - 60); c.quadraticCurveTo(sx - (F.bx - px) / 2, sy - 70, sx, sy + bob - 6); c.stroke(); c.fillStyle = '#b03020'; c.beginPath(); c.arc(sx, sy + bob - 4, 4, 0, 7); c.fill(); c.fillStyle = '#f2ead8'; c.beginPath(); c.arc(sx, sy + bob - 7, 2.5, 0, 7); c.fill(); } }); }
@@ -6980,7 +6982,7 @@ window.B137 = (function () {
       W.cart.forEach(function (o) { items.push({ y: o.y, x: o.x, y2: o.y, fn: function (sx, sy) { cartArt(ctx, o, sx, sy); } }); });
       W.train.forEach(function (o) { items.push({ y: o.y, x: o.x, y2: o.y, fn: function (sx, sy) { trainArt(ctx, o, sx, sy); } }); });
       if (L.hallFire > 0) items.push({ y: city.y - 110, x: city.x, y2: city.y - 110, fn: function (sx, sy) { var c = ctx; for (var i = 0; i < 4; i++) { var fx = sx - 90 + i * 60, h = 18 + Math.min(40, L.hallFire) + Math.random() * 10; c.fillStyle = 'rgba(255,140,40,.85)'; c.beginPath(); c.moveTo(fx - 10, sy - 60); c.quadraticCurveTo(fx, sy - 60 - h * 2, fx + 10, sy - 60); c.fill(); c.fillStyle = 'rgba(255,240,160,.9)'; c.beginPath(); c.arc(fx, sy - 66, 4, 0, 7); c.fill(); } } });
-      if (VT.length) { var pr = Math.max(0, Math.min(1, (25 - (ME_S.vT126 || 0)) / 22)); VT.forEach(function (v) { var tx = city.x + 230 + (v.i % 4 - 1.5) * 26, ty = city.y + 80 + Math.floor(v.i / 4) * 24, x = v.x0 + (tx - v.x0) * pr, y = v.y0 + (ty - v.y0) * pr; items.push({ y: y, x: x, y2: y, fn: function (sx, sy) { var m = spr(v.r, null, false); if (m) dsprA(ctx, m, sx, sy, 56, tx > v.x0 ? 1 : -1); } }); }); }
+      if (VT.length) { var pr = Math.max(0, Math.min(1, (25 - (ME_S.vT126 || 0)) / 22)); VT.forEach(function (v) { var tx = city.x - 200 + (v.i % 4 - 1.5) * 26, ty = city.y + 140 + Math.floor(v.i / 4) * 24, x = v.x0 + (tx - v.x0) * pr, y = v.y0 + (ty - v.y0) * pr; items.push({ y: y, x: x, y2: y, fn: function (sx, sy) { var m = spr(v.r, null, false); if (m) dsprA(ctx, m, sx, sy, 56, tx > v.x0 ? 1 : -1); } }); }); }
     } catch (e) {} };
   })();
 
@@ -9387,7 +9389,7 @@ window.B137 = (function () {
     } catch (e) {}
 
     window.TRAIN167 = {
-      v211: { side: function (a) { return sideOf(frame(a, 0, 0)); }, smoke: function () { return SMK.length; }, snd: SND },
+      v211: { side: function (a) { return sideOf(frame(a, 0, 0)); }, smoke: function () { return SMK.length; }, snd: SND, draw: function (p, sx, sy) { draw211(p, sx, sy); } },
       n: function () { return TRAINS.filter(function (t) { return !t.run; }).length; }, setRuns: setRuns, runs: function () { return TRAINS.filter(function (t) { return t.run; }); }, all: function () { return TRAINS; },
       list: function () {
         return TRAINS.map(function (t) {
@@ -9977,7 +9979,7 @@ window.B137 = (function () {
       try {
         var e = document.getElementById('res') || resEl;
         if (!e || !ME_S) return;
-        var label = '  COAL ' + Math.floor(coalOf(ME_S));
+        var label = ' \u26ab' + Math.floor(coalOf(ME_S)); /* v212: coal reads like the other resources */
         var n = document.getElementById('coal169hud');
         if (n && n.parentNode === e) {
           if (n.textContent !== label) n.textContent = label;
@@ -13755,7 +13757,7 @@ window.B137 = (function () {
         }
         c.fillStyle = grav && grav.got ? '#2a6a2a' : '#2a1a0a';
         c.font = 'bold 10px monospace'; c.textAlign = 'center';
-        if (!window.NOLBL205) c.fillText(grav && grav.got ? 'COLOR' : (riff && riff.got ? 'BOX READY' : 'BOX SET'), 0, -36);
+        /* v212: stale BOX SET / BOX READY / COLOR label removed */
       }
       c.restore();
     }
@@ -14115,6 +14117,26 @@ window.B137 = (function () {
       }
       c.restore();
     }
+    /* v212: the STORY express uses the v211 solid 3/4-view rolling stock; the messenger stands in the open door of the green express car */
+    var K212 = { engine: ['loco', 'cw'], tender: ['hopper', 'cw'], box: ['box', 'dwp'], express: ['pass', 'cw'], caboose: ['caboose', 'cw'] };
+    function drawCar212(c, T, kind, sx, sy, L) {
+      var V = window.TRAIN167 && TRAIN167.v211 && TRAIN167.v211.draw, k = K212[kind];
+      if (!V || !k) return drawCar(c, T, kind, sx, sy, L);
+      try { V({ k: k[0], co: k[1], x: sx + T.head, y: T.ty, ang: 0, dirS: 1, ph: T.dist / 8, stop: !(T.v > 1), load: kind === 'tender' ? 'coal' : null }, sx, sy); window.EXP212 = (window.EXP212 || 0) + 1; }
+      catch (e) { try { c.restore(); } catch (e2) {} return drawCar(c, T, kind, sx, sy, L); }
+      if (kind !== 'express') return;
+      var du = T.doorX0 || 0, HX = -0.32;
+      c.save(); c.transform(1, 0, -HX, 1, sx, sy + 12);
+      c.fillStyle = '#3a2412'; c.fillRect(du - 11, -37, 22, 25); c.strokeStyle = '#d8b040'; c.lineWidth = 1; c.strokeRect(du - 11, -37, 22, 25); /* open door */
+      var reach = !T.done2 && T.carry ? T.hand : 0;
+      c.fillStyle = '#2a4a7a'; c.fillRect(du - 5, -27, 10, 14); c.fillStyle = '#e0b088'; c.beginPath(); c.arc(du, -31, 4.5, 0, 7); c.fill();
+      c.fillStyle = '#1e3460'; c.fillRect(du - 5.5, -36.5, 11, 4);
+      c.strokeStyle = '#2a4a7a'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(du + 2, -24); c.lineTo(du + 6, -16 + reach * 8); c.stroke();
+      if (!T.done2 && T.carry) { var near = Math.abs((T.head - T.doorOff) - px) < 420; if (near) { c.strokeStyle = T.inZ ? 'rgba(80,200,90,.95)' : 'rgba(232,192,64,' + (0.55 + 0.4 * Math.sin(performance.now() / 160)) + ')'; c.lineWidth = 3; c.strokeRect(du - 14, -40, 28, 31); } }
+      c.restore();
+      if (T.done2) drawStrongbox(c, sx + du, sy - 4, 0.7);
+      if (!T.done2 && T.carry && Math.abs((T.head - T.doorOff) - px) < 420) { c.save(); c.strokeStyle = T.inZ ? 'rgba(80,200,90,.95)' : 'rgba(232,192,64,.8)'; c.lineWidth = 3; c.beginPath(); c.ellipse(sx + du, sy + 80, 36, 12, 0, 0, 7); c.stroke(); c.restore(); }
+    }
     var CARS202 = [['engine', 110], ['tender', 60], ['box', 90], ['express', 100], ['caboose', 70]];
     function trainItems(items) {
       var T = ACT.express; if (!T || !T.run) return;
@@ -14124,7 +14146,7 @@ window.B137 = (function () {
         var L = cr[1], cx = x - L / 2; x -= L + 8;
         if (Math.abs(cx - px) > half + L) return;
         if (cr[0] === 'express') T.doorX0 = (T.head - T.doorOff) - cx;
-        items.push({ y: T.ty, x: cx, y2: T.ty, fn: function (sx, sy) { try { drawCar(ctx, T, cr[0], sx, sy, L); } catch (e) {} } });
+        items.push({ y: T.ty, x: cx, y2: T.ty, fn: function (sx, sy) { try { drawCar212(ctx, T, cr[0], sx, sy, L); } catch (e) {} } });
       });
     }
     function drawDrift(c, kind, x, y, rot, seed, alpha) {
@@ -15658,7 +15680,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer\'s offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow\'s man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow\'s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your  claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won\'t stop, so ride beside the green express car, match the engineer\'s throttle and hand the strongbox up to the messenger. Then The Freshet: back at the diggings a cloudburst sends a flash flood down the creek. Take Hank\'s pike pole and hook the drift, brush, logs and whole trees, ashore before it smashes the sluice.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year on the frontier, told in chapters. Meet people, learn the ropes and stake your claim.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -15848,5 +15870,76 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v210-inventory --><!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --><!-- v204-railroads --><!-- v205-freight-cars --><!-- v206-wanted-agents --><!-- v207-map-shares --></body>
+<!-- v210-inventory --><!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --><!-- v204-railroads --><!-- v205-freight-cars --><!-- v206-wanted-agents --><!-- v207-map-shares --><style id="ui212">/* ===== v212 UI CLEANUP: one Western look - paper panels, wood frames, one serif face, one button size ===== */
+:root { --p212: #f3e3c3; --p212b: #ead3a8; --i212: #3b2410; --w212: #7a4a1c; --w212d: #4e2e12; }
+body *:not(canvas) { font-family: Georgia, 'Times New Roman', serif !important; }
+button { background: var(--p212); color: var(--i212); border: 2px solid var(--i212); border-radius: 8px; font-weight: bold; letter-spacing: .3px; min-height: 30px; }
+button.on { background: var(--w212); color: #fff3d6; border-color: var(--w212d); }
+button:disabled, button[disabled] { opacity: .45; }
+/* full screens: title, mode select, settings */
+#creator, #modes, #settings { background: #e9d4a6 !important; }
+#cbox, #mbox, #sbox { background: var(--p212) !important; border: 4px solid var(--w212) !important; border-radius: 14px; box-shadow: inset 0 0 0 2px #c9a46a, 0 4px 14px rgba(60,36,12,.25); }
+#cbox h1, #mbox h2, #sbox h2 { color: var(--w212d); letter-spacing: 6px; }
+.mode { background: #fbf1dc !important; border: 3px solid var(--w212) !important; border-radius: 10px !important; }
+.mode b { color: var(--w212d); }
+#start { background: var(--w212) !important; color: #fff3d6 !important; border: 3px solid var(--w212d) !important; border-radius: 10px; }
+/* panels */
+#shop, #menu, #banner, #upanel, #statsP, #ordP, #chP, #near63, #propPanel, #eraHud { background: var(--p212) !important; color: var(--i212) !important; border: 3px solid var(--w212) !important; border-radius: 10px !important; box-shadow: 0 4px 14px rgba(60,36,12,.3); }
+#crop132, #cp133, #tp131, #pp133, #gp135, #railp136, #dlg170, #rc203, #dead209, #invp210, #bankPanel { border-color: var(--w212) !important; border-radius: 10px !important; }
+#shop .row { border-bottom: 1px dashed #b08a50 !important; }
+#menu { overflow: hidden; }
+#menu button { background: var(--p212) !important; border-radius: 0 !important; border: none !important; border-bottom: 1px solid #c9a46a !important; min-height: 40px; }
+#save73 { background: rgba(60,36,12,.45) !important; }
+#save73 > div { background: var(--p212) !important; border: 3px solid var(--w212) !important; border-radius: 12px; }
+#save73y { background: var(--w212) !important; color: #fff3d6 !important; border: 2px solid var(--w212d) !important; border-radius: 8px; }
+#save73n { background: var(--p212) !important; color: var(--i212) !important; border: 2px solid var(--i212) !important; border-radius: 8px; }
+/* HUD: paper chips top-left next to the minimap; red hearts */
+#topHud > div { background: rgba(243,227,195,.94) !important; color: var(--i212) !important; border: 2px solid var(--w212); border-radius: 8px !important; box-shadow: 0 1px 3px rgba(60,36,12,.25); }
+#topHud #hp { color: #b0281c !important; letter-spacing: 0 !important; }
+#minimap { border: 3px solid var(--w212) !important; box-shadow: 0 0 0 2px #e9d4a6, 0 2px 6px rgba(60,36,12,.3); background: var(--p212) !important; }
+/* the same corner buttons: menu, map, bag */
+#menuBtn { background: var(--p212) !important; border: 3px solid var(--i212) !important; border-radius: 8px !important; }
+#menuBtn span { background: var(--i212) !important; }
+#mapb136, #inv210 { width: 72px !important; height: 36px !important; min-height: 0 !important; padding: 0 !important; font: bold 13px Georgia, serif !important; background: var(--p212) !important; color: var(--i212) !important; border: 3px solid var(--i212) !important; border-radius: 8px !important; right: calc(10px + env(safe-area-inset-right, 0px)) !important; }
+#mapb136 { top: calc(64px + env(safe-area-inset-top, 0px)) !important; }
+#inv210 { top: calc(106px + env(safe-area-inset-top, 0px)) !important; }
+/* action buttons bottom-right */
+#atk { background: var(--w212) !important; border: 3px solid var(--w212d) !important; color: #fff3d6 !important; font-weight: bold; box-shadow: 0 2px 6px rgba(60,36,12,.35); }
+#rcol button, #talk170, #rail136, #tpb131, #open130 { border-radius: 8px !important; min-height: 36px; }
+#joy { border-color: var(--w212) !important; background: rgba(122,74,28,.12) !important; }
+#joyKnob { background: var(--w212) !important; }
+/* one close / back button everywhere */
+button.x212 { background: var(--w212) !important; color: #fff3d6 !important; border: 2px solid var(--w212d) !important; border-radius: 8px !important; min-width: 36px !important; min-height: 36px !important; font: bold 14px Georgia, serif !important; padding: 4px 10px !important; }
+/* nothing from the game shows over the title, mode select or settings */
+body.out212 #mapb136, body.out212 #inv210, body.out212 #rail136, body.out212 #talk170, body.out212 #tpb131, body.out212 #gb135, body.out212 #minimap { display: none !important; }
+body.bigmap212 #minimap { display: none !important; }
+#mbox { justify-content: center; } #mgrid { max-width: 820px !important; }
+@media (max-height: 480px) { body.pan212 #rcol, body.pan212 #talk170 { visibility: hidden !important; } }
+body.nomap212 #inv210 { top: calc(64px + env(safe-area-inset-top, 0px)) !important; }
+</style>
+<script>
+/* v212 UI CLEANUP: minimap shown in play, game buttons hidden off the play screen, one style for every close / back button */
+(function () {
+  var CL = /^(\u2715|\u00d7|x|close|\u2715 close|back|\u25c0 back|\u2190 back|done|cancel)$/i, was = false;
+  function vis(id) { var e = document.getElementById(id); return !!(e && e.style.display !== 'none' && getComputedStyle(e).display !== 'none'); }
+  function tick() {
+    try {
+      var b = document.body, inG = typeof started !== 'undefined' && !!started && vis('menuBtn') && !vis('settings') && !vis('modes') && !vis('creator');
+      b.classList.toggle('out212', !inG);
+      var mv = document.getElementById('map136'); b.classList.toggle('bigmap212', !!(mv && mv.style.display === 'block'));
+      b.classList.toggle('pan212', ['railp136', 'invp210', 'rc203'].some(vis));
+      var mb = document.getElementById('mapb136'); b.classList.toggle('nomap212', !(mb && mb.style.display === 'block'));
+      if (inG && !was) b.classList.add('map63'); /* minimap is part of the essential HUD */
+      was = inG;
+      var bs = document.getElementsByTagName('button');
+      for (var i = 0; i < bs.length; i++) { var t = bs[i]; if (t.x212 === t.textContent) continue; t.x212 = t.textContent; var tx = (t.textContent || '').trim(); if (CL.test(tx) || /^\u2715\s/.test(tx)) t.classList.add('x212'); else t.classList.remove('x212'); }
+    } catch (e) {}
+  }
+  setInterval(tick, 300); tick();
+  /* v212: closing or reloading the page mid-game keeps your gold and goods (HOME -> NO still discards a run) */
+  window.addEventListener('pagehide', function () { try { if (window.__v73 && __v73.buf() && typeof started !== 'undefined' && started && window.__save119) { __save119(); __v73.save(); } } catch (e) {} });
+  window.UI212 = { tick: tick };
+})();
+
+</script><!-- v212-ui --></body>
 </html>
