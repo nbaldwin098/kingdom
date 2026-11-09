@@ -234,7 +234,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer's offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow's man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow&#39;s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won't stop, so ride beside the green express car, match the engineer's throttle and hand the strongbox up to the messenger. Then The Freshet: back at the diggings a cloudburst sends a flash flood down the creek. Take Hank&#39;s pike pole and hook the drift, brush, logs and whole trees, ashore before it smashes the sluice.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer's offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow's man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow&#39;s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won't stop, so ride beside the green express car, match the engineer's throttle and hand the strongbox up to the messenger. Then The Freshet: back at the diggings a cloudburst sends a flash flood down the creek. Take Hank&#39;s pike pole and hook the drift, brush, logs and whole trees, ashore before it smashes the sluice. The Cabin: snow is a month off, so roll the beached drift logs up skid poles onto the cabin walls while Hank holds the rope.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -10529,7 +10529,8 @@ window.B137 = (function () {
       { id: 29, title: 'The Hobnails', year: 1, need: ['marlow29', 'brann29'] },
       { id: 30, title: 'The Ford', year: 1, need: ['tully30', 'brann30'] },
       { id: 31, title: 'The Express', year: 1, need: ['harker31', 'brann31'] },
-      { id: 32, title: 'The Freshet', year: 1, need: ['brann32', 'creed32'] }
+      { id: 32, title: 'The Freshet', year: 1, need: ['brann32', 'creed32'] },
+      { id: 33, title: 'The Cabin', year: 1, need: ['creed33', 'brann33'] }
     ];
 
     var NODES = {
@@ -12468,6 +12469,37 @@ window.B137 = (function () {
       creed_ch32_again: { who: 'creed', say: "Hook and haul! Pull it up onto your bank.", replies: [
         { t: "Right.", next: 'end' }
       ] },
+      creed_ch33: { who: 'creed', say: "Lottie calls that drift firewood. I call it a cabin. Forty years I've wintered in tents on creeks like this, and I'm done with it. Snow's a month off. Those are good straight logs, and the sill's already down on its rocks.", replies: [
+        { t: "How do we get them up there?", next: 'creed_ch33_how', rel: { creed: 1 } },
+        { t: "Just the two of us?", next: 'creed_ch33_two' }
+      ] },
+      creed_ch33_how: { who: 'creed', say: "Skid poles. I stand up top on the wall with the rope. You roll a log off the deck to the foot of the poles, then push her up them from below. Push square, from the middle, or she cants and slews off. When your wind's gone, holler HOLD, that's ATTACK, and I'll snub her round the corner. Near the top, ease off so she rolls into the notch slow instead of jumping it.", replies: [
+        { t: "Push square, holler hold, ease off.", next: 'end', flag: 'met_creed33', rel: { creed: 1 } },
+        { t: "What if you can't hold her?", next: 'creed_ch33_hold' }
+      ] },
+      creed_ch33_two: { who: 'creed', say: "Folks raised cabins with two men and a rope long before anybody thought of a crane. You do the pushing, I do the holding.", replies: [
+        { t: "How does it work?", next: 'creed_ch33_how', rel: { creed: 1 } }
+      ] },
+      creed_ch33_hold: { who: 'creed', say: "A snub only holds so long; watch the rope bar, that's my arms. And once you push her on up past where I snubbed, I let it off to take in rope, so holler again when you stop.", replies: [
+        { t: "Holler every time I stop. Let's raise it.", next: 'end', flag: 'met_creed33', rel: { creed: 1 } }
+      ] },
+      creed_ch33_again: { who: 'creed', say: "Push her square from the middle. Holler HOLD when you need wind, and ease off near the top.", replies: [
+        { t: "Right.", next: 'end' },
+        { t: "How many more?", next: 'creed_ch33_more' }
+      ] },
+      creed_ch33_more: { who: 'creed', say: "Three rounds today: back wall, then front, each round. Lottie and I butt the short end logs in. The roof can wait for tomorrow.", replies: [
+        { t: "Back to it.", next: 'end' }
+      ] },
+      brann_ch33: { who: 'brann', say: "I wanted those logs for firewood. Hank wants walls. I suppose walls burn slower. I've got the deck chocked and the notches scored. When you're ready I'll knock the chock out and you can start rolling.", replies: [
+        { t: "Knock it out.", next: 'end', flag: 'met_brann33', rel: { brann: 1 } },
+        { t: "A cabin means we're staying.", next: 'brann_ch33_stay' }
+      ] },
+      brann_ch33_stay: { who: 'brann', say: "It means we're not giving Marlow a winter of empty creek to jump. A cabin on a claim says somebody lives here. Go on, I'll knock the chock out.", replies: [
+        { t: "Then let's live here.", next: 'end', flag: 'met_brann33', rel: { brann: 1 } }
+      ] },
+      brann_ch33_again: { who: 'brann', say: "Roll the front log on the deck to the foot of the skid poles. Mind it doesn't roll back on you.", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
       creed_ch25_again: { who: 'creed', say: "Walk beside her, lean high. The scale's at the end of the road.", replies: [
         { t: "Right.", next: 'end' }
       ] },
@@ -12630,10 +12662,11 @@ window.B137 = (function () {
       29: { cast: ['marlow', 'brann'], at: 'marlow', do: 'boots', mark: 'MARLOW & SONS' },
       30: { cast: ['tully', 'brann'], at: 'ford', do: 'ford', mark: 'DRY FORK FORD' },
       31: { cast: ['harker', 'brann'], at: 'siding', do: 'express', mark: 'DRY FORK SIDING' },
-      32: { cast: ['brann', 'creed'], at: 'diggings', do: 'freshet', mark: 'THE FRESHET' }
+      32: { cast: ['brann', 'creed'], at: 'diggings', do: 'freshet', mark: 'THE FRESHET' },
+      33: { cast: ['creed', 'brann'], at: 'diggings', do: 'cabin', mark: 'THE CABIN' }
     };
     CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
-    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]], 26: [[-190, -10], [230, 0]], 27: [[0, -40], [-210, -10]], 28: [[-210, 160], [-70, 200]], 29: [[40, -150], [-250, 150]], 30: [[-420, -220], [380, -150]], 31: [[-150, -24], [150, 40]], 32: [[-150, 240], [10, 290]] };
+    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]], 26: [[-190, -10], [230, 0]], 27: [[0, -40], [-210, -10]], 28: [[-210, 160], [-70, 200]], 29: [[40, -150], [-250, 150]], 30: [[-420, -220], [380, -150]], 31: [[-150, -24], [150, 40]], 32: [[-150, 240], [10, 290]], 33: [[-160, 300], [-405, 610]] };
     var GENERIC = [[-90, -30], [95, -10], [10, 105]];
     var DW = null;
     var EU = null;
@@ -12689,7 +12722,7 @@ window.B137 = (function () {
     function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
     function charId(need) { return String(need).replace(/\d+$/, ''); }
 
-    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, weigh: null, stock: null, lantern: null, boots: null, ford: null, express: null, freshet: null, t: 0 };
+    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, weigh: null, stock: null, lantern: null, boots: null, ford: null, express: null, freshet: null, cabin: null, t: 0 };
     function talksDone() { var d = chDef(); for (var i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return false; return true; }
     function actOK() {
       var d = chDef(); if (!d) return true;
@@ -12698,9 +12731,10 @@ window.B137 = (function () {
       if (d.do === 'arrive') { var s = scenePos(); if (Math.hypot(px - s.x, py - s.y) < 280) { ST.flags['act' + d.id] = 1; save(); return true; } return false; }
       return !!(ACT.id === d.id && ACT.done);
     }
-    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; ACT.weigh = null; ACT.stock = null; ACT.lantern = null; ACT.boots = null; ACT.ford = null; ACT.express = null; ACT.freshet = null; }
+    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; ACT.weigh = null; ACT.stock = null; ACT.lantern = null; ACT.boots = null; ACT.ford = null; ACT.express = null; ACT.freshet = null; ACT.cabin = null; }
     function setupAct() {
       var d = chDef(); clearAct(); ACT.id = d.id; ACT.kind = d.do || ''; ACT.done = !!ST.flags['act' + d.id];
+      if (ACT.done && ST.on && d.do === 'cabin') { cbSetup(scenePos()); var CBd = ACT.cabin; CBd.n = CBd.N; CBd.done2 = 1; CBd.a = null; CBd.deckN = 0; cbCast(CBd); cbEndSay(); }
       if (ACT.done || !ST.on) return;
       var s = scenePos(), i;
       if (d.do === 'herd') {
@@ -12852,6 +12886,8 @@ window.B137 = (function () {
           tree: flw ? 0.26 : fsq2 ? 0.06 : 0.14, gap: fsq2 ? 1.18 : 1, pass: 1, hits: 0, saved: 0, pokeCD: 0, pole: null, done2: 0, reward: 0, warned: 0 };
         NODES.creed_ch32.say = "Forty years on creeks and I've seen three freshets take a sluice clean down to the river. " + (flw ? "And Marlow's upper camp has a splash dam full of logs. With his man in the sheriff's cells, nobody up there will lift a finger to hold it, so look for whole trees. " : fsq2 ? "Marlow sent a rider at noon. His men are letting their splash dam down slow so it won't hit us in one lump. Fewer trees, maybe. He's keeping his word. " : fpay ? "I spent some of Marlow's money on spare boards for the head of the box, so she can take an extra knock. " : "") + "Here's the pike pole, iron hook on the end.";
         NODES.creed_ch32_box.say = (fpay ? "Five boards on the upstream end, with the spares Marlow paid for." : "Four boards on the upstream end.") + " A log takes one, a tree takes two. Lose them all and I'll nail her back together, but the water won't wait on us.";
+      } else if (d.do === 'cabin') {
+        cbSetup(s);
       } else if (d.do === 'shovel') {
         ACT.shovel = { x: s.x + 50, y: s.y + 160, n: 0, need: 10, miss: 0, ph: 0, flash: 0, flashT: 0, pile: 1 };
       }
@@ -12872,6 +12908,7 @@ window.B137 = (function () {
       if (ACT.ford) { ACT.ford.done2 = 1; ACT.ford.logs = []; fordBrannSay(); }
       if (ACT.express) { ACT.express.done2 = 1; ACT.express.carry = 1; expBrannSay(); }
       if (ACT.freshet) { ACT.freshet.done2 = 1; ACT.freshet.deb = []; frEndSay(); }
+      if (ACT.cabin) { ACT.cabin.done2 = 1; ACT.cabin.n = ACT.cabin.N; ACT.cabin.a = null; cbEndSay(); }
       if (ACT.wagon) ACT.wagon.ex = ACT.wagon.x;
       save(); finishChapter();
     }
@@ -13045,6 +13082,155 @@ window.B137 = (function () {
         frEndSay(); completeAct();
       }
     }
+    /* v219 STORY chapter 33 The Cabin: roll the beached freshet drift logs up skid poles onto the cabin walls with Hank on the rope */
+    function cbCourse(B) { return Math.floor(B.n / 2); }
+    function cbDeckY(B, i) { return B.yf + 150 + i * 34; }
+    function cbFoot(B) { return B.yf + 70 + 14 * cbCourse(B); }
+    function cbFrontH(B) { return B.D * (1 + Math.floor(B.n / 2)); }
+    function cbBackH(B) { return B.D * (1 + Math.ceil(B.n / 2)); }
+    function cbYg(B, s) { var f = cbFoot(B); return f + (B.yf - f) * s; }
+    function cbVmax(B) { return 0.16 - 0.012 * cbCourse(B); }
+    function cbPop(B, x, y, txt, col) { B.pops.push({ x: x, y: y, txt: txt, t: 0, col: col || '40,110,40' }); if (B.pops.length > 8) B.pops.shift(); }
+    function cbCast(B) {
+      var H = byId('creed'), L = byId('brann');
+      if (H && !H.dead209) { H.x = B.C.x + 72; H.y = B.yf - cbFrontH(B) - 2; H.face = -1; }
+      if (L && !L.dead209 && !B.castSet) { L.x = B.C.x - 175; L.y = cbDeckY(B, 2); L.face = 1; }
+      B.castSet = 1;
+    }
+    function cbNewLog(B) {
+      if (B.n >= B.N) { B.a = null; B.deckN = 0; return; }
+      B.a = { ph: 'deck', y: cbDeckY(B, 0), vy: 0, s: 0, v: 0, cant: 0, t: 0, roll: 0 };
+      B.deckN = B.N - B.n - 1; B.snub = null; B.strain = 0;
+    }
+    function cbSetup(s) {
+      var C = { x: s.x - 230, y: s.y + 330 }, N = 6;
+      var B = ACT.cabin = { C: C, yf: C.y + 60, yb: C.y - 60, D: 16, N: N, n: Math.max(0, Math.min(N, ST.flags.ch33_n | 0)), a: null, deckN: 0, wind: 1, strain: 0, snub: null,
+        slews: ST.flags.ch33_sl | 0, jumps: ST.flags.ch33_jp | 0, slips: 0, knocks: 0, pops: [], chips: [], done2: 0, reward: 0, seatV: 0.13, push: 0, prevPy: null, stag: 0, snag: 0, snagT: 0, hankT: 0, castSet: 0,
+        pay: !!ST.flags.ch29_pay };
+      cbNewLog(B); cbCast(B);
+      var pay = B.pay, whole = !!ST.flags.ch32_whole;
+      NODES.creed_ch33.say = "Lottie calls that drift firewood. I call it a cabin. Forty years I've wintered in tents on creeks like this, and I'm done with it. Snow's a month off. " + (whole ? "The freshet never got a board off the sluice, so we've got the days to spare. " : "") + (pay ? "And I spent the last of Marlow's money on a good manila rope, so I can hang on to a log longer. " : "") + "The sill's already down on its rocks.";
+      if (B.n > 0) { NODES.brann_ch33.say = "You've got " + B.n + " of six up already. I've got the deck chocked again. Say the word and I'll knock the chock out."; }
+    }
+    function cbEndSay() {
+      var B = ACT.cabin, tight = B && (B.jumps + B.slews) === 0;
+      var c2 = NODES.creed_ch33_again; if (c2) { c2.say = (tight ? "Not one log slewed or jumped. Square and tight. " : "Three rounds up, notched and seated. ") + "Roof poles tomorrow, then we chink the gaps with mud and moss before the snow."; c2.replies = [{ t: "A roof by Sunday.", next: 'end', rel: { creed: 1 } }, { t: "My shoulders say Monday.", next: 'end' }]; }
+      var n = NODES.brann_ch33_again; if (n) { n.say = "Walls. Real walls, on our own claim. " + (ST.flags.ch29_square ? "Marlow can ride by and see we mean to stay. He's been fair lately; maybe he'll knock." : "Let Marlow ride by and count the rounds.") + " I'll still burn the crooked ones."; n.replies = [{ t: "Save me the straight ones.", next: 'end', rel: { brann: 1 } }]; }
+    }
+    function cbHoldNear() {
+      var B = ACT.cabin; if (!ST.on || !B || ACT.kind !== 'cabin' || ACT.done || B.done2 || !B.a || B.a.ph !== 'ramp') return false;
+      var yg = cbYg(B, B.a.s); return Math.abs(px - B.C.x) < 190 && py > yg - 60 && py < yg + 220;
+    }
+    function cbHold() {
+      var B = ACT.cabin; if (!cbHoldNear()) return 0;
+      var H = byId('creed'), a = B.a;
+      if (a.s < 0.03) { cbPop(B, B.C.x, cbYg(B, a.s) - 60, 'SHE\'S STILL ON THE GROUND', '90,60,30'); return 0; }
+      if (!H || H.dead209 || !H.here) { cbPop(B, B.C.x, cbYg(B, a.s) - 60, 'NOBODY ON THE ROPE', '150,40,30'); return 0; }
+      if (B.strain >= 0.97) { cbPop(B, B.C.x + 72, B.yf - cbFrontH(B) - 70, 'HANK: CAN\'T!', '150,40,30'); return 0; }
+      B.snub = { at: a.s }; B.hankT = 0.5;
+      cbPop(B, px, py - 70, 'HOLD!', '120,70,20');
+      return 1;
+    }
+    function cbPlace(B) {
+      B.n++; ST.flags.ch33_n = B.n; ST.flags.ch33_sl = B.slews; ST.flags.ch33_jp = B.jumps; save(); B.snub = null; B.strain = 0; cbCast(B);
+      cbPop(B, B.C.x, B.yf - cbFrontH(B) - 40, B.n % 2 ? 'BACK WALL ROUND ' + Math.ceil(B.n / 2) : 'ROUND ' + (B.n / 2) + ' UP', '40,110,40');
+      if (B.n >= B.N) { cbFinish(B); return; }
+      cbNewLog(B);
+    }
+    function cbFinish(B) {
+      B.done2 = 1; B.a = null;
+      B.reward = Math.max(5, 24 - 2 * (B.jumps + B.slews)) + (ST.flags.ch32_whole ? 5 : 0);
+      if (B.jumps + B.slews === 0) ST.flags.ch33_tight = 1;
+      try { gold += B.reward; updateRes(); showToast('THE CABIN WALLS ARE UP +' + B.reward + ' GOLD'); } catch (e) {}
+      window.CB219 = { n: B.n, slews: B.slews, jumps: B.jumps, slips: B.slips, knocks: B.knocks, reward: B.reward };
+      cbEndSay(); completeAct();
+    }
+    function cbTick(dt) {
+      var B = ACT.cabin; if (!B || B.done2 || ACT.done) return;
+      B.pops.forEach(function (q) { q.t += dt; }); B.pops = B.pops.filter(function (q) { return q.t < 1.5; });
+      B.chips.forEach(function (q) { q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 300 * dt; }); B.chips = B.chips.filter(function (q) { return q.t < 0.8; });
+      if (B.hankT > 0) B.hankT -= dt;
+      var C = B.C, a = B.a, H = byId('creed'), hankOK = !!(H && !H.dead209 && H.here);
+      /* the cabin is solid: you stand outside it */
+      if (Math.abs(px - C.x) < 112 && py > B.yb - 14 && py < B.yf + 12) {
+        var dS = B.yf + 12 - py, dN = py - (B.yb - 14), dW = px - (C.x - 112), dE = C.x + 112 - px, m = Math.min(dS, dN, dW, dE);
+        if (m === dS) py = B.yf + 12; else if (m === dN) py = B.yb - 14; else if (m === dW) px = C.x - 112; else px = C.x + 112;
+      }
+      if (!a) { B.prevPy = py; return; }
+      var inX = Math.abs(px - C.x) < 106, prev = B.prevPy == null ? py : B.prevPy;
+      B.push = 0;
+      if (B.stag > 0) B.stag -= dt;
+      if (a.ph === 'deck') {
+        var dir = 0;
+        if (inX && py < a.y + 12 && py > a.y - 12) {
+          if (prev >= a.y) { py = a.y + 12; dir = -1; } else { py = a.y - 12; dir = 1; }
+          if (!talksDone()) dir = 0;
+        }
+        if (dir) { a.vy += dir * 360 * dt; a.vy = Math.max(-85, Math.min(85, a.vy)); B.push = 1; } else a.vy *= Math.pow(0.075, dt);
+        a.y += a.vy * dt; a.roll += a.vy * dt;
+        var ymax = cbDeckY(B, 0) + 40; if (a.y > ymax) { a.y = ymax; a.vy = 0; }
+        var foot = cbFoot(B);
+        if (a.y <= foot) {
+          a.y = foot; a.ph = 'ramp'; a.s = 0; a.v = 0; a.cant = 0; B.snag = 0; B.snagT = 0.6;
+          cbPop(B, C.x, foot - 40, 'ON THE SKIDS', '40,110,40');
+          if (inX && py < foot + 12 && py > foot - 34) py = foot + 12;
+        }
+        B.wind = Math.min(1, B.wind + 0.34 * dt);
+      } else if (a.ph === 'ramp') {
+        var c = cbCourse(B), G = 0.15 + 0.05 * c, vmax = cbVmax(B), yg = cbYg(B, a.s), yc = yg + 12;
+        if (inX && py < yc && py > yg - 34) {
+          if (prev < yg - 4) py = yg - 35; /* on the high side of the log: it blocks you */
+          else { py = yc; if (B.stag <= 0) B.push = 1; }
+        }
+        var push = B.push, ox = Math.max(-1, Math.min(1, (px - C.x) / 90));
+        var winded = push && B.wind <= 0.05, acc = push && !winded ? 0.5 - G : -G;
+        if ((!push || winded) && a.v > 0) acc -= 0.15; /* let go (or run out of wind) and she stops dead, then starts back down */
+        if (winded && a.v <= 0) acc = -G * 0.5; /* braced but spent: she creeps back on you */ /* let go and she stops dead, then starts back down */
+        a.v += acc * dt; if (push && a.v > vmax) a.v = vmax; if (a.v < -0.7) a.v = -0.7;
+        a.s += a.v * dt; a.roll -= a.v * dt * 120;
+        var loaded = 0;
+        if (B.snub && !hankOK) B.snub = null;
+        if (B.snub) {
+          if (push && !winded && a.s > B.snub.at + 0.035) B.snub = null; /* you pushed her on up: Hank lets the snub off to take in rope */
+          else if (!push || winded) { if (a.s > B.snub.at) B.snub.at = a.s; /* she coasts up: Hank takes in the slack */ if (a.v <= 0.01) loaded = 1; if (a.s < B.snub.at - 0.012) { a.s = B.snub.at - 0.012; if (a.v < 0) a.v = 0; } } /* she sits on the rope: Hank carries her weight */
+        }
+        if (loaded) B.strain += (0.24 + 0.06 * c) * (B.pay ? 0.7 : 1) * dt; else B.strain = Math.max(0, B.strain - 0.3 * dt);
+        if (B.strain >= 1) { B.snub = null; B.slips++; B.strain = 0.75; cbPop(B, C.x + 72, B.yf - cbFrontH(B) - 70, 'THE ROPE SLIPS!', '150,40,30'); }
+        B.wind = push ? Math.max(0, B.wind - (0.3 + 0.03 * c) * dt) : Math.min(1, B.wind + 0.34 * dt);
+        if (push && a.v > 0.005) {
+          B.snagT -= dt; if (B.snagT <= 0) { B.snagT = 1.1 + Math.random() * 1.1; B.snag = (Math.random() * 2 - 1) * (0.22 + 0.08 * c); }
+          a.cant += (ox * 0.9 + B.snag) * dt;
+        } else if (B.snub) a.cant *= Math.pow(0.4, dt);
+        else if (a.v < -0.02) a.cant += a.cant * 0.5 * dt;
+        if (Math.abs(a.cant) >= 1) {
+          B.slews++; cbPop(B, C.x + (a.cant > 0 ? 80 : -80), cbYg(B, a.s) - 50, 'SHE SLEWED OFF THE POLES!', '150,40,30');
+          a.s = 0; a.v = 0; a.cant = 0; B.snub = null;
+        }
+        if (a.s <= 0) { if (a.v < -0.3) cbPop(B, C.x, cbFoot(B) - 30, 'THUD', '90,60,30'); a.s = 0; if (a.v < 0) a.v = 0; }
+        var yg2 = cbYg(B, a.s), yc2 = yg2 + 12;
+        if (inX && py < yc2 && py > yg2 - 34 && prev >= yg - 4) {
+          if (a.v < -0.13 && B.stag <= 0) { B.knocks++; py = yc2 + 46; B.stag = 0.9; cbPop(B, px, py - 80, 'IT ROLLS BACK ON YOU', '150,40,30'); }
+          else { py = yc2; if (B.push && a.v < 0) a.v = 0; }
+        }
+        if (a.s >= 1) {
+          if (push && a.v > 0.09) { a.ph = 'over'; a.t = 0; B.jumps++; B.snub = null; cbPop(B, C.x, B.yf - cbFrontH(B) - 50, 'JUMPED THE NOTCH!', '150,40,30'); }
+          else {
+            a.ph = 'seat'; a.s = 1; a.t = 0; a.v = 0; B.hankT = 1.1; cbPop(B, C.x, B.yf - cbFrontH(B) - 50, 'SEATED', '40,110,40');
+            for (var k = 0; k < 8; k++) B.chips.push({ x: C.x + (k % 2 ? 98 : -98), y: B.yf - cbFrontH(B) - 10, vx: (Math.random() - 0.5) * 120, vy: -80 - Math.random() * 80, t: 0 });
+          }
+        }
+      } else if (a.ph === 'seat') {
+        a.t += dt; B.wind = Math.min(1, B.wind + 0.34 * dt);
+        if (a.t >= 1.1) { if (B.n % 2 === 0) { a.ph = 'cross'; a.t = 0; } else cbPlace(B); }
+      } else if (a.ph === 'cross') {
+        a.t += dt; B.wind = Math.min(1, B.wind + 0.34 * dt);
+        if (a.t >= 0.9) cbPlace(B);
+      } else if (a.ph === 'over') {
+        a.t += dt; B.wind = Math.min(1, B.wind + 0.34 * dt);
+        if (a.t >= 1.6) { a.ph = 'ramp'; a.s = 0; a.v = 0; a.cant = 0; cbPop(B, C.x, cbFoot(B) - 40, 'BACK AT THE FOOT', '90,60,30'); }
+      }
+      B.prevPy = py;
+    }
     window.WADE202 = function () { try { var F = ACT.ford; return !!(ST.on && F && ACT.kind === 'ford' && F.inW && !F.onBar); } catch (e) { return false; } };
     function fordReset(F, why) {
       px = F.sx; py = F.sy; try { moveId = null; targetX = px; targetY = py; } catch (e) {}
@@ -13059,6 +13245,7 @@ window.B137 = (function () {
       if (d.do === 'arrive') { if (!ST.flags['act' + d.id] && actOK()) finishChapter(); return; }
       if (d.do === 'express' && ACT.express) expTick(dt);
       if (d.do === 'freshet' && ACT.freshet) frTick(dt);
+      if (d.do === 'cabin' && ACT.cabin) cbTick(dt);
       if (ACT.done) return;
       var i, a;
       if (d.do === 'herd') {
@@ -13387,6 +13574,7 @@ window.B137 = (function () {
     try { var _atk180 = attack; attack = function () { var r = _atk180.apply(this, arguments); try { if (typeof started === 'undefined' || started) hitFoes(px + (typeof face !== 'undefined' ? face : 1) * 40, py, 140, 1); } catch (e) {} return r; }; } catch (e) {}
     try { if (window.WILD141 && WILD141.hitAt) { var _ha180 = WILD141.hitAt; WILD141.hitAt = function (x, y, rx, ry, p) { var n = _ha180.apply(this, arguments); try { n += hitFoes(x, y + 20, Math.max(rx, 30) + 20, p || 1); } catch (e) {} return n; }; } } catch (e) {}
 
+    try { var _atk233 = attack; attack = function () { try { if ((typeof started === 'undefined' || started) && cbHoldNear()) { cbHold(); return; } } catch (e) {} return _atk233.apply(this, arguments); }; } catch (e) {}
     function marker() {
       if (!ST.on || typeof city === 'undefined' || !city) return null;
       var d = chDef(), s = scenePos(), lab = d.mark || d.title.toUpperCase();
@@ -13435,6 +13623,7 @@ window.B137 = (function () {
           if (!FRm.on) t = { x: slm.x, y: slm.y, label: 'GUARD THE SLUICE' };
           else { var urg = FRm.deb.slice().sort(function (a, b) { return b.d - a.d; })[0]; if (urg) { var up = frDebXY(FRm, urg); t = { x: up.x, y: up.y, label: urg.kind === 'tree' ? 'UPROOTED TREE' : urg.kind === 'log' ? 'DRIFT LOG' : 'BRUSH' }; } else t = { x: slm.x, y: slm.y, label: 'GUARD THE SLUICE' }; }
         } }
+        else if (d.do === 'cabin') { var CBm = ACT.cabin; if (CBm && talksDone() && CBm.a) { var am = CBm.a; if (am.ph === 'deck') t = { x: CBm.C.x, y: am.y, label: 'DRIFT LOG' }; else t = { x: CBm.C.x, y: cbYg(CBm, am.s), label: 'SKID POLES' }; } }
         else if (d.do === 'ford') { var FM = ACT.ford; if (FM && FM.carry) {
           if (px < FM.x - FM.hw) t = { x: FM.x - FM.hw + 10, y: FM.y - 200, label: 'WADE IN UPSTREAM' };
           else t = { x: FM.x + FM.hw + 60, y: FM.y - 40, label: 'EAST BANK' };
@@ -14503,6 +14692,113 @@ window.B137 = (function () {
       }
       c.restore();
     }
+    /* v219 ch33 The Cabin art: round drift logs with end grain, saddle-notched walls, skid poles, Hank's rope */
+    function cbLog(c, x, y, hl, D, roll, tilt, tone) {
+      var r = D / 2; c.save(); c.translate(x, y); if (tilt) c.rotate(tilt);
+      c.fillStyle = 'rgba(0,0,0,.16)'; c.fillRect(-hl + 2, r - 1, 2 * hl, 3);
+      c.fillStyle = tone ? '#7c5430' : '#6e4626'; c.beginPath(); c.moveTo(-hl, -r); c.lineTo(hl, -r); c.lineTo(hl, r); c.lineTo(-hl, r); c.closePath(); c.fill();
+      c.fillStyle = tone ? '#a2703f' : '#946238'; c.fillRect(-hl, -r + 1, 2 * hl, r * 0.62);
+      c.fillStyle = 'rgba(255,230,190,.18)'; c.fillRect(-hl, -r + 2, 2 * hl, 1.5);
+      c.fillStyle = '#4a2c14'; c.fillRect(-hl, r * 0.42, 2 * hl, r * 0.58);
+      c.strokeStyle = 'rgba(36,20,6,.5)'; c.lineWidth = 1; c.beginPath();
+      for (var j = 0; j < 3; j++) { var yy = (((roll || 0) * 0.9 + j * D / 3) % D + D) % D - r; if (Math.abs(yy) > r - 1.5) continue; for (var xx = -hl + 6 + j * 7; xx < hl - 14; xx += 23) { c.moveTo(xx, yy); c.lineTo(xx + 11, yy + 0.5); } }
+      c.stroke();
+      [-hl, hl].forEach(function (ex) {
+        c.fillStyle = '#d9b47c'; c.beginPath(); c.ellipse(ex, 0, r * 0.42, r, 0, 0, 7); c.fill();
+        c.strokeStyle = '#8a6038'; c.lineWidth = 1.2; c.stroke();
+        c.strokeStyle = 'rgba(138,96,56,.6)'; c.lineWidth = 0.8; c.beginPath(); c.ellipse(ex, 0, r * 0.24, r * 0.55, 0, 0, 7); c.stroke();
+        c.fillStyle = '#8a6038'; c.fillRect(ex - 0.8, -0.8, 1.6, 1.6);
+      });
+      c.restore();
+    }
+    function cbSideWall(c, x, yTop, len, D, k) {
+      var r = D / 2, y = yTop - k * D;
+      c.fillStyle = '#5e3a1e'; c.fillRect(x - r, y - r, D, len);
+      c.fillStyle = '#946238'; c.fillRect(x - r + 1, y - r, r * 0.9, len);
+      c.fillStyle = 'rgba(36,20,6,.35)'; for (var q = 8; q < len - 4; q += 19) c.fillRect(x - r + 2, y - r + q, D - 4, 1);
+      c.fillStyle = '#d9b47c'; c.beginPath(); c.ellipse(x, y - r + 1, r, r * 0.42, 0, 0, 7); c.fill(); c.strokeStyle = '#8a6038'; c.lineWidth = 1; c.stroke();
+    }
+    function cbBackItem(c, B, sx, sy) {
+      var D = B.D, r = D / 2, dep = B.yf - B.yb, nb = Math.ceil(B.n / 2) + 1, ns = Math.floor(B.n / 2) + 1, i;
+      c.save();
+      c.fillStyle = '#b08a5c'; c.fillRect(sx - 100, sy, 200, dep);
+      c.fillStyle = 'rgba(80,50,24,.18)'; for (i = 0; i < 14; i++) c.fillRect(sx - 92 + (i * 53) % 184, sy + 8 + (i * 31) % (dep - 16), 6, 2);
+      [[-100, 0], [100, 0], [-100, dep], [100, dep]].forEach(function (o) { c.fillStyle = '#8c8a84'; c.beginPath(); c.ellipse(sx + o[0], sy + o[1] + 4, 13, 6, 0, 0, 7); c.fill(); c.fillStyle = '#a8a69e'; c.beginPath(); c.ellipse(sx + o[0] - 2, sy + o[1] + 2, 8, 3.5, 0, 0, 7); c.fill(); });
+      for (i = 0; i < nb; i++) cbLog(c, sx, sy - i * D - r, 110, D, i * 7, 0, i % 2);
+      for (i = 0; i < ns; i++) { cbSideWall(c, sx - 100, sy - r + r, dep, D, i); cbSideWall(c, sx + 100, sy - r + r, dep, D, i); }
+      var a = B.a; if (a && a.ph === 'over' && a.t > 0.35) { var k = Math.min(1, (a.t - 0.35) / 0.3); cbLog(c, sx, sy + dep - 40 - (1 - k) * 30, 104, D, a.t * 60, 0.05, 0); }
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'center';
+      if (!B.done2) c.fillText('THE CABIN \u00b7 LOG ' + Math.min(B.N, B.n + 1) + ' OF ' + B.N, sx, sy - Math.max(nb, ns) * D - 34);
+      c.restore();
+    }
+    function cbFrontItem(c, B, sx, sy) {
+      var D = B.D, r = D / 2, nf = Math.floor(B.n / 2) + 1, hf = nf * D, a = B.a, i;
+      c.save();
+      for (i = 0; i < nf; i++) cbLog(c, sx, sy - i * D - r, 110, D, i * 11 + 3, 0, (i + 1) % 2);
+      if (!B.done2 && a) {
+        var foot = cbFoot(B) - B.yf;
+        [-55, 55].forEach(function (ox) {
+          c.strokeStyle = 'rgba(40,24,8,.22)'; c.lineWidth = 5; c.beginPath(); c.moveTo(sx + ox + 3, sy + foot + 3); c.lineTo(sx + ox + 3 + hf * 0.5, sy + 2); c.stroke();
+          c.fillStyle = '#5e3a1e'; c.beginPath(); c.moveTo(sx + ox - 4.5, sy + foot); c.lineTo(sx + ox + 4.5, sy + foot); c.lineTo(sx + ox + 2.5, sy - hf - 2); c.lineTo(sx + ox - 2.5, sy - hf - 2); c.closePath(); c.fill();
+          c.strokeStyle = '#5e3a1e'; 
+          c.strokeStyle = '#a07040'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(sx + ox - 1, sy + foot); c.lineTo(sx + ox - 1, sy - hf - 2); c.stroke();
+          c.fillStyle = '#7a5a34'; c.beginPath(); c.moveTo(sx + ox - 9, sy + foot + 5); c.lineTo(sx + ox + 9, sy + foot + 5); c.lineTo(sx + ox + 4, sy + foot - 3); c.lineTo(sx + ox - 4, sy + foot - 3); c.closePath(); c.fill();
+        });
+        if (a.ph === 'seat') cbLog(c, sx, sy - hf - r, 104, D, 0, 0, 0);
+        else if (a.ph === 'cross') { var k = Math.min(1, a.t / 0.9), dep = B.yf - B.yb, hb = (Math.ceil(B.n / 2) + 1) * D; cbLog(c, sx, (sy - hf - r) * (1 - k) + (sy - dep - hb - r) * k - Math.sin(k * Math.PI) * 10, 104, D, k * 40, 0, 0); }
+        else if (a.ph === 'over' && a.t <= 0.35) cbLog(c, sx, sy - hf - r - a.t * 40, 104, D, a.t * 90, 0, 0);
+      }
+      c.restore();
+    }
+    function cbActiveItem(c, B, sx, sy) {
+      var a = B.a; if (!a) return;
+      var D = B.D, r = D / 2;
+      if (a.ph === 'deck') { cbLog(c, sx, sy - r, 104, D, a.roll, 0, 0); return; }
+      if (a.ph !== 'ramp') return;
+      var hf = cbFrontH(B), z = hf * a.s, ly = sy - z - r, H = byId('creed');
+      cbLog(c, sx, ly, 104, D, a.roll, a.cant * 0.12, 0);
+      if (H && !H.dead209 && H.here) {
+        var camX0 = B.C.x - sx, camY0 = cbYg(B, a.s) - sy, hx = H.x - camX0 - 8, hy = H.y - camY0 - 30;
+        c.save(); c.lineCap = 'round';
+        [-30, 30].forEach(function (ox) {
+          var ex = sx + ox + a.cant * ox * 0.1, ey = ly - r + 2;
+          c.strokeStyle = B.snub ? '#8a3a1a' : '#c8a060'; c.lineWidth = B.snub ? 2.4 : 1.8; c.beginPath(); c.moveTo(hx, hy);
+          if (B.snub) c.lineTo(ex, ey); else c.quadraticCurveTo((hx + ex) / 2, Math.max(hy, ey) + 18, ex, ey);
+          c.stroke();
+        });
+        c.restore();
+      }
+    }
+    function cabinItems(items) {
+      var B = ACT.cabin; if (!B || Math.abs(B.C.x - px) > 1500 || Math.abs(B.C.y - py) > 1100) return;
+      items.push({ y: B.yb, x: B.C.x, y2: B.yb, fn: function (sx, sy) { cbBackItem(ctx, B, sx, sy); } });
+      items.push({ y: B.yf, x: B.C.x, y2: B.yf, fn: function (sx, sy) { cbFrontItem(ctx, B, sx, sy); } });
+      for (var i = 0; i < B.deckN; i++) (function (i) { var y = cbDeckY(B, i + 1), jx = ((i * 37) % 17) - 8; items.push({ y: y, x: B.C.x + jx, y2: y, fn: function (sx, sy) { cbLog(ctx, sx, sy - B.D / 2, 100 + (i % 3) * 3, B.D, i * 13, 0, i % 2); } }); })(i);
+      var a = B.a; if (a && (a.ph === 'deck' || a.ph === 'ramp')) { var yy = a.ph === 'deck' ? a.y : cbYg(B, a.s) + 0.5; items.push({ y: yy, x: B.C.x, y2: a.ph === 'deck' ? a.y : cbYg(B, a.s), fn: function (sx, sy) { cbActiveItem(ctx, B, sx, sy); } }); }
+    }
+    function drawCabinTop(c, B, camX0, camY0) {
+      c.save();
+      B.chips.forEach(function (q) { c.fillStyle = 'rgba(232,200,140,' + (1 - q.t / 0.8).toFixed(3) + ')'; c.fillRect(q.x - camX0, q.y - camY0, 3, 2); });
+      var H = byId('creed');
+      if (H && !H.dead209 && H.here && B.hankT > 0 && B.a && B.a.ph === 'seat') { var ang = Math.sin(performance.now() / 70) * 0.9, hx = H.x - camX0 - 10, hy = H.y - camY0 - 34; c.save(); c.translate(hx, hy); c.rotate(-0.6 + ang); c.fillStyle = '#7a5030'; c.fillRect(-1.5, -22, 3, 24); c.fillStyle = '#9aa0a8'; c.fillRect(-6, -24, 9, 6); c.restore(); }
+      B.pops.forEach(function (q) { c.fillStyle = 'rgba(' + q.col + ',' + (1 - q.t / 1.5).toFixed(3) + ')'; c.font = 'bold 12px monospace'; c.textAlign = 'center'; c.fillText(q.txt, q.x - camX0, q.y - camY0 - q.t * 22); });
+      var a = B.a;
+      if (a && a.ph === 'ramp' && !B.done2 && Math.abs(px - B.C.x) < 220 && Math.abs(py - cbYg(B, a.s)) < 200) {
+        var x = px - camX0, y = py - camY0 + 22, w = 74;
+        c.fillStyle = 'rgba(42,26,10,.78)'; c.fillRect(x - w / 2 - 2, y - 2, w + 4, 21);
+        c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(x - w / 2, y, w, 7); c.fillRect(x - w / 2, y + 10, w, 7);
+        c.fillStyle = B.wind > 0.25 ? '#6aa8d8' : '#d86a4a'; c.fillRect(x - w / 2, y, w * B.wind, 7);
+        c.fillStyle = B.strain > 0.7 ? '#d8402a' : B.strain > 0.4 ? '#e8a030' : '#e8d060'; c.fillRect(x - w / 2, y + 10, w * Math.min(1, B.strain), 7);
+        /* the level: keep her square on both poles */
+        var lv = Math.max(-1, Math.min(1, a.cant)); c.fillStyle = 'rgba(42,26,10,.78)'; c.fillRect(x - 30, y + 20, 60, 6); c.fillStyle = Math.abs(lv) > 0.6 ? '#d8402a' : '#7ac85a'; c.fillRect(x - 3 + lv * 27, y + 19, 6, 8);
+        c.fillStyle = '#ffe9b8'; c.font = 'bold 7px monospace'; c.textAlign = 'left'; c.fillText('WIND', x - w / 2 + 2, y + 6); c.fillText('ROPE', x - w / 2 + 2, y + 16);
+        var lab = B.stag > 0 ? 'KNOCKED BACK' : B.snub ? 'HANK HOLDING' : B.push ? (B.wind <= 0.05 ? 'WINDED' : (a.s > 0.86 ? 'EASE OFF' : 'PUSHING')) : (a.v < -0.03 ? 'ROLLING BACK!' : a.s > 0 ? 'SHE\'S LOOSE' : 'AT THE FOOT');
+        c.fillStyle = '#3b2410'; c.font = 'bold 9px monospace'; c.textAlign = 'center'; c.fillText(lab, x, y + 38);
+      }
+      c.restore();
+    }
+    try { var _pf233 = pushFactionItems; pushFactionItems = function (items) { _pf233.apply(this, arguments); try { if (ST.on && ACT.kind === 'cabin' && ACT.cabin && ACT.id === ST.ch) cabinItems(items); } catch (e) { if (!window.E233) { window.E233 = 1; console.warn(e); } } }; } catch (e) {}
+    try { var _fa233 = featuresAt; featuresAt = function (cx, cy) { var a = _fa233(cx, cy); try { var B = ACT.cabin; if (B && ST.on && ACT.kind === 'cabin') { var X0 = cx * 384, Y0 = cy * 384, y0 = B.yb - 90, y1 = cbDeckY(B, B.N) + 60; if (X0 + 384 > B.C.x - 260 && X0 < B.C.x + 260 && Y0 + 384 > y0 && Y0 < y1) a = a.filter(function (f) { return !(Math.abs(f.x - B.C.x) < 250 && f.y > y0 && f.y < y1); }); } } catch (e) {} return a; }; } catch (e) {}
     function drawExpressTop(c, T, camX0, camY0) {
       T.puffs.forEach(function (q) { var k = q.t / 1.6; c.fillStyle = 'rgba(236,232,224,' + (0.7 * (1 - k)).toFixed(3) + ')'; c.beginPath(); c.arc(q.x - camX0, q.y - camY0, q.r * (1 + k * 1.8), 0, 7); c.fill(); });
       if (!T.carry && !ACT.done) { var B = byId('brann'); if (B) drawStrongbox(c, B.x - camX0 + 26, B.y - camY0 + 2, 1); return; }
@@ -14753,7 +15049,7 @@ window.B137 = (function () {
       c.fillText(k.got ? 'COLOR' : 'GRAVEL BAR', 0, -22);
       c.restore();
     }
-    var DIG205 = { pan: 1, corners: 1, sluice: 1, race: 1, shovel: 1, haul: 1, lantern: 1 };
+    var DIG205 = { pan: 1, corners: 1, sluice: 1, race: 1, shovel: 1, haul: 1, lantern: 1, cabin: 1 };
     try { var _dg205 = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dg205.apply(this, arguments); try { if (ST.on && ACT.id === ST.ch && DIG205[ACT.kind]) { var s = scenePos(); if (s && Math.abs(s.x - px) < (x1 - x0) / 2 + 700 && Math.abs(s.y - py) < (y1 - y0) / 2 + 500) { window.DIG205N = (window.DIG205N || 0) + 1; drawDiggings(ctx, s.x - camX, s.y - camY); } } } catch (e) { if (!window.E205d) { window.E205d = 1; console.warn(e); } } }; } catch (e) {}
     function drawAct(camX, camY) {
       if (!ST.on || ACT.id !== ST.ch) return;
@@ -14796,6 +15092,7 @@ window.B137 = (function () {
       if (ACT.kind === 'ford' && ACT.ford) drawFordTop(c, ACT.ford, camX, camY);
       if (ACT.kind === 'express' && ACT.express) drawExpressTop(c, ACT.express, camX, camY);
       if (ACT.kind === 'freshet' && ACT.freshet) drawFreshet(c, ACT.freshet, camX, camY, Wv);
+      if (ACT.kind === 'cabin' && ACT.cabin) drawCabinTop(c, ACT.cabin, camX, camY);
       if (ACT.kind === 'weigh' && ACT.weigh) drawWeigh(c, ACT.weigh, ACT.weigh.x - camX, ACT.weigh.y - camY, camX, camY);
       if (ACT.kind === 'shovel' && ACT.shovel) drawShovel(c, ACT.shovel, ACT.shovel.x - camX, ACT.shovel.y - camY);
       if (ACT.kind === 'sluice') {
@@ -15081,6 +15378,9 @@ window.B137 = (function () {
       express: function () { var T = ACT.express; return T ? { x: T.x, y: T.y, ty: T.ty, head: T.head, door: T.head - T.doorOff, dir: T.dir, v: T.v, sp: T.sp, run: T.run, carry: T.carry, hand: T.hand, inZ: T.inZ, need: T.need, pass: T.pass, done2: T.done2, leave: T.leave, reward: T.reward, len: T.len } : null; },
       freshet: function () { var F = ACT.freshet; if (!F) return null; var sl = frAt(F, F.sd), br = frAt(F, F.bd); return { x: F.x, y: F.y, on: F.on, armed: F.armed, t: F.t, dur: F.dur, W: F.W, hw: F.W / 2, boards: F.boards, max: F.max, pass: F.pass, hits: F.hits, saved: F.saved, done2: F.done2, reward: F.reward, sd: F.sd, bd: F.bd, L: F.L, onBridge: !!F.onBridge, sl: { x: sl.x, y: sl.y }, br: { x: br.x, y: br.y, nx: br.nx, ny: br.ny }, deb: F.deb.map(function (b) { var p = frDebXY(F, b); return { kind: b.kind, d: b.d, l: b.l, x: p.x, y: p.y, nx: p.q.nx, ny: p.q.ny }; }) }; },
       freshetPoke: function () { return frPoke(); },
+      cabin: function () { var B = ACT.cabin; if (!B) return null; var a = B.a; return { C: { x: B.C.x, y: B.C.y }, yf: B.yf, yb: B.yb, n: B.n, N: B.N, done2: B.done2, reward: B.reward, slews: B.slews, jumps: B.jumps, slips: B.slips, knocks: B.knocks, wind: B.wind, strain: B.strain, snub: B.snub ? B.snub.at : -1, deck: B.deckN, a: a ? { ph: a.ph, y: a.y, vy: a.vy, s: a.s, v: a.v, cant: a.cant, t: a.t, yg: a.ph === 'deck' ? a.y : cbYg(B, a.s), yfoot: cbFoot(B), push: !!B.push } : null, seatV: B.seatV, vmax: cbVmax(B) }; },
+      cabinHold: function () { return cbHold(); },
+      cabinCant: function (v) { if (ACT.cabin && ACT.cabin.a) ACT.cabin.a.cant = v; },
       freshetGo: function () { var F = ACT.freshet; if (F && F.armed && !F.on) F.wait = 0; },
       freshetAt: function (d, l) { var F = ACT.freshet; if (!F) return null; var q = frAt(F, d); return { x: q.x + q.nx * (l || 0), y: q.y + q.ny * (l || 0) }; },
       freshetNear: function (x, y) { var F = ACT.freshet; return F ? frNear(F, x, y) : null; },
