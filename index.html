@@ -5984,7 +5984,7 @@ window.B137 = (function () {
     _bc37(); CAP.props.forEach(function (p) { if (p.k === 'house' && Math.hypot(p.x, p.y) > (CAPX.R - 170) * 0.62 && hash2(p.x / 250 + 5, p.y / 230 + 3) < 0.5) { p.sz = 0.4; p.value *= 0.4; } });
   };
   function pName37(p) { return p.sz ? 'COTTAGE' : PK[p.k].n; }
-  function COMPAV151(X, Y) { /* v152: compasses never sit on buttons */ try { var ids = ['wpnBtn', 'mountBtn', 'vehBtn', 'atk', 'joy', 'rail136', 'open130', 'menuBtn', 'mapb136']; for (var pass = 0; pass < 3; pass++) { var moved = false; for (var i = 0; i < ids.length; i++) { var e = document.getElementById(ids[i]); if (!e || !e.getClientRects().length) continue; /* v158: fixed buttons have no offsetParent */ var r = e.getBoundingClientRect(); if (!r.width) continue; if (X + 44 > r.left && X - 44 < r.right && Y + 40 > r.top && Y - 22 < r.bottom) { var up = r.top - 42, dn = r.bottom + 24; Y = (Y - up < dn - Y && up > 30) ? up : dn; moved = true; } } if (!moved) { var SB = window.__sb207, tn = performance.now(); if (SB) for (var sk in SB) { var q = SB[sk]; if (!q || tn - q.t > 300) continue; if (X + 44 > q.l && X - 44 < q.r && Y + 40 > q.t2 && Y - 22 < q.b) { var up2 = q.t2 - 42, dn2 = q.b + 24; Y = (Y - up2 < dn2 - Y && up2 > 30) ? up2 : dn2; moved = true; } } /* v207: and never on a depot signboard */ } if (!moved) break; } } catch (e) {} return [X, Y]; }
+  function COMPAV151(X, Y) { /* v152: compasses never sit on buttons */ try { var ids = ['wpnBtn', 'mountBtn', 'vehBtn', 'atk', 'joy', 'rail136', 'open130', 'menuBtn', 'mapb136', 'inv210']; for (var pass = 0; pass < 3; pass++) { var moved = false; for (var i = 0; i < ids.length; i++) { var e = document.getElementById(ids[i]); if (!e || !e.getClientRects().length) continue; /* v158: fixed buttons have no offsetParent */ var r = e.getBoundingClientRect(); if (!r.width) continue; if (X + 44 > r.left && X - 44 < r.right && Y + 40 > r.top && Y - 22 < r.bottom) { var up = r.top - 42, dn = r.bottom + 24; Y = (Y - up < dn - Y && up > 30) ? up : dn; moved = true; } } if (!moved) { var SB = window.__sb207, tn = performance.now(); if (SB) for (var sk in SB) { var q = SB[sk]; if (!q || tn - q.t > 300) continue; if (X + 44 > q.l && X - 44 < q.r && Y + 40 > q.t2 && Y - 22 < q.b) { var up2 = q.t2 - 42, dn2 = q.b + 24; Y = (Y - up2 < dn2 - Y && up2 > 30) ? up2 : dn2; moved = true; } } /* v207: and never on a depot signboard */ } if (!moved) break; } } catch (e) {} return [X, Y]; }
   // ===== v37: capital compass (clarity: where is the market?) =====
   function capCompass37() {
     if (!CAPX || !BOUNDS) return; var dx = CAPX.x - px, dy = CAPX.y - py, d = Math.hypot(dx, dy); if (d < CAPX.R + 400) return;
@@ -6145,7 +6145,7 @@ window.B137 = (function () {
   }
   function open(s) { town = s; P.style.display = 'block'; render(); }
   function close() { P.style.display = 'none'; town = null; }
-  window.TP131 = { open: open, close: close, bag: function () { return BAG; }, render: render };
+  window.TP131 = { open: open, close: close, bag: function () { return BAG; }, render: render, cap: function () { try { return cap(); } catch (e) { return 10; } }, n: bagN };
   // other towns: walk up to their hall -> tap OPEN TRADING POST
   var TB = document.createElement('button'); TB.id = 'tpb131'; document.body.appendChild(TB); var nearT = null;
   TB.onclick = function (e) { e.stopPropagation(); if (nearT) open(nearT); };
@@ -14724,7 +14724,7 @@ window.B137 = (function () {
       if (S.wT <= 0) { S.wT = wOpen().length ? 100 + Math.random() * 60 : 8; if (wOpen().length < 3) post(); }
       S.want.forEach(function (w) {
         if (w.st !== 'open') return;
-        if (S.ft > w.due) { w.st = 'late'; w.end = S.ft; ch = 1; }
+        if (S.ft > w.due) { w.st = 'late'; w.end = S.ft; ch = 1; if (w.acc && !w.fine) { w.fine = Math.min(Math.max(0, Math.floor(ME_S.res.gold)), Math.round(w.bonus * 0.25)); ME_S.res.gold -= w.fine; try { updateRes(); } catch (e) {} toast('\ud83d\udcdc CONTRACT MISSED AT ' + w.to + ' \u00b7 FORFEIT \u2212' + w.fine + ' GOLD'); } }
         else if (w.rv > 0 && S.ft >= w.rv) { w.st = 'lost'; w.end = S.ft; S.pat[w.rco] = (S.pat[w.rco] || 0) + 1; ch = 1; /* v207: no toast - the signboard says TAKEN */ }
       });
       var n0 = S.want.length; S.want = S.want.filter(function (w) { return w.st === 'open' || S.ft - w.end < 50; }); if (ch || n0 !== S.want.length) save();
@@ -15128,6 +15128,13 @@ window.B137 = (function () {
       ride: function (id, a, b) { ride(COI[id], stByName(a), stByName(b)); }, ship: function (id, a, b, k, q) { return ship(COI[id], stByName(a), stByName(b), k, q); },
       war: function () { if (S) { S.warT = 0; tick(0.01); } return S && S.war; }, ff: function (sec) { if (S) tick(sec); }, ui: ui, render: render, load: load,
       want: function () { return S ? S.want : []; }, post: function (n, k, q, h) { return S ? post(n, k, q, h) : null; }, hand: function (n) { return hand(stByName(n)); }, shares: function () { return S ? CO.map(function (c) { return { id: c.id, held: held(c), price: sPrice(c), div: divPer(c), disc: disc(c) }; }) : []; }, buy: function (id, n) { return buySh(COI[id], n || 1); }, cars: function () { return S ? S.cars.map(function (c) { return { co: c.co, ct: c.ct, own: c.own, earn: c.earn, used: c.used, busy: carBusy(c) }; }) : []; }, buyCar: function (id, ct) { return buyCar(COI[id], ct, 0); }, leaseCar: function (id, ct) { return buyCar(COI[id], ct, 1); }, dropCar: function (id, ct) { return dropCar(COI[id], ct); }, carCost: function (id, ct) { return { buy: cPrice(COI[id], ct), lease: cLease(COI[id], ct), earn: cEarn(COI[id], ct) }; }, pn: function (v) { if (S && v) { S.pn = v; save(); syncRuns(); } return S ? S.pn : ''; }, sell: function (id, n) { return sellSh(COI[id], n || 1); },
+      inv210: { on: function () { return !!(S && on()); }, home: function () { var h = stations().filter(function (s) { return s.home; })[0]; return h ? h.name : null; },
+        dests: function () { return stations().filter(function (s) { return !s.home && s.name; }).map(function (s) { return s.name; }); }, have: function (k) { var h = stations().filter(function (s) { return s.home; })[0]; return have(k, h); },
+        ships: function () { return S ? S.ship.map(function (sp) { return { id: sp.id, k: sp.k, q: sp.q, to: sp.to, from: sp.from, co: sp.co, sh: (COI[sp.co] || CO[0]).sh, c: (COI[sp.co] || CO[0]).c, wait: sp.dep != null && sp.dep > S.ft, left: Math.max(0, (sp.at - S.ft) / 20), depH: sp.depH, eta: sp.eta, own: sp.own }; }) : []; }, done: function () { return S ? S.done.slice(0, 3) : []; },
+        quote: function (k, q, to) { var a = stations().filter(function (s) { return s.home; })[0], b = stByName(to); if (!S || !a || !b) return []; var w = wFor(b.name, k); return CO.map(function (c) { var f = frate(c, k, q, a, b), ok = f >= 0 && serves(c, a) && serves(c, b) && q >= 1 && q <= c.cap, arr = hourNow() + fDep(c) + fH(c, a, b); return { id: c.id, sh: c.sh, n: c.n, c: c.c, cost: f, ok: ok, cap: c.cap, why: f < 0 ? 'NO ' + CAR[carOf(k)] + 'S' : !serves(c, b) ? 'DOES NOT STOP' : q > c.cap ? 'MAX ' + c.cap : '', arrH: arr, arr: hhmm(arr), est: Math.round(sellValue(b, k, q)), wb: w && S.ft + (arr - hourNow()) * 20 <= w.due ? w.bonus : 0, mine: !!myCar(c, carOf(k)) }; }); },
+        ship: function (id, k, q, to) { var a = stations().filter(function (s) { return s.home; })[0], b = stByName(to), c = COI[id]; if (!S || !a || !b || !c || !serves(c, a) || !serves(c, b)) return false; return ship(c, a, b, k, q); },
+        wants: function () { return S ? S.want.slice() : []; }, accept: function (id) { if (!S) return false; var w = S.want.filter(function (x) { return x.id === id && x.st === 'open'; })[0]; if (!w || w.acc || S.want.filter(function (x) { return x.acc && x.st === 'open'; }).length >= 2) return false; w.acc = 1; w.rv = -1; save(); return true; },
+        hhmm: hhmm, hour: hourNow, car: function (k) { return CAR[carOf(k)]; } },
       agents209: function (x, y, r) { var o = []; try { stations().forEach(function (st) { if (Math.abs(st.x - x) > r + 800 || Math.abs(st.y - y) > r + 800) return; if (agentSts().indexOf(st) < 0) return; agentsAt(st).forEach(function (a) { o.push(a); }); }); } catch (e) {} return o; },
       agents: function (n) { var st = stByName(n); return st ? agentsAt(st).map(function (a) { return { co: a.co.id, x: a.x, y: a.y }; }) : []; } };
   })();
@@ -15411,11 +15418,181 @@ var h=document.createElement('div');h.id='hint119';h.style.cssText='position:fix
 setInterval(function(){fix();try{var g=window.__v58&&window.__v58.goals(),on=document.getElementById('modes'),play=!(on&&getComputedStyle(on).display!=='none');var i=-1;if(g)for(var k=0;k<GN.length;k++)if(!g[k]){i=k;break}
 var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(play&&g&&i>=0&&!cov){h.textContent='\u2691 '+GN[i];var th=document.getElementById('topHud'),r=th&&th.getBoundingClientRect();if(r&&r.width>0){h.style.left=Math.round(r.left)+'px';h.style.top=Math.round(r.bottom+3)+'px'}h.style.display='block'}else h.style.display='none'}catch(e){}},500)})();
 </script>
+<script>
+/* v210 INVENTORY MENU: a 🎒 BAG button (always there, FREE / STORY / 1V1) opens one menu - GOODS (eat, sell by wire), GEAR (weapons, armor plate, tools), RIDES (horse, vehicle, rail cars), MAIL (order supplies, delivered later or by express), FREIGHT (ship from the homestead, track), WANTED (view and accept contracts). Walk-up shops keep the better prices. */
+(function () {
+  var EAT = { wheat: 1, corn: 1, peas: 1, berries: 1, cattle: 4 };
+  var CAT = [{ id: 'shells', n: 'SHELLS', q: 6, p: 9, ic: '\u2699' }, { id: 'rations', n: 'RATIONS', q: 5, p: 8, ic: '\ud83c\udf5e' }, { id: 'wheat', q: 10 }, { id: 'tools', q: 2 }, { id: 'clothes', q: 2 }, { id: 'fuel', q: 5 }, { id: 'coal', q: 10 }];
+  var STD = 60, EXP = 15; /* seconds: 3 game hours by post, ~45 game min by express */
+  var WN = { shotgun: '\ud83d\udd2b SHOTGUN', rifle: '\ud83c\udfaf RIFLE', knife: '\ud83d\udde1 KNIFE', melee: '\u2694 MELEE' }, WD = { shotgun: '6 PELLETS \u00b7 1 SHELL', rifle: 'LONG RANGE \u00b7 1 SHELL', knife: 'FAST \u00b7 NO AMMO', melee: 'CLOSE \u00b7 NO AMMO' };
+  var I = { mail: [], nid: 1, arm: 0, dl: [] }, KEY = '', tab = 'goods', fr = { k: null, to: null, q: 10 }, OPEN = false;
+  function E() { return window.ECON131; }
+  function G() { return E() ? E().G : {}; }
+  function GKs() { return Object.keys(G()); }
+  function storyOn() { try { return !!(window.STORY170 && STORY170.on()); } catch (e) { return false; } }
+  function key() { return 'kingdom-inv210:' + MODE + (storyOn() ? ':story' : ''); }
+  function persist() { return typeof MODE !== 'undefined' && MODE === 'free'; }
+  /* saving follows the game's own rules: paid mail orders ride with your gold (written by the HOME save, v73 buffer); what was delivered and the plate you wear ride with your goods (written at once) - so a reload can never deliver an order twice or refund one that came */
+  function MK() { return KEY.replace('inv210', 'inv210m'); }
+  function save() { try { if (!KEY || !persist()) return; localStorage.setItem(KEY, JSON.stringify({ arm: I.arm, nid: I.nid, dl: I.dl.slice(-60) }));
+      var m = JSON.stringify({ mail: I.mail, nid: I.nid }), B = window.__v73 && __v73.buf(); if (B) B[MK()] = m; else localStorage.setItem(MK(), m); } catch (e) {} }
+  function load() { KEY = key(); I = { mail: [], nid: 1, arm: 0, dl: [] }; try { if (persist()) { var v = JSON.parse(localStorage.getItem(KEY) || 'null') || {}, B = window.__v73 && __v73.buf(), mr = B && MK() in B ? B[MK()] : localStorage.getItem(MK()), m = JSON.parse(mr || 'null') || {};
+      I.arm = v.arm ? 1 : 0; I.dl = v.dl || []; I.nid = Math.max(v.nid || 1, m.nid || 1); I.mail = (m.mail || []).filter(function (o) { return o && o.q > 0 && I.dl.indexOf(o.id) < 0; }); } } catch (e) {} }
+  function saveGoods() { try { if (MODE === 'free' && ME_S && ME_S.g131 && window.TP131) localStorage.setItem('kingdom-goods-v1:' + MODE, JSON.stringify({ bag: TP131.bag(), home: ME_S.g131 })); } catch (e) {} }
+  function bag() { return window.TP131 ? TP131.bag() : {}; }
+  function home() { try { return E().stock(ME_S); } catch (e) { return {}; } }
+  function nB(k) { return Math.floor(bag()[k] || 0); }
+  function nH(k) { return Math.floor(home()[k] || 0); }
+  function room() { try { return Math.max(0, TP131.cap() - TP131.n()); } catch (e) { return 0; } }
+  function rail() { try { return window.RAILCO203 && RAILCO203.inv210 && RAILCO203.inv210.on() ? RAILCO203.inv210 : null; } catch (e) { return null; } }
+  function money() { return ME_S && ME_S.res ? ME_S.res.gold : 0; }
+  function fm(v) { return Math.floor(v + 1e-6); }
+  function upd() { try { updateRes(); } catch (e) {} }
+  function toast(t) { try { showToast(t); } catch (e) {} }
+  /* ---- remote market: the nearest town takes your goods by wire at 80% of what its trading post pays */
+  function mkt() { if (MODE === 'duel' || typeof __econ === 'undefined') return null; var b = null, bd = 1e18; try { __econ.allSets().forEach(function (s) { if (!s || s === ME_S || !s.g131 || !s.fac) return; var d = Math.hypot(s.x - px, s.y - py); if (d < bd) { bd = d; b = s; } }); } catch (e) {} return b; }
+  function mktName(m) { return m ? ((m.fac && m.fac.name) || 'TOWN') : 'TRADER'; }
+  function unitSell(m, k) { var p = m ? E().price(m, k) : G()[k].p; return p * 0.9 * 0.8; }
+  function sellQuote(k, n) { var m = mkt(), g = m ? E().stock(m) : null, s0 = g ? g[k] || 0 : 0, t = 0; for (var i = 0; i < n; i++) { t += unitSell(m, k); if (g) g[k] = (g[k] || 0) + 1; } if (g) g[k] = s0; return t; }
+  function sell(k, n) { var have = nB(k) + nH(k); n = Math.min(n, have); if (n < 1) return 0; var m = mkt(), g = m ? E().stock(m) : null, t = 0, B = bag(), H = home();
+    for (var i = 0; i < n; i++) { t += unitSell(m, k); if (g) g[k] = (g[k] || 0) + 1; }
+    var fb = Math.min(n, nB(k)); B[k] -= fb; if (n > fb) H[k] = Math.max(0, (H[k] || 0) - (n - fb));
+    ME_S.res.gold += t; window.SOLD210 = (window.SOLD210 || 0) + n; upd(); saveGoods(); return t; }
+  /* ---- eat */
+  function heal(n) { var h0 = hp; hp = Math.min(HPMAX, hp + n); try { drawHp(); } catch (e) {} return hp - h0; }
+  function eat(k) { if (hp >= HPMAX) return false; if (k === 'rations') { if (food < 1) return false; food -= 1; heal(1); upd(); return true; }
+    if (!EAT[k] || nB(k) < 1) return false; bag()[k] -= 1; heal(EAT[k]); saveGoods(); upd(); return true; }
+  /* ---- gear */
+  function wpn() { return window.WPN149 ? WPN149.cur : 'shotgun'; }
+  function equip(w) { if (!window.WPN149 || !WN[w] || WPN149.cur === w) return false; WPN149.cur = w; try { localStorage.setItem('kingdom-wpn149', w); } catch (e) {} try { WPN149.lab(); } catch (e) {} return true; }
+  function wear() { if (I.arm) return false; if (nB('armor') >= 1) bag().armor -= 1; else if (nH('armor') >= 1) home().armor -= 1; else return false; I.arm = 1; save(); saveGoods(); return true; }
+  function strip() { if (!I.arm) return false; I.arm = 0; if (room() >= 1) bag().armor = (bag().armor || 0) + 1; else home().armor = (home().armor || 0) + 1; save(); saveGoods(); return true; }
+  function giveTools(n) { n = Math.min(n, nB('tools')); if (n < 1) return 0; bag().tools -= n; home().tools = (home().tools || 0) + n; saveGoods(); return n; }
+  var lastHp = null; function armTick() { try { if (typeof started !== 'undefined' && started && typeof hp === 'number') { if (I.arm && lastHp != null && hp < lastHp && hp > 0) { hp = Math.min(lastHp, hp + (lastHp - hp) * 0.2); try { drawHp(); } catch (e) {} } lastHp = hp; } else lastHp = null; } catch (e) {} requestAnimationFrame(armTick); }
+  requestAnimationFrame(armTick);
+  /* ---- rides */
+  function horse() { if (typeof steed === 'undefined') return null; var d = steed.st === 'ridden' ? 0 : steed.x != null ? Math.hypot(steed.x - px, steed.y - py) : 1e9; return { st: steed.st, d: d }; }
+  function whistle() { var h = horse(); if (!h || (h.st !== 'tied' && h.st !== 'loose') || h.d > 4000) return false; steed.st = 'loose'; steed.post = null; steed.x = px - (typeof face !== 'undefined' ? face : 1) * 34; steed.y = py + 4; steed.hx = steed.x; steed.hy = steed.y; steed.t = 0; try { saveHorse(); updateMountBtn(); } catch (e) {} return true; }
+  var VN = ['CART', 'WAGON', 'CAR', 'TRUCK', 'JEEP', 'TANK', 'BOAT', 'PLANE', 'SAILBOAT', 'BIG SHIP'];
+  /* ---- mail order */
+  function item(c) { var g = G()[c.id]; return { id: c.id, n: c.n || (g ? g.n : c.id.toUpperCase()), q: c.q, p: c.p || Math.round(((g ? g.p : 5) * c.q) * 1.35), ic: c.ic || '\ud83d\udce6' }; }
+  function cost(it, ex) { return ex ? Math.round(it.p * 1.25) + 8 : it.p; }
+  function order(id, ex) { var c = CAT.filter(function (x) { return x.id === id; })[0]; if (!c) return false; var it = item(c), p = cost(it, ex); if (money() < p) return false;
+    ME_S.res.gold -= p; I.mail.push({ id: I.nid++, k: it.id, n: it.n, q: it.q, left: ex ? EXP : STD, ex: ex ? 1 : 0, paid: p }); save(); upd(); return true; }
+  function arrive(o) { var i = I.mail.indexOf(o); if (i < 0) return; I.mail.splice(i, 1); I.dl.push(o.id); save(); var where = '';
+    if (o.k === 'shells') { ME_S.steel142 = (ME_S.steel142 || 0) + o.q; try { WPN149.lab(); } catch (e) {} }
+    else if (o.k === 'rations') food += o.q;
+    else { var r = Math.min(room(), o.q); if (r > 0) bag()[o.k] = (bag()[o.k] || 0) + r; if (o.q > r) { home()[o.k] = (home()[o.k] || 0) + (o.q - r); where = r ? ' (SOME TO YOUR STOREHOUSE)' : ' TO YOUR STOREHOUSE'; } }
+    window.MAIL210 = (window.MAIL210 || 0) + 1; saveGoods(); upd(); toast('\ud83d\udcec MAIL ORDER IN: ' + o.q + ' ' + o.n + where); }
+  var acc = 0; setInterval(function () { try { if (!started || KEY !== key()) { if (started && KEY !== key()) load(); return; } if (document.hidden || !I.mail.length) return; I.mail.slice().forEach(function (o) { o.left -= 1; if (o.left <= 0) arrive(o); }); if (++acc % 5 === 0) save(); } catch (e) {} }, 1000);
+  /* ---- UI */
+  var css = document.createElement('style');
+  css.textContent = '#inv210{position:fixed;right:calc(8px + env(safe-area-inset-right,0px));top:calc(100px + env(safe-area-inset-top,0px));z-index:16;width:67px;height:40px;padding:0;font:bold 13px Georgia,serif;background:#f3e3c3;color:#3b2410;border:3px solid #3b2410;border-radius:8px;display:none;pointer-events:auto}' +
+    '#invp210{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:77;width:min(660px,96vw);height:min(560px,94vh);box-sizing:border-box;background:#f3e3c3;border:3px solid #3b2410;border-radius:10px;box-shadow:0 5px 0 rgba(59,36,16,.35);font:bold 12px monospace;color:#2a1a0a;display:none;flex-direction:column;padding:6px 8px}' +
+    '#invp210 .hd{display:flex;align-items:center;gap:8px;flex:0 0 auto}#invp210 .ttl{flex:1;min-width:0;font:bold 16px Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#invp210 .gd{white-space:nowrap}' +
+    '#invp210 .x{flex:0 0 auto;width:44px;height:38px;font:bold 18px monospace;background:#3b2410;color:#fff;border:0;border-radius:6px}' +
+    '#invp210 .tabs{display:flex;gap:4px;margin:5px 0;flex:0 0 auto}#invp210 .tabs button{flex:1 1 0;min-width:0;height:36px;padding:0 2px;font:bold 11px monospace;background:#fff8e8;color:#2a1a0a;border:2px solid #3b2410;border-radius:6px;white-space:nowrap;overflow:hidden}#invp210 .tabs button.on{background:#7a4a1c;color:#ffe9b8}' +
+    '#invp210 .bd{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;min-height:0;padding-right:2px}' +
+    '#invp210 .row{display:flex;align-items:center;gap:6px;padding:3px 4px;border-bottom:1px dashed #b89a6a;min-height:40px}#invp210 .row.dim{opacity:.55}#invp210 .nm{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#invp210 .nm small{display:block;font:bold 10px monospace;color:#6a4a2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+    '#invp210 .row button,#invp210 .ch button,#invp210 .q button{flex:0 0 auto;min-height:36px;padding:0 8px;font:bold 11px monospace;background:#fff8e8;color:#2a1a0a;border:2px solid #3b2410;border-radius:6px;white-space:nowrap}#invp210 button.go{background:#2f6e3c;color:#fff}#invp210 button.on{background:#7a4a1c;color:#ffe9b8}#invp210 button:disabled{opacity:.4}' +
+    '#invp210 .sec{margin:6px 0 2px;font:bold 12px Georgia,serif;letter-spacing:1px;border-bottom:2px solid #3b2410}#invp210 .note{font:bold 11px monospace;color:#5a3a1c;padding:4px}#invp210 .ch{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0}#invp210 .q{display:flex;align-items:center;gap:6px;margin:3px 0}#invp210 .q b{min-width:44px;text-align:center;font-size:15px}' +
+    '#invp210 .pill{display:inline-block;padding:1px 5px;border-radius:4px;color:#fff;font:bold 10px monospace;margin-right:4px}';
+  document.head.appendChild(css);
+  var BT = document.createElement('button'); BT.id = 'inv210'; BT.textContent = '\ud83c\udf92 BAG'; BT.title = 'INVENTORY (I)'; document.body.appendChild(BT);
+  var P = document.createElement('div'); P.id = 'invp210'; document.body.appendChild(P);
+  ['pointerdown', 'touchstart', 'mousedown', 'wheel'].forEach(function (ev) { P.addEventListener(ev, function (e) { e.stopPropagation(); }, { passive: true }); });
+  function el(t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h != null) e.textContent = h; return e; }
+  function btn(par, txt, cls, dis, fn) { var b = el('button', cls || '', txt); b.disabled = !!dis; b.onclick = function (e) { e.stopPropagation(); if (b.disabled) return; fn(); render(); }; par.appendChild(b); return b; }
+  function row(par, nm, sub, dim) { var r = el('div', 'row' + (dim ? ' dim' : '')), n = el('div', 'nm', nm); if (sub) n.appendChild(el('small', '', sub)); r.appendChild(n); par.appendChild(r); return r; }
+  function open() { if (!started) return; OPEN = true; if (!rail() && (tab === 'freight' || tab === 'wanted')) tab = 'goods'; P.style.display = 'flex'; render(); }
+  function close() { OPEN = false; P.style.display = 'none'; }
+  BT.addEventListener('click', function (e) { e.stopPropagation(); if (OPEN) close(); else open(); });
+  addEventListener('keydown', function (e) { if ((e.key === 'i' || e.key === 'I') && started && !(e.target && /INPUT|TEXTAREA/.test(e.target.tagName))) { if (OPEN) close(); else open(); } });
+  function render() { if (!OPEN) return; var bd0 = P.querySelector('.bd'), sc = bd0 ? bd0.scrollTop : 0; P.innerHTML = '';
+    var hd = el('div', 'hd'); hd.appendChild(el('div', 'ttl', '\ud83c\udf92 INVENTORY')); var cp = 10, nn = 0; try { cp = TP131.cap(); nn = TP131.n(); } catch (e) {}
+    hd.appendChild(el('div', 'gd', '\ud83d\udcb0' + fm(money()) + '  \u2665' + Math.ceil(hp) + '/' + HPMAX + '  \ud83c\udf92' + nn + '/' + cp));
+    var x = el('button', 'x', '\u2715'); x.onclick = function (e) { e.stopPropagation(); close(); }; hd.appendChild(x); P.appendChild(hd);
+    var R = rail(), T = [['goods', '\ud83c\udf92 GOODS'], ['gear', '\u2694 GEAR'], ['rides', '\ud83d\udc0e RIDES'], ['mail', '\ud83d\udcec MAIL' + (I.mail.length ? ' ' + I.mail.length : '')]];
+    if (R) { var ns = R.ships().length, nw = R.wants().filter(function (w) { return w.st === 'open'; }).length; T.push(['freight', '\ud83d\ude82 FREIGHT' + (ns ? ' ' + ns : '')], ['wanted', '\ud83d\udcdc WANTED' + (nw ? ' ' + nw : '')]); }
+    var tb = el('div', 'tabs'); T.forEach(function (t) { var b = el('button', t[0] === tab ? 'on' : '', t[1]); b.onclick = function (e) { e.stopPropagation(); tab = t[0]; render(); var q = P.querySelector('.bd'); if (q) q.scrollTop = 0; }; tb.appendChild(b); }); P.appendChild(tb);
+    var bd = el('div', 'bd'); P.appendChild(bd);
+    try { ({ goods: rGoods, gear: rGear, rides: rRides, mail: rMail, freight: rFreight, wanted: rWanted })[tab](bd, R); } catch (e) { console.warn(e); }
+    bd.scrollTop = sc; }
+  function rGoods(bd) { var m = mkt(), any = 0;
+    bd.appendChild(el('div', 'note', 'SELL BY WIRE TO ' + mktName(m) + ' \u00b7 80% OF ITS TRADING POST PRICE (BAGS FIRST, THEN STOREHOUSE)'));
+    var rr = row(bd, '\ud83c\udf5e RATIONS \u00b7 ' + fm(food), 'TOWN LARDER \u00b7 EAT +1\u2665'); btn(rr, 'EAT', '', food < 1 || hp >= HPMAX, function () { eat('rations'); });
+    GKs().forEach(function (k) { var b = nB(k), h = nH(k); if (b + h < 1) return; any++; var g = G()[k], one = sellQuote(k, 1);
+      var r = row(bd, g.n + ' \u00b7 \ud83c\udf92' + b + ' \ud83c\udfe0' + h, 'SELL ~' + one.toFixed(1) + ' EACH' + (EAT[k] ? ' \u00b7 EAT +' + EAT[k] + '\u2665' : ''));
+      if (EAT[k]) btn(r, 'EAT', '', b < 1 || hp >= HPMAX, function () { eat(k); });
+      btn(r, 'SELL 1', '', false, function () { sell(k, 1); });
+      var all = b + h, tq = sellQuote(k, all); btn(r, 'ALL +' + fm(tq) + 'G', 'go', false, function () { sell(k, all); }); });
+    if (!any) bd.appendChild(el('div', 'note', 'NO GOODS IN YOUR BAGS OR STOREHOUSE YET.')); }
+  function rGear(bd) { bd.appendChild(el('div', 'sec', 'WEAPONS'));
+    var st = ME_S ? ME_S.steel142 || 0 : 0;
+    Object.keys(WN).forEach(function (w) { var on = wpn() === w, r = row(bd, WN[w], WD[w] + (w === 'shotgun' || w === 'rifle' ? ' \u00b7 HAVE ' + st : '')); btn(r, on ? 'IN HAND' : 'EQUIP', on ? 'on' : '', on, function () { equip(w); }); });
+    bd.appendChild(el('div', 'sec', 'ARMOR & TOOLS'));
+    var ah = nB('armor') + nH('armor'), ra = row(bd, '\ud83d\udee1 ARMOR PLATE' + (I.arm ? ' \u00b7 WORN' : ''), (I.arm ? 'TAKES 20% OFF EVERY HIT' : 'SPARE PLATES: \ud83c\udf92' + nB('armor') + ' \ud83c\udfe0' + nH('armor')) + ' \u00b7 SMITHS MAKE THEM');
+    if (I.arm) btn(ra, 'TAKE OFF', '', false, function () { strip(); }); else btn(ra, 'WEAR', 'go', ah < 1, function () { wear(); });
+    var rt = row(bd, '\ud83d\udd27 TOOLS \u00b7 \ud83c\udf92' + nB('tools') + ' \ud83c\udfe0' + nH('tools'), 'TOOLS IN THE STOREHOUSE SPEED UP FARMS, MINES & WELLS'); btn(rt, 'GIVE TO WORKERS', '', nB('tools') < 1, function () { giveTools(nB('tools')); });
+    try { var U = UP150.U; bd.appendChild(el('div', 'note', 'HERO: HEALTH L' + U.hh + ' \u00b7 ARMOR L' + U.ha + ' \u00b7 GRIT L' + U.hg + ' \u00b7 BARDING L' + U.hb + ' \u00b7 STAMINA L' + U.hs + ' (UPGRADES AT A MARKET)')); } catch (e) {} }
+  function rRides(bd, R) { var h = horse(); bd.appendChild(el('div', 'sec', 'HORSE'));
+    if (h) { var s = h.st === 'ridden' ? 'RIDING' : h.st === 'tied' ? 'TIED UP \u00b7 ' + Math.round(h.d / 100) / 10 + 'K AWAY' : h.st === 'loose' ? 'GRAZING \u00b7 ' + Math.round(h.d / 100) / 10 + 'K AWAY' : 'NO HORSE - BUY ONE AT A MARKET';
+      var r = row(bd, '\ud83d\udc0e YOUR HORSE', s, h.st === 'lost');
+      if (h.st === 'ridden') btn(r, 'DISMOUNT', '', false, function () { try { toggleMount(); } catch (e) {} });
+      else if ((h.st === 'tied' || h.st === 'loose') && h.d < 90) btn(r, 'MOUNT', 'go', false, function () { try { toggleMount(); } catch (e) {} });
+      else if ((h.st === 'tied' || h.st === 'loose') && h.d <= 4000) btn(r, 'WHISTLE', 'go', false, function () { whistle(); });
+      else if (h.st === 'tied' || h.st === 'loose') r.querySelector('small').textContent += ' \u00b7 TOO FAR TO HEAR A WHISTLE'; }
+    bd.appendChild(el('div', 'sec', 'VEHICLE'));
+    var V = window.VEH130 && VEH130(), vb = document.getElementById('vehBtn');
+    if (V && V.k >= 0) { var d = V.on ? 0 : Math.hypot(V.x - px, V.y - py), rv = row(bd, '\ud83d\ude97 ' + (VN[V.k] || 'VEHICLE'), V.on ? 'DRIVING' : 'PARKED \u00b7 ' + Math.round(d / 100) / 10 + 'K AWAY');
+      if (vb && (V.on || d < 90)) btn(rv, V.on ? 'GET OUT' : 'DRIVE', V.on ? '' : 'go', false, function () { vb.click(); }); }
+    else bd.appendChild(el('div', 'note', 'NO VEHICLE YET - CARTS, WAGONS AND CARS ARE SOLD AT A MARKET.'));
+    if (R && window.RAILCO203) { var cs = RAILCO203.cars(), co = {}; RAILCO203.cos().forEach(function (c) { co[c.id] = c; }); bd.appendChild(el('div', 'sec', 'RAIL CARS'));
+      if (!cs.length) bd.appendChild(el('div', 'note', 'NONE - BUY OR LEASE ONE IN A DEPOT\'S MY CARS TAB.'));
+      cs.forEach(function (c) { var nmc = { tank: 'TANK CAR', box: 'BOXCAR', stock: 'STOCK CAR', hop: 'GONDOLA' }[c.ct] || c.ct; row(bd, '\ud83d\ude83 ' + nmc + ' \u00b7 ' + (co[c.co] ? co[c.co].n : c.co), (c.own ? 'OWNED' : 'LEASED') + ' \u00b7 ' + (c.busy ? 'LOADED, ROLLING' : 'IDLE, HAULING FOR OTHERS') + ' \u00b7 EARNED ' + fm(c.earn || 0)); }); } }
+  function mm(s) { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+  function rMail(bd) { if (I.mail.length) { bd.appendChild(el('div', 'sec', 'ON THE WAY'));
+      I.mail.forEach(function (o) { row(bd, (o.ex ? '\u26a1 ' : '\ud83d\udcec ') + o.q + ' ' + o.n, 'ARRIVES IN ' + mm(o.left) + (o.ex ? ' \u00b7 EXPRESS' : ' \u00b7 BY POST') + ' \u00b7 PAID ' + o.paid); }); }
+    bd.appendChild(el('div', 'sec', 'MAIL-ORDER CATALOG'));
+    bd.appendChild(el('div', 'note', 'POST: ~3 GAME HOURS, NO FEE \u00b7 EXPRESS: ~45 MIN, +25% +8 \u00b7 CHEAPER AT A TRADING POST'));
+    CAT.forEach(function (c) { var it = item(c), a = cost(it, 0), b = cost(it, 1), r = row(bd, it.ic + ' ' + it.q + ' ' + it.n, c.id === 'shells' ? 'FOR SHOTGUN & RIFLE' : c.id === 'rations' ? 'INTO YOUR TOWN LARDER' : 'INTO YOUR BAGS');
+      btn(r, '\ud83d\udcec ' + a, '', money() < a, function () { order(c.id, 0); }); btn(r, '\u26a1 ' + b, 'go', money() < b, function () { order(c.id, 1); }); }); }
+  function rFreight(bd, R) { var S = R.ships(), dn = R.done();
+    bd.appendChild(el('div', 'sec', 'YOUR FREIGHT'));
+    if (!S.length) bd.appendChild(el('div', 'note', 'NOTHING ROLLING.'));
+    S.forEach(function (s) { var r = row(bd, '', (s.wait ? 'LOADING AT ' + s.from + ' \u00b7 LEAVES ' + R.hhmm(s.depH) : 'ROLLING \u00b7 ' + (Math.round(s.left * 10) / 10) + ' H TO GO') + ' \u00b7 ARR ' + R.hhmm(s.eta)), n = r.querySelector('.nm'), pl = el('span', 'pill', s.sh); pl.style.background = s.c; n.insertBefore(pl, n.firstChild); n.insertBefore(document.createTextNode(s.q + ' ' + (G()[s.k] ? G()[s.k].n : s.k) + ' \u2192 ' + s.to), pl.nextSibling); });
+    dn.forEach(function (d) { bd.appendChild(el('div', 'note', '\u2714 ' + d)); });
+    bd.appendChild(el('div', 'sec', 'SHIP FROM ' + (R.home() || 'HOME') + ' BY WIRE'));
+    var ks = GKs().filter(function (k) { return R.have(k) >= 1; });
+    if (!ks.length) { bd.appendChild(el('div', 'note', 'NO GOODS AT HOME OR IN YOUR BAGS TO SHIP.')); return; }
+    if (ks.indexOf(fr.k) < 0) fr.k = ks[0]; var ds = R.dests(); if (ds.indexOf(fr.to) < 0) fr.to = ds[0];
+    var hv = R.have(fr.k); fr.q = Math.max(1, Math.min(fr.q, hv));
+    var c1 = el('div', 'ch'); ks.forEach(function (k) { btn(c1, G()[k].n + ' ' + R.have(k), k === fr.k ? 'on' : '', false, function () { fr.k = k; }); }); bd.appendChild(c1);
+    var c2 = el('div', 'ch'); ds.forEach(function (d) { btn(c2, d, d === fr.to ? 'on' : '', false, function () { fr.to = d; }); }); bd.appendChild(c2);
+    var q = el('div', 'q'); btn(q, '\u221210', '', fr.q <= 1, function () { fr.q = Math.max(1, fr.q - 10); }); btn(q, '\u22121', '', fr.q <= 1, function () { fr.q -= 1; }); q.appendChild(el('b', '', String(fr.q))); btn(q, '+1', '', fr.q >= hv, function () { fr.q += 1; }); btn(q, '+10', '', fr.q >= hv, function () { fr.q = Math.min(hv, fr.q + 10); }); btn(q, 'MAX ' + hv, '', fr.q >= hv, function () { fr.q = hv; }); q.appendChild(el('span', '', R.car(fr.k))); bd.appendChild(q);
+    R.quote(fr.k, fr.q, fr.to).forEach(function (o) { var r = row(bd, '', o.ok ? 'ARR ' + o.arr + ' \u00b7 SELLS ~' + o.est + (o.wb ? ' \u00b7 \u2605+' + o.wb + ' WANTED' : '') + (o.mine ? ' \u00b7 YOUR CAR' : '') : o.why, !o.ok), n = r.querySelector('.nm'), pl = el('span', 'pill', o.sh); pl.style.background = o.c; n.insertBefore(pl, n.firstChild); n.insertBefore(document.createTextNode(o.n), pl.nextSibling);
+      if (o.ok) btn(r, 'SHIP ' + o.cost, 'go', money() < o.cost, function () { if (R.ship(o.id, fr.k, fr.q, fr.to)) window.SHIP210 = (window.SHIP210 || 0) + 1; }); }); }
+  function rWanted(bd, R) { var L = R.wants(), na = L.filter(function (w) { return w.acc && w.st === 'open'; }).length;
+    bd.appendChild(el('div', 'note', 'ACCEPT A NOTICE AND RIVAL SHIPPERS STAND ASIDE TILL ITS DEADLINE \u00b7 MISS IT AND YOU FORFEIT 25% OF THE BONUS \u00b7 MAX 2'));
+    if (!L.length) bd.appendChild(el('div', 'note', 'NO WANTED NOTICES POSTED RIGHT NOW.'));
+    L.forEach(function (w) { var g = G()[w.k] || { n: w.k }, st = w.st === 'open' ? (w.acc ? 'ACCEPTED' : 'OPEN') : w.st === 'won' ? 'FILLED' : w.st === 'lost' ? 'TAKEN' : 'EXPIRED';
+      var r = row(bd, w.to + ' WANTS ' + w.q + ' ' + g.n + ' \u2605+' + w.bonus, st + ' \u00b7 BY ' + R.hhmm(w.dueH) + ' \u00b7 ' + w.got + '/' + w.q + ' IN \u00b7 YOU HAVE ' + R.have(w.k), w.st !== 'open');
+      if (w.st !== 'open') return;
+      if (!w.acc) btn(r, 'ACCEPT', 'go', na >= 2, function () { R.accept(w.id); });
+      btn(r, 'SHIP \u2192', '', R.have(w.k) < 1, function () { tab = 'freight'; fr.k = w.k; fr.to = w.to; fr.q = Math.min(w.q - w.got, R.have(w.k)); }); }); }
+  /* button visibility + live refresh */
+  setInterval(function () { try { var mb = document.getElementById('menuBtn'), mv = document.getElementById('map136');
+      var show = typeof started !== 'undefined' && started && mb && getComputedStyle(mb).display !== 'none' && !(mv && mv.style.display === 'block');
+      BT.style.display = show ? 'block' : 'none'; if (!show && OPEN) close();
+      if (OPEN && (tab === 'mail' || tab === 'freight' || tab === 'wanted' || tab === 'rides') && !P.matches(':active')) render(); } catch (e) {} }, 1000);
+  window.INV210 = { open: open, close: close, isOpen: function () { return OPEN; }, tab: function (t) { if (t) { tab = t; render(); } return tab; }, state: function () { return I; }, sell: sell, sellQuote: sellQuote, eat: eat, equip: equip, wear: wear, strip: strip, giveTools: giveTools, order: order, whistle: whistle, cat: function () { return CAT.map(function (c) { var it = item(c); return { id: it.id, q: it.q, p: cost(it, 0), ex: cost(it, 1) }; }); }, fr: fr, load: load, render: render, mkt: function () { return mktName(mkt()); } };
+})();
+</script>
 <style>/* v125: touch landscape: joystick on the RIGHT, attack + actions on the LEFT */
 @media (any-pointer:coarse) and (orientation:landscape){
 #joy{left:auto!important;right:calc(var(--pad) + 6px + var(--sr))!important;transform-origin:right bottom!important}
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --><!-- v204-railroads --><!-- v205-freight-cars --><!-- v206-wanted-agents --><!-- v207-map-shares --></body>
+<!-- v210-inventory --><!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --><!-- v204-railroads --><!-- v205-freight-cars --><!-- v206-wanted-agents --><!-- v207-map-shares --></body>
 </html>
