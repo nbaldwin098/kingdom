@@ -6679,7 +6679,9 @@ window.B137 = (function () {
       setTimeout(function () { var p = stPos(S); px = p.x; py = p.y; try { var V = VEH130(); if (V && V.on) { V.x = px; V.y = py; } } catch (e) {} try { if (typeof steed !== 'undefined' && steed.x != null) { steed.x = px; steed.y = py; } } catch (e) {} window.RIDES136 = (window.RIDES136 || 0) + 1; grow(); FADE.style.opacity = '0'; setTimeout(function () { FADE.style.display = 'none'; }, 400); showToast('WELCOME TO ' + S.name); }, 900); return true; }
     function railPanel() { var R = rail(); RP.innerHTML = '<div style="margin-bottom:6px">\ud83d\ude82 ' + STN.name + ' \u2014 WHERE TO?</div>'; R.st.forEach(function (S) { if (S === STN) return; var b = document.createElement('button'), d = Math.round(Math.hypot(stPos(S).x - px, stPos(S).y - py) / 1000); b.textContent = S.name + ' \u00b7 ' + d + 'K \u00b7 ' + fare(stPos(STN), stPos(S)) + ' GOLD'; b.style.cssText = 'display:block;width:100%;margin:3px 0;padding:6px;font:bold 13px Georgia,serif;background:#e8d4a8;border:2px solid #3b2410;border-radius:5px'; b.onclick = function () { ride(S); }; RP.appendChild(b); });
       var x = document.createElement('button'); x.textContent = '\u2715 CLOSE'; x.style.cssText = 'margin-top:4px;font:bold 12px Georgia,serif'; x.onclick = function () { RP.style.display = 'none'; }; RP.appendChild(x); RP.style.display = 'block'; }
-    RB.onclick = function () { if (STN) railPanel(); };
+    RB.onclick = function (e) { if (e) e.stopPropagation(); if (STN) { if (window.RAILCO203) RAILCO203.open(STN); else railPanel(); } };
+    window.RAIL136 = { stn: function () { return STN; }, rail: rail, stPos: stPos, RB: RB, FADE: FADE,
+      land: function (S) { var p = stPos(S); px = p.x; py = p.y; try { moveId = null; targetX = px; targetY = py; } catch (e) {} try { var V = VEH130(); if (V && V.on) { V.x = px; V.y = py; } } catch (e) {} try { if (typeof steed !== 'undefined' && steed.x != null) { steed.x = px; steed.y = py; } } catch (e) {} window.RIDES136 = (window.RIDES136 || 0) + 1; try { grow(); } catch (e) {} } };
     function drawMap() { var dpr = window.devicePixelRatio || 1, W = innerWidth, Hh = innerHeight; MV.width = W * dpr; MV.height = Hh * dpr; var c = MV.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); var sc = Math.min(W, Hh) / (2 * MAPR), L = T(), R = rail();
       function P(x, y) { return [W / 2 + (x - px) * sc, Hh / 2 + (y - py) * sc]; }
       c.fillStyle = '#d9c59a'; c.fillRect(0, 0, W, Hh); c.strokeStyle = 'rgba(90,60,30,.12)'; c.lineWidth = 1; var gs = 10000; for (var gx = Math.floor((px - W / 2 / sc) / gs) * gs; gx < px + W / 2 / sc; gx += gs) { var a = P(gx, 0); c.beginPath(); c.moveTo(a[0], 0); c.lineTo(a[0], Hh); c.stroke(); } for (var gy = Math.floor((py - Hh / 2 / sc) / gs) * gs; gy < py + Hh / 2 / sc; gy += gs) { var b2 = P(0, gy); c.beginPath(); c.moveTo(0, b2[1]); c.lineTo(W, b2[1]); c.stroke(); }
@@ -6697,7 +6699,7 @@ window.B137 = (function () {
     addEventListener('keydown', function (e) { if (!free() || e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; if (e.key === 'm' || e.key === 'M') openMap(MV.style.display !== 'block'); else if (e.key === 'Escape' && MV.style.display === 'block') openMap(false); });
     var gT = 0;
     setInterval(function () { try { var on = free() && T().length > 0 && (typeof running === 'undefined' || running !== false); MB.style.display = on ? 'block' : 'none'; if (!on) { RB.style.display = 'none'; return; }
-      if (++gT % 4 === 0) { grow(); ranchTowns(); } var R = rail(); STN = null; R.st.forEach(function (S) { var p = stPos(S); if (Math.hypot(p.x - px, p.y - py) < 260) STN = S; }); RB.style.display = STN && RP.style.display !== 'block' ? 'block' : 'none'; if (!STN) RP.style.display = 'none'; if (MV.style.display === 'block') drawMap(); } catch (e) { if (!window.E136c) { window.E136c = 1; console.warn(e); } } }, 250);
+      if (++gT % 4 === 0) { grow(); ranchTowns(); } var R = rail(); STN = null; R.st.forEach(function (S) { var p = stPos(S); if (Math.hypot(p.x - px, p.y - py) < 260) STN = S; }); RB.style.display = STN && RP.style.display !== 'block' && !(window.RAILCO203 && RAILCO203.isOpen()) && !window.RIDING203 ? 'block' : 'none'; if (!STN) RP.style.display = 'none'; if (MV.style.display === 'block') drawMap(); } catch (e) { if (!window.E136c) { window.E136c = 1; console.warn(e); } } }, 250);
     // first pass: crossroads saloons on the fixed roads, once the towns exist
     var once = setInterval(function () { if (!free()) return; var L = T(); if (!L.length) return; clearInterval(once); L.slice().forEach(function (t) { if (!t.d.proc && !t.d.mini) saloonFor(t); }); resetWater(); RAIL.key = ''; }, 300);
     window.MAP136 = { feat: feat, lake: lakeAt, grow: grow, rail: rail, ride: ride, openMap: openMap, stations: function () { return rail().st; }, near: function () { return STN; }, FT: FT, cell: CELL, TC: TC };
@@ -8835,6 +8837,11 @@ window.B137 = (function () {
       for (i = 0; i < n; i++) a.push(KINDS[Math.abs((seed * 17 + i * 31 + i * i * 3) >> 0) % KINDS.length]);
       return a;
     }
+    function mixCo(n, seed, co) {
+      var K = co === 'pg' ? ['tanker', 'tanker', 'hopper', 'tanker', 'box', 'cattle', 'tanker', 'hopper'] : co === 'cw' ? ['pass', 'pass', 'mail', 'pass', 'box'] : KINDS;
+      var a = [], i; for (i = 0; i < n; i++) a.push(K[Math.abs((seed * 17 + i * 31 + i * i * 3) >> 0) % K.length]);
+      return a;
+    }
     function realSt(R) { return (R.st || []).filter(function (s) { return s && (s.home || s.name) && !s.siding; }); }
     function pickDest(R, from, avoid) {
       var L = realSt(R).filter(function (s) { return s !== from && s !== avoid; });
@@ -8861,7 +8868,7 @@ window.B137 = (function () {
       var kinds = ['loco'].concat(t.cars).concat(['caboose']), parts = [], i, p;
       for (i = 0; i < kinds.length; i++) {
         p = pointAlong(segs, (t.head || 0) - i * GAP);
-        if (p) parts.push({ k: kinds[i], x: p.x, y: p.y, ang: p.ang + flip, ph: t.ph, robbed: t.robbed, stop: t.stopT > 0 });
+        if (p) parts.push({ k: kinds[i], x: p.x, y: p.y, ang: p.ang + flip, ph: t.ph, robbed: t.robbed, stop: t.stopT > 0, co: t.co });
       }
       t.parts = parts;
       if (parts[0]) { t.x = parts[0].x; t.y = parts[0].y; t.ang = parts[0].ang; }
@@ -8877,16 +8884,23 @@ window.B137 = (function () {
       home = home || st[0];
       var dest = pickDest(R, home);
       if (!dest) return;
-      var t1 = { cars: mix(18, 167), ph: 0, stopT: 3.2, robbed: 0, spd: 240 };
+      var t1 = { cars: mix(18, 167), ph: 0, stopT: 3.2, robbed: 0, spd: 240, co: 'dwp' };
       if (bindRoute(t1, R, home, dest, 1)) { layout(t1); TRAINS.push(t1); }
       if (st.length >= 3) {
         var far = st.filter(function (s) { return s !== home && s !== dest; })[0];
         var dest2 = pickDest(R, far, home);
         if (far && dest2) {
-          var t2 = { cars: mix(8 + (Math.abs(Math.round(far.x)) % 43), 269), ph: 0, stopT: 1.4, robbed: 0, spd: 260 };
+          var t2 = { cars: mixCo(8 + (Math.abs(Math.round(far.x)) % 43), 269, 'pg'), ph: 0, stopT: 1.4, robbed: 0, spd: 200, co: 'pg' };
           if (bindRoute(t2, R, far, dest2, 0)) { layout(t2); TRAINS.push(t2); }
         }
       }
+      /* v204: a Crowe Western express on a stretch of line the other two trains don't use */
+      try {
+        var used = {}; TRAINS.forEach(function (t) { (t.route || []).forEach(function (g) { used[kxy(g.x0, g.y0) + '|' + kxy(g.x1, g.y1)] = 1; used[kxy(g.x1, g.y1) + '|' + kxy(g.x0, g.y0)] = 1; }); });
+        var pick = null;
+        st.forEach(function (s) { if (pick || s === home) return; var d3 = pickDest(R, s, home); if (!d3 || d3 === home) return; var rt = routeSegs(R, s.x, s.y, d3.x, d3.y); if (!rt.length) return; for (var q = 0; q < rt.length; q++) if (used[kxy(rt[q].x0, rt[q].y0) + '|' + kxy(rt[q].x1, rt[q].y1)]) return; pick = [s, d3]; });
+        if (pick) { var t3 = { cars: mixCo(6, 331, 'cw'), ph: 0, stopT: 2, robbed: 0, spd: 340, co: 'cw' }; if (bindRoute(t3, R, pick[0], pick[1], 0)) { layout(t3); TRAINS.push(t3); } }
+      } catch (e) {}
     }
 
     function step(dt) {
@@ -8925,6 +8939,7 @@ window.B137 = (function () {
       var moving = !p.stop && !p.robbed;
       if (p.k === 'loco') {
         put(c, locoSpr(), 0, 0);
+        livery203(c, p, 1);
         wheel(c, -88, -8, 8, p.ph * 1.4); wheel(c, -46, -12, 13, p.ph, '#c8402a'); wheel(c, -18, -12, 13, p.ph, '#c8402a'); wheel(c, 18, -8, 7, p.ph * 1.6);
         var rx = Math.cos(p.ph) * 6, ry = Math.sin(p.ph) * 6;
         c.strokeStyle = '#c8c8c8'; c.lineWidth = 2.3; c.beginPath(); c.moveTo(-46 + rx, -12 + ry); c.lineTo(-18 + rx, -12 + ry); c.lineTo(4, -20); c.stroke();
@@ -8936,6 +8951,7 @@ window.B137 = (function () {
         }
       } else {
         put(c, carSpr(p.k), 0, 0);
+        livery203(c, p, 0);
         wheel(c, -24, -8, 8, p.ph); wheel(c, 24, -8, 8, p.ph);
         c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.beginPath(); c.moveTo(42, -16); c.lineTo(48, -16); c.stroke();
       }
@@ -8943,6 +8959,25 @@ window.B137 = (function () {
       if (p.robbed && p.k === 'loco') { c.fillStyle = '#b03020'; c.font = 'bold 11px monospace'; c.textAlign = 'center'; c.fillText('HELD UP', sx, sy - 108); }
     }
 
+
+    /* v204: company liveries - cab, roof and boiler band on the engine, a frame stripe on every car, unmirrored herald */
+    var LIV203 = { dwp: ['#9a2a1e', '#e8c050', 'DW&P'], cw: ['#2f6e3c', '#f0e0a0', 'CROWE'], pg: ['#2a5a9a', '#f2ead8', 'P&G'] };
+    function livery203(c, p, loco) {
+      var L = LIV203[p.co]; if (!L) return;
+      var fl = Math.cos(p.ang) < 0;
+      c.strokeStyle = '#2a1a0a'; c.lineWidth = 1;
+      if (loco) {
+        c.fillStyle = L[0]; c.fillRect(-112, -56, 50, 30); c.strokeRect(-112, -56, 50, 30);
+        c.fillRect(-116, -88, 58, 8); c.strokeRect(-116, -88, 58, 8);
+        c.fillRect(-62, -33, 82, 6); c.strokeRect(-62, -33, 82, 6);
+        c.strokeStyle = L[1]; c.lineWidth = 1.2; c.strokeRect(-108, -52, 42, 22);
+        c.save(); c.translate(-87, -37); if (fl) c.scale(-1, 1); c.fillStyle = L[1]; c.font = 'bold 9px monospace'; c.textAlign = 'center'; c.fillText(L[2], 0, 0); c.restore();
+      } else {
+        c.fillStyle = L[0]; c.fillRect(-42, -24, 84, 6); c.strokeRect(-42, -24, 84, 6);
+        c.fillStyle = L[1]; c.fillRect(-42, -22, 84, 1.4);
+        if (p.k === 'caboose') { c.fillStyle = L[0]; c.fillRect(-16, -80, 32, 6); c.strokeRect(-16, -80, 32, 6); }
+      }
+    }
     var drawn = 0, drawnC = 0;
     var _pf = pushFactionItems;
     pushFactionItems = function (items) {
@@ -9019,7 +9054,7 @@ window.B137 = (function () {
       n: function () { return TRAINS.length; },
       list: function () {
         return TRAINS.map(function (t) {
-          return { x: t.x, y: t.y, n: t.cars.length, caboose: 1, stopT: t.stopT, dest: t.dest && t.dest.name, origin: t.origin && t.origin.name, robbed: t.robbed, parts: (t.parts || []).length };
+          return { co: t.co, x: t.x, y: t.y, n: t.cars.length, caboose: 1, stopT: t.stopT, dest: t.dest && t.dest.name, origin: t.origin && t.origin.name, robbed: t.robbed, parts: (t.parts || []).length };
         });
       },
       nearHome: function () {
@@ -14429,6 +14464,204 @@ window.B137 = (function () {
     };
   })();
 
+  // ===== v204: COMPETING RAILROADS - three companies share the line; tickets and freight from one clean station panel =====
+  (function () {
+    var CO = [
+      { id: 'dwp', n: 'D.W. & P. R.R.', sh: 'DW&P', c: '#9a2a1e', c2: '#e8c050', fare: 1, spd: 14000, fspd: 11000, rate: { box: 1, tank: 1, hop: 1, stock: 1 }, cap: 40, hw: 1, off: 0.25, ot: 0.9, tag: 'EVERY STATION', w: 1.25 },
+      { id: 'cw', n: 'CROWE WESTERN', sh: 'CROWE', c: '#2f6e3c', c2: '#f0e0a0', fare: 1.45, spd: 24000, fspd: 18000, rate: { box: 1.35, stock: 1.5 }, cap: 25, hw: 1.5, off: 0.6, ot: 0.97, tag: 'EXPRESS', w: 0.9 },
+      { id: 'pg', n: 'PECOS & GULF', sh: 'P&G', c: '#2a5a9a', c2: '#f2ead8', fare: 0.7, spd: 9000, fspd: 7000, rate: { box: 0.75, tank: 0.55, hop: 0.7, stock: 0.8 }, cap: 80, hw: 2, off: 1.1, ot: 0.78, tag: 'CHEAP \u00b7 TANK CARS', w: 0.9 }
+    ];
+    var COI = {}; CO.forEach(function (c) { COI[c.id] = c; });
+    var CAR = { tank: 'TANK CAR', hop: 'HOPPER', stock: 'STOCK CAR', box: 'BOXCAR' }, BASE = { tank: 0.8, hop: 0.5, stock: 1, box: 0.7 };
+    function carOf(k) { return k === 'crude' || k === 'fuel' ? 'tank' : k === 'coal' || k === 'iron' ? 'hop' : k === 'cattle' ? 'stock' : 'box'; }
+    var S = null, KEY = '', ui = { tab: 't', to: null, good: null, q: 0, last: 0 }, OPEN = null;
+    function fresh() { return { m: { dwp: 1, cw: 1, pg: 1 }, pat: { dwp: 0, cw: 0, pg: 0 }, ship: [], ft: 0, nid: 1, warT: 50, war: null, done: [] }; }
+    function key() { var st = 0; try { st = window.STORY170 && STORY170.on() ? 1 : 0; } catch (e) {} return 'kingdom-rail203:' + MODE + (st ? ':story' : ''); }
+    function load() { KEY = key(); S = fresh(); try { var v = JSON.parse(localStorage.getItem(KEY) || 'null'); if (v && v.m) { S.m = v.m; S.pat = v.pat || S.pat; S.ship = v.ship || []; S.ft = v.ft || 0; S.nid = v.nid || 1; S.done = v.done || []; } } catch (e) {} }
+    function save() { try { if (S && KEY) localStorage.setItem(KEY, JSON.stringify({ m: S.m, pat: S.pat, ship: S.ship, ft: S.ft, nid: S.nid, done: S.done.slice(0, 4) })); } catch (e) {} }
+    function saveGoods() { try { if (MODE === 'free' && ME_S && ME_S.g131 && window.TP131) localStorage.setItem('kingdom-goods-v1:' + MODE, JSON.stringify({ bag: TP131.bag(), home: ME_S.g131 })); } catch (e) {} }
+    function on() { return typeof MODE !== 'undefined' && MODE === 'free' && typeof city !== 'undefined' && city && window.RAIL136 && window.ECON131 && typeof ME_S !== 'undefined' && ME_S; }
+    function stations() { var R = RAIL136.rail(); return R && R.st ? R.st.filter(function (s) { return s && !s.siding && (s.home || s.name); }) : []; }
+    function idxOf(st) { return stations().indexOf(st); }
+    function realm(st) { return st.home ? ME_S : (st.t && st.t.econ) || null; }
+    function serves(co, st) {
+      if (co.id === 'dwp' || st.home) return true; var i = idxOf(st), big = st.t && st.t.d && st.t.d.pop >= 30, ty = '';
+      try { var r = realm(st); ty = r ? ECON131.ty(r) : ''; } catch (e) {}
+      return co.id === 'cw' ? (i % 2 === 0 || big) : (i % 2 === 1 || ty === 'oil');
+    }
+    function pos(st) { return RAIL136.stPos(st); }
+    function dist(a, b) { var p = pos(a), q = pos(b); return Math.hypot(p.x - q.x, p.y - q.y); }
+    function hourNow() { try { return CLOCK133.hour(); } catch (e) { return 12; } }
+    function hhmm(h) { h = ((h % 24) + 24) % 24; var m = Math.floor((h % 1) * 60); return (Math.floor(h) % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' AM' : ' PM'); }
+    function nextDep(co) { var H = hourNow(), n = co.off + Math.ceil((H - co.off) / co.hw - 0.02) * co.hw; return n - H; }
+    function fare(co, a, b) { return Math.max(1, Math.round(Math.max(2, dist(a, b) / 1500) * co.fare * S.m[co.id])); }
+    function rideH(co, a, b) { return 0.15 + dist(a, b) / co.spd; }
+    function frate(co, k, q, a, b) { var car = carOf(k); if (!co.rate[car]) return -1; return Math.max(2, Math.round(q * Math.max(0.5, dist(a, b) / 10000) * BASE[car] * co.rate[car] * S.m[co.id])); }
+    function fH(co, a, b) { return 0.5 + dist(a, b) / co.fspd; }
+    function share() { var t = 0, pt = 0, o = {}; CO.forEach(function (c) { pt += S.pat[c.id] || 0; }); CO.forEach(function (c) { o[c.id] = c.w / (S.m[c.id] * S.m[c.id]) + 1.2 * (S.pat[c.id] || 0) / (4 + pt); t += o[c.id]; }); CO.forEach(function (c) { o[c.id] /= t; }); return o; }
+    function gold() { return ME_S && ME_S.res ? ME_S.res.gold : 0; }
+    function bag() { return window.TP131 ? TP131.bag() : {}; }
+    function have(k, st) { var n = Math.floor(bag()[k] || 0); if (st && st.home) n += Math.floor(ECON131.stock(ME_S)[k] || 0); return n; }
+    function take(k, q, st) { var B = bag(), a = Math.min(q, Math.floor(B[k] || 0)); B[k] = (B[k] || 0) - a; q -= a; if (q > 0 && st && st.home) { var g = ECON131.stock(ME_S); g[k] = Math.max(0, (g[k] || 0) - q); } }
+    function sellValue(st, k, q) { if (st.home) return 0; var r = realm(st); if (!r) return 0; var g = ECON131.stock(r), s0 = g[k] || 0, t = 0, i; for (i = 0; i < q; i++) { t += ECON131.price(r, k) * 0.9; g[k] = (g[k] || 0) + 1; } g[k] = s0; return t; }
+    function toast(t) { try { showToast(t); } catch (e) {} }
+
+    // ---- rate wars: the line losing the market cuts, rivals answer; prices drift back
+    function tick(dt) {
+      if (!S) return;
+      CO.forEach(function (c) { S.m[c.id] += (1 - S.m[c.id]) * Math.min(1, 0.006 * dt); });
+      S.warT -= dt; if (S.war) { S.war.t -= dt; if (S.war.t <= 0) S.war = null; }
+      if (S.warT <= 0) {
+        S.warT = 70 + Math.random() * 60;
+        var sh = share(), lo = CO.slice().sort(function (a, b) { return sh[a.id] - sh[b.id]; })[0], cut = 0.15 + Math.random() * 0.1;
+        S.m[lo.id] = Math.max(0.62, S.m[lo.id] * (1 - cut));
+        var ans = []; CO.forEach(function (c) { if (c !== lo && Math.random() < 0.6) { S.m[c.id] = Math.max(0.7, S.m[c.id] * 0.9); ans.push(c.sh + ' \u221210%'); } });
+        S.war = { t: 45, s: 'RATE WAR \u00b7 ' + lo.sh + ' CUTS ' + Math.round(cut * 100) + '%' + (ans.length ? ' \u00b7 ' + ans.join(' \u00b7 ') : ' \u00b7 NO ANSWER YET') };
+      }
+      S.ft += dt;
+      for (var i = S.ship.length - 1; i >= 0; i--) { var sp = S.ship[i]; if (S.ft >= sp.at) { S.ship.splice(i, 1); deliver(sp); save(); saveGoods(); } }
+    }
+    function stByName(n) { return stations().filter(function (s) { return s.name === n; })[0]; }
+    function deliver(sp) {
+      var st = stByName(sp.to), G = ECON131.G[sp.k] || { n: sp.k.toUpperCase() };
+      if (!st || st.home) { var g = ECON131.stock(ME_S); g[sp.k] = (g[sp.k] || 0) + sp.q; S.done.unshift(sp.q + ' ' + G.n + ' IN YOUR STOREHOUSE'); toast('\ud83d\ude82 FREIGHT IN: ' + sp.q + ' ' + G.n + ' TO YOUR STOREHOUSE'); return; }
+      var r = realm(st), t = 0; if (r) { var gg = ECON131.stock(r); for (var i = 0; i < sp.q; i++) { t += ECON131.price(r, sp.k) * 0.9; gg[sp.k] = (gg[sp.k] || 0) + 1; } }
+      t = Math.round(t); ME_S.res.gold += t; try { updateRes(); } catch (e) {}
+      S.done.unshift(sp.q + ' ' + G.n + ' SOLD AT ' + st.name + ' +' + t); window.FREIGHT203 = (window.FREIGHT203 || 0) + 1;
+      toast('\ud83d\ude82 FREIGHT SOLD AT ' + st.name + ': ' + sp.q + ' ' + G.n + ' +' + t + ' GOLD');
+    }
+
+    // ---- passenger ride: wait on the platform, ride, arrive (clock moves with you)
+    var RIDE = document.createElement('div'); RIDE.id = 'ride203'; document.body.appendChild(RIDE);
+    function ride(co, from, to) {
+      var f = fare(co, from, to); if (gold() < f) return;
+      var gb = ME_S.res.gold; ME_S.res.gold -= f; window.PAY203 = gb - ME_S.res.gold; try { updateRes(); } catch (e) {}
+      S.pat[co.id] = (S.pat[co.id] || 0) + 1; save();
+      var w = nextDep(co), h = rideH(co, from, to), late = Math.random() > co.ot; if (late) h *= 1.4;
+      var H0 = hourNow(), dep = H0 + w, arr = dep + h;
+      close();
+      RIDE.innerHTML = '<div class="rb" style="border-color:' + co.c + '"><div class="rt"><i style="background:' + co.c + '"></i>' + co.n + '</div><div class="rr">' + from.name + ' \u2192 ' + to.name + '</div><div class="rbar"><b style="background:' + co.c + '"></b></div><div class="rs">DEPARTS ' + hhmm(dep) + ' \u00b7 ARRIVES ' + hhmm(arr) + (late ? ' \u00b7 RUNNING LATE' : '') + '</div></div>';
+      RIDE.style.display = 'flex'; var bar = RIDE.querySelector('.rbar b'), T = 1400 + Math.min(3200, h * 900), t0 = performance.now();
+      window.RIDING203 = 1;
+      (function an() { var u = Math.min(1, (performance.now() - t0) / T); bar.style.width = Math.round(u * 100) + '%'; if (u < 1) return requestAnimationFrame(an);
+        RAIL136.land(to); try { CLOCK133.set(arr); } catch (e) {} S.ft += (w + h) * 20; save();
+        window.RIDING203 = 0; window.RIDES203 = (window.RIDES203 || 0) + 1; window.LASTRIDE203 = { co: co.id, to: to.name, fare: f, late: late };
+        setTimeout(function () { RIDE.style.display = 'none'; toast('WELCOME TO ' + to.name); }, 250); })();
+    }
+    function ship(co, from, to, k, q) {
+      var c = frate(co, k, q, from, to); if (c < 0 || gold() < c || q < 1 || q > co.cap || q > have(k, from)) return false;
+      ME_S.res.gold -= c; take(k, q, from); try { updateRes(); } catch (e) {}
+      var h = fH(co, from, to); if (Math.random() > co.ot) h *= 1.3;
+      S.ship.push({ id: S.nid++, k: k, q: q, from: from.name, to: to.name, co: co.id, cost: c, car: carOf(k), at: S.ft + h * 20, eta: hourNow() + h });
+      S.pat[co.id] = (S.pat[co.id] || 0) + 1; save(); saveGoods();
+      ui.q = Math.min(ui.q, have(k, from)); return true;
+    }
+
+    // ---- the station panel
+    var P = document.createElement('div'); P.id = 'rc203'; document.body.appendChild(P);
+    var css = document.createElement('style');
+    css.textContent = '#rc203{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:76;width:min(620px,92vw);max-height:92vh;overflow:auto;box-sizing:border-box;background:#f3e3c3;border:3px solid #3b2410;border-radius:10px;box-shadow:0 5px 0 rgba(59,36,16,.35);font:bold 13px monospace;color:#2a1a0a;display:none;padding:8px 10px}' +
+      '#rc203 .hd{display:flex;align-items:center;gap:8px}#rc203 .ttl{flex:1;min-width:0;font:bold 16px Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#rc203 .gd{white-space:nowrap;font-size:13px}' +
+      '#rc203 .x{flex:0 0 auto;width:44px;height:40px;font:bold 18px monospace;background:#3b2410;color:#fff;border:0;border-radius:6px}' +
+      '#rc203 .sh{display:flex;height:16px;border:1px solid #3b2410;border-radius:5px;overflow:hidden;margin:5px 0 3px}#rc203 .sh i{display:block;height:100%;font:bold 10px/16px monospace;font-style:normal;color:#fff8e8;text-align:center;white-space:nowrap;overflow:hidden}' +
+      '#rc203 .shl{display:flex;gap:10px;font-size:10px;color:#5a3a1c;flex-wrap:wrap}#rc203 .shl i{display:inline-block;width:9px;height:9px;border:1px solid #3b2410;margin-right:3px;vertical-align:-1px}' +
+      '#rc203 .tabs{display:flex;gap:6px;margin:6px 0}#rc203 .tabs button{flex:1;min-height:40px;font:bold 14px monospace;background:#fff8e8;color:#2a1a0a;border:2px solid #3b2410;border-radius:6px}#rc203 .tabs button.on{background:#7a4a1c;color:#ffe9b8}' +
+      '#rc203 .ln{display:flex;align-items:center;gap:6px;margin:4px 0}#rc203 .lb{flex:0 0 auto;font-size:11px;color:#5a3a1c;width:36px}' +
+      '#rc203 .ch{flex:1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;padding:1px 0 3px}#rc203 .ch button{flex:0 0 auto;min-height:40px;padding:4px 10px;font:bold 12px monospace;background:#fff8e8;color:#2a1a0a;border:2px solid #3b2410;border-radius:20px}#rc203 .ch button.on{background:#3b2410;color:#ffe9b8}#rc203 .ch button small{font-size:10px;opacity:.75}' +
+      '#rc203 .q{flex:0 0 auto;display:flex;align-items:center;gap:4px}#rc203 .q button{width:40px;height:40px;font:bold 16px monospace;background:#fff8e8;color:#2a1a0a;border:2px solid #3b2410;border-radius:6px}#rc203 .q span{min-width:34px;text-align:center;font-size:15px}' +
+      '#rc203 .row{display:flex;align-items:center;gap:8px;padding:5px 2px;border-top:1px dashed #b8996a;min-height:46px}#rc203 .sw{flex:0 0 12px;align-self:stretch;border:1px solid #3b2410;border-radius:3px}' +
+      '#rc203 .nm{flex:1;min-width:0}#rc203 .nm b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#rc203 .nm small{display:block;font-size:11px;color:#5a3a1c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+      '#rc203 .go{flex:0 0 auto;min-width:112px;min-height:42px;font:bold 13px monospace;background:#7a4a1c;color:#ffe9b8;border:2px solid #3b2410;border-radius:6px;padding:0 8px}#rc203 .go:disabled{background:#d8c49c;color:#7a6040;border-color:#a08660}' +
+      '#rc203 .dn{color:#2e7a2e}#rc203 .go .dn{color:#b8f0a0}#rc203 .go .up{color:#ffb0a0}#rc203 .up{color:#a02020}#rc203 .ban{font-size:11px;background:#7a1a1a;color:#ffe9b8;border-radius:4px;padding:3px 7px;margin:4px 0}#rc203 .em{padding:10px 4px;color:#5a3a1c;font-size:12px}' +
+      '#rc203 .st{font-size:11px;color:#3b2410;border-top:2px solid #3b2410;margin-top:4px;padding-top:4px}#rc203 .st div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px}#rc203 .st i{display:inline-block;width:9px;height:9px;border:1px solid #3b2410;margin-right:4px;vertical-align:-1px}' +
+      '#ride203{position:fixed;inset:0;z-index:90;background:rgba(26,18,8,.92);display:none;align-items:center;justify-content:center}#ride203 .rb{background:#f3e3c3;border:4px solid;border-radius:10px;padding:12px 16px;width:min(460px,86vw);font:bold 13px monospace;color:#2a1a0a;text-align:center}' +
+      '#ride203 .rt{font:bold 18px Georgia,serif}#ride203 .rt i{display:inline-block;width:14px;height:14px;border:1px solid #3b2410;margin-right:6px;vertical-align:-1px}#ride203 .rr{margin:6px 0}#ride203 .rbar{height:12px;border:2px solid #3b2410;border-radius:6px;overflow:hidden;background:#fff8e8}#ride203 .rbar b{display:block;height:100%;width:0}#ride203 .rs{margin-top:6px;font-size:12px}' +
+      '#rail136{left:50%!important;transform:translateX(-50%)!important;bottom:calc(env(safe-area-inset-bottom,0px) + 22px)!important;padding:8px 16px!important;font:bold 14px monospace!important;background:#7a4a1c!important;color:#ffe9b8!important;border:2px solid #3b2410!important;border-radius:8px!important;box-shadow:0 3px 0 #3b2410;min-height:40px}' +
+      '@media (max-height:500px){#rc203{padding:5px 8px;max-height:96vh}#rc203 .x{height:36px}#rc203 .tabs{margin:3px 0}#rc203 .tabs button{min-height:36px}#rc203 .ln{margin:2px 0}#rc203 .row{min-height:40px;padding:2px}#rc203 .go{min-height:38px}#rc203 .ttl{font-size:15px}#rc203 .ban{margin:2px 0;padding:2px 6px}#rail136{bottom:8px!important}}';
+    document.head.appendChild(css);
+    function el(t, cls, txt) { var e = document.createElement(t); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+    function btn(cls, html, fn, dis) { var b = el('button', cls); b.innerHTML = html; b.disabled = !!dis; b.onclick = function (e) { e.stopPropagation(); ui.last = performance.now(); fn(); }; return b; }
+    function arrow(co) { var m = S.m[co.id]; return m < 0.97 ? ' <span class="dn">\u25bc' + Math.round((1 - m) * 100) + '%</span>' : m > 1.03 ? ' <span class="up">\u25b2</span>' : ''; }
+    function render() {
+      if (!OPEN) return; var st = OPEN, L = stations(), dests = L.filter(function (s) { return s !== st; });
+      if (!ui.to || dests.indexOf(ui.to) < 0) ui.to = dests[0] || null;
+      var sl = {}; P.querySelectorAll('.ch').forEach(function (c, i) { sl[i] = c.scrollLeft; }); var stp = P.scrollTop;
+      P.innerHTML = '';
+      var hd = el('div', 'hd'); hd.appendChild(el('div', 'ttl', '\ud83d\ude82 ' + st.name + (st.home ? '' : ' DEPOT')));
+      hd.appendChild(el('div', 'gd', '\ud83d\udcb0 ' + Math.floor(gold()) + ' \u00b7 ' + hhmm(hourNow())));
+      hd.appendChild(btn('x', '\u2715', close)); P.appendChild(hd);
+      var sh = share(), bar = el('div', 'sh');
+      CO.forEach(function (c) { var i = el('i', '', c.sh + ' ' + Math.round(sh[c.id] * 100) + '%'); i.style.background = c.c; i.style.width = (sh[c.id] * 100).toFixed(1) + '%'; bar.appendChild(i); });
+      P.appendChild(bar);
+      if (S.war) P.appendChild(el('div', 'ban', '\u2694 ' + S.war.s));
+      var tb = el('div', 'tabs');
+      tb.appendChild(btn(ui.tab === 't' ? 'on' : '', '\ud83c\udfab TICKETS', function () { ui.tab = 't'; render(); }));
+      tb.appendChild(btn(ui.tab === 'f' ? 'on' : '', '\ud83d\udce6 FREIGHT' + (S.ship.length ? ' (' + S.ship.length + ')' : ''), function () { ui.tab = 'f'; render(); }));
+      P.appendChild(tb);
+      if (ui.tab === 'f') {
+        var GK = Object.keys(ECON131.G).filter(function (k) { return have(k, st) > 0; });
+        if (GK.indexOf(ui.good) < 0) { ui.good = GK[0] || null; ui.q = ui.good ? Math.min(10, have(ui.good, st)) : 0; }
+        var gl = el('div', 'ln'); gl.appendChild(el('div', 'lb', 'SHIP')); var gc = el('div', 'ch');
+        if (!GK.length) gc.appendChild(el('div', 'em', st.home ? 'NOTHING IN YOUR BAGS OR STOREHOUSE' : 'NOTHING IN YOUR BAGS \u00b7 BUY GOODS AT A TRADING POST'));
+        GK.forEach(function (k) { gc.appendChild(btn(k === ui.good ? 'on' : '', ECON131.G[k].n + ' <small>' + have(k, st) + '</small>', function () { ui.good = k; ui.q = Math.min(10, have(k, st)); render(); })); });
+        gl.appendChild(gc);
+        if (ui.good) { var mx = have(ui.good, st); ui.q = Math.max(1, Math.min(ui.q || 1, mx)); var qd = el('div', 'q');
+          qd.appendChild(btn('', '\u2212', function () { ui.q = Math.max(1, ui.q - (ui.q > 10 ? 5 : 1)); render(); })); qd.appendChild(el('span', '', String(ui.q)));
+          qd.appendChild(btn('', '+', function () { ui.q = Math.min(have(ui.good, st), ui.q + (ui.q >= 10 ? 5 : 1)); render(); })); qd.appendChild(btn('', 'ALL', function () { ui.q = have(ui.good, st); render(); }));
+          qd.lastChild.style.width = '48px'; qd.lastChild.style.fontSize = '12px'; gl.appendChild(qd); }
+        P.appendChild(gl);
+      }
+      var dl = el('div', 'ln'); dl.appendChild(el('div', 'lb', 'TO')); var dc = el('div', 'ch');
+      dests.forEach(function (d) { dc.appendChild(btn(d === ui.to ? 'on' : '', d.name + ' <small>' + Math.round(dist(st, d) / 1000) + 'K</small>', function () { ui.to = d; render(); })); });
+      dl.appendChild(dc); P.appendChild(dl);
+      var to = ui.to;
+      if (to) CO.forEach(function (c) {
+        var row = el('div', 'row'), sw = el('div', 'sw'); sw.style.background = c.c; row.appendChild(sw);
+        var nm = el('div', 'nm'), ok = serves(c, st) && serves(c, to), go;
+        if (ui.tab === 't') {
+          var f = fare(c, st, to), w = nextDep(c), h = rideH(c, st, to);
+          nm.innerHTML = '<b>' + c.n + ' <small style="display:inline;font-size:10px">' + c.tag + '</small></b><small>' + (ok ? 'DEP ' + hhmm(hourNow() + w) + ' \u00b7 ' + h.toFixed(1) + ' H RIDE \u00b7 ' + Math.round(c.ot * 100) + '% ON TIME' : 'NO SERVICE ON THIS ROUTE') + '</small>';
+          go = btn('go', ok ? f + ' GOLD' + arrow(c) : 'NO SERVICE', function () { ride(c, st, to); }, !ok || gold() < f);
+          if (ok && gold() < f) go.innerHTML = 'NEED ' + f;
+        } else {
+          var k = ui.good, q = ui.q || 0, cost = k ? frate(c, k, q, st, to) : -1, hf = fH(c, st, to), val = k ? Math.round(sellValue(to, k, q)) : 0, car = k ? carOf(k) : 'box', why = '';
+          if (!k) why = '\u2014'; else if (!ok) why = 'NO SERVICE'; else if (cost < 0) why = 'NO ' + CAR[car] + 'S'; else if (q > c.cap) why = 'MAX ' + c.cap; else if (gold() < cost) why = 'NEED ' + cost;
+          nm.innerHTML = '<b>' + c.n + (k && ok && cost >= 0 ? ' <small style="display:inline;font-size:10px">' + CAR[car] + '</small>' : '') + '</b><small>' + (!k ? 'PICK SOMETHING TO SHIP' : !ok ? 'NO SERVICE ON THIS ROUTE' : cost < 0 ? 'NO ' + CAR[car] + 'S ON THIS LINE' : 'ARR ~' + hhmm(hourNow() + hf) + ' \u00b7 ' + (to.home ? 'INTO YOUR STOREHOUSE' : 'SELLS ~' + val + ' \u21d2 ' + (val - cost >= 0 ? '+' : '') + (val - cost))) + '</small>';
+          go = btn('go', why || ('SHIP ' + cost + arrow(c)), function () { if (ship(c, st, to, k, q)) render(); }, !!why);
+        }
+        row.appendChild(nm); row.appendChild(go); P.appendChild(row);
+      });
+      if (ui.tab === 'f' && (S.ship.length || S.done.length)) {
+        var sd = el('div', 'st');
+        S.ship.slice(0, 3).forEach(function (sp) { var d = el('div'), c = COI[sp.co] || CO[0], left = Math.max(0, (sp.at - S.ft) / 20); d.innerHTML = '<i style="background:' + c.c + '"></i>' + CAR[sp.car] + ' \u00b7 ' + sp.q + ' ' + (ECON131.G[sp.k] ? ECON131.G[sp.k].n : sp.k) + ' \u2192 ' + sp.to + ' \u00b7 ' + left.toFixed(1) + ' H'; sd.appendChild(d); });
+        if (S.ship.length > 3) sd.appendChild(el('div', '', '+' + (S.ship.length - 3) + ' MORE ROLLING'));
+        if (S.done[0]) sd.appendChild(el('div', '', 'LAST: ' + S.done[0]));
+        P.appendChild(sd);
+      }
+      P.querySelectorAll('.ch').forEach(function (c, i) { if (sl[i]) c.scrollLeft = sl[i]; else { var o = c.querySelector('.on'); if (o && o.offsetLeft > c.clientWidth - 40) c.scrollLeft = o.offsetLeft - 20; } }); P.scrollTop = stp;
+    }
+    function open(st) { if (!on() || !st) return; if (!S || KEY !== key()) load(); OPEN = st; ui.last = performance.now(); P.style.display = 'block'; try { RAIL136.RB.style.display = 'none'; } catch (e) {} render(); }
+    function close() { OPEN = null; P.style.display = 'none'; }
+    addEventListener('keydown', function (e) { if (!OPEN) return; if (e.key === 'Escape') close(); });
+    var lt = performance.now(), rr = 0;
+    setInterval(function () {
+      try {
+        var now = performance.now(), dt = Math.min(1, (now - lt) / 1000); lt = now;
+        if (!on() || (typeof started !== 'undefined' && !started)) { if (OPEN) close(); return; }
+        if (!S || KEY !== key()) load();
+        if (!document.hidden && !window.RIDING203) tick(dt);
+        if (OPEN) { var p = pos(OPEN); if (Math.hypot(p.x - px, p.y - py) > 420) close(); else if (++rr % 3 === 0 && now - ui.last > 2000) render(); }
+        var RB = RAIL136.RB; if (RB) { RB.textContent = '\ud83d\ude82 TICKETS & FREIGHT';
+          var tp = document.getElementById('tpb131'); RB.style.setProperty('margin-bottom', tp && getComputedStyle(tp).display !== 'none' ? '58px' : '0px'); }
+      } catch (e) { if (!window.E203) { window.E203 = 1; console.warn(e); } }
+    }, 500);
+    window.RAILCO203 = { open: open, close: close, isOpen: function () { return !!OPEN; }, cos: function () { return CO.map(function (c) { return { id: c.id, n: c.n, c: c.c, m: S ? S.m[c.id] : 1 }; }); },
+      state: function () { return S; }, share: function () { return S ? share() : null; }, serves: function (id, name) { var st = stByName(name); return !!(st && serves(COI[id], st)); },
+      fare: function (id, a, b) { return fare(COI[id], stByName(a), stByName(b)); }, frate: function (id, k, q, a, b) { return frate(COI[id], k, q, stByName(a), stByName(b)); },
+      ride: function (id, a, b) { ride(COI[id], stByName(a), stByName(b)); }, ship: function (id, a, b, k, q) { return ship(COI[id], stByName(a), stByName(b), k, q); },
+      war: function () { if (S) { S.warT = 0; tick(0.01); } return S && S.war; }, ff: function (sec) { if (S) tick(sec); }, ui: ui, render: render, load: load };
+  })();
+
 
   requestAnimationFrame(frame);
 </script>
@@ -14471,5 +14704,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --><!-- v204-railroads --></body>
 </html>
