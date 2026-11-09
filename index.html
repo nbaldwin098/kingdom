@@ -2258,7 +2258,7 @@ window.B137 = (function () {
       var camX = px - W / 2, camY = py - H / 2;
       ctx.fillStyle = '#ece0c0'; ctx.fillRect(0, 0, W, H);
       ctx.save();
-      ctx.translate(W / 2, H / 2); if (KICK46 > 0) ctx.translate((Math.random() - 0.5) * 40 * KICK46, (Math.random() - 0.5) * 40 * KICK46); ctx.scale(zoom, zoom); ctx.translate(-W / 2, -H / 2);
+      ctx.translate(W / 2, H / 2); if (KICK46 > 0) { var k216 = KICK46 * (window.LOFX213 ? 0.35 : 1); ctx.translate((Math.random() - 0.5) * 40 * k216, (Math.random() - 0.5) * 40 * k216); } ctx.scale(zoom, zoom); ctx.translate(-W / 2, -H / 2);
       var items = [];
       var viewX0 = px - W / (2 * zoom), viewX1 = px + W / (2 * zoom);
       var viewY0 = py - H / (2 * zoom), viewY1 = py + H / (2 * zoom);
@@ -7254,7 +7254,7 @@ window.B137 = (function () {
     function knife() { W.cd = 0.28; W.slash = 0.15; W.shots++; hitAll(px + face * 55, py, 60, 2 + (typeof weaponBonus === 'function' ? weaponBonus() : 0)); try { sfx('click142', px, py, 0.4); } catch (e) {} }
     function cannon() { if (!use(2)) return; W.cd = 1.5; W.flash = 0.12; W.shots++; W.bul.push({ x: px + face * 60, y: py - 30, vx: face * 1400, life: 0.8, big: 1 }); try { sfx('boom142', px, py, 1); } catch (e) {} KICK46 = Math.max(KICK46 || 0, 0.2); }
     function bomb() { if (!use(2)) return; W.cd = 1.0; W.shots++; W.boom.push({ x: px, y: py, t: 0.6, fall: 1 }); }
-    function splash(x, y) { W.boom.push({ x: x, y: y, t: 0.4 }); hitAll(x, y, 140, 6); try { sfx('boom142', x, y, 1); } catch (e) {} }
+    function splash(x, y) { W.boom.push({ x: x, y: y, t: 0.4 }); hitAll(x, y, 140, 6); try { sfx('boom142', x, y, 1); } catch (e) {} try { FEEL216.boom(x, y, 0.8); } catch (e) {} }
     var _at = attack; attack = function () { if (!started) return _at.apply(this, arguments); var k = veh(); sync();
       if (k === 5 || k === 7) { if (W.cd <= 0) (k === 5 ? cannon : bomb)(); return; }
       if (W.cur === 'rifle') { if (W.cd <= 0) rifle(); return; }
@@ -9308,12 +9308,12 @@ window.B137 = (function () {
       SYN.whistle211 = function (o, t) { var g = AC.createGain(), f = AC.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 900; f.Q.value = 0.8; g.connect(f); f.connect(o);
         [[0, 1.1], [1.25, 0.45]].forEach(function (b) { [370, 466, 554].forEach(function (fr, j) { tone(g, t + b[0], j ? 'triangle' : 'sawtooth', fr * 0.97, fr, b[1], j ? 0.12 : 0.07, 0.08); }); noise(g, t + b[0], b[1], 0.06, 'bandpass', 1800, 2); }); return 1.8; };
     } } catch (e) {}
-    var SND = { clk: 0, wh: {} };
+    var SND = { clk: 0, wh: {}, ch: 0 };
     function soundTick(now) {
-      try { if (typeof sfx !== 'function') return; var best = null, bd = 1e9, i, j;
+      try { if (typeof sfx !== 'function') return; var best = null, bd = 1e9, i, j, loco = null, ld = 1e9, lsp = 0;
         for (i = 0; i < TRAINS.length; i++) { var t = TRAINS[i], P = t.parts || []; if (!P.length) continue; var L = P[0];
           if (Math.abs(L.x - px) > 3500 || Math.abs(L.y - py) > 3500) continue;
-          var mv = !L.stop && !L.robbed;
+          var mv = !L.stop && !L.robbed, dl = Math.hypot(L.x - px, L.y - py); if (mv && dl < ld) { ld = dl; loco = L; lsp = t.run ? 260 : (t.spd || 240); }
           for (j = 0; j < P.length; j += 3) { var d = Math.hypot(P[j].x - px, P[j].y - py); if (mv && d < bd) { bd = d; best = P[j]; } }
           /* whistle: once as the engine closes on a station, once as it pulls out */
           var R = rail(), st = R && R.st || [], near = null, nd = 1e9;
@@ -9323,6 +9323,10 @@ window.B137 = (function () {
           if (mv && !w.mv && now - w.t > 8000) { w.t = now; sfx('whistle211', L.x, L.y, 0.7); window.WHIS211 = (window.WHIS211 || 0) + 1; }
           w.mv = mv; }
         if (best && bd < 1400 && now - SND.clk > 430) { SND.clk = now; sfx('clack211', best.x, best.y, 0.55); window.CLK211 = (window.CLK211 || 0) + 1; }
+        /* v216: steam chuff from the nearest working engine, faster with speed */
+        if (loco && ld < 1600 && now - SND.ch > Math.max(160, 70000 / Math.max(120, lsp))) { SND.ch = now; sfx('chuff216', loco.x, loco.y, 0.6); }
+        var R2 = rail(), st2 = R2 && R2.st || [], sd = 1e9; for (j = 0; j < st2.length; j++) { var q2 = st2[j]; if (!q2.p216) { try { q2.p216 = window.RAIL136 && RAIL136.stPos ? RAIL136.stPos(q2) : null; } catch (e) {} if (!q2.p216) q2.p216 = { x: q2.x, y: q2.y }; } var d2 = Math.min(Math.hypot(q2.x - px, q2.y - py), Math.hypot(q2.p216.x - px, q2.p216.y - py)); if (d2 < sd) sd = d2; }
+        window.RAIL216 = { t: now, tr: bd, loco: ld, st: sd };
       } catch (e) {}
     }
     function drawPart(p, sx, sy) { try { draw211(p, sx, sy); } catch (e) { if (!window.E211) { window.E211 = 1; console.warn(e); } try { ctx.restore(); } catch (e2) {} drawPart167(p, sx, sy); } }
@@ -16186,6 +16190,7 @@ body.joyL213 #rcol { left: auto !important; right: calc(var(--pad) + 6px + var(-
   function blow(A, t, n, dur) { var o = A.createOscillator(), v = A.createOscillator(), vg = A.createGain(), g = A.createGain(), f = A.createBiquadFilter(); o.type = 'square'; o.frequency.value = hz(n); v.frequency.value = 5.5; vg.gain.value = hz(n) * 0.012; v.connect(vg); vg.connect(o.frequency); f.type = 'lowpass'; f.frequency.value = 1400; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.06); g.gain.setValueAtTime(0.05, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(f); f.connect(g); g.connect(MU.g); o.start(t); v.start(t); o.stop(t + dur + 0.05); v.stop(t + dur + 0.05); }
   function level() { var s = snd() && __snd.get ? __snd.get() : { on: true }; return s.on ? S.music * 0.5 : 0; }
   function muTick() {
+    if (window.MU216) return MU216.tick();
     var A = snd() && __snd.ctx(); if (!A) return;
     if (!MU.g) { MU.g = A.createGain(); MU.g.gain.value = 0; MU.g.connect(A.destination); MU.next = A.currentTime + 0.2; }
     var L = level(); MU.g.gain.setTargetAtTime(L, A.currentTime, 0.15); window.MUSIC213 = { level: L, step: MU.step };
@@ -16534,6 +16539,159 @@ body.out212 #talk215, body.map214 #talk215 { display: none !important; }
     talking: function () { return dlgOpen && curNode ? { say: curNode.say, r: curNode.r.map(function (q) { return q.t; }) } : null; }, raidLeft: raidLeft, turkeys: function () { return WILD141.A.filter(function (a) { return a.ftm215 && !a.dead; }).map(function (a) { return { x: a.x, y: a.y }; }); }, clock: function () { return CLK; } };
 })();
 </script><!-- v215-first10 -->
+<script>/* v216 GAME FEEL: synthesized sounds (guns, hooves, trains, coins, building), hit flashes, screen shake on explosions,
+   and an area music loop (homestead/prairie, town/saloon, mine/diggings, rail) that crossfades. Respects SETTINGS
+   (SOUND, EFFECTS, MUSIC, GRAPHICS) and stops with the pause. Audio starts only after a tap or key (v22 audioInit). */
+(function () {
+  var P = window.PAUSE213, S = P && P.set || { music: 0.3, gfx: 'high' };
+  var F = window.FEEL216 = { req: {}, played: {}, names: {}, shakes: 0, flashes: 0, pflash: 0, area: 'prairie' };
+  var CAT = { boom142: 'gun', click142: 'gun', bow: 'gun', hoof: 'hoof', whistle211: 'train', clack211: 'train', chuff216: 'train',
+    coin: 'coin', spend216: 'coin', place216: 'build', done216: 'build', hammer: 'build', build: 'build', boom: 'boom' };
+  F.types = ['gun', 'hoof', 'train', 'coin', 'build', 'boom'];
+  function live() { try { return !!(window.AC && AC.state === 'running' && window.sndOn && window.vol > 0); } catch (e) { return false; } }
+  /* ---------- new and reworked effect sounds ---------- */
+  try {
+    /* hooves: a two-beat clip-clop (hollow wood block + dirt thud) */
+    SYN.hoof = function (o, t) { var f = 520 + Math.random() * 90; tone(o, t, 'sine', f, f * 0.8, 0.05, 0.22); noise(o, t, 0.05, 0.22, 'lowpass', 600); tone(o, t + 0.085, 'sine', f * 0.84, f * 0.68, 0.05, 0.16); noise(o, t + 0.085, 0.04, 0.15, 'lowpass', 520); tone(o, t, 'sine', 110, 60, 0.08, 0.25); return 0.16; };
+    /* steam engine chuff: a breathy burst of filtered noise */
+    SYN.chuff216 = function (o, t) { noise(o, t, 0.16, 0.32, 'bandpass', 700 + Math.random() * 200, 1.2); noise(o, t, 0.08, 0.18, 'lowpass', 240); return 0.18; };
+    /* paying out: two dull coins dropping onto a counter */
+    SYN.spend216 = function (o, t) { tone(o, t, 'triangle', 1400, 1250, 0.07, 0.16); tone(o, t + 0.07, 'triangle', 1150, 1000, 0.09, 0.12); noise(o, t, 0.03, 0.1, 'highpass', 3500); return 0.18; };
+    /* better gold pickup: bright three-coin jingle */
+    SYN.coin = function (o, t) { [1900, 2550, 3200].forEach(function (f, i) { tone(o, t + i * 0.055, 'sine', f, f, 0.16, 0.2 - i * 0.04); tone(o, t + i * 0.055, 'square', f * 2, f * 2, 0.03, 0.03); }); return 0.3; };
+    /* placing a building: a timber thunk and two mallet knocks */
+    SYN.place216 = function (o, t) { tone(o, t, 'sine', 140, 60, 0.22, 0.6); noise(o, t, 0.12, 0.45, 'lowpass', 500); [0.18, 0.32].forEach(function (d) { tone(o, t + d, 'square', 640, 580, 0.05, 0.1); noise(o, t + d, 0.04, 0.22, 'bandpass', 1500, 2); }); return 0.42; };
+    /* building done: a rising four-note brass-ish fanfare */
+    SYN.done216 = function (o, t) { var g = AC.createGain(), f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 2200; g.connect(f); f.connect(o);
+      [[392, 0], [494, 0.12], [587, 0.24], [784, 0.38]].forEach(function (n) { tone(g, t + n[1], 'sawtooth', n[0], n[0], n[1] > 0.3 ? 0.55 : 0.16, 0.12, 0.02); tone(g, t + n[1], 'triangle', n[0] * 2, n[0] * 2, 0.12, 0.05); }); return 1.0; };
+    GAP.chuff216 = 0.12; GAP.spend216 = 0.1; GAP.place216 = 0.3; GAP.done216 = 0.5; GAP.hoof = 0.14;
+  } catch (e) { console.warn('v216 syn', e); }
+  /* ---------- every sound goes through here: counted (tests), explosions shake ---------- */
+  var _sfx = window.sfx;
+  window.sfx = function (name, x, y, v) {
+    var c = CAT[name] || name; F.req[c] = (F.req[c] || 0) + 1; F.names[name] = (F.names[name] || 0) + 1;
+    if (c === 'boom') F.boom(x, y, (v || 1) * 0.9);
+    if (live()) F.played[c] = (F.played[c] || 0) + 1;
+    return _sfx.apply(this, arguments);
+  };
+  F.play = function (name, x, y, v) { return window.sfx(name, x === undefined ? px : x, y === undefined ? py : y, v); };
+  /* ---------- screen shake (GRAPHICS LOW scales it down in the frame) ---------- */
+  F.shake = function (a) { a = Math.min(0.45, a); if (!(a > 0.02)) return; try { if (a > KICK46) KICK46 = a; F.shakes++; } catch (e) {} };
+  F.boom = function (x, y, s) { var d = x === undefined ? 0 : Math.hypot(x - px, y - py); if (d > 1500) return; F.shake((s || 1) * 0.4 * (1 - d / 1500)); };
+  /* ---------- hit flashes ---------- */
+  var _dd = window.dealDamage;
+  window.dealDamage = function (src, t, dmg) { var r = _dd.apply(this, arguments); try { if (t && !t.isPlayer && dmg > 0) { t.hf216 = performance.now(); F.flashes++; } } catch (e) {} return r; };
+  var fr = { n: 0, t: 0 };
+  var _sa = window.soldierArt;
+  window.soldierArt = function (c, u, x, y) {
+    _sa.apply(this, arguments);
+    var h = u.hf216; if (!h) return; var a = (performance.now() - h) / 1000; if (a > 0.16 || a < 0) { u.hf216 = 0; return; }
+    var now = performance.now(); if (now - fr.t > 8) { fr.t = now; fr.n = 0; } /* a new frame */
+    var k = 1 - a / 0.16, big = u.gun || /^[mvrthjn]$/.test(u.t || '');
+    if (!window.LOFX213 && fr.n < 6) { fr.n++; /* redraw the unit added on top of itself: it lights up white-hot */
+      c.save(); c.globalAlpha = 0.85 * k; c.globalCompositeOperation = 'lighter'; try { _sa.call(this, c, u, x, y); } catch (e) {} c.restore(); return; }
+    c.save(); c.globalAlpha = 0.5 * k; c.fillStyle = a < 0.05 ? '#ffffff' : '#ffd8c8'; c.beginPath();
+    if (big) c.ellipse(x, y - 16, 26, 16, 0, 0, 7); else c.ellipse(x, y - 22, 10, 20, 0, 0, 7); c.fill(); c.restore();
+  };
+  /* your rider hurt: a short red edge flash (not on GRAPHICS LOW) */
+  var hurt = document.createElement('div'); hurt.id = 'hurt216';
+  hurt.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:4;opacity:0;transition:opacity .35s ease-out;box-shadow:inset 0 0 70px 18px rgba(170,20,10,.75)';
+  document.body.appendChild(hurt);
+  F.hurt = function () { F.pflash++; if (window.LOFX213) return; hurt.style.transition = 'none'; hurt.style.opacity = '1'; clearTimeout(F.hurtT); F.hurtT = setTimeout(function () { hurt.style.transition = 'opacity .4s ease-out'; hurt.style.opacity = '0'; }, 110); };
+  /* ---------- watchers: gold up/down, buildings placed/finished, rider hurt ---------- */
+  var W = { g: null, nb: -1, nd: -1, me: null, hp: null, md: null };
+  function built(s) { var n = 0; for (var i = 0; i < s.bld.length; i++) if (s.bld[i].L > 0 && !s.bld[i].j) n++; return n; }
+  function near1(d) { return Math.abs(d - Math.round(d)) < 0.02; }
+  F.watch = function () {
+    if (!window.started || (P && P.on)) { W.g = null; W.me = null; W.hp = null; return; }
+    try { var g = +window.gold; if (W.g !== null && W.md === MODE) { var d = g - W.g; if ((d >= 1 && near1(d)) || d >= 15) F.play('coin', px, py, 0.8); else if ((d <= -1 && near1(d)) || d <= -15) F.play('spend216', px, py, 0.7); } W.g = g; W.md = MODE; } catch (e) {}
+    try { var s = window.ME_S; if (s && s.bld) { var nb = s.bld.length, nd = built(s);
+        if (W.me === s) { if (nb > W.nb) { var b = s.bld[nb - 1], h = homeXY(s); F.play('place216', h.x + (b.x || 0), h.y + (b.y || 0), 0.9); } if (nd > W.nd) F.play('done216', px, py, 0.8); }
+        W.me = s; W.nb = nb; W.nd = nd; } } catch (e) {}
+    try { if (W.hp !== null && hp < W.hp - 0.01) F.hurt(); W.hp = hp; } catch (e) {}
+  };
+  /* ---------- area music ---------- */
+  function hz(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+  function pl(A, out, t, n, pk, dur, type, cut) { var o = A.createOscillator(), g = A.createGain(), f = A.createBiquadFilter(); o.type = type || 'triangle'; o.frequency.value = hz(n); f.type = 'lowpass'; f.frequency.value = cut || 1800; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(pk, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(f); f.connect(g); g.connect(out); o.start(t); o.stop(t + dur + 0.05); }
+  function hb(A, out, t, n, dur, pk) { var o = A.createOscillator(), v = A.createOscillator(), vg = A.createGain(), g = A.createGain(), f = A.createBiquadFilter(); o.type = 'square'; o.frequency.value = hz(n); v.frequency.value = 5.5; vg.gain.value = hz(n) * 0.012; v.connect(vg); vg.connect(o.frequency); f.type = 'lowpass'; f.frequency.value = 1400; pk = pk || 0.05; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(pk, t + 0.05); g.gain.setValueAtTime(pk, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(f); f.connect(g); g.connect(out); o.start(t); v.start(t); o.stop(t + dur + 0.05); v.stop(t + dur + 0.05); }
+  function nz(A, out, t, dur, pk, fq, type) { if (!window.nbuf) return; var s = A.createBufferSource(), f = A.createBiquadFilter(), g = A.createGain(); s.buffer = nbuf; f.type = type || 'bandpass'; f.frequency.value = fq; g.gain.setValueAtTime(pk, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); s.connect(f); f.connect(g); g.connect(out); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.02); }
+  /* homestead / prairie: the v213 waltz (guitar + harmonica, D major, 3/4) */
+  var PW = [[38, [50, 54, 57]], [43, [55, 59, 62]], [38, [50, 54, 57]], [45, [57, 61, 64]], [38, [50, 54, 57]], [43, [55, 59, 62]], [45, [57, 61, 64]], [38, [50, 54, 57]]];
+  var MW = [66, 69, 71, 71, 69, 67, 66, 64, 62, 64, 66, 64, 66, 69, 74, 71, 69, 67, 66, 64, 61, 62, 0, 0];
+  /* town / saloon: a ragtime piano two-step in G */
+  var CT = { G: [43, 50, [59, 62, 67]], C: [48, 43, [60, 64, 67]], E7: [40, 47, [56, 59, 62]], A7: [45, 40, [61, 64, 67]], D7: [38, 45, [54, 57, 60]] };
+  var PT = ['G', 'G', 'C', 'G', 'G', 'E7', 'A7', 'D7'];
+  var MT = [74, 0, 71, 74, 76, 74, 71, 67, 72, 0, 76, 72, 71, 72, 74, 0, 74, 71, 67, 71, 68, 71, 74, 76, 73, 0, 76, 73, 74, 72, 71, 69];
+  /* mine / diggings: slow A minor banjo arpeggios over a low drone, lonely harmonica, a pick in the distance */
+  var CM = { Am: [57, 60, 64, 60], F: [53, 57, 60, 57], G: [55, 59, 62, 59], E: [52, 56, 59, 56] }, PM = ['Am', 'Am', 'F', 'E', 'Am', 'G', 'F', 'E'];
+  var MM = [69, 0, 0, 0, 72, 0, 71, 0, 69, 0, 0, 0, 68, 0, 0, 0, 69, 0, 0, 0, 67, 0, 71, 0, 72, 0, 71, 0, 68, 0, 0, 0];
+  /* rail: a chugging E boogie with brushed snare and a harmonica riff */
+  var CR = { E: [40, [52, 56, 59], 64], A: [45, [57, 61, 64], 69], B: [47, [59, 63, 66], 71] }, PR = ['E', 'E', 'A', 'E', 'B', 'A', 'E', 'B'];
+  var RIFF = { 0: 0, 3: 3, 4: 5, 6: 7, 10: 5, 12: 3 };
+  var TR = {
+    prairie: { beat: 0.6, play: function (A, o, t, st) { var i = st % 24, bar = PW[(i / 3) | 0], b = i % 3;
+      if (b === 0) pl(A, o, t, bar[0], 0.22, 1.1, 'triangle', 600); else bar[1].forEach(function (n, k) { pl(A, o, t + k * 0.018, n, 0.07, 0.45); });
+      if (((st / 24) | 0) % 2 === 1 && MW[i]) hb(A, o, t, MW[i], 0.54); } },
+    town: { beat: 0.27, play: function (A, o, t, st) { var i = st % 32, ch = CT[PT[(i / 4) | 0]], b = i % 4;
+      if (b === 0) pl(A, o, t, ch[0], 0.2, 0.3, 'triangle', 900); else if (b === 2) pl(A, o, t, ch[1], 0.17, 0.3, 'triangle', 900);
+      else ch[2].forEach(function (n, k) { pl(A, o, t + k * 0.008, n, 0.05, 0.2, 'square', 1600); });
+      var cyc = ((st / 32) | 0) % 3; if (cyc !== 2 && MT[i]) { pl(A, o, t, MT[i] + (cyc === 1 ? 12 : 0), 0.08, 0.32, 'triangle', 3200); pl(A, o, t + 0.004, MT[i] + (cyc === 1 ? 12 : 0), 0.025, 0.25, 'square', 2400); } } },
+    mine: { beat: 0.5, play: function (A, o, t, st) { var i = st % 32, ch = CM[PM[(i / 4) | 0]];
+      if (i % 8 === 0) pl(A, o, t, 45, 0.14, 4.2, 'sine', 400);
+      pl(A, o, t, ch[i % 4], 0.08, 0.6, 'sawtooth', 1300);
+      if (((st / 32) | 0) % 2 === 1 && MM[i]) hb(A, o, t, MM[i], 1.6, 0.04);
+      if (i % 16 === 6) { pl(A, o, t, 98, 0.03, 0.12, 'sine', 6000); pl(A, o, t + 0.5, 98, 0.02, 0.1, 'sine', 6000); } } },
+    rail: { beat: 0.17, play: function (A, o, t, st) { var i = st % 128, bar = (i / 16) | 0, s = i % 16, ch = CR[PR[bar]];
+      nz(A, o, t, 0.06, [0.09, 0.03, 0.06, 0.03][s % 4], 4200, 'highpass');
+      if (s === 0 || s === 8) pl(A, o, t, ch[0], 0.2, 0.5, 'triangle', 700); if (s === 4 || s === 12) pl(A, o, t, ch[0] + 7, 0.16, 0.4, 'triangle', 700);
+      if (s === 2 || s === 6 || s === 10 || s === 14) ch[1].forEach(function (n, k) { pl(A, o, t + k * 0.01, n, 0.04, 0.14, 'square', 1500); });
+      if (((st / 128) | 0) % 2 === 0 && RIFF[s] !== undefined) hb(A, o, t, ch[2] + RIFF[s], s === 6 ? 0.5 : 0.28, 0.045);
+      if (bar === 7 && s === 8) { hb(A, o, t, 76, 0.5, 0.03); hb(A, o, t, 80, 0.5, 0.03); } } }
+  };
+  F.areas = Object.keys(TR);
+  var MZ = { bus: null, tr: {}, area: 'prairie', cand: 'prairie', candT: 0, last: 0, force: null };
+  function townArea() { var T = []; try { T = window.TOWN133 ? TOWN133.towns() : []; } catch (e) {}
+    for (var i = 0; i < T.length; i++) { var t = T[i], b = t.box; if (!b) continue;
+      var gold = t.d && t.d.ty === 'gold';
+      if (gold && Math.hypot(px - t.x, py - t.y) < 3600) return 'mine';
+      if (px > b.x0 - 300 && px < b.x1 + 300 && py > b.y0 - 300 && py < b.y1 + 300) return 'town'; }
+    return null; }
+  F.areaNow = function () {
+    if (MZ.force) return MZ.force;
+    if (!window.started) return 'prairie';
+    try { var R = window.RAIL216, home = inCity(px, py); if (R && performance.now() - R.t < 1500 && (R.st < (home ? 250 : 380) || (!home && R.tr < 300))) return 'rail'; } catch (e) {}
+    if (window.RIDING203) return 'rail';
+    var a = townArea(); if (a) return a;
+    try { if (MODE === 'duel' && nearTown() && !inCity(px, py)) return 'town'; } catch (e) {}
+    return 'prairie';
+  };
+  function level() { return window.sndOn ? (S.music || 0) * 0.5 : 0; }
+  MZ.tick = function () {
+    var A = window.AC, now = P ? P.raw.now() : performance.now(), dt = Math.min(0.5, (now - (MZ.last || now)) / 1000); MZ.last = now;
+    /* pick the area: it has to hold for 1.5 s before the music changes */
+    var a = F.areaNow(); if (a !== MZ.cand) { MZ.cand = a; MZ.candT = 0; } else MZ.candT += dt;
+    if (MZ.cand !== MZ.area && (MZ.candT >= 1.5 || MZ.force)) MZ.area = MZ.cand; F.area = MZ.area;
+    var L = level(), paused = !!(P && P.on), on = L > 0 && !paused && !document.hidden;
+    window.MUSIC213 = { level: L, step: MZ.tr[MZ.area] ? MZ.tr[MZ.area].step : 0, area: MZ.area, playing: on && !!A && A.state === 'running', paused: paused };
+    if (!A) return;
+    if (!MZ.bus) { MZ.bus = A.createGain(); MZ.bus.gain.value = 0; MZ.bus.connect(A.destination);
+      F.areas.forEach(function (k) { var g = A.createGain(); g.gain.value = 0; g.connect(MZ.bus); MZ.tr[k] = { g: g, lvl: 0, tgt: 0, next: 0, step: 0 }; }); }
+    MZ.bus.gain.setTargetAtTime(on ? L : 0, A.currentTime, paused ? 0.03 : 0.2);
+    if (A.state !== 'running' || !on) { F.areas.forEach(function (k) { MZ.tr[k].next = 0; }); return; }
+    F.areas.forEach(function (k) { var T = MZ.tr[k], tg = k === MZ.area ? 1 : 0;
+      if (tg !== T.tgt) { T.tgt = tg; T.g.gain.setTargetAtTime(tg, A.currentTime, 1.1); if (tg) T.step = 0; }
+      T.lvl += (tg - T.lvl) * (1 - Math.exp(-dt / 1.1));
+      if (tg > 0 || T.lvl > 0.02) { if (T.next < A.currentTime) T.next = A.currentTime + 0.05;
+        while (T.next < A.currentTime + 0.45) { try { TR[k].play(A, T.g, T.next, T.step); } catch (e) {} T.next += TR[k].beat; T.step++; } }
+      else T.next = 0; });
+  };
+  MZ.levels = function () { var o = {}; F.areas.forEach(function (k) { o[k] = MZ.tr[k] ? +MZ.tr[k].lvl.toFixed(3) : 0; }); o.bus = MZ.bus ? +MZ.bus.gain.value.toFixed(3) : 0; return o; };
+  MZ.setArea = function (k) { MZ.force = k || null; };
+  window.MU216 = MZ; F.music = MZ;
+  (P ? P.raw.si : setInterval)(function () { try { MZ.tick(); } catch (e) {} }, 100);
+  setInterval(function () { try { F.watch(); } catch (e) {} }, 250);
+})();
+</script><!-- v216-feel -->
 
 </body>
 </html>
