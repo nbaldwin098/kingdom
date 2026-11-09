@@ -5104,7 +5104,7 @@ window.B137 = (function () {
     var tk56 = 0, _ec56 = econTick; econTick = function (dt) { _ec56(dt); try { tk56 -= dt; if (tk56 > 0) return; tk56 = 1; var M = M56();
       factions.concat(me && factions.indexOf(me) < 0 ? [me] : []).forEach(function (f) { var h = f.hallObj, s = M[f.id], S = SIEGE51[f.id]; if (!h || !s || !f.alive) return;
         // militia drill: 30 gold buys training (max 3) once walls are upgraded, same rule for all
-        if (!S && (s.drill56 || 0) < 3 && (s.res.gold || 0) > 60 && (s.wallUp55 || 0) >= 30) { s.res.gold -= 30; s.drill56 = (s.drill56 || 0) + 1; if (f.isMe) { updateRes(); showToast('MILITIA DRILLED - LEVEL ' + s.drill56); } }
+        if (!S && !(f.isMe && MODE === 'free') && (s.drill56 || 0) < 3 && (s.res.gold || 0) > 60 && (s.wallUp55 || 0) >= 30) { /* v215: FREE no longer quietly spends your first 90 gold on militia drills */ s.res.gold -= 30; s.drill56 = (s.drill56 || 0) + 1; if (f.isMe) { updateRes(); showToast('MILITIA DRILLED - LEVEL ' + s.drill56); } }
         if (!S || !S.tower55) return;
         if (!S.tPos56) { var a = Math.random() * 6.28; S.tPos56 = { x: h.x + Math.cos(a) * 110, y: h.y + Math.sin(a) * 60 }; S.towerHp56 = 100; }
         // defenders near the tower set it alight: archers 6/s, militia 3/s, others 2/s, the player 8/s
@@ -6609,15 +6609,16 @@ window.B137 = (function () {
     var btn = document.createElement('button'); btn.id = 'gb135'; document.body.appendChild(btn);
     var pnl = document.createElement('div'); pnl.id = 'gp135'; document.body.appendChild(pnl);
     var near = null, cur = '', openG = null;
-    function jobTxt(s, g) { var b = jobB(s, g); if (!b) return g.st === 'build' || g.st === 'tobuild' ? 'BUILDING ' + ((ENAME[(s.jobs[0] || {}).k] || '') + '').toUpperCase() : g.st === 'repair' || g.st === 'torepair' ? 'REPAIRING THE VAULT' : 'FREE \u00b7 BUILDS & REPAIRS'; var o = g.o === 'crop' ? (ECON131.CN ? (ECON131.CN()[outOf(s, b, 'crop')] || 'CROP') : 'CROP') : RN[g.o]; return (ENAME[b.k] || b.k).toUpperCase() + ' L' + b.L + ' \u2192 ' + String(o).toUpperCase() + (g.c ? ' \u00b7 HAULING ' + Math.round(g.c) : ''); }
+    function jobTxt(s, g) { var b = jobB(s, g); if (!b && g.hunt141 && g.st !== 'build' && g.st !== 'tobuild') return 'HUNTING \u2192 MEAT' + (g.c ? ' \u00b7 HAULING ' + Math.round(g.c) : ''); if (!b) return g.st === 'build' || g.st === 'tobuild' ? 'BUILDING ' + ((ENAME[(s.jobs[0] || {}).k] || '') + '').toUpperCase() : g.st === 'repair' || g.st === 'torepair' ? 'REPAIRING THE VAULT' : 'FREE \u00b7 BUILDS & REPAIRS'; var o = g.o === 'crop' ? (ECON131.CN ? (ECON131.CN()[outOf(s, b, 'crop')] || 'CROP') : 'CROP') : RN[g.o]; return (ENAME[b.k] || b.k).toUpperCase() + ' L' + b.L + ' \u2192 ' + String(o).toUpperCase() + (g.c ? ' \u00b7 HAULING ' + Math.round(g.c) : ''); }
     function panel(kind, g) { var s = ME_S; if (!s || !s.gen135) return; openG = g || null; pnl.innerHTML = ''; pnl.style.display = 'block'; pnl.dataset.k = kind;
       var x = document.createElement('button'); x.className = 'x'; x.textContent = '\u2715'; x.onclick = function (e) { e.stopPropagation(); pnl.style.display = 'none'; }; pnl.appendChild(x);
       function add(t, fn, dis, on) { var b = document.createElement('button'); b.textContent = t; b.disabled = !!dis; if (on) b.className = 'on'; b.onclick = function (e) { e.stopPropagation(); fn(); }; pnl.appendChild(b); return b; }
       function h(t, sub) { var d = document.createElement('h3'); d.textContent = t; pnl.appendChild(d); if (sub) { var q = document.createElement('div'); q.textContent = sub; q.style.marginBottom = '6px'; pnl.appendChild(q); } }
       if (kind === 'gen') { var i = s.gen135.indexOf(g); h('\ud83c\udf96 GENERAL #' + (i + 1), 'JOB: ' + jobTxt(s, g)); var d = document.createElement('div'); d.textContent = 'REASSIGN TO:'; pnl.appendChild(d);
-        add('FREE \u2014 BUILDS NEW STUFF & REPAIRS THE VAULT', function () { deposit(s, g); assign(s, g, null); panel('gen', g); }, false, !jobB(s, g));
+        add('FREE \u2014 BUILDS NEW STUFF & REPAIRS THE VAULT', function () { deposit(s, g); assign(s, g, null); g.hunt141 = 0; g.prey141 = null; panel('gen', g); }, false, !jobB(s, g) && !g.hunt141);
+        if (window.WILD141) add('\ud83c\udff9 HUNT \u2014 BRINGS MEAT TO THE STRONGBOX', function () { deposit(s, g); assign(s, g, null); g.hunt141 = 1; panel('gen', g); }, false, !!g.hunt141); /* v215 */
         var gp = { x: g.x, y: g.y }; s.bld.filter(function (b) { return b.L > 0 && OUT[b.k]; }).sort(function (a, b) { var pa = bldPos(s, a), pb = bldPos(s, b); return Math.hypot(pa.x - gp.x, pa.y - gp.y) - Math.hypot(pb.x - gp.x, pb.y - gp.y); }).forEach(function (b) {
-          OUT[b.k].forEach(function (o) { var on = jobB(s, g) === b && g.o === o, ot = o === 'crop' ? String((ECON131.CN && ECON131.CN()[outOf(s, b, 'crop')]) || 'CROP').toUpperCase() : RN[o], busy = s.gen135.filter(function (q) { return q !== g && jobB(s, q) === b; }).length; add((ENAME[b.k] || b.k).toUpperCase() + ' L' + b.L + ' \u2192 ' + ot + (busy ? ' (' + busy + ' ALREADY)' : ''), function () { deposit(s, g); assign(s, g, b, o); showToast('GENERAL #' + (i + 1) + ': ' + (ENAME[b.k] || b.k).toUpperCase() + ' \u2192 ' + ot); panel('gen', g); }, false, on); }); });
+          OUT[b.k].forEach(function (o) { var on = jobB(s, g) === b && g.o === o, ot = o === 'crop' ? String((ECON131.CN && ECON131.CN()[outOf(s, b, 'crop')]) || 'CROP').toUpperCase() : RN[o], busy = s.gen135.filter(function (q) { return q !== g && jobB(s, q) === b; }).length; add((ENAME[b.k] || b.k).toUpperCase() + ' L' + b.L + ' \u2192 ' + ot + (busy ? ' (' + busy + ' ALREADY)' : ''), function () { deposit(s, g); assign(s, g, b, o); g.hunt141 = 0; g.prey141 = null; showToast('GENERAL #' + (i + 1) + ': ' + (ENAME[b.k] || b.k).toUpperCase() + ' \u2192 ' + ot); panel('gen', g); }, false, on); }); });
         add('\u2190 ALL GENERALS', function () { panel('list'); }); return; }
       if (kind === 'vault') { var v = s.v135; h('\ud83c\udfe6 YOUR VAULT', 'HP ' + Math.ceil(v.hp) + '/' + v.max + ' \u00b7 ARMOR ' + v.arm + (v.hp <= 0 ? ' \u00b7 BROKEN: GOLD CAN BE LOOTED' : '') + ' \u00b7 HOLDS FOOD ' + fmt(s.res.food) + ' WATER ' + fmt(s.res.water) + ' WOOD ' + fmt(s.res.wood) + ' STONE ' + fmt(s.res.stone) + ' GOLD ' + fmt(s.res.gold) + ' \u00b7 NEXT GOBLIN RAID ' + Math.max(0, Math.ceil(GW.t)) + 's');
         add('\ud83d\udd27 REPAIR +40% (20 WOOD 20 STONE)', function () { if (s.res.wood < 20 || s.res.stone < 20) return showToast('NEED 20 WOOD 20 STONE'); s.res.wood -= 20; s.res.stone -= 20; v.hp = Math.min(v.max, v.hp + v.max * 0.4); updateRes(); panel('vault'); }, v.hp >= v.max);
@@ -16171,7 +16172,7 @@ body.joyL213 #rcol { left: auto !important; right: calc(var(--pad) + 6px + var(-
   window.addEventListener('pagehide', function () { try { if (!window.NOSAVE213 && inGame() && mode() !== 'duel') P.snap(mode(), label()); } catch (e) {} });
   window.PZ213 = { open: open, resume: resume, isOpen: function () { return OPEN; }, save: save, mode: mode,
     canOpen: function () { return inGame() && !vis($('creator')) && !vis($('modes')) && !vis(settingsEl); },
-    nothingOpen: function () { try { if (window.__p114 && __p114().length) return false; if (window.STORY170 && STORY170.dlgOn()) return false; var L = ['shop', 'statsP', 'chP', 'invp210', 'railp136', 'map136', 'rc203', 'dlg170', 'dead209', 'ordP', 'upanel', 'bankPanel', 'crop132', 'cp133', 'tp131', 'pp133', 'gp135', 'near63', 'propPanel', 'banner', 'save73'];
+    nothingOpen: function () { try { if (window.__p114 && __p114().length) return false; if (window.STORY170 && STORY170.dlgOn()) return false; var L = ['shop', 'statsP', 'chP', 'invp210', 'railp136', 'map136', 'rc203', 'dlg170', 'dlg215', 'dead209', 'ordP', 'upanel', 'bankPanel', 'crop132', 'cp133', 'tp131', 'pp133', 'gp135', 'near63', 'propPanel', 'banner', 'save73'];
       for (var i = 0; i < L.length; i++) { var e = $(L[i]); if (e && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0) return false; } } catch (e) {} return true; },
     key: function (k) { if (vis(settingsEl)) { $('settingsClose').click(); return; } if (ask.style.display !== 'none') { show('main'); return; } resume(); } };
   /* ---------- sound / music ---------- */
@@ -16331,6 +16332,208 @@ body.map214 #minimap, body.map214 #mapb136, body.map214 #inv210, body.map214 #ra
   setInterval(function () { try { var mv = document.getElementById('map136'); if (mv && mv.style.display === 'block' && !freeOn() && window.MAP136) MAP136.openMap(false); } catch (e) {} }, 400);
 })();
 </script><!-- v214-map -->
+<style id="v215css">/* v215 FIRST 10 MINUTES OF FREE: Sam Tully, the neighbour who teaches the start by talking (walk-up TALK button + reply options) */
+#talk215 { position: fixed; left: 50%; top: calc(12% + 48px); transform: translateX(-50%); z-index: 57; display: none; font: bold 15px Georgia, serif; padding: 10px 16px; background: var(--w212, #7a4a1c) !important; color: #fff3d6 !important; border: 2px solid var(--w212d, #4e2e12) !important; border-radius: 8px !important; box-shadow: 0 3px 0 #3b2410; min-height: 36px; white-space: nowrap; }
+#talk215 b { display: inline-block; margin-left: 8px; background: #fff3d6; color: #b0281c; border-radius: 50%; width: 18px; height: 18px; line-height: 18px; text-align: center; font-size: 13px; }
+#dlg215 { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 92; display: none; background: var(--p212, #f3e3c3); border: 3px solid var(--w212, #7a4a1c); border-radius: 10px; padding: 12px; font: 13px Georgia, serif; color: var(--i212, #3b2410); width: min(500px, 92vw); max-height: 86vh; overflow: auto; box-shadow: 0 8px 0 rgba(0,0,0,.3); }
+#dlg215 .row { display: flex; gap: 10px; align-items: flex-start; padding-right: 44px; }
+#dlg215 canvas { width: 72px; height: 88px; background: #e8d4a8; border: 2px solid var(--i212, #3b2410); border-radius: 6px; flex: 0 0 auto; }
+#dlg215 .meta { font-weight: bold; letter-spacing: .4px; font-size: 15px; }
+#dlg215 .ttl { opacity: .75; font-size: 11px; letter-spacing: .6px; }
+#dlg215 .say { margin: 8px 0; line-height: 1.38; font-size: 14px; }
+#dlg215 button.r215 { display: block; width: 100%; margin: 5px 0; padding: 8px 10px; font: bold 13px Georgia, serif; background: var(--w212, #7a4a1c); color: #fff3d6; border: 2px solid var(--i212, #3b2410); border-radius: 8px; text-align: left; min-height: 36px; }
+#dlg215 .x { position: absolute; right: 8px; top: 8px; }
+@media (orientation: landscape) and (max-height: 500px) { #talk215 { top: 8px; padding: 6px 12px; font-size: 13px; } #dlg215 { max-height: 94vh; padding: 8px 10px; width: min(560px, 74vw); } #dlg215 .say { margin: 5px 0; font-size: 13px; line-height: 1.3; } #dlg215 button.r215 { padding: 5px 8px; margin: 3px 0; } #dlg215 canvas { width: 50px; height: 60px; } }
+body.out212 #talk215, body.map214 #talk215 { display: none !important; }
+@media (max-height: 480px) { body.pan212 #talk215 { visibility: hidden !important; } }
+</style>
+<script>
+/* v215 FIRST 10 MINUTES OF FREE: a neighbour (Sam Tully) stands by your claim and teaches the start through walk-up talk with reply options:
+   hunt a turkey and sell it to him (first money), put your general on a job (first job), build a farm (first building), then a small goblin
+   scouting party that you can beat (first raid), a bounty and his parting advice, then he rides home. No hint toasts. State is saved per FREE run. */
+(function () {
+  var KEY = 'kingdom-ftm215', F = null, SAM = null, CLK = 0, BARK = null, dlgOpen = false, curNode = null, lastSave = 0;
+  function $(i) { return document.getElementById(i); }
+  function storyOn() { try { return !!(window.STORY170 && STORY170.on()); } catch (e) { return false; } }
+  function on() { return typeof MODE !== 'undefined' && MODE === 'free' && typeof started !== 'undefined' && !!started && !storyOn() && !!ME_S && !!F; }
+  function fresh() { return { st: 0, told: {}, meat0: 0, tm: {}, clk: 0, paid: 0, bounty: 0, kills: 0, n: 0 }; }
+  function save() { try { if (F) localStorage.setItem(KEY, JSON.stringify(F)); } catch (e) {} }
+  function veteran() { try { var s = ME_S; return s.ppl.length > 0 || hallL(s) > 0 || s.bld.some(function (b, i) { return i > 0 && !b.start141 && (b.L > 0 || b.j); }); } catch (e) { return false; } }
+  function home() { try { return homeXY(ME_S); } catch (e) { return { x: city.x, y: city.y }; } }
+  function samPos() { var h = home(); return { x: h.x - 170, y: h.y - 70 }; }
+  function begin(had) {
+    F = null; SAM = null; BARK = null; closeDlg();
+    if (typeof MODE === 'undefined' || MODE !== 'free' || storyOn()) return;
+    var j = null; try { j = had ? JSON.parse(localStorage.getItem(KEY) || 'null') : null; } catch (e) {}
+    if (j && typeof j.st === 'number') F = j; else { F = fresh(); if (had && veteran()) F.st = 7; }
+    F.told = F.told || {}; F.tm = F.tm || {};
+    if (F.st === 5) F.st = 4; /* a raid in progress does not survive a reload: Sam warns again */
+    CLK = F.clk || 0;
+    if (F.st < 7) { var p = samPos(); SAM = { x: p.x, y: p.y, face: 1, a: 1, leave: 0 }; }
+    save();
+  }
+  var _eb = econBegin; econBegin = function () { var had = null; try { had = MODE === 'free' && localStorage.getItem(ECON_KEY); } catch (e) {} var r = _eb.apply(this, arguments); try { begin(!!had); } catch (e) { console.warn(e); } return r; };
+
+  /* ---------- world facts ---------- */
+  function idleGen() { var s = ME_S; return (s.gen135 || []).every(function (g) { return !g.hunt141 && !g.coal169 && !(window.GEN135 && GEN135.job(s, g)); }); }
+  function jobDone() { var s = ME_S; return (s.gen135 || []).some(function (g) { return g.hunt141 || g.coal169 || (window.GEN135 && GEN135.job(s, g)); }); }
+  function built() { var s = ME_S; return hallL(s) > 0 || s.bld.some(function (b, i) { return i > 0 && !b.start141 && b.L > 0; }); }
+  function building() { var s = ME_S; return !!(s.jobs && s.jobs.length); }
+  function meat() { return (ME_S && ME_S.meat141) || 0; }
+  function town() { var best = null; try { TOWN133.towns().forEach(function (t) { var d = Math.hypot(t.x - px, t.y - py); if (!best || d < best.d) best = { n: t.name, d: d, x: t.x, y: t.y }; }); } catch (e) {} return best; }
+  function dirTo(x, y) { var a = Math.atan2(y - py, x - px), dx = Math.cos(a), dy = Math.sin(a); return ((Math.abs(dy) > 0.4 ? (dy > 0 ? 'south' : 'north') : '') + (Math.abs(dx) > 0.4 ? (dx > 0 ? 'east' : 'west') : '')) || 'out'; }
+  function cap(t) { return String(t || '').toLowerCase().replace(/\b\w/g, function (c) { return c.toUpperCase(); }); }
+  function townTxt() { var t = town(); return t ? cap(t.n) + ', about ' + (t.d / 1000).toFixed(1) + 'k ' + dirTo(t.x, t.y) : 'a long ride off'; }
+  function raidLeft() { return wolves.filter(function (w) { return w.ftm215 && w.hp > 0 && !w.gone; }).length; }
+  function pay(n) { gold += n; try { updateRes(); } catch (e) {} try { if (typeof sfx === 'function') sfx('coin'); } catch (e) {} if (SAM) SAM.pop = { s: '+' + n + ' GOLD', t: 1.8 }; }
+  function bark(t, d) { BARK = { s: t, t: d || 3.5 }; }
+  function mark(k) { if (F.tm[k] == null) F.tm[k] = Math.round(CLK); }
+
+  /* turkeys for the first hunt, a short ride west of Sam */
+  function turkeys() { if (!window.WILD141) return; var p = samPos(), n = 0;
+    for (var t = 0; t < 30 && n < 2; t++) { var x = p.x - 330 - Math.random() * 160 - n * 60, y = p.y - 40 + Math.random() * 140; var ok = true; try { if (!isLand(x, y) || blockedWorld(x, y)) ok = false; } catch (e) {} if (!ok) continue;
+      WILD141.A.push({ k: 'turkey', x: x, y: y, hp: 1, f: 1, ph: Math.random() * 6, tx: x, ty: y, flee: 0, z: 0, dead: 0, ftm215: 1 }); n++; } }
+  function turkeysLeft() { return window.WILD141 ? WILD141.A.filter(function (a) { return a.ftm215 && !a.dead; }).length : 0; }
+
+  /* the first goblin raid: a three-goblin scouting party from the east that walks a little slower than a war band */
+  function raid() { var s = ME_S; if (!s || !s.v135 || s.v135.x == null) return; var v = GEN135.vpos(s), n = 0;
+    for (var t = 0; t < 80 && n < 3; t++) { var a = -0.5 + Math.random() * 1.0, r = 820 + Math.random() * 120, x = v.x + Math.cos(a) * r, y = v.y + Math.sin(a) * r * 0.6; try { if (!isLand(x, y)) continue; } catch (e) {}
+      wolves.push({ gob: 1, ftm215: 1, x: x, y: y, hp: 3, hm: 3, face: -1, ph: Math.random() * 6, hitT: 0, cd: 0, loot: 0 }); n++; }
+    F.st = 5; F.n = n; mark('raid'); bark('GOBLINS! SHOOT \u2019EM BEFORE THEY HIT THE STRONGBOX!', 7); save(); }
+
+  /* ---------- what Sam says ---------- */
+  function R(t, go) { return { t: t, go: go }; }
+  function node(id) {
+    var s = ME_S;
+    switch (id) {
+      case 'hello': return { say: 'Howdy, neighbour. Sam Tully \u2014 I hold the claim over the ridge. This patch is yours now: a sign, a strongbox and one general, nothing else. Nearest town is ' + townTxt() + '. Out here you earn your keep.',
+        r: [R('So where do I start?', function () { startHunt(); return 'hunt'; }), R('What can a body do out here?', function () { return 'what'; }), R('I know the frontier, Sam. I\u2019ll manage.', function () { F.st = 7; F.skipped = 1; leave('SUIT YOURSELF. GOOD LUCK, NEIGHBOUR!'); return null; })] };
+      case 'what': return { say: 'Hunt and farm. Raise a town and fill it with settlers. Haul freight on the railroad, sell in town, fight off goblins \u2014 or turn outlaw and get yourself WANTED. One step at a time, though.',
+        r: [R('Fair enough. Where do I start?', function () { startHunt(); return 'hunt'; })] };
+      case 'hunt': return { say: 'First you need coin. A pair of wild turkeys just went by, west of here. Shoot one and I\u2019ll pay cash for the bird \u2014 I\u2019m too old to chase \u2019em.',
+        r: [R('On my way.', function () { return null; }), R('How do I shoot?', function () { return 'shoot'; })] };
+      case 'shoot': return { say: 'Face the bird and hit ATTACK (SPACE on a keyboard). That shotgun spreads, so get close. Turkeys run when you crowd \u2019em \u2014 the horse is quicker.',
+        r: [R('Got it.', function () { return null; })] };
+      case 'huntwait': return { say: (turkeysLeft() ? 'No bird yet? They\u2019re just west of here, pecking about. Get close and fire.' : 'Those turkeys got clean away. There\u2019s two more wandering west of here now \u2014 go on.'),
+        r: [R('On my way.', function () { if (!turkeysLeft()) turkeys(); return null; })] };
+      case 'paid': var m = Math.max(1, Math.round(meat() - F.meat0)); return { say: 'Now that\u2019s a fat bird! ' + m + ' pounds of meat. Here\u2019s 25 gold for the hide and feathers \u2014 keep the meat, your settlers will need feeding.',
+        r: [R('Thanks, Sam. (+25 gold)', function () { if (!F.paid) { F.paid = 1; pay(25); mark('money'); } F.st = 2; return 'job'; })] };
+      case 'job': return { say: 'Next: that fellow in the top hat by your strongbox is your GENERAL \u2014 your foreman. Every job out here runs through a general, and he\u2019s standing idle. Walk up to him and give him a job. HUNT will do for now; he\u2019ll haul meat to the strongbox.',
+        r: [R('I\u2019ll put him to work.', function () { return null; }), R('Why can\u2019t I do it all myself?', function () { return 'whygen'; })] };
+      case 'whygen': return { say: 'You can hunt and fight, but a general builds, hauls and works a farm or a mine while you ride. You start with one. More cost gold at the Town Hall.',
+        r: [R('I\u2019ll put him to work.', function () { return null; })] };
+      case 'jobwait': return { say: 'Your general\u2019s still twiddling his thumbs. Walk up to him by the strongbox and pick HUNT.', r: [R('On my way.', function () { return null; })] };
+      case 'build': F.told.b = 1; return { say: (building() ? 'Your general\u2019s raising it now. Won\u2019t take long \u2014 stand back and watch.' : 'Good, he\u2019s working. Now put something on your claim. Ride to the YOUR CLAIM sign, open the TOWN HALL, tap \u2302 BUILD and pick a FARM \u2014 it\u2019s 2 wood. A free general walks over and raises it.'),
+        r: [R('I\u2019ll build a farm.', function () { return null; }), R('What else can I build?', function () { return 'whatbuild'; })] };
+      case 'whatbuild': return { say: 'Houses bring settlers. A lumber camp gives wood, a well water, a quarry stone. Mines, derricks and a market come later. Every new building needs a free general on site.',
+        r: [R('A farm it is.', function () { return null; })] };
+      case 'warn': return { say: 'Nice work \u2014 your first building! Now hush... hear that? Goblins, up from the dry wash to the east. Just a scouting party, three of \u2019em, but they\u2019ll crack your strongbox and grab your gold. Shoot them before they get there.',
+        r: [R('Let them come.', function () { raid(); return null; }), R('What are goblins after?', function () { return 'gobs'; })] };
+      case 'gobs': return { say: 'Gold, mostly. Once they know you\u2019re here, bigger bands come every few minutes. Their camps are out in the scrub \u2014 burn a camp and its raids stop.',
+        r: [R('Let them come.', function () { raid(); return null; })] };
+      case 'fight': var n = raidLeft(); return { say: 'Quit jawing and shoot! ' + n + ' goblin' + (n === 1 ? '' : 's') + ' left, coming from the east!', r: [R('On it.', function () { return null; })] };
+      case 'won': return { say: 'Ha! That\u2019s how it\u2019s done. Here\u2019s the bounty \u2014 20 gold. Bigger raids will come: build up, hire more generals at the Town Hall, and keep that shotgun handy.',
+        r: [R('Any last advice?', function () { return 'advice'; }), R('Thanks, Sam. (+20 gold)', function () { bounty(); F.st = 7; leave('I\u2019LL BE OVER THE RIDGE. SO LONG!'); return null; })] };
+      case 'advice': return { say: 'Sell your goods in town \u2014 ' + townTxt() + ' \u2014 at the market or by rail from the depot. Towns post WANTED freight with a bonus. Tap the MAP to set a waypoint. And don\u2019t shoot townsfolk unless you fancy a posse.',
+        r: [R('Thanks, Sam. (+20 gold)', function () { bounty(); F.st = 7; leave('I\u2019LL BE OVER THE RIDGE. SO LONG!'); return null; })] };
+    }
+    return null;
+  }
+  function bounty() { if (!F.bounty) { F.bounty = 1; pay(20); } }
+  function startHunt() { if (F.st < 1) { F.st = 1; F.meat0 = meat(); turkeys(); save(); } }
+  function entry() {
+    switch (F.st) {
+      case 0: return 'hello';
+      case 1: return meat() > F.meat0 ? 'paid' : (F.told.h ? 'huntwait' : 'hunt');
+      case 2: return F.told.j ? 'jobwait' : 'job';
+      case 3: return 'build';
+      case 4: return 'warn';
+      case 5: return 'fight';
+      case 6: return 'won';
+    }
+    return null;
+  }
+  function news() { if (!F) return false; return (F.st === 1 && meat() > F.meat0) || (F.st === 3 && !F.told.b) || F.st === 4 || F.st === 6 || F.st === 0; }
+  function leave(t) { if (SAM) { SAM.leave = 1; bark(t, 4); } save(); }
+
+  /* ---------- dialog ---------- */
+  var btn = document.createElement('button'); btn.id = 'talk215'; document.body.appendChild(btn);
+  var dlg = document.createElement('div'); dlg.id = 'dlg215'; document.body.appendChild(dlg);
+  var por = document.createElement('canvas'); por.width = 90; por.height = 110;
+  function paintPor() { var c = por.getContext('2d'); c.fillStyle = '#e8d4a8'; c.fillRect(0, 0, 90, 110); try { var im = window.ART137 && ART137.spr('farmer'); if (im) { c.drawImage(im, -24, -10, 138, 138); return; } } catch (e) {} c.fillStyle = '#e0b088'; c.beginPath(); c.arc(45, 40, 16, 0, 7); c.fill(); }
+  function closeDlg() { dlgOpen = false; curNode = null; dlg.style.display = 'none'; dlg.innerHTML = ''; }
+  function open(id) {
+    var n = id && node(id); if (!n) { closeDlg(); return; }
+    if (id === 'hunt') F.told.h = 1; if (id === 'job') F.told.j = 1; save();
+    curNode = n; dlg.innerHTML = '';
+    var x = document.createElement('button'); x.className = 'x x212'; x.textContent = '\u2715'; x.onclick = function (e) { e.stopPropagation(); closeDlg(); }; dlg.appendChild(x);
+    var row = document.createElement('div'); row.className = 'row'; paintPor(); row.appendChild(por);
+    var info = document.createElement('div'), meta = document.createElement('div'), ttl = document.createElement('div'); meta.className = 'meta'; meta.textContent = 'Sam Tully'; ttl.className = 'ttl'; ttl.textContent = 'YOUR NEIGHBOUR \u00b7 OLD HAND';
+    info.appendChild(meta); info.appendChild(ttl); row.appendChild(info); dlg.appendChild(row);
+    var say = document.createElement('div'); say.className = 'say'; say.textContent = n.say; dlg.appendChild(say);
+    n.r.forEach(function (r, i) { var b = document.createElement('button'); b.className = 'r215'; b.textContent = (i + 1) + '. ' + r.t; b.onclick = function (e) { e.stopPropagation(); pick(i); }; dlg.appendChild(b); });
+    dlg.style.display = 'block'; dlgOpen = true;
+  }
+  function pick(i) { if (!curNode || !curNode.r[i]) return; var nx = curNode.r[i].go(); save(); if (nx) open(nx); else closeDlg(); }
+  function near() { return SAM && !SAM.leave && Math.hypot(SAM.x - px, SAM.y - py) < 100; }
+  function busy() { try { if (window.PZ213 && PZ213.isOpen()) return true; if (window.STORY170 && STORY170.dlgOn()) return true; var L = ['shop', 'invp210', 'map136', 'ordP', 'gp135', 'rc203', 'dead209', 'save73', 'statsP', 'chP', 'railp136'];
+      for (var i = 0; i < L.length; i++) { var e = $(L[i]); if (e && e.style.display !== 'none' && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0) return true; } } catch (e) {} return false; }
+  function talk() { if (!on() || !near() || dlgOpen) return false; open(entry()); return true; }
+  btn.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+  btn.onclick = function (e) { e.stopPropagation(); talk(); };
+  dlg.addEventListener('pointerdown', function (e) { e.stopPropagation(); }); dlg.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+  addEventListener('keydown', function (e) {
+    if (/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+    if (dlgOpen) { if (e.key === 'Escape') { closeDlg(); e.preventDefault(); e.stopImmediatePropagation(); return; } var k = +e.key; if (k >= 1 && k <= 9 && curNode && curNode.r[k - 1]) { pick(k - 1); e.preventDefault(); e.stopImmediatePropagation(); } return; }
+    if ((e.key === 't' || e.key === 'T') && on() && near() && !busy()) { talk(); e.preventDefault(); e.stopImmediatePropagation(); }
+  }, true);
+  setInterval(function () { try {
+    if (!on() || !near() || dlgOpen || busy()) { if (btn.style.display !== 'none') btn.style.display = 'none'; if (dlgOpen && (!on() || !SAM || (window.PZ213 && PZ213.isOpen() && false))) closeDlg(); return; }
+    var t = 'TALK TO SAM' + (matchMedia('(pointer:coarse)').matches ? '' : ' [T]'), h = t + (news() ? '<b>!</b>' : ''); if (btn.innerHTML !== h) btn.innerHTML = h; btn.style.display = 'block';
+  } catch (e) {} }, 250);
+
+  /* ---------- tick: goals, raid hold, Sam leaving ---------- */
+  function tick(dt) {
+    if (!on()) return; CLK += dt; F.clk = CLK;
+    if (BARK) { BARK.t -= dt; if (BARK.t <= 0) BARK = null; }
+    if (SAM && SAM.pop) { SAM.pop.t -= dt; if (SAM.pop.t <= 0) SAM.pop = null; }
+    if (SAM) { if (Math.hypot(SAM.x - px, SAM.y - py) < 260) SAM.face = px < SAM.x ? -1 : 1;
+      if (SAM.leave) { SAM.leave += dt; SAM.face = -1; SAM.x -= 70 * dt; SAM.ph = (SAM.ph || 0) + dt * 8; SAM.a = Math.max(0, 1 - Math.max(0, SAM.leave - 4) / 3); if (SAM.leave > 7.5) { SAM = null; if (dlgOpen) closeDlg(); } } }
+    var ch = false;
+    if (F.st === 2 && jobDone()) { F.st = 3; mark('job'); bark('GOOD! NOW COME TALK BUILDING.'); ch = true; }
+    if ((F.st === 3 || F.st === 2) && built()) { if (F.st === 2) mark('job'); F.st = 4; F.at4 = CLK; mark('build'); bark('YOUR FIRST BUILDING! COME HERE, QUICK.'); ch = true; }
+    if (F.st < 4 && built() && F.st >= 1 && F.tm.build == null) mark('build');
+    if (F.st === 4 && F.at4 != null && CLK - F.at4 > 45 && !dlgOpen) raid();
+    if (F.st === 5 && raidLeft() === 0) { F.st = 6; mark('raidWon'); bark('HA! THEY\u2019RE RUNNING. COME GET YOUR BOUNTY.'); ch = true; }
+    /* hold the regular goblin waves while Sam is teaching (at most 12 minutes) so the first raid is his small one */
+    try { if (F.st >= 1 && F.st < 6 && CLK < 720 && GEN135.GW.t < 40) { GEN135.GW.t = 40; GEN135.GW.warned = false; } if (F.st >= 6 && !F.gwSet) { F.gwSet = 1; GEN135.GW.t = Math.max(GEN135.GW.t, 150); ch = true; } } catch (e) {}
+    if (ch || CLK - lastSave > 5) { lastSave = CLK; save(); }
+  }
+  var LAST = {}; var _uw = updateWolves; updateWolves = function (dt) {
+    var mine = []; try { if (on()) wolves.forEach(function (w) { if (w.ftm215) mine.push([w, w.x, w.y]); }); } catch (e) {}
+    _uw.apply(this, arguments);
+    try { mine.forEach(function (q) { var w = q[0]; if (w.hp > 0 && !w.gone) { w.x = q[1] + (w.x - q[1]) * 0.62; w.y = q[2] + (w.y - q[2]) * 0.62; } }); tick(dt); } catch (e) { if (!window.E215) { window.E215 = 1; console.warn(e); } } };
+  var _hw = hitWolf; hitWolf = function (w, p) { var was = w && w.hp; var r = _hw.apply(this, arguments); try { if (w && w.ftm215 && was > 0 && w.hp <= 0 && F) { F.kills = (F.kills || 0) + 1; } } catch (e) {} return r; };
+
+  /* ---------- drawing Sam ---------- */
+  function bubble(c, x, y, t, a) { c.save(); c.globalAlpha = a; c.font = 'bold 12px Georgia, serif'; var w = Math.min(300, c.measureText(t).width + 18); c.fillStyle = '#fbf1dc'; c.strokeStyle = '#7a4a1c'; c.lineWidth = 2;
+    var z = (typeof zoom === 'number' && zoom > 0) ? zoom : 1, WW = (typeof W === 'number' && W > 0) ? W : innerWidth, bx = Math.max(WW / 2 + (130 - WW / 2) / z + w / 2, Math.min(WW / 2 + (WW / 2 - 12) / z - w / 2, x)); if (!(bx === bx)) bx = x; /* keep the bubble on screen, clear of the minimap column */
+    c.beginPath(); if (c.roundRect) c.roundRect(bx - w / 2, y - 24, w, 22, 7); else c.rect(bx - w / 2, y - 24, w, 22); c.fill(); c.stroke(); c.beginPath(); c.moveTo(x - 6, y - 3); c.lineTo(x, y + 6); c.lineTo(x + 6, y - 3); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = '#3b2410'; c.textAlign = 'center'; c.fillText(t, bx, y - 9, w - 10); c.restore(); }
+  function drawSam(camX, camY) { if (!on() || !SAM) return; var sx = SAM.x - camX, sy = SAM.y - camY, c = ctx; if (Math.abs(SAM.x - px) > 1600 || Math.abs(SAM.y - py) > 1000) return;
+    c.save(); c.globalAlpha = SAM.a;
+    try { var im = window.ART137 && ART137.spr('farmer'); if (im && typeof dspr === 'function') dspr(c, im, sx, sy + (SAM.leave ? Math.abs(Math.sin(SAM.ph || 0)) * -2 : 0), 68, SAM.face || 1); else { c.fillStyle = '#e0b088'; c.beginPath(); c.arc(sx, sy - 42, 7, 0, 7); c.fill(); c.fillStyle = '#6a4a2a'; c.fillRect(sx - 7, sy - 34, 14, 24); } } catch (e) {}
+    c.fillStyle = '#2a1a0a'; c.font = 'bold 11px Georgia, serif'; c.textAlign = 'center'; c.fillText('SAM TULLY', sx, sy - 76);
+    if (BARK) bubble(c, sx, sy - 86, BARK.s, Math.min(1, BARK.t) * SAM.a);
+    else if (news() && !SAM.leave) { var b = Math.sin(performance.now() / 260) * 2; bubble(c, sx, sy - 86 + b, '!', 1); }
+    if (SAM.pop) { c.globalAlpha = Math.min(1, SAM.pop.t); c.font = 'bold 14px Georgia, serif'; c.lineWidth = 3; c.strokeStyle = '#2a1a0a'; var yy = sy - 112 - (1.8 - SAM.pop.t) * 18; c.strokeText(SAM.pop.s, sx, yy); c.fillStyle = '#ffd27a'; c.fillText(SAM.pop.s, sx, yy); }
+    c.restore(); }
+  var _du = drawUnits; drawUnits = function (camX, camY) { var r = _du.apply(this, arguments); try { drawSam(camX, camY); } catch (e) { if (!window.E215d) { window.E215d = 1; console.warn(e); } } return r; };
+
+  window.FTM215 = { state: function () { return F ? JSON.parse(JSON.stringify(F)) : null; }, sam: function () { return SAM ? { x: SAM.x, y: SAM.y, leave: SAM.leave } : null; }, talk: talk, near: near, reply: function (i) { if (!dlgOpen) return false; pick(i); return true; },
+    talking: function () { return dlgOpen && curNode ? { say: curNode.say, r: curNode.r.map(function (q) { return q.t; }) } : null; }, raidLeft: raidLeft, turkeys: function () { return WILD141.A.filter(function (a) { return a.ftm215 && !a.dead; }).map(function (a) { return { x: a.x, y: a.y }; }); }, clock: function () { return CLK; } };
+})();
+</script><!-- v215-first10 -->
 
 </body>
 </html>
