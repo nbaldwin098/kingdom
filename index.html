@@ -6380,7 +6380,7 @@ window.B137 = (function () {
       var inT = T.filter(function (t) { return px > t.box.x0 && px < t.box.x1 && py > t.box.y0 && py < t.box.y1; })[0];
       if (NEAR) { PB.innerHTML = '\ud83e\udd20 ' + NEAR.n + ' \u00b7 ' + NEAR.job + '<br><span style="font-weight:normal">' + NEAR.doing + ' \u00b7 LIVES ON ' + ['MAIN', '2ND', '3RD', '4TH'][Math.max(0, Math.round((NEAR.hm.y + 40 - NEAR.t.y) / 330))] + ' ST \u00b7 ' + hhmm() + '</span>'; PB.style.display = 'block'; }
       else if (inT) { PB.innerHTML = inT.name + ' \u00b7 POP ' + inT.d.pop + ' \u00b7 ' + hhmm(); PB.style.display = 'block'; } else PB.style.display = 'none'; } catch (e) {} }, 250);
-    window.TOWN133.near = function () { return NEAR; };
+    window.TOWN133.near = function () { return NEAR; }; window.TOWN133.pspr = pspr; /* v209 */
     // the whole game: your houses use the new cached western home art
     var _cb = cityBuilding; cityBuilding = function (c, b, x, y) { if (b.kind === 'house') { var A = bart({ k: 'home', v: Math.abs(Math.round(x * 0 + (b.x || 0) / 50)) % 4, w: 130, h: 80, top: 50, i: 0 }, false); c.drawImage(A.c, x - A.ox, y - A.oy); c.fillStyle = '#2a1a0a'; c.font = 'bold 13px monospace'; c.textAlign = 'center'; return; } return _cb.apply(this, arguments); };
   })();
@@ -6875,14 +6875,16 @@ window.B137 = (function () {
       // fishing
       if (L.fish) { L.fish.t -= dt; if (Math.hypot(L.fish.bx - px, L.fish.by - py) > 260) { L.fish = null; showToast('LINE REELED IN'); } else if (L.fish.t <= 0) { var big = Math.random() < 0.25, m = big ? 8 : 4; food += m; ME_S.fish143 = (ME_S.fish143 || 0) + 1; try { if (ME_S.res && ME_S.res.fish != null) ME_S.res.fish += 1; } catch (e) {} updateRes(); pop143({ x: L.fish.bx, y: L.fish.by - 30, t: 1.5, s: '+' + m + ' FOOD' }); showToast((big ? 'BIG CATFISH!' : 'CAUGHT A TROUT') + ' +' + m + ' FOOD'); L.fish = null; } }
       // wanted: sheriffs spawn & chase; decay when none are close
+      var dmgList; if (!window.KILL209) {
       var want = Math.ceil(L.wanted); while (L.law.length < want) { var a = Math.random() * 6.28; L.law.push({ x: px + Math.cos(a) * 750, y: py + Math.sin(a) * 450, hp: 3, cd: 1.5, f: 1, ph: 0 }); }
       var close = 0; L.law.forEach(function (s) { var dx = px - s.x, dy = py - s.y, d = Math.hypot(dx, dy) || 1; s.f = dx > 0 ? 1 : -1; s.ph += dt * 8; if (d > 220) { s.x += dx / d * 250 * dt; s.y += dy / d * 250 * dt; } if (d < 700) close++; s.cd -= dt; if (d < 380 && s.cd <= 0) { s.cd = 1.8; s.shot = 0.12; try { sfx('clash', s.x, s.y, 0.6); } catch (e) {} if (Math.random() < 0.6) { hp -= 0.5; hurtT = 0.3; drawHp(); } } if (s.shot > 0) s.shot -= dt; if (s.hitT > 0) s.hitT -= dt; });
       // shotgun pellets / melee hit sheriffs & rioters
-      function dmgList(list, onKill) { list.forEach(function (s) { if (s.hp <= 0) return; if (window.SG142) SG142.pel.forEach(function (p) { if (!p.used143 && Math.abs(p.x - s.x) < 24 && Math.abs(p.y - (s.y - 30)) < 40) { p.used143 = 1; p.life = 0; s.hp -= 1; s.hitT = 0.2; } }); if (s.hp <= 0) onKill(s); }); }
+      dmgList = function (list, onKill) { list.forEach(function (s) { if (s.hp <= 0) return; if (window.SG142) SG142.pel.forEach(function (p) { if (!p.used143 && Math.abs(p.x - s.x) < 24 && Math.abs(p.y - (s.y - 30)) < 40) { p.used143 = 1; p.life = 0; s.hp -= 1; s.hitT = 0.2; } }); if (s.hp <= 0) onKill(s); }); }
       dmgList(L.law, function (s) { gold += 5; updateRes(); pop143({ x: s.x, y: s.y - 50, t: 1.4, s: 'SHERIFF DOWN +5' }); L.wanted = Math.min(5, L.wanted + 0.5); wantHud(); });
       L.law = L.law.filter(function (s) { return s.hp > 0; });
       if (L.wanted > 0 && !close) { L.wdec += dt; if (L.wdec > 20) { L.wdec = 0; L.wanted = Math.max(0, Math.ceil(L.wanted) - 1); wantHud(); if (!L.wanted) { showToast('THE LAW LOST YOUR TRAIL - WANTED CLEARED'); L.law = []; } } } else if (close) L.wdec = 0;
       if (hp <= 0.5 && L.wanted) { L.wanted = 0; L.law = []; wantHud(); showToast('ARRESTED! WANTED CLEARED, LOST HALF YOUR GOLD'); gold = Math.floor(gold / 2); updateRes(); hp = HPMAX; drawHp(); }
+      } else dmgList = function (list, onKill) { list.forEach(function (s) { if (s.hp <= 0) return; if (window.SG142) SG142.pel.forEach(function (p) { if (!p.used143 && Math.abs(p.x - s.x) < 24 && Math.abs(p.y - (s.y - 30)) < 40) { p.used143 = 1; p.life = 0; s.hp -= 1; s.hitT = 0.2; } }); if (s.hp <= 0) onKill(s); }); };
       // politics: riots when approval sinks (not on a bare claim)
       L.rT -= dt; if (L.rT <= 0) { L.rT = 45; var ap = 1; try { ap = V126.approval(); } catch (e) {} if (ap < 0.35 && ME_S.ppl.length >= 4 && L.riot.length === 0) { var n2 = 4 + Math.floor(Math.random() * 3); for (var j = 0; j < n2; j++) L.riot.push({ x: city.x + (Math.random() - 0.5) * 500, y: city.y + 150 + Math.random() * 200, hp: 2, ph: j, f: 1, tool: j % 2 }); showToast('RIOT! APPROVAL ' + Math.round(ap * 100) + '% - FOLK MARCH ON THE HALL (CALM THEM IN THE SHOP OR DISPERSE THEM)'); } }
       L.riot.forEach(function (r) { var tx = city.x + Math.sin(r.ph) * 120, ty = city.y - 40, dx = tx - r.x, dy = ty - r.y, d = Math.hypot(dx, dy) || 1; r.f = dx > 0 ? 1 : -1; r.ph += dt * 6; if (d > 30) { r.x += dx / d * 70 * dt; r.y += dy / d * 70 * dt; } else { try { ME_S.happy143 = 1; } catch (e) {} if (Math.random() < dt * 0.5) { try { var h = factions.find(function (f) { return f.id === 'me' || f === ME_S.f; }); } catch (e) {} } } if (r.hitT > 0) r.hitT -= dt; });
@@ -14567,7 +14569,8 @@ window.B137 = (function () {
       shovelPh: function (p) { if (ACT.shovel) ACT.shovel.ph = p; },
       setFlag: function (f) { ST.flags[f] = 1; setupAct(); },
       teleport: function (x, y) { px = x; py = y; try { moveId = null; targetX = px; targetY = py; } catch (e) {} return { x: px, y: py }; },
-      talksDone: talksDone
+      talksDone: talksDone,
+      _chars: function () { return ST.chars; }, restart209: function () { closeDlg(); place(); return ST.chars.length; }
     };
   })();
 
@@ -15064,6 +15067,7 @@ window.B137 = (function () {
       c.fillStyle = co.c2; for (var sI = -24; sI < 14; sI += 10) c.fillRect(sI, -59, 4, 8);
       c.fillStyle = co.c; c.fillRect(-28, -74, 44, 13); c.strokeStyle = '#2a1a0a'; c.strokeRect(-28, -74, 44, 13);
       c.fillStyle = co.c2; c.font = 'bold 8px monospace'; c.textAlign = 'center'; c.fillText('TICKETS', -6, -64.5);
+      if (a.dead209 || a.hide209) { c.restore(); return; } /* v209: shot agent - empty booth */
       /* the agent stands out front, waving when you come near */
       var x = 26, bob = near ? Math.sin(T * 3) * 0.6 : 0;
       c.fillStyle = '#2a2a30'; c.fillRect(x - 5, -16, 4, 16); c.fillRect(x + 1, -16, 4, 16);
@@ -15109,7 +15113,7 @@ window.B137 = (function () {
         window.BOARDS205 = nd;
         var na = 0, best = null, bd = 95; ui.hl = null;
         agentSts().forEach(function (st) { var A = agentsAt(st); if (!A.length || Math.abs(A[0].x - px) > vw + 200 || Math.abs(A[0].y - py) > vh) return;
-          A.forEach(function (a) { var d = Math.hypot(a.x + 26 - px, a.y - py); if (d < bd) { bd = d; best = a; } }); });
+          A.forEach(function (a) { if (a.dead209 || a.hide209) return; var d = Math.hypot(a.x + 26 - px, a.y - py); if (d < bd) { bd = d; best = a; } }); });
         if (best) ui.hl = best.co.id;
         agentSts().forEach(function (st) { var A = agentsAt(st); A.forEach(function (a) { if (Math.abs(a.x - px) > vw || Math.abs(a.y - py) > vh) return; na++; items.push({ y: a.y, x: a.x, y2: a.y, fn: function (sx, sy) { drawAgent(a, st, sx, sy, a === best); } }); if (a === best) items.push({ y: Math.max(a.y, py) + 0.5, x: a.x, y2: a.y, fn: function (sx, sy) { agentBubble(a, st, sx, sy); } }); }); });
         window.AGENTS206 = na; window.AGENTNEAR206 = best ? best.co.id : null;
@@ -15124,6 +15128,7 @@ window.B137 = (function () {
       ride: function (id, a, b) { ride(COI[id], stByName(a), stByName(b)); }, ship: function (id, a, b, k, q) { return ship(COI[id], stByName(a), stByName(b), k, q); },
       war: function () { if (S) { S.warT = 0; tick(0.01); } return S && S.war; }, ff: function (sec) { if (S) tick(sec); }, ui: ui, render: render, load: load,
       want: function () { return S ? S.want : []; }, post: function (n, k, q, h) { return S ? post(n, k, q, h) : null; }, hand: function (n) { return hand(stByName(n)); }, shares: function () { return S ? CO.map(function (c) { return { id: c.id, held: held(c), price: sPrice(c), div: divPer(c), disc: disc(c) }; }) : []; }, buy: function (id, n) { return buySh(COI[id], n || 1); }, cars: function () { return S ? S.cars.map(function (c) { return { co: c.co, ct: c.ct, own: c.own, earn: c.earn, used: c.used, busy: carBusy(c) }; }) : []; }, buyCar: function (id, ct) { return buyCar(COI[id], ct, 0); }, leaseCar: function (id, ct) { return buyCar(COI[id], ct, 1); }, dropCar: function (id, ct) { return dropCar(COI[id], ct); }, carCost: function (id, ct) { return { buy: cPrice(COI[id], ct), lease: cLease(COI[id], ct), earn: cEarn(COI[id], ct) }; }, pn: function (v) { if (S && v) { S.pn = v; save(); syncRuns(); } return S ? S.pn : ''; }, sell: function (id, n) { return sellSh(COI[id], n || 1); },
+      agents209: function (x, y, r) { var o = []; try { stations().forEach(function (st) { if (Math.abs(st.x - x) > r + 800 || Math.abs(st.y - y) > r + 800) return; if (agentSts().indexOf(st) < 0) return; agentsAt(st).forEach(function (a) { o.push(a); }); }); } catch (e) {} return o; },
       agents: function (n) { var st = stByName(n); return st ? agentsAt(st).map(function (a) { return { co: a.co.id, x: a.x, y: a.y }; }) : []; } };
   })();
 
@@ -15149,6 +15154,228 @@ window.B137 = (function () {
         window.UNSTUCK208 = (window.UNSTUCK208 || 0) + n; } catch (e) { if (!window.E208u) { window.E208u = 1; console.warn(e); } }
     };
   })();
+
+  // ===== v209: KILL ANYONE - every person can be hurt and killed (fists, knife, guns, trample, vehicles, explosions); civilians flee and scream, lawmen and outlaws fight back;
+  // bodies stay a while, can be looted, then fade; witnessed killings raise WANTED 1-5 stars, a posse hunts you, the bounty grows; lose them or pay it off at a sheriff's office;
+  // a dead shopkeeper closes the store until a new one arrives; a dead STORY character fails the chapter with a retry from its start =====
+  (function () {
+    var K = window.KILL209 = { act: [], bodies: [], puffs: [], kills: 0, log: [], bounty: 0, seenT: 0, spT: 0, decT: 0, dead: [], closed: {}, story: null, crimeX: 0, crimeY: 0 };
+    var L = window.LIFE143 || (window.LIFE143 = { wanted: 0, law: [] });
+    var CIVSAY = ['AAH!', 'HELP!', 'MURDER!', "DON'T SHOOT!", 'RUN!', 'SHERIFF!'], LAWSAY = ['HOLD IT!', 'STOP RIGHT THERE!', 'YOU\'RE UNDER ARREST!', 'DRAW!'], OUTSAY = ['WRONG MAN, FRIEND', 'YOU ASKED FOR IT', 'DRAW!'];
+    var LAWJ = { SHERIFF: 1, DEPUTY: 1 }, OUTJ = { DRIFTER: 1, GAMBLER: 1, COWBOY: 1, ROUGHNECK: 1 }, KEEPJ = { SHOPKEEPER: 1, CLERK: 1 };
+    var REPL = 150, REVIVE = 300; /* seconds until a new shopkeeper / a newcomer arrives */
+    var NOW = 0, FN = ['AMOS', 'BESS', 'CLEM', 'DORA', 'EZRA', 'FAYE', 'GUS', 'HETTY', 'IKE', 'JUNE', 'LEM', 'MATTIE', 'NED', 'OLLIE', 'PRU', 'RUFE', 'SADIE', 'TOBE', 'VIOLA', 'WILEY'], LN = ['ABBOTT', 'BRIGGS', 'CALDER', 'DUNN', 'EASTON', 'FORD', 'GRAVES', 'HOLT', 'IVES', 'JESSUP', 'KEMP', 'LARKIN', 'MOSS', 'NOLAN', 'PRATT', 'REESE', 'SWANN', 'TUCKER'];
+    function freeOn() { return started && typeof MODE !== 'undefined' && MODE === 'free' && typeof ME_S !== 'undefined' && ME_S; }
+    function rnd(a) { return a[Math.floor(Math.random() * a.length)]; }
+    function towns() { try { return window.TOWN133 && MODE === 'free' ? TOWN133.towns() : []; } catch (e) { return []; } }
+    function townsNear(x, y, r) { return towns().filter(function (t) { return t.P && Math.abs(t.x - x) < r + 2500 && Math.abs(t.y - y) < r + 1600; }); }
+    function her() { try { return typeof HER44 !== 'undefined' && HER44.b && HER44.b.length && HER44.pop48 ? HER44.pop48.ppl : null; } catch (e) { return null; } }
+    function stChars() { try { return window.STORY170 && STORY170.on() && STORY170._chars ? STORY170._chars() : []; } catch (e) { return []; } }
+    function agentsNear(x, y, r) { try { return window.RAILCO203 && RAILCO203.agents209 ? RAILCO203.agents209(x, y, r) : []; } catch (e) { return []; } }
+    function pop(x, y, s, col) { K.puffs.push({ x: x, y: y, t: 1.4, s: s, col: col || '#2e6a2e', txt: 1 }); }
+    function puff(x, y) { for (var i = 0; i < 4; i++) K.puffs.push({ x: x + (Math.random() - 0.5) * 14, y: y - 30 - Math.random() * 16, t: 0.35 + Math.random() * 0.15, vx: (Math.random() - 0.5) * 90, vy: -40 - Math.random() * 60, r: 3 + Math.random() * 3 }); }
+    function sfx2(n, x, y, v) { try { sfx(n, x, y, v); } catch (e) {} }
+    // ---------- actors: anyone hurt, fleeing, fighting or dead is run here ----------
+    function mkActor(src, ref, x, y, o) { var a = { src: src, ref: ref, x: x, y: y, f: 1, hp: 6, max: 6, st: 'calm', t: 0, hitT: 0, cd: 1 + Math.random(), ph: Math.random() * 6, say: null, sayT: 0, kind: 'civ', name: '', job: '' }; for (var k in o) a[k] = o[k]; a.max = a.hp; K.act.push(a); return a; }
+    function actorOf(ref) { for (var i = 0; i < K.act.length; i++) if (K.act[i].ref === ref) return K.act[i]; return null; }
+    function fromTown(p, t) { var a = actorOf(p); if (a) return a; var i = t.P.indexOf(p); if (i >= 0) t.P.splice(i, 1);
+      var kind = LAWJ[p.job] ? 'law' : OUTJ[p.job] ? 'out' : KEEPJ[p.job] ? 'keep' : 'civ';
+      return mkActor('town', p, p.x, p.y, { t0: t, name: p.n, job: p.job, kind: kind, kid: !!p.kid, hp: kind === 'law' ? 10 : kind === 'out' ? 8 : p.kid ? 4 : 6, f: p.f || 1 }); }
+    function fromHer(p) { var a = actorOf(p); if (a) return a; var P = her(); if (P) { var i = P.indexOf(p); if (i >= 0) P.splice(i, 1); }
+      return mkActor('her', p, p.x, p.y, { name: (p.c && p.c.name || 'SETTLER').toUpperCase(), job: (p.c && p.c.role || 'villager').toUpperCase(), kind: p.c && p.c.role === 'guard' ? 'law' : 'civ', hp: p.c && p.c.role === 'guard' ? 10 : 6, f: p.face || 1 }); }
+    function fromAgent(g) { var a = actorOf(g); if (a) return a; g.hide209 = 1; return mkActor('agent', g, g.x + 26, g.y, { name: g.co.sh + ' AGENT', job: 'TICKET AGENT', kind: 'civ', hp: 6, col: g.co.c, fixed: 1 }); }
+    function fromStory(ch) { var a = actorOf(ch); if (a) return a; ch.here = 0; return mkActor('story', ch, ch.x, ch.y, { name: ch.name, job: ch.title || '', kind: 'story', hp: 8, role: ch.role || 'villager', f: ch.face || 1, fixed: 1 }); }
+    function alive(a) { return a.st !== 'dead'; }
+    // ---------- who can be hit right now ----------
+    function cands(x, y, r) {
+      var out = [];
+      K.act.forEach(function (a) { if (alive(a)) out.push({ x: a.x, y: a.y, a: a }); });
+      townsNear(x, y, r).forEach(function (t) { t.P.forEach(function (p) { if (!p.in && Math.abs(p.x - x) < r + 80 && Math.abs(p.y - y) < r + 80) out.push({ x: p.x, y: p.y, town: t, p: p }); }); });
+      var P = her(); if (P) P.forEach(function (p) { if (Math.abs(p.x - x) < r + 80 && Math.abs(p.y - y) < r + 80) out.push({ x: p.x, y: p.y, her: p }); });
+      agentsNear(x, y, r).forEach(function (g) { if (!g.dead209 && !g.hide209) out.push({ x: g.x + 26, y: g.y, ag: g }); });
+      stChars().forEach(function (ch) { if (ch.here && !ch.dead209 && Math.abs(ch.x - x) < r + 80 && Math.abs(ch.y - y) < r + 80) out.push({ x: ch.x, y: ch.y, ch: ch }); });
+      return out;
+    }
+    function toActor(c) { return c.a || (c.town ? fromTown(c.p, c.town) : c.her ? fromHer(c.her) : c.ag ? fromAgent(c.ag) : fromStory(c.ch)); }
+    // ---------- damage ----------
+    function hurt(a, dmg, how) {
+      if (!alive(a)) return false; a.hp -= dmg; a.hitT = 0.18; puff(a.x, a.y); sfx2('clash', a.x, a.y, 0.35);
+      K.crimeX = a.x; K.crimeY = a.y;
+      if (a.hp <= 0) { die(a, how); return true; }
+      if (a.kind === 'law' || a.kind === 'out') { if (a.st !== 'fight') { a.st = 'fight'; a.t = 0; say(a, rnd(a.kind === 'law' ? LAWSAY : OUTSAY)); } if (a.kind === 'law' && !a.posse && !a.assault && L.wanted < 1 && witnessed(a.x, a.y, a)) { a.assault = 1; want(1, 10); } }
+      else if (a.kind === 'story') { a.st = 'cower'; a.t = 0; say(a, 'WHAT ARE YOU DOING?!'); }
+      else if (!a.fixed) { flee(a, 1); }
+      else { a.st = 'cower'; a.t = 0; say(a, rnd(CIVSAY)); }
+      scare(a.x, a.y, 380, a);
+      return false;
+    }
+    function say(a, s) { a.say = s; a.sayT = 1.6; }
+    function flee(a, loud) { if (a.st === 'dead' || a.kind === 'law' || a.kind === 'story' || (a.kind === 'out' && a.st === 'fight')) return; if (a.fixed) { a.st = 'cower'; a.t = 0; if (loud) say(a, rnd(CIVSAY)); return; }
+      var cow = !a.kid && Math.random() < 0.3 && a.st !== 'flee'; if (a.st !== 'flee' && a.st !== 'cower') { a.st = cow ? 'cower' : 'flee'; a.t = 0; if (loud || Math.random() < 0.6) say(a, rnd(CIVSAY)); } else if (a.st === 'flee') a.t = Math.min(a.t, 2); }
+    // nearby folk panic at gunfire / a killing (only the closest few become actors - keeps the frame light)
+    function scare(x, y, r, src) {
+      var c = cands(x, y, r).filter(function (q) { return Math.hypot(q.x - x, q.y - y) < r && !(q.a && q.a === src) && !q.ch; });
+      c.sort(function (a, b) { return Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y); }); c = c.slice(0, 10);
+      c.forEach(function (q) { if (q.ag) { var a0 = toActor(q); a0.st = 'cower'; a0.t = 0; return; } var a = toActor(q); if (a.kind === 'law') { if (L.wanted > 0 || a.st === 'fight') { a.st = 'fight'; a.t = 0; } else { a.st = 'alert'; a.t = 0; } } else if (a.kind === 'out' && src && src.kind !== 'law' && Math.random() < 0.15) { a.st = 'fight'; a.t = 0; say(a, rnd(OUTSAY)); } else flee(a, 0); });
+    }
+    function witnessed(x, y, victim) { var n = 0; cands(x, y, 650).forEach(function (q) { if (n > 4) return; var a = q.a; if (a && (a === victim || !alive(a))) return; if (a && a.st === 'cower' && a.kind !== 'law' && Math.random() < 0.2) return; if (Math.hypot(q.x - x, q.y - y) < 650) n++; }); return n; }
+    function want(n, bounty) { if (!freeOn()) return; K.lx = px; K.ly = py; var w0 = Math.ceil(L.wanted || 0); L.wanted = Math.min(5, (L.wanted || 0) + n); L.wdec = 0; K.seenT = 0; K.decT = 0; K.bounty += bounty || 0; if (Math.ceil(L.wanted) > w0) K.spT = Math.min(K.spT, 0.6); hud(); }
+    // robberies and hold-ups use the same stars and bounty (no toasts - the HUD shows it)
+    L.addWanted = function (n, why) { if (n <= 0) return; want(n, Math.round(n * 20)); };
+    function die(a, how) {
+      a.st = 'dead'; a.hp = 0; a.deadT = 0; a.fall = 0; a.say = null; K.kills++; K.log.push({ name: a.name, job: a.job, kind: a.kind, src: a.src, how: how || '' });
+      var gold0 = a.kind === 'law' ? 8 + Math.floor(Math.random() * 8) : a.kind === 'keep' ? 10 + Math.floor(Math.random() * 12) : a.kid ? 0 : 2 + Math.floor(Math.random() * 9);
+      var body = { x: a.x, y: a.y, f: a.f, a: a, t: 0, life: 90, gold: gold0, steel: a.kind === 'law' || a.kind === 'out' ? 2 : 0, food: a.kind === 'civ' && Math.random() < 0.4 ? 2 : 0, looted: 0 };
+      K.bodies.push(body); if (K.bodies.length > 30) K.bodies.shift();
+      var w = witnessed(a.x, a.y, a), add = a.kind === 'law' ? 2 : a.kind === 'posse' ? 0.5 : 1, bty = a.kind === 'law' || a.kind === 'posse' ? 50 : 25;
+      if (a.posse) { add = 0.5; bty = 40; }
+      if (w > 0 || a.posse) want(add, bty);
+      scare(a.x, a.y, 520, a);
+      if (a.src === 'town' && a.t0) { var t = a.t0; K.dead.push({ p: a.ref, t: t, at: NOW, keep: a.kind === 'keep' }); if (a.kind === 'keep' && !t.P.some(function (q) { return KEEPJ[q.job]; })) { K.closed[t.name] = NOW + REPL; t.closed209 = NOW + REPL; } }
+      if (a.src === 'agent') { a.ref.dead209 = NOW; K.dead.push({ ag: a.ref, at: NOW }); }
+      if (a.src === 'story') { a.ref.dead209 = 1; a.ref.here = 0; storyDead(a); }
+      if (a.src === 'unit') { /* the army's own corpses are cleaned up by the game */ }
+    }
+    // ---------- weapons: every player hit also lands on people ----------
+    var _ph = playerHit; playerHit = function (x, y, R, power, dir) {
+      var hit = _ph.apply(this, arguments);
+      try { if (!started) return hit; var big = R >= 100, d = Math.max(1, power) * 2, how = big ? 'explosion' : R <= 22 ? 'gun' : 'blade';
+        var hs = cands(x, y, R + 30), n = 0;
+        hs.forEach(function (q) { if (n >= (big ? 12 : 2)) return; var dx = q.x - x, dy = q.y - y; if (Math.abs(dx) < R + 6 && Math.abs(dy) < (big ? R : 50) && (big || dir === 0 || dx * dir > -12)) { hurt(toActor(q), big ? d * (1 - Math.min(0.6, Math.hypot(dx, dy) / (R * 2))) : d, how); n++; } });
+        if (typeof units !== 'undefined' && (R <= 30 || big)) for (var i = 0; i < units.length; i++) { var u = units[i]; if (u.f !== 'me' || u.hp <= 0 || u.t === 'c' || u.sea) continue; if (Math.abs(u.x - x) < R + 4 && Math.abs(u.y - y) < (big ? R : 40)) { u.hp -= d; u.hitT = 0.2; puff(u.x, u.y); if (u.hp <= 0) { K.kills++; K.log.push({ name: 'YOUR SOLDIER', kind: 'unit', src: 'unit', how: how }); K.bodies.push({ x: u.x, y: u.y, f: u.face || 1, unit: u, t: 0, life: 40, gold: 0, steel: 0, food: 0, looted: 1 }); } n++; } }
+        if (n) hit = true;
+        if (!big && R <= 30) { if (Math.random() < 0.5) scare(px, py, 420, null); } else if (big) scare(x, y, 600, null);
+      } catch (e) { if (!window.E209h) { window.E209h = 1; console.warn(e); } }
+      return hit;
+    };
+    K.hitAt = function (x, y, R, power, dir) { return playerHit(x, y, R, power, dir == null ? 0 : dir); };
+    // ---------- per frame ----------
+    var lpx = null, lpy = null, scanT = 0;
+    var _uw = updateWolves; updateWolves = function (dt) { _uw.apply(this, arguments); try { if (!started) return; tick(dt); } catch (e) { if (!window.E209) { window.E209 = 1; console.warn(e); } } };
+    function solid(x, y) { try { if (!isLand(x, y)) return true; } catch (e) {} try { if (typeof blockedWorld === 'function' && blockedWorld(x, y)) return true; } catch (e) {} return false; }
+    function moveTo(a, tx, ty, sp, dt, away) { var dx = tx - a.x, dy = ty - a.y, d = Math.hypot(dx, dy) || 1; if (away) { dx = -dx; dy = -dy; } var nx = a.x + dx / d * sp * dt, ny = a.y + dy / d * sp * dt; if (!solid(nx, ny)) { a.x = nx; a.y = ny; } else if (!solid(nx, a.y)) a.x = nx; else if (!solid(a.x, ny)) a.y = ny; else if (away) { a.x += dy / d * sp * dt; a.y -= dx / d * sp * dt; } if (Math.abs(dx) > 1) a.f = dx > 0 ? 1 : -1; a.ph += dt * sp / 14; a.mv = 1; }
+    function shootAt(a, dt, acc) { a.cd -= dt; var d = Math.hypot(px - a.x, py - a.y); a.f = px > a.x ? 1 : -1; if (d < 420 && a.cd <= 0) { a.cd = 1.5 + Math.random() * 0.8; a.shot = 0.12; sfx2('boom142', a.x, a.y, 0.3); if (Math.random() < acc * (d < 200 ? 1 : 0.75)) { var h0 = hp; hp -= 0.5; hurtT = 0.3; try { if (window.UP150) UP150.cut(h0); } catch (e) {} try { drawHp(); } catch (e) {} } } }
+    function tick(dt) {
+      NOW += dt; var fr = freeOn();
+      // trample: a galloping horse or a moving vehicle knocks people down
+      if (lpx != null) { var sp = Math.hypot(px - lpx, py - lpy) / Math.max(dt, 0.001), V = window.VEH130 && VEH130(), veh = V && V.on && V.k >= 0 && V.k <= 5;
+        if ((veh || (typeof mounted === 'function' && mounted())) && sp > 150 && sp < 5000) { cands(px, py, 60).forEach(function (q) { if (Math.abs(q.x - px) < (veh ? 50 : 34) && Math.abs(q.y - py) < 26) { var a = toActor(q); if ((a.trT || 0) > 0) return; a.trT = 0.7; hurt(a, veh ? (V.k >= 2 ? 12 : 6) : 4, veh ? 'vehicle' : 'trample'); } }); } }
+      lpx = px; lpy = py;
+      // lawmen in town come for you while you are wanted
+      scanT -= dt; if (scanT <= 0) { scanT = 0.3; if (fr && L.wanted > 0) cands(px, py, 650).forEach(function (q) { if (q.ch || q.ag) return; var p = q.p || q.her, law = (q.p && LAWJ[q.p.job]) || (q.her && q.her.c && q.her.c.role === 'guard') || (q.a && q.a.kind === 'law'); if (!law || Math.hypot(q.x - px, q.y - py) > 650) return; var a = toActor(q); if (alive(a) && a.st !== 'fight') { a.st = 'fight'; a.t = 0; say(a, rnd(LAWSAY)); } }); }
+      // actors
+      var seen = false;
+      K.act.forEach(function (a) { a.t += dt; if (a.hitT > 0) a.hitT -= dt; if (a.sayT > 0) a.sayT -= dt; if (a.shot > 0) a.shot -= dt; if (a.trT > 0) a.trT -= dt; a.mv = 0;
+        if (a.st === 'dead') { a.deadT += dt; a.fall = Math.min(1, a.fall + dt * 4); return; }
+        var d = Math.hypot(px - a.x, py - a.y);
+        if (a.st === 'flee') { moveTo(a, px, py, a.kid ? 120 : 105, dt, 1); if (a.t > 9 && d > 450) a.st = 'calm'; }
+        else if (a.st === 'cower') { if (a.t > 7 && d > 260) a.st = a.fixed ? 'calm' : 'flee', a.t = a.fixed ? 0 : 6; }
+        else if (a.st === 'alert') { a.f = px > a.x ? 1 : -1; if (a.t > 6) a.st = 'calm'; }
+        else if (a.st === 'fight') { var spd = a.mount ? 240 : 175; if (a.posse) { if (K.seenT < 14 || d < 900) { if (d > 230) moveTo(a, px, py, spd, dt); else { a.f = px > a.x ? 1 : -1; } } else if (Math.hypot(a.x - K.lx, a.y - K.ly) > 60) moveTo(a, K.lx, K.ly, spd * 0.5, dt); }
+          else if (!a.fixed && d > 220 && d < 1100) moveTo(a, px, py, spd * 0.8, dt);
+          if (d < 900) seen = true; shootAt(a, dt, a.kind === 'out' ? 0.4 : 0.5);
+          if (a.kind === 'out' && (a.t > 25 || d > 1100)) { a.st = 'calm'; a.t = 0; }
+          if (a.kind === 'law' && !a.posse && L.wanted <= 0 && a.t > 3) { a.st = 'calm'; a.t = 0; } }
+        else if (a.st === 'calm') { if (a.t > 2 && !a.posse) a.home = 1; }
+        if (a.posse && L.wanted <= 0) { moveTo(a, a.x + (a.x - px), a.y + (a.y - py), 160, dt); if (d > 1100) a.gone = 1; }
+        if (a.posse && d > 3200) a.gone = 1;
+      });
+      // return calm folk to their town / homestead / booth
+      K.act = K.act.filter(function (a) { if (a.st === 'dead') return a.deadT < 95; if (a.gone) return false; if (a.st !== 'calm' || !a.home) return true; return !giveBack(a); });
+      // bodies: loot by walking over them; fade after a while
+      K.bodies.forEach(function (b) { b.t += dt; if (b.a) { b.x = b.a.x; b.y = b.a.y; } if (!b.looted && b.t > 0.6 && Math.hypot(b.x - px, b.y - py) < 46) loot(b); });
+      K.bodies = K.bodies.filter(function (b) { return b.t < b.life; });
+      K.puffs = K.puffs.filter(function (q) { q.t -= dt; if (!q.txt) { q.x += (q.vx || 0) * dt; q.y += (q.vy || 0) * dt; q.vy = (q.vy || 0) + 160 * dt; } else q.y -= 18 * dt; return q.t > 0; });
+      // replacements: a new shopkeeper / newcomer / ticket agent arrives later
+      K.dead = K.dead.filter(function (r) { if (r.ag) { if (NOW - r.at > REPL) { r.ag.dead209 = 0; return false; } return true; } var due = r.keep ? REPL : REVIVE; if (NOW - r.at < due) return true; var p = r.p, t = r.t; if (!t.P) return false; p.n = rnd(FN) + ' ' + rnd(LN); p.x = t.west != null ? t.west - 60 : t.x; p.y = (t.streetY && t.streetY[0]) || t.y; p.path = []; p.gb = null; p.in = false; t.P.push(p); if (r.keep) { delete K.closed[t.name]; t.closed209 = 0; } return false; });
+      // wanted: posse rides out; lose them (out of sight) and the stars drop; caught = arrested
+      if (!fr) { if (L.wanted) { L.wanted = 0; K.bounty = 0; hud(); } return; }
+      var want0 = Math.ceil(L.wanted || 0), posse = K.act.filter(function (a) { return a.posse && alive(a) && !a.gone; });
+      if (want0 > 0) {
+        if (!seen) posse.forEach(function (a) { if (Math.hypot(a.x - px, a.y - py) < 900) seen = true; });
+        K.seenT = seen ? 0 : K.seenT + dt; if (seen) { K.lx = px; K.ly = py; }
+        var need = [0, 2, 3, 4, 6, 8][want0]; K.spT -= dt;
+        if (posse.length < need && K.spT <= 0 && K.seenT < 8 && Math.hypot(px - (K.lx == null ? px : K.lx), py - (K.ly == null ? py : K.ly)) < 1200) { K.spT = 2.2; spawnPosse(want0); }
+        if (K.seenT > 10) { K.decT += dt; if (K.decT > 9) { K.decT = 0; L.wanted = Math.max(0, want0 - 1); if (!L.wanted) { K.bounty = 0; } hud(); } } else K.decT = 0;
+        if (hp <= 0.5) { var fine = Math.min(gold, Math.max(K.bounty, Math.floor(gold / 2))); gold -= fine; try { updateRes(); } catch (e) {} L.wanted = 0; K.bounty = 0; hp = HPMAX; try { drawHp(); } catch (e) {} hud(); showToast('ARRESTED - PAID ' + fine + ' GOLD'); K.act.forEach(function (a) { if (a.posse) a.gone = 1; else if (a.st === 'fight' && a.kind === 'law') { a.st = 'calm'; a.t = 0; } }); }
+      } else { K.seenT = 0; K.decT = 0; }
+      payBtn();
+      if (++hudN % 20 === 0) hud();
+    }
+    var hudN = 0;
+    function spawnPosse(w) { var best = null, bd = 1e9; towns().forEach(function (t) { var d = Math.hypot(t.x - px, t.y - py); if (d < bd) { bd = d; best = t; } }); var ox = K.lx == null ? px : K.lx, oy = K.ly == null ? py : K.ly, ang = best && bd < 6000 ? Math.atan2(best.y - oy, best.x - ox) : Math.random() * 6.28, x, y;
+      for (var k = 0; k < 8; k++) { var a2 = ang + (k ? (Math.random() - 0.5) * 1.6 : 0); x = ox + Math.cos(a2) * 880; y = oy + Math.sin(a2) * 520; if (!solid(x, y)) break; }
+      var m = w >= 3, a = mkActor('posse', null, x, y, { name: m ? 'POSSE RIDER' : 'DEPUTY', job: 'POSSE', kind: 'law', hp: m ? 12 : 10, posse: 1, mount: m, st: 'fight' }); a.cd = 1.2 + Math.random(); say(a, rnd(LAWSAY)); }
+    function giveBack(a) { var p = a.ref;
+      if (a.src === 'town' && a.t0 && a.t0.P) { p.x = a.x; p.y = a.y; p.path = []; p.gb = null; p.in = false; p.f = a.f; if (a.t0.P.indexOf(p) < 0) a.t0.P.push(p); return true; }
+      if (a.src === 'her') { var P = her(); if (P) { p.x = a.x; p.y = a.y; p.tx = a.x; p.ty = a.y; if (P.indexOf(p) < 0) P.push(p); } return true; }
+      if (a.src === 'agent') { p.hide209 = 0; return true; } if (a.src === 'story') { if (!p.dead209) p.here = 1; return true; }
+      return a.src !== 'posse'; }
+    function loot(b) { b.looted = 1; var s = []; if (b.gold) { gold += b.gold; s.push('+' + b.gold + ' GOLD'); } if (b.steel) { try { ME_S.steel142 = (ME_S.steel142 || 0) + b.steel; s.push('+' + b.steel + ' SHELLS'); } catch (e) {} } if (b.food) { food += b.food; s.push('+' + b.food + ' FOOD'); } try { updateRes(); } catch (e) {} pop(b.x, b.y - 40, s.length ? s.join(' ') : 'POCKETS EMPTY', s.length ? '#2e6a2e' : '#6a5a4a'); sfx2('coin', b.x, b.y, 0.6); K.loots = (K.loots || 0) + 1; }
+    // ---------- shops: a dead shopkeeper closes the store until the new one comes ----------
+    try { var _tpo = TP131.open; TP131.open = function (s) { try { var t = towns().filter(function (q) { return q.econ === s; })[0]; if (t && t.closed209 > NOW) { showToast(t.name + ' STORE CLOSED - NEW SHOPKEEPER IN ' + Math.ceil((t.closed209 - NOW) / 60) + ' MIN'); return; } } catch (e) {} return _tpo.apply(this, arguments); }; TP131.open209 = 1; } catch (e) {}
+    K.closedAt = function (name) { var t = towns().filter(function (q) { return q.name === name; })[0]; return !!(t && t.closed209 > NOW); };
+    // ---------- STORY: a dead story character fails the chapter; retry from its start ----------
+    var card = document.createElement('div'); card.id = 'dead209'; card.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:93;display:none;background:#f3e6c4;border:3px solid #3b2410;border-radius:10px;padding:10px 16px;font:bold 14px monospace;color:#2a1a0a;text-align:center;box-shadow:0 6px 0 rgba(0,0,0,.3);min-width:220px';
+    document.body.appendChild(card);
+    function storyDead(a) { K.story = { name: a.name }; card.innerHTML = '<div style="color:#8a1a1a;font-size:16px;letter-spacing:1px">THIS PERSON IS DEAD</div><div style="font-weight:normal;margin:4px 0 8px">' + a.name + (a.job ? ' \u00b7 ' + a.job : '') + '</div>';
+      var b = document.createElement('button'); b.id = 'retry209'; b.textContent = '\u21bb RETRY CHAPTER'; b.style.cssText = 'font:bold 13px monospace;padding:9px 18px;min-height:40px;background:#7a4a1c;color:#ffe9b8;border:2px solid #3b2410;border-radius:6px;pointer-events:auto';
+      b.onclick = function (e) { e.stopPropagation(); retry(); }; b.addEventListener('touchstart', function (e) { e.preventDefault(); e.stopPropagation(); retry(); }, { passive: false }); card.appendChild(b); card.style.display = 'block'; }
+    function retry() { card.style.display = 'none'; K.story = null; K.act = K.act.filter(function (a) { return a.src !== 'story' && !a.posse; }); K.bodies = K.bodies.filter(function (b) { return !(b.a && b.a.src === 'story'); }); L.wanted = 0; K.bounty = 0; hud(); try { STORY170.restart209(); var g = STORY170.gotoScene && STORY170.gotoScene(); } catch (e) {} }
+    K.retry = retry;
+    // ---------- HUD: small wanted stars + bounty, top centre ----------
+    var H = document.getElementById('wanted143'); if (!H) { H = document.createElement('div'); H.id = 'wanted143'; document.body.appendChild(H); }
+    H.style.cssText = 'position:fixed;top:14px;right:74px;left:auto;transform:none;z-index:12;pointer-events:none;display:none;font:bold 13px monospace;color:#b03020;background:rgba(243,230,196,.88);border:1.5px solid #3b2410;border-radius:10px;padding:1px 8px;white-space:nowrap';
+    function hud() { var n = Math.ceil(L.wanted || 0); if (n <= 0) { H.style.display = 'none'; return; } H.style.display = 'block'; var f = K.seenT > 10 ? 0.45 + 0.4 * Math.abs(Math.sin(NOW * 3)) : 1; H.style.opacity = f.toFixed(2); H.innerHTML = '\u2605'.repeat(n) + '<span style="color:#b8a080">' + '\u2605'.repeat(5 - n) + '</span> <span style="color:#2a1a0a">$' + Math.round(K.bounty) + '</span>'; }
+    K.hud = hud;
+    // ---------- pay off the bounty at a sheriff's office (or your own post office) ----------
+    var pb = document.createElement('button'); pb.id = 'pay209'; pb.style.cssText = 'font:bold 12px monospace;padding:6px 10px;background:#f2ead8;color:#2a1a0a;border:2px solid #6b4a26;border-radius:6px;margin-right:6px;display:none;pointer-events:auto';
+    try { var cb = document.getElementById('ctx143') || document.getElementById('wpnBtn'); cb.parentNode.insertBefore(pb, cb); } catch (e) { document.body.appendChild(pb); }
+    function office() { var best = null; towns().forEach(function (t) { if (best || Math.abs(t.x - px) > 2600 || Math.abs(t.y - py) > 1800) return; (t.b || []).forEach(function (b) { if (!best && b.k === 'sheriff' && Math.abs(b.x - px) < 150 && py > b.y - 70 && py < b.y + 170) best = { b: b, t: t, n: 'SHERIFF' }; }); });
+      if (!best) try { (ME_S.bld || []).forEach(function (b) { if (best || b.k !== 'post' || !(b.L > 0)) return; var f = FP131(ME_S, b), cx = (f.x0 + f.x1) / 2; if (Math.abs(cx - px) < 160 && py > f.y0 - 40 && py < f.y1 + 150) best = { b: b, n: 'POST OFFICE' }; }); } catch (e) {}
+      return best; }
+    var offT = 0, OFF = null;
+    function payBtn() { offT -= 1 / 60; if (offT <= 0) { offT = 0.25; OFF = K.bounty > 0 && L.wanted > 0 ? office() : null; } pb.style.display = OFF ? 'inline-block' : 'none'; if (OFF) { var c = Math.ceil(K.bounty); pb.textContent = '\ud83d\udcb0 PAY BOUNTY $' + c; pb.style.color = gold < c ? '#b03020' : '#2a1a0a'; } }
+    function pay(e) { if (e) { e.preventDefault(); e.stopPropagation(); } var c = Math.ceil(K.bounty); if (!(c > 0)) return false; if (gold < c) { showToast('NEED ' + c + ' GOLD'); return false; } gold -= c; try { updateRes(); } catch (er) {} K.paid = (K.paid || 0) + c; K.bounty = 0; L.wanted = 0; hud(); K.act.forEach(function (a) { if (a.posse) a.gone = 1; else if (a.kind === 'law' && a.st === 'fight') { a.st = 'calm'; a.t = 0; } }); showToast('BOUNTY PAID - WANTED CLEARED'); sfx2('coin', px, py, 1); return true; }
+    pb.addEventListener('click', pay); pb.addEventListener('touchstart', pay, { passive: false });
+    K.pay = function () { return pay(); }; K.office = function () { return office(); };
+    // ---------- drawing ----------
+    function figure(c, a, sx, sy) { var p = a.ref, f = a.f || 1;
+      if (a.src === 'town' && TOWN133.pspr) { var fr = a.mv ? (Math.floor(performance.now() / 120 + a.ph) % 2) : 0, S = TOWN133.pspr(p.v, fr, p.kid, p.fem); c.save(); c.translate(sx, sy); if (f < 0) c.scale(-1, 1); c.drawImage(S, -20, -56); c.restore(); return; }
+      if (a.src === 'her' && typeof cityPerson === 'function') { var fc = p.face; p.face = f; var zf = window.focusW; cityPerson(c, p, sx, sy); p.face = fc; return; }
+      if (a.src === 'story') { var im = window.ART137 && ART137.spr(a.role || 'villager'); if (im) { dspr(c, im, sx, sy, 52, f); return; } }
+      var m = spr(a.kind === 'law' ? 'guard' : a.src === 'agent' ? 'merchant' : 'villager', null, false); if (m) dsprA(c, m, sx, sy, 56, f);
+      else { c.fillStyle = a.col || '#6a4a2a'; c.fillRect(sx - 7, sy - 36, 14, 24); c.fillStyle = '#e0b088'; c.beginPath(); c.arc(sx, sy - 42, 6, 0, 7); c.fill(); }
+      if (a.src === 'agent') { c.fillStyle = a.col; c.fillRect(sx - 6, sy - 56, 12, 5); } }
+    function drawActor(a, sx, sy) { var c = ctx;
+      if (a.st === 'dead') { var r = (a.f || 1) * 1.45 * a.fall, al = a.deadT > 80 ? Math.max(0, 1 - (a.deadT - 80) / 12) : 1; c.save(); c.globalAlpha = al; c.fillStyle = 'rgba(40,25,10,.25)'; c.beginPath(); c.ellipse(sx + (a.f || 1) * -16 * a.fall, sy + 2, 26, 5, 0, 0, 7); c.fill(); c.translate(sx, sy); c.rotate(-r); figure(c, a, 0, 0); c.restore();
+        if (a.fall >= 1 && al > 0.5) { var bd = bodyOf(a); if (bd && !bd.looted) { c.fillStyle = '#d4a017'; c.font = 'bold 12px monospace'; c.textAlign = 'center'; c.fillText('$', sx - (a.f || 1) * 22, sy - 14 + Math.sin(performance.now() / 300) * 2); } } return; }
+      c.save(); if (a.mount && window.ART153) { try { ART153.horse(c, sx, sy, 50, a.f || 1, a.ph, 2); } catch (e) {} c.translate(0, -26); }
+      if (a.st === 'cower') { c.translate(sx + Math.sin(performance.now() / 40) * 0.8, sy); c.scale(1, 0.72); figure(c, a, 0, 0); } else figure(c, a, sx, sy);
+      c.restore();
+      if (a.hitT > 0) { c.save(); c.globalAlpha = Math.min(0.55, a.hitT * 4); c.fillStyle = '#ffffff'; c.beginPath(); c.ellipse(sx, sy - 30 - (a.mount ? 26 : 0), 12, 26, 0, 0, 7); c.fill(); c.restore(); }
+      var hy = sy - 66 - (a.mount ? 26 : 0);
+      if (a.kind === 'law') { c.fillStyle = '#d4a017'; c.beginPath(); for (var i = 0; i < 10; i++) { var an = i * 0.628 - 1.57, rr = i % 2 ? 2 : 5; c.lineTo(sx + (a.f || 1) * 4 + Math.cos(an) * rr, sy - 34 - (a.mount ? 26 : 0) + Math.sin(an) * rr); } c.fill(); }
+      if (a.shot > 0) { c.fillStyle = '#ffd060'; c.beginPath(); c.arc(sx + (a.f || 1) * 22, sy - 32 - (a.mount ? 26 : 0), 6, 0, 7); c.fill(); c.strokeStyle = 'rgba(255,220,140,.8)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(sx + (a.f || 1) * 26, sy - 32 - (a.mount ? 26 : 0)); c.lineTo(sx + (px - a.x) * 0.6, sy + (py - a.y) * 0.6 - 30); c.stroke(); }
+      if (a.hp < a.max && a.st !== 'dead') { c.fillStyle = 'rgba(42,26,10,.6)'; c.fillRect(sx - 13, hy, 26, 4); c.fillStyle = '#c0392b'; c.fillRect(sx - 12, hy + 1, 24 * Math.max(0, a.hp / a.max), 2); }
+      if (a.say && a.sayT > 0) { c.font = 'bold 11px monospace'; var tw = c.measureText(a.say).width + 10; c.fillStyle = '#fff'; c.strokeStyle = a.kind === 'law' ? '#7a1a1a' : '#2a1a0a'; c.lineWidth = 1.5; c.beginPath(); c.rect(sx - tw / 2, hy - 20, tw, 15); c.fill(); c.stroke(); c.fillStyle = a.kind === 'law' ? '#7a1a1a' : '#2a1a0a'; c.textAlign = 'center'; c.fillText(a.say, sx, hy - 9); } }
+    function bodyOf(a) { for (var i = 0; i < K.bodies.length; i++) if (K.bodies[i].a === a) return K.bodies[i]; return null; }
+    function drawUnitBody(b, sx, sy) { var c = ctx, al = b.t > b.life - 8 ? Math.max(0, (b.life - b.t) / 8) : 1; c.save(); c.globalAlpha = al; c.translate(sx, sy); c.rotate(-(b.f || 1) * 1.45); var m = spr('villager', null, false); if (m) dsprA(c, m, 0, 0, 48, 1); c.restore(); }
+    var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); try { if (!started) return; var z = (typeof zoom === 'number' && zoom > 0) ? zoom : 1, vw = innerWidth / (2 * z) + 150, vh = innerHeight / (2 * z) + 150; K.drawn = 0;
+      K.act.forEach(function (a) { if (Math.abs(a.x - px) > vw || Math.abs(a.y - py) > vh) return; K.drawn++; items.push({ y: a.st === 'dead' ? a.y - 8 : a.y, x: a.x, y2: a.y, fn: function (sx, sy) { drawActor(a, sx, sy); } }); });
+      K.bodies.forEach(function (b) { if (!b.unit || Math.abs(b.x - px) > vw || Math.abs(b.y - py) > vh) return; items.push({ y: b.y - 8, x: b.x, y2: b.y, fn: function (sx, sy) { drawUnitBody(b, sx, sy); } }); });
+      K.puffs.forEach(function (q) { if (Math.abs(q.x - px) > vw || Math.abs(q.y - py) > vh) return; items.push({ y: q.y + 3000, x: q.x, y2: q.y, fn: function (sx, sy) { var c = ctx; if (q.txt) { c.save(); c.globalAlpha = Math.min(1, q.t * 1.5); c.font = 'bold 13px monospace'; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = '#fff4d8'; c.strokeText(q.s, sx, sy - 3000); c.fillStyle = q.col; c.fillText(q.s, sx, sy - 3000); c.restore(); return; } c.fillStyle = 'rgba(200,40,30,' + Math.min(1, q.t * 3).toFixed(2) + ')'; c.beginPath(); c.arc(sx, sy - 3000, q.r, 0, 7); c.fill(); } }); });
+      // CLOSED plank across a store whose keeper was killed
+      towns().forEach(function (t) { if (!(t.closed209 > NOW) || Math.abs(t.x - px) > vw + 1200 || Math.abs(t.y - py) > vh + 600) return; (t.b || []).forEach(function (b) { if (b.k !== 'general') return; items.push({ y: b.y + 1, x: b.x, y2: b.y, fn: function (sx, sy) { var c = ctx; c.save(); c.translate(sx, sy - 34); c.rotate(-0.12); c.fillStyle = '#8a5a2e'; c.fillRect(-46, -9, 92, 18); c.strokeStyle = '#3b2410'; c.lineWidth = 2; c.strokeRect(-46, -9, 92, 18); c.fillStyle = '#f3e3c3'; c.font = 'bold 12px Georgia,serif'; c.textAlign = 'center'; c.fillText('CLOSED', 0, 5); c.restore(); } }); }); });
+    } catch (e) { if (!window.E209d) { window.E209d = 1; console.warn(e); } } };
+    // test hooks
+    K.ff = function (s) { NOW += s; for (var i = 0; i < 5; i++) tick(0.001); };
+    K.now = function () { return NOW; };
+    K.sim = function (dt, n) { for (var i = 0; i < n; i++) tick(dt); return K.state(); };
+    K.people = function (x, y, r) { return cands(x, y, r).map(function (q) { var o = q.a || q.p || q.her || q.ag || q.ch; return { x: q.x, y: q.y, src: q.a ? q.a.src : q.p ? 'town' : q.her ? 'her' : q.ag ? 'agent' : 'story', job: q.a ? q.a.job : q.p ? q.p.job : q.ag ? 'TICKET AGENT' : q.ch ? 'STORY' : 'SETTLER', name: q.a ? q.a.name : q.p ? q.p.n : q.ch ? q.ch.name : q.ag ? q.ag.co.sh : '', st: q.a ? q.a.st : 'calm' }; }); };
+    K.state = function () { return { wanted: L.wanted, stars: Math.ceil(L.wanted || 0), bounty: K.bounty, posse: K.act.filter(function (a) { return a.posse && alive(a) && !a.gone; }).length, fighting: K.act.filter(function (a) { return a.st === 'fight' && alive(a); }).length, fleeing: K.act.filter(function (a) { return a.st === 'flee' || a.st === 'cower'; }).length, act: K.act.length, bodies: K.bodies.length, kills: K.kills, seenT: K.seenT, story: K.story, loots: K.loots || 0 }; };
+  })();
+
   requestAnimationFrame(frame);
 </script>
 
