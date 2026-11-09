@@ -6125,7 +6125,7 @@ window.B137 = (function () {
   function ty(s) { if (s === ME_S) return 'mixed'; if (!s.ty131) { var h = H(s); s.ty131 = h < 0.3 ? 'farm' : h < 0.55 ? 'oil' : h < 0.8 ? 'gold' : 'mixed'; } return s.ty131; }
   function stock(s) { if (!s.g131) { s.g131 = {}; var t = TY[ty(s)]; GK.forEach(function (k, i) { var h = hash2(i * 31 + Math.floor(H(s) * 1000), 7); s.g131[k] = s === ME_S ? 0 : Math.round((t.sup[k] ? 40 + 40 * h : 4 + 14 * h) / (G[k].p > 20 ? 3 : 1)); }); } return s.g131; }
   function dem(s, k) { var t = TY[ty(s)]; return (t.dem[k] || 1) / (t.sup[k] ? 1.8 : 1); }
-  function price(s, k) { var st = stock(s)[k] || 0, T = 30 * dem(s, k); return G[k].p * Math.max(0.3, Math.min(3, 2 * T / (T + st))) * (s && s.city136 ? 1.3 : 1); }
+  function price(s, k) { var st = Math.max(0, +stock(s)[k] || 0), T = 30 * dem(s, k); return G[k].p * Math.max(0.3, Math.min(3, 2 * T / (T + st))) * (s && s.city136 ? 1.3 : 1); }
   var CROPS = ['wheat', 'corn', 'peas', 'berries', 'cotton', 'spice', 'cattle'];
   function crop(s, b) { if (!b.crop131) { var p = bldPos(s, b); b.crop131 = CROPS[Math.floor(hash2(Math.round(p.x / 7), Math.round(p.y / 7)) * CROPS.length) % CROPS.length]; } return b.crop131; }
   function clothed(s) { var g = stock(s); return !(s.ppl && s.ppl.length > 2) || g.clothes >= 1; }
@@ -6140,7 +6140,13 @@ window.B137 = (function () {
   var CP = document.createElement('div'); CP.id = 'cp133'; CP.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:72;background:#f3e3c3;border:3px solid #3b2410;border-radius:8px;padding:6px;font:bold 12px monospace;color:#2a1a0a;display:none;text-align:center;max-width:92vw'; document.body.appendChild(CP);
   function pickCrop(s, b) { CP.innerHTML = '<div style="margin-bottom:4px">WHAT SHOULD THIS FIELD GROW?</div>'; CROPS.forEach(function (k) { var x = document.createElement('button'); x.textContent = CN[k]; x.style.cssText = 'margin:2px;font:bold 12px monospace;padding:6px 8px;background:' + (b.crop131 === k ? '#7a4a1c;color:#ffe9b8' : '#fff8e8;color:#2a1a0a') + ';border:2px solid #3b2410;border-radius:5px'; x.onclick = function (e) { e.stopPropagation(); b.crop131 = k; b.picked133 = 1; CP.style.display = 'none'; showToast('FIELD WILL GROW ' + G[k].n); }; CP.appendChild(x); }); CP.style.display = 'block'; }
   var seen133 = null; setInterval(function () { try { if (!ME_S) return; var fs = ME_S.bld.filter(function (b) { return b.k === 'farm'; }); if (seen133 === null || seen133.s !== ME_S) { seen133 = { s: ME_S, l: fs.slice() }; fs.forEach(function (b) { b.picked133 = 1; }); return; } var busy = ['tp131', 'ordP'].some(function (id) { var e = document.getElementById(id); return e && getComputedStyle(e).display !== 'none'; }); fs.forEach(function (b) { if (!busy && seen133.l.indexOf(b) < 0) { seen133.l.push(b); b.picked133 = 1; /* v140: picker opens only on tap */ } }); } catch (e) {} }, 300);
-  window.ECON131 = { pickCrop: pickCrop, chain: chain, CN: function () { return CN; }, crop: crop, clothed: clothed, G: G, stock: stock, price: price, ty: ty, TY: TY };
+  /* v217: town markets settle back - goods you dump get used up and what you buy out is restocked, about a quarter of the gap a minute, so prices recover and nothing runs away */
+  function base217(s, k) { var t = TY[ty(s)], i = GK.indexOf(k); if (i < 0 || s === ME_S) return null; var h = hash2(i * 31 + Math.floor(H(s) * 1000), 7); return Math.round((t.sup[k] ? 40 + 40 * h : 4 + 14 * h) / (G[k].p > 20 ? 3 : 1)); }
+  function mk217() { var L = [], seen = new Set(); function add(s) { if (s && s.g131 && s !== ME_S && !seen.has(s)) { seen.add(s); L.push(s); } }
+    try { allS75().forEach(add); } catch (e) {} try { if (window.TOWN133) TOWN133.towns().forEach(function (t) { add(t.econ); }); } catch (e) {} try { if (window.RAIL136) (RAIL136.rail().st || []).forEach(function (st) { if (st && st.t) add(st.t.econ); }); } catch (e) {} return L; }
+  function settle217(dt) { var n = 0; try { mk217().forEach(function (s) { if (!s || s === ME_S || !s.g131) return; GK.forEach(function (k) { var b = base217(s, k), v = s.g131[k]; if (b == null) return; if (!(v >= 0)) v = 0; var nv = v + (b - v) * (1 - Math.exp(-0.0045 * dt)); s.g131[k] = Math.abs(nv - b) < 0.05 ? b : nv; n++; }); }); } catch (e) {} return n; }
+  var lt217 = Date.now(); setInterval(function () { var now = Date.now(), dt = Math.min(5, (now - lt217) / 1000); lt217 = now; try { if (typeof started !== 'undefined' && started && MODE !== 'duel' && !(window.PAUSE213 && PAUSE213.on)) settle217(dt); } catch (e) {} }, 1000);
+  window.ECON131 = { base: base217, settle: settle217, pickCrop: pickCrop, chain: chain, CN: function () { return CN; }, crop: crop, clothed: clothed, G: G, stock: stock, price: price, ty: ty, TY: TY };
   // ---- production chain, identical for every realm
   var _es = econStep; econStep = function (s, dt) { _es(s, dt); try { chain(s, dt); } catch (e) {} };
   function chain(s, dt) {
@@ -6527,14 +6533,17 @@ window.B137 = (function () {
       if (dps > 0 && v.hp > 0) { v.hp = Math.max(0, v.hp - dps * dt); v.hitT = clock; if (v.hp <= 0) { var to = setOfF(by); ['wood', 'stone', 'food'].forEach(function (k) { var g = s.res[k] * 0.2; s.res[k] -= g; if (to) to.res[k] += g; }); if (s === ME_S) showToast('YOUR VAULT WAS BROKEN! REPAIR IT'); else if (by === 'me') showToast('VAULT OF ' + nm(s) + ' BROKEN! LOOT THE GOLD'); } } }
     // ---- goblins replace wolves: waves rush the vault, ignore people, grow over time
     var GW = { t: 150, n: 0, warned: false };
-    function spawnWave(s) { var p = vpos(s), cnt = Math.min(36, 2 + Math.round(GW.n * 1.6)); GW.n++;
-      for (var i = 0, tries = 0; i < cnt && tries < 200; tries++) { var a = Math.random() * Math.PI * 2, r = 1100 + Math.random() * 300, x = p.x + Math.cos(a) * r, y = p.y + Math.sin(a) * r; if (!isLand(x, y)) continue; wolves.push({ gob: 1, x: x, y: y, hp: 3 + GW.n, hm: 3 + GW.n, face: 1, ph: Math.random() * 6, hitT: 0, cd: 0, loot: 0 }); i++; }
+    /* v217: goblin difficulty curve - small, fair first raids that build up: 2,3,4,6,7,9... war bands, toughness grows half as fast as before, a little more breathing room between raids early on */
+    function gob217(n) { return { cnt: Math.min(28, 2 + Math.round(n * 1.1 + n * n * 0.04)), hp: 3 + Math.floor(n * 0.5), next: Math.max(75, 150 - n * 5) }; }
+    window.GOB217 = gob217;
+    function spawnWave(s) { var p = vpos(s), W2 = gob217(GW.n), cnt = W2.cnt; GW.n++; var ghp = gob217(GW.n - 1).hp;
+      for (var i = 0, tries = 0; i < cnt && tries < 200; tries++) { var a = Math.random() * Math.PI * 2, r = 1100 + Math.random() * 300, x = p.x + Math.cos(a) * r, y = p.y + Math.sin(a) * r; if (!isLand(x, y)) continue; wolves.push({ gob: 1, x: x, y: y, hp: ghp, hm: ghp, face: 1, ph: Math.random() * 6, hitT: 0, cd: 0, loot: 0 }); i++; }
       showToast('GOBLIN RAID #' + GW.n + '! ' + cnt + ' GOBLINS RUSH YOUR VAULT'); try { sfx && sfx('horn'); } catch (e) {} }
-    function cpuWaves(n) { sets().forEach(function (s) { if (s === ME_S || !s.v135 || s.v135.x == null) return; var dmg = Math.max(0, (2 + n * 1.6) * 22 - soldiers(s).length * 12 - lvSum(s, 'outpost') * 40 - 30); if (!dmg) return; var v = s.v135; v.hp = Math.max(0, v.hp - dmg); v.hitT = clock; if (v.hp <= 0) ['wood', 'stone', 'gold'].forEach(function (k) { s.res[k] *= 0.85; }); }); }
+    function cpuWaves(n) { sets().forEach(function (s) { if (s === ME_S || !s.v135 || s.v135.x == null) return; var dmg = Math.max(0, gob217(Math.max(0, n - 1)).cnt * 22 - soldiers(s).length * 12 - lvSum(s, 'outpost') * 40 - 30); if (!dmg) return; var v = s.v135; v.hp = Math.max(0, v.hp - dmg); v.hitT = clock; if (v.hp <= 0) ['wood', 'stone', 'gold'].forEach(function (k) { s.res[k] *= 0.85; }); }); }
     function hitG(w, d) { var was = w.hp; hitWolf(w, d); return was > 0 && w.hp <= 0; }
     updateWolves = function (dt) {
       var s = ME_S, v = s && s.v135 && s.v135.x != null ? s.v135 : null;
-      if (v) { GW.t -= dt; if (GW.t < 15 && !GW.warned) { GW.warned = true; showToast('GOBLINS SPOTTED! RAID IN 15s \u00b7 GUARD THE VAULT'); } if (GW.t <= 0) { spawnWave(s); cpuWaves(GW.n); GW.t = Math.max(70, 130 - GW.n * 4); GW.warned = false; } }
+      if (v) { GW.t -= dt; if (GW.t < 15 && !GW.warned) { GW.warned = true; showToast('GOBLINS SPOTTED! RAID IN 15s \u00b7 GUARD THE VAULT'); } if (GW.t <= 0) { spawnWave(s); cpuWaves(GW.n); GW.t = gob217(GW.n).next; GW.warned = false; } }
       wolves = wolves.filter(function (w) { return w.gob && w.hp > 0 && !w.gone; });
       if (v) { var p = vpos(s), towers = s.bld.filter(function (b) { return (b.L > 0 && b.k === 'outpost') || b.k === 'hall'; }), mine = units.filter(function (u) { return u.f === 'me' && u.hp > 0 && u.t !== 'c'; });
         wolves.forEach(function (w) { w.hitT -= dt; w.cd -= dt;
@@ -6927,7 +6936,7 @@ window.B137 = (function () {
     // goblin camps send raiders: every few minutes the nearest camp within 9k sends a war party that walks to your vault
     var raidT = 200; var _uw2 = updateWolves; updateWolves = function (dt) { _uw2.apply(this, arguments); try { if (!started || MODE !== 'free' || !window.MAP136 || !ME_S || !ME_S.v135 || ME_S.v135.x == null || bare(ME_S)) return; raidT -= dt; if (raidT > 0) return; raidT = 180 + Math.random() * 120;
         var vp = GEN135.vpos(ME_S), best = null, bd = 9000; MAP136.FT.forEach(function (f) { if (f && f.k === 'camp' && !f.burned141) { var d = Math.hypot(f.x - vp.x, f.y - vp.y); if (d < bd) { bd = d; best = f; } } }); if (!best) return;
-        var a = Math.atan2(best.y - vp.y, best.x - vp.x), r = Math.min(bd, 1800), n = 3 + Math.floor(Math.random() * 3) + Math.floor(GEN135.GW.n / 2); for (var i = 0; i < n; i++) wolves.push({ gob: 1, x: vp.x + Math.cos(a) * r + (Math.random() - 0.5) * 120, y: vp.y + Math.sin(a) * r + (Math.random() - 0.5) * 80, hp: 3 + GEN135.GW.n, hm: 3 + GEN135.GW.n, face: 1, ph: Math.random() * 6, hitT: 0, cd: 0, loot: 0 });
+        var a = Math.atan2(best.y - vp.y, best.x - vp.x), r = Math.min(bd, 1800), n = Math.min(16, 2 + Math.floor(Math.random() * 2) + Math.floor(GEN135.GW.n / 2)), gh = window.GOB217 ? GOB217(GEN135.GW.n).hp : 3 + GEN135.GW.n; for (var i = 0; i < n; i++) wolves.push({ gob: 1, x: vp.x + Math.cos(a) * r + (Math.random() - 0.5) * 120, y: vp.y + Math.sin(a) * r + (Math.random() - 0.5) * 80, hp: gh, hm: gh, face: 1, ph: Math.random() * 6, hitT: 0, cd: 0, loot: 0 });
         var dir = (Math.abs(Math.sin(a)) > 0.4 ? (Math.sin(a) > 0 ? 'S' : 'N') : '') + (Math.abs(Math.cos(a)) > 0.4 ? (Math.cos(a) > 0 ? 'E' : 'W') : ''); showToast('GOBLIN CAMP ' + (bd / 1000).toFixed(1) + 'K ' + dir + ' SENT ' + n + ' RAIDERS - BURN THE CAMP TO STOP THEM'); } catch (e) {} };
     // burn a camp: attack next to it
     var _at2 = attack; attack = function () { _at2.apply(this, arguments); try { if (!window.MAP136) return; MAP136.FT.forEach(function (f) { if (f && f.k === 'camp' && Math.hypot(f.x - px, f.y - py) < 220) { f.hits141 = (f.hits141 || 0) + 1; if (f.hits141 >= 8) { f.k = 'ash'; f.burned141 = 1; gold += 40; updateRes(); showToast('GOBLIN CAMP BURNED +40 GOLD - NO MORE RAIDS FROM IT'); } else showToast('BURNING THE GOBLIN CAMP ' + f.hits141 + '/8'); } }); } catch (e) {} };
@@ -7217,7 +7226,7 @@ window.B137 = (function () {
       // navy / embarked units: hard rule every frame
       if (typeof units !== 'undefined') for (var i = units.length - 1; i >= 0; i--) { var u = units[i]; if (UT[u.t] && UT[u.t].sea && u.x != null && !fixU(u)) { units.splice(i, 1); if (!window.__nw147) { window.__nw147 = 1; try { showToast('NO WATER HERE - SHIPS CANNOT SAIL ON LAND'); } catch (e) {} } } }
       var v = window.VEH130 && VEH130(); if (!v || v.k < 0 || !boatK(v.k)) { lastW = null; return; }
-      if (v.on) { if (W(px, py)) lastW = { x: px, y: py }; else if (lastW) { px = lastW.x; py = lastW.y; } else { var w = NW(px, py, 3000); if (w) { px = w.x; py = w.y; lastW = w; } } }
+      if (v.on) { if (W(px, py)) lastW = { x: px, y: py }; else if (lastW && Math.hypot(px - lastW.x, py - lastW.y) > 600) { /* v217: you were carried off (train ride, story scene, knocked out) - the boat stays moored on the water instead of dragging you back */ v.on = false; v.x = lastW.x; v.y = lastW.y; lastW = null; window.BOATLEFT217 = (window.BOATLEFT217 || 0) + 1; } else if (lastW) { px = lastW.x; py = lastW.y; } else { var w = NW(px, py, 3000); if (w) { px = w.x; py = w.y; lastW = w; } } }
       else if (v.x < 1e6 && !W(v.x, v.y)) { var w2 = NW(v.x, v.y, 3000); if (w2) { v.x = w2.x; v.y = w2.y; } else { v.x = v.y = 2e6; } }
     };
     window.BOATS147 = function () {
@@ -9507,6 +9516,123 @@ window.B137 = (function () {
       }
     } catch (e) {}
 
+    /* ===== v217: BLOCK SIGNALS - trains never run through each other. A train only moves if its new place keeps clear of every other consist;
+       when two meet (head-on on single track, or one standing at a platform) the lesser one takes the passing siding beside the line,
+       lets the other by and comes back; a shuttle that is held too long turns back. Scheduled company runs keep their cars and catch up afterwards. ===== */
+    var CLR217 = 66, LANE217 = 84, ST217 = { blocks: 0, sides: 0, revs: 0, fin: 0, spawnSide: 0 };
+    function bb217(P) { var b = [1e18, 1e18, -1e18, -1e18]; for (var i = 0; i < P.length; i++) { var p = P[i]; if (p.x < b[0]) b[0] = p.x; if (p.y < b[1]) b[1] = p.y; if (p.x > b[2]) b[2] = p.x; if (p.y > b[3]) b[3] = p.y; } return b; }
+    function md217(P, t) {
+      var best = { m: 1e9, o: null }; if (!P || !P.length) return best; var b = bb217(P);
+      for (var j = 0; j < TRAINS.length; j++) { var o = TRAINS[j]; if (o === t || !o.parts || !o.parts.length) continue; var Q = o.parts, c = o.bb217 || bb217(Q);
+        if (c[0] > b[2] + CLR217 + 40 || c[2] < b[0] - CLR217 - 40 || c[1] > b[3] + CLR217 + 40 || c[3] < b[1] - CLR217 - 40) continue;
+        for (var i = 0; i < P.length; i++) { var p = P[i]; if (p.x < c[0] - CLR217 - 40 || p.x > c[2] + CLR217 + 40 || p.y < c[1] - CLR217 - 40 || p.y > c[3] + CLR217 + 40) continue;
+          for (var k = 0; k < Q.length; k++) { var dx = p.x - Q[k].x, dy = p.y - Q[k].y; if (Math.abs(dx) > 200 || Math.abs(dy) > 200) continue; var d = Math.sqrt(dx * dx + dy * dy); if (d < best.m) { best.m = d; best.o = o; } } } }
+      return best;
+    }
+    var _lay217 = layout;
+    layout = function (t) {
+      if (t.yard217) { t.parts = []; t.bb217 = null; return t.parts; } /* waiting in the yard (no room at the platform yet) */
+      var parts = _lay217(t), s = t.s217 || 0;
+      if (s > 0.001) { var sg = t.sg217 || -1;
+        for (var i = 0; i < parts.length; i++) { var p = parts[i], nx = -Math.sin(p.ang), ny = Math.cos(p.ang); if (ny < 0 || (ny === 0 && nx < 0)) { nx = -nx; ny = -ny; } p.x += nx * LANE217 * s * sg; p.y += ny * LANE217 * s * sg; if (s >= 0.6) p.sid = true; }
+        if (parts[0]) { t.x = parts[0].x; t.y = parts[0].y; } }
+      t.bb217 = bb217(parts);
+      return parts;
+    };
+    runStep205 = function (t, dt) {
+      t.ft += dt; var h = t.hold217 || 0, span = Math.max(1, t.at - t.dep), u = Math.max(0, Math.min(1, (t.ft - h - t.dep) / span)), moving = u > 0 && u < 1;
+      var a = t.lo0, b = Math.max(a, t.hi - 4);
+      t.stopT = moving ? 0 : 1; t.u = u; if (moving) t.ph += dt * Math.min(400, (b - a) / span) / 18;
+      t.head = a + (b - a) * u; layout(t);
+    };
+    function pri217(t) { return t.run ? 10 + (t.u > 0 && t.u < 1 ? 5 : 0) + (t.fin217 ? 3 : 0) : 1 + (t.stopT > 0 ? 0 : 0.5) + TRAINS.indexOf(t) * 0.01; }
+    function placeClear217(t) { /* a consist that appears on top of another starts on the siding beside the line */
+      var P = layout(t); if (md217(P, t).m >= CLR217) return;
+      t.st217 = 1; t.s217 = 1; t.sT217 = 0; P = layout(t); if (md217(P, t).m >= CLR217) { ST217.spawnSide++; return; }
+      t.sg217 = 1; P = layout(t); if (md217(P, t).m >= CLR217) { ST217.spawnSide++; return; }
+      t.sg217 = -1; t.st217 = 0; t.s217 = 0;
+      if (t.run) { t.yard217 = 1; ST217.yard = (ST217.yard || 0) + 1; }
+      layout(t);
+    }
+    function yardTry217(t) { t.yard217 = 0; t.st217 = 0; t.s217 = 0; t.sg217 = -1; var P = layout(t); if (md217(P, t).m >= CLR217 + 20) return true;
+      t.st217 = 1; t.s217 = 1; t.sT217 = 0; P = layout(t); if (md217(P, t).m >= CLR217 + 20) return true;
+      t.sg217 = 1; P = layout(t); if (md217(P, t).m >= CLR217 + 20) return true;
+      t.yard217 = 1; t.st217 = 0; t.s217 = 0; t.sg217 = -1; layout(t); return false; }
+    var _spawn217 = spawnAll;
+    spawnAll = function (R) { var n0 = TRAINS.length; _spawn217(R); for (var i = n0; i < TRAINS.length; i++) placeClear217(TRAINS[i]); };
+    var _sr217 = setRuns;
+    setRuns = function (list) {
+      var keepK = {}; (list || []).forEach(function (q) { keepK[q.key] = 1; });
+      var before = TRAINS.slice();
+      var fin = TRAINS.filter(function (t) { return t.run && !keepK[t.run] && (t.fin217 || ((t.hold217 || 0) > 0.05 && (t.u || 0) < 1)); });
+      var was = TRAINS.filter(function (t) { return t.run && t.parts; }).map(function (t) { return [t, t.head, t.ft, t.ph]; });
+      _sr217(list);
+      /* the schedule sync no longer jumps a consist along the line: only the signalled step() moves trains (a big clock jump - load, long pause - still re-syncs) */
+      was.forEach(function (w) { var t = w[0]; if (TRAINS.indexOf(t) < 0 || t.head === w[1]) return; if (Math.abs(t.ft - w[2]) > 3) { if (md217(t.parts, t).m < CLR217) placeClear217(t); return; } t.ft = w[2]; t.head = w[1]; t.ph = w[3]; layout(t); });
+      fin.forEach(function (t) { if (TRAINS.indexOf(t) < 0) { if (!t.fin217) ST217.fin++; t.fin217 = 1; TRAINS.push(t); } });
+      TRAINS.forEach(function (t) { if (before.indexOf(t) < 0) placeClear217(t); });
+    };
+    step = function (dt) {
+      var R = rail(); if (!R) return;
+      if (!TRAINS.some(function (q) { return !q.run; })) spawnAll(R);
+      var order = TRAINS.slice().sort(function (a, b) { return pri217(b) - pri217(a); }), i, t;
+      for (i = 0; i < TRAINS.length; i++) if (!TRAINS[i].parts) layout(TRAINS[i]);
+      for (var oi = 0; oi < order.length; oi++) {
+        t = order[oi]; i = TRAINS.indexOf(t);
+        if (!t.route || !t.route.length) continue;
+        if (t.yard217) { t.ft += dt; t.yT217 = (t.yT217 || 0) + dt; if (t.yT217 > 30) t.vy217 = 1; if (!t.vy217 && t.ft - (t.hold217 || 0) > t.dep) t.hold217 = (t.hold217 || 0) + dt;
+          if (t.fin217 && t.ft - (t.hold217 || 0) > t.at + 2) { TRAINS.splice(TRAINS.indexOf(t), 1); continue; } if (!yardTry217(t)) continue; runStep205(t, 0); if (md217(t.parts, t).m < CLR217) { t.yard217 = 1; layout(t); continue; } }
+        var cur = md217(t.parts, t), sv = { head: t.head, dir: t.dir, stopT: t.stopT, ph: t.ph, s: t.s217 || 0, hold: t.hold217 || 0 };
+        var tgt = t.st217 ? 1 : 0; if (sv.s !== tgt) t.s217 = sv.s + Math.max(-dt * 1.2, Math.min(dt * 1.2, tgt - sv.s));
+        var want = false;
+        if (t.run) {
+          if (!t.bk217 && t.hold217 > 0) t.hold217 = Math.max(0, t.hold217 - 0.4 * dt); /* catch up after a hold */
+          runStep205(t, dt); want = t.head !== sv.head;
+          if (t.fin217 && (t.u || 0) >= 1 && t.ft - (t.hold217 || 0) > t.at + 4) { TRAINS.splice(TRAINS.indexOf(t), 1); continue; }
+        } else if (t.stopT > 0 || (t.st217 && sv.s < 1 && sv.s > 0)) { if (t.stopT > 0) t.stopT -= dt; layout(t); }
+        else {
+          want = true;
+          t.head += (t.dir || 1) * t.spd * dt; t.ph += dt * t.spd / 18;
+          if (t.head >= t.hi - 2) { t.head = t.hi; t.dir = -1; t.stopT = 6 + (i % 3); }
+          else if (t.head <= Math.max(t.lo, Math.min(t.hi - 8, (t.cars.length + 1) * GAP + 4)) + 2 && t.dir < 0) { t.head = Math.max(t.lo, Math.min(t.hi - 8, (t.cars.length + 1) * GAP + 4)); t.dir = 1; t.stopT = 6 + (i % 3); }
+          layout(t);
+        }
+        var nw = md217(t.parts, t);
+        if (nw.m < CLR217 && nw.m < cur.m - 0.001) {
+          /* signal at danger: stay put (but keep sliding on/off the siding if that alone is clear) */
+          t.head = sv.head; t.dir = sv.dir; t.stopT = sv.stopT; t.ph = sv.ph; if (t.run) t.hold217 = sv.hold + dt;
+          var P2 = layout(t), n2 = md217(P2, t);
+          if (n2.m < CLR217 && n2.m < cur.m - 0.001) { t.s217 = sv.s; layout(t); }
+          if (want) { t.bk217 = (t.bk217 || 0) + dt; t.by217 = nw.o; ST217.blocks++; } 
+        } else if (want) { t.bk217 = 0; t.by217 = null; }
+        else if (!t.run || !(t.u > 0 && t.u < 1)) { t.bk217 = 0; t.by217 = null; }
+      }
+      /* meets: the lesser train takes the passing siding; a shuttle held too long turns back */
+      for (i = 0; i < TRAINS.length; i++) {
+        t = TRAINS[i];
+        if ((t.bk217 || 0) > (t.by217 && (!t.run || !t.by217.run) ? 0.3 : 1.2) && t.by217 && TRAINS.indexOf(t.by217) >= 0) {
+          var o = t.by217, y = pri217(t) < pri217(o) ? t : o, ot = y === t ? o : t;
+          if (t.st217 && o.st217 && (t.sg217 || -1) === (o.sg217 || -1)) { var hi2 = y === t ? o : t; hi2.st217 = 0; hi2.sT217 = 0; } /* both on the same siding: the main train goes back to the main line */
+          else if (!y.st217) { y.st217 = 1; y.sT217 = 0; if (!(y.s217 > 0)) y.sg217 = (ot.st217 && (ot.sg217 || -1) === -1) ? 1 : -1; ST217.sides++; }
+          else if ((y.s217 || 0) >= 1 && t.bk217 > 4 && y === o && !ot.st217) { ot.st217 = 1; ot.sT217 = 0; if (!(ot.s217 > 0)) ot.sg217 = -(y.sg217 || -1); ST217.sides++; }
+          if (!t.run && t.bk217 > 8) { t.dir = -(t.dir || 1); t.bk217 = 0; t.by217 = null; ST217.revs++; }
+        }
+        /* dispatcher: a consist jammed far too long is cleared to the yard while nobody watches; it comes back on its timetable when the line is clear */
+        var bbx = t.bb217, far = !bbx || bbx[0] > px + 2600 || bbx[2] < px - 2600 || bbx[1] > py + 1900 || bbx[3] < py - 1900;
+        if (t.run && !t.yard217 && (t.bk217 || 0) > (far ? 20 : 90)) { t.yard217 = 1; t.vy217 = 1; t.yT217 = 0; t.hold217 = 0; t.bk217 = 0; t.by217 = null; t.st217 = 0; t.s217 = 0; layout(t); ST217.clear = (ST217.clear || 0) + 1; continue; }
+        if (!t.run) { if ((t.bk217 || 0) > 0 || (t.st217 && t.s217 > 0 && t.s217 < 1)) t.jam217 = (t.jam217 || 0) + dt; else if (t.stopT <= 0) t.jam217 = 0;
+          if (t.jam217 > 40 && far) { var h0 = t.head, d0 = t.dir, s1 = t.s217, st1 = t.st217, lb = Math.max(t.lo, Math.min(t.hi - 8, (t.cars.length + 1) * GAP + 4)), done = false;
+            [[lb, 1], [t.hi, -1]].forEach(function (c) { if (done) return; t.head = c[0]; t.dir = c[1]; t.s217 = 0; t.st217 = 0; if (md217(layout(t), t).m >= CLR217 + 20) done = true; });
+            if (done) { t.stopT = 3; t.jam217 = 0; t.bk217 = 0; t.by217 = null; ST217.clear = (ST217.clear || 0) + 1; } else { t.head = h0; t.dir = d0; t.s217 = s1; t.st217 = st1; layout(t); } } }
+        if (t.st217 && (t.s217 || 0) > 0 && t.s217 < 1) { if (t.s217 === t.ls217) { t.rp217 = (t.rp217 || 0) + dt; if (t.rp217 > 3) { t.st217 = 0; t.rp217 = 0; } } else t.rp217 = 0; } /* cannot finish sliding over: back to the main line */
+        t.ls217 = t.s217;
+        if (t.st217 && (t.s217 || 0) >= 1) {
+          t.sT217 = (t.sT217 || 0) + dt;
+          if (t.sT217 > 2.5) { var s0 = t.s217; t.s217 = 0; var Pm = layout(t), cm = md217(Pm, t).m; t.s217 = s0; layout(t); if (cm >= CLR217 + 40) { t.st217 = 0; t.sT217 = 0; } }
+        }
+      }
+    };
+    function overlaps217(th) { th = th || 60; var o = []; for (var a = 0; a < TRAINS.length; a++) { var r = md217(TRAINS[a].parts, TRAINS[a]); if (r.m < th && TRAINS.indexOf(r.o) > a) o.push([TRAINS[a].co + (TRAINS[a].run ? 'R' : ''), r.o.co + (r.o.run ? 'R' : ''), Math.round(r.m)]); } return o; }
     window.TRAIN167 = {
       v211: { side: function (a) { return sideOf(frame(a, 0, 0)); }, smoke: function () { return SMK.length; }, snd: SND, draw: function (p, sx, sy) { draw211(p, sx, sy); } },
       n: function () { return TRAINS.filter(function (t) { return !t.run; }).length; }, setRuns: setRuns, runs: function () { return TRAINS.filter(function (t) { return t.run; }); }, all: function () { return TRAINS; },
@@ -9525,7 +9651,8 @@ window.B137 = (function () {
         }
         return best;
       },
-      raw: function () { return TRAINS; }
+      raw: function () { return TRAINS; },
+      v217: { step: function (dt) { step(dt); }, overlaps: overlaps217, md: function (t) { return md217(t.parts, t).m; }, stats: function () { return ST217; }, CLR: CLR217 }
     };
   })();
 
@@ -15034,7 +15161,10 @@ window.B137 = (function () {
       var o = []; if (S && S.cars) S.cars.forEach(function (c) { if (!carBusy(c)) o.push({ co: c.co, k: KIND208[c.ct], n: '\u2605 ' + S.pn }); }); window.MYC208 = o; }
     var KIND208 = { tank: 'tanker', hop: 'gondola', stock: 'cattle', box: 'box' };
     function rideH(co, a, b) { return 0.15 + dist(a, b) / co.spd; }
-    function frate(co, k, q, a, b) { var car = carOf(k); if (!co.rate[car]) return -1; return Math.max(2, Math.round(q * Math.max(0.5, dist(a, b) / 10000) * BASE[car] * co.rate[car] * S.m[co.id] * (1 - disc(co)) * (myCar(co, car) ? OWNR : 1))); }
+    function frate(co, k, q, a, b) { var car = carOf(k); if (!co.rate[car]) return -1; var c = q * Math.max(0.5, dist(a, b) / 10000) * BASE[car] * co.rate[car] * S.m[co.id];
+      /* v217: freight never eats the sale - the list rate tops out at 45% of what the load fetches at a town (shareholder and own-car discounts still come off after) */
+      var sv = 0; try { sv = b && !b.home ? sellValue(b, k, q) : 0; } catch (e) {} if (sv > 0) c = Math.min(c, sv * 0.45);
+      return Math.max(2, Math.round(c * (1 - disc(co)) * (myCar(co, car) ? OWNR : 1))); }
     function fH(co, a, b) { return 0.5 + dist(a, b) / co.fspd; }
     function share() { var t = 0, pt = 0, o = {}; CO.forEach(function (c) { pt += S.pat[c.id] || 0; }); CO.forEach(function (c) { o[c.id] = c.w / (S.m[c.id] * S.m[c.id]) + 1.2 * (S.pat[c.id] || 0) / (4 + pt); t += o[c.id]; }); CO.forEach(function (c) { o[c.id] /= t; }); return o; }
     function gold() { return ME_S && ME_S.res ? ME_S.res.gold : 0; }
