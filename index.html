@@ -5984,7 +5984,7 @@ window.B137 = (function () {
     _bc37(); CAP.props.forEach(function (p) { if (p.k === 'house' && Math.hypot(p.x, p.y) > (CAPX.R - 170) * 0.62 && hash2(p.x / 250 + 5, p.y / 230 + 3) < 0.5) { p.sz = 0.4; p.value *= 0.4; } });
   };
   function pName37(p) { return p.sz ? 'COTTAGE' : PK[p.k].n; }
-  function COMPAV151(X, Y) { /* v152: compasses never sit on buttons */ try { var ids = ['wpnBtn', 'mountBtn', 'vehBtn', 'atk', 'joy', 'rail136', 'open130', 'menuBtn', 'mapb136']; for (var pass = 0; pass < 3; pass++) { var moved = false; for (var i = 0; i < ids.length; i++) { var e = document.getElementById(ids[i]); if (!e || !e.getClientRects().length) continue; /* v158: fixed buttons have no offsetParent */ var r = e.getBoundingClientRect(); if (!r.width) continue; if (X + 44 > r.left && X - 44 < r.right && Y + 40 > r.top && Y - 22 < r.bottom) { var up = r.top - 42, dn = r.bottom + 24; Y = (Y - up < dn - Y && up > 30) ? up : dn; moved = true; } } if (!moved) break; } } catch (e) {} return [X, Y]; }
+  function COMPAV151(X, Y) { /* v152: compasses never sit on buttons */ try { var ids = ['wpnBtn', 'mountBtn', 'vehBtn', 'atk', 'joy', 'rail136', 'open130', 'menuBtn', 'mapb136']; for (var pass = 0; pass < 3; pass++) { var moved = false; for (var i = 0; i < ids.length; i++) { var e = document.getElementById(ids[i]); if (!e || !e.getClientRects().length) continue; /* v158: fixed buttons have no offsetParent */ var r = e.getBoundingClientRect(); if (!r.width) continue; if (X + 44 > r.left && X - 44 < r.right && Y + 40 > r.top && Y - 22 < r.bottom) { var up = r.top - 42, dn = r.bottom + 24; Y = (Y - up < dn - Y && up > 30) ? up : dn; moved = true; } } if (!moved) { var SB = window.__sb207, tn = performance.now(); if (SB) for (var sk in SB) { var q = SB[sk]; if (!q || tn - q.t > 300) continue; if (X + 44 > q.l && X - 44 < q.r && Y + 40 > q.t2 && Y - 22 < q.b) { var up2 = q.t2 - 42, dn2 = q.b + 24; Y = (Y - up2 < dn2 - Y && up2 > 30) ? up2 : dn2; moved = true; } } /* v207: and never on a depot signboard */ } if (!moved) break; } } catch (e) {} return [X, Y]; }
   // ===== v37: capital compass (clarity: where is the market?) =====
   function capCompass37() {
     if (!CAPX || !BOUNDS) return; var dx = CAPX.x - px, dy = CAPX.y - py, d = Math.hypot(dx, dy); if (d < CAPX.R + 400) return;
@@ -6692,7 +6692,8 @@ window.B137 = (function () {
       var h = P(city.x, city.y); c.fillStyle = '#1a4a8a'; c.font = 'bold 16px serif'; c.fillText('\u2605', h[0], h[1] + 5); c.font = 'bold 11px Georgia,serif'; c.fillText('HOMESTEAD', h[0], h[1] + 18);
       try { (factions || []).forEach(function (f) { if (!f || !f.hallObj || f.dead) return; var a = P(f.x, f.y); if (a[0] < 0 || a[0] > W || a[1] < 0 || a[1] > Hh) return; c.fillStyle = '#a02020'; c.fillRect(a[0] - 3, a[1] - 3, 6, 6); }); } catch (e) {}
       c.fillStyle = '#ffd040'; c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.beginPath(); c.arc(W / 2, Hh / 2, 6, 0, 7); c.fill(); c.stroke(); c.fillStyle = '#2a1a0a'; c.font = 'bold 13px Georgia,serif'; c.fillText('YOU', W / 2, Hh / 2 - 10);
-      c.textAlign = 'left'; c.font = 'bold 12px Georgia,serif'; c.fillText('MAP \u00b7 ' + Math.round(MAPR * 2 / 1000) + 'K ACROSS \u00b7 \u25cf TOWN  \u2605 HOME  \u25a0 KINGDOM  \u25b2 GOBLIN CAMP  - - RAIL', 10, Hh - 10); }
+      var mk207 = 0; try { if (window.MAPHOOK207) mk207 = MAPHOOK207(c, P, sc, W, Hh) || 0; } catch (e) { if (!window.E207m) { window.E207m = 1; console.warn(e); } } /* v207: your shipments + WANTED notices */
+      c.textAlign = 'left'; c.font = 'bold 12px Georgia,serif'; c.fillStyle = '#2a1a0a'; c.fillText('MAP \u00b7 ' + Math.round(MAPR * 2 / 1000) + 'K ACROSS \u00b7 \u25cf TOWN  \u2605 HOME  \u25a0 KINGDOM  \u25b2 CAMP  - - RAIL' + (mk207 ? '  \u25ac YOUR FREIGHT  \u272a WANTED' : ''), 10, Hh - 10); }
     function openMap(on) { MV.style.display = MX.style.display = on ? 'block' : 'none'; if (on) drawMap(); }
     MB.onclick = function () { openMap(MV.style.display !== 'block'); };
     MX.onclick = function (e) { var z = e.target.getAttribute('data-z'); if (!z) return; if (z === 'x') openMap(false); else { MAPR = Math.max(6000, Math.min(240000, MAPR * +z)); drawMap(); } };
@@ -14573,10 +14574,10 @@ window.B137 = (function () {
     var CAR = { tank: 'TANK CAR', hop: 'GONDOLA', stock: 'STOCK CAR', box: 'BOXCAR' }, BASE = { tank: 0.8, hop: 0.5, stock: 1, box: 0.7 };
     function carOf(k) { return k === 'crude' || k === 'fuel' ? 'tank' : k === 'coal' || k === 'iron' ? 'hop' : k === 'cattle' ? 'stock' : 'box'; }
     var S = null, KEY = '', ui = { tab: 't', to: null, good: null, q: 0, last: 0 }, OPEN = null;
-    function fresh() { return { m: { dwp: 1, cw: 1, pg: 1 }, pat: { dwp: 0, cw: 0, pg: 0 }, ship: [], ft: 0, nid: 1, warT: 50, war: null, done: [], want: [], wnid: 1, wT: 0 }; }
+    function fresh() { return { m: { dwp: 1, cw: 1, pg: 1 }, pat: { dwp: 0, cw: 0, pg: 0 }, ship: [], ft: 0, nid: 1, warT: 50, war: null, done: [], want: [], wnid: 1, wT: 0, hs: { dwp: 0, cw: 0, pg: 0 }, dd: -1, dv: 0, dl: 0, dlc: {} }; }
     function key() { var st = 0; try { st = window.STORY170 && STORY170.on() ? 1 : 0; } catch (e) {} return 'kingdom-rail203:' + MODE + (st ? ':story' : ''); }
-    function load() { KEY = key(); S = fresh(); try { var v = JSON.parse(localStorage.getItem(KEY) || 'null'); if (v && v.m) { S.m = v.m; S.pat = v.pat || S.pat; S.ship = v.ship || []; S.ft = v.ft || 0; S.nid = v.nid || 1; S.done = v.done || []; S.want = v.want || []; S.wnid = v.wnid || 1; S.wT = v.wT != null ? v.wT : 0; } } catch (e) {} }
-    function save() { try { if (S && KEY) localStorage.setItem(KEY, JSON.stringify({ m: S.m, pat: S.pat, ship: S.ship, ft: S.ft, nid: S.nid, done: S.done.slice(0, 4), want: S.want, wnid: S.wnid, wT: S.wT })); } catch (e) {} }
+    function load() { KEY = key(); S = fresh(); try { var v = JSON.parse(localStorage.getItem(KEY) || 'null'); if (v && v.m) { S.m = v.m; S.pat = v.pat || S.pat; S.ship = v.ship || []; S.ft = v.ft || 0; S.nid = v.nid || 1; S.done = v.done || []; S.want = v.want || []; S.wnid = v.wnid || 1; S.wT = v.wT != null ? v.wT : 0; S.hs = v.hs || S.hs; S.dd = v.dd != null ? v.dd : -1; S.dv = v.dv || 0; S.dl = v.dl || 0; S.dlc = v.dlc || {}; } } catch (e) {} }
+    function save() { try { if (S && KEY) localStorage.setItem(KEY, JSON.stringify({ m: S.m, pat: S.pat, ship: S.ship, ft: S.ft, nid: S.nid, done: S.done.slice(0, 4), want: S.want, wnid: S.wnid, wT: S.wT, hs: S.hs, dd: S.dd, dv: S.dv, dl: S.dl, dlc: S.dlc })); } catch (e) {} }
     function saveGoods() { try { if (MODE === 'free' && ME_S && ME_S.g131 && window.TP131) localStorage.setItem('kingdom-goods-v1:' + MODE, JSON.stringify({ bag: TP131.bag(), home: ME_S.g131 })); } catch (e) {} }
     function on() { return typeof MODE !== 'undefined' && MODE === 'free' && typeof city !== 'undefined' && city && window.RAIL136 && window.ECON131 && typeof ME_S !== 'undefined' && ME_S; }
     function stations() { var R = RAIL136.rail(); return R && R.st ? R.st.filter(function (s) { return s && !s.siding && (s.home || s.name); }) : []; }
@@ -14593,9 +14594,18 @@ window.B137 = (function () {
     function hhmm(h) { h = ((h % 24) + 24) % 24; var m = Math.floor((h % 1) * 60); return (Math.floor(h) % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' AM' : ' PM'); }
     function nextDep(co) { var H = hourNow(), n = co.off + Math.ceil((H - co.off) / co.hw - 0.02) * co.hw; return n - H; }
     function fDep(co) { var w = nextDep(co); return w < 0.35 ? w + co.hw : w; } /* v205: freight needs loading time, so it makes the following train */
-    function fare(co, a, b) { return Math.max(1, Math.round(Math.max(2, dist(a, b) / 1500) * co.fare * S.m[co.id])); }
+    function fare(co, a, b) { return Math.max(1, Math.round(Math.max(2, dist(a, b) / 1500) * co.fare * S.m[co.id] * (1 - disc(co)))); }
+    /* v207: railroad shares - price follows market share, dividends every game day, holders ride and ship cheaper */
+    var SHB = { dwp: 40, cw: 55, pg: 28 }, SHMAX = 50, DAY = 480;
+    function held(co) { return (S && S.hs && S.hs[co.id]) || 0; }
+    function disc(co) { return Math.min(0.2, held(co) * 0.01); }
+    function sPrice(co) { var sh = share()[co.id]; return Math.max(5, Math.round(SHB[co.id] * (0.55 + 1.35 * sh) * (S.war && S.war.co === co.id ? 0.9 : 1))); }
+    function divPer(co) { var sh = share()[co.id]; return Math.round(SHB[co.id] * 0.045 * sh * 3 * (S.war ? (S.war.co === co.id ? 0.5 : 0.85) : 1) * 10) / 10; }
+    function payDiv(nd) { var t = 0, per = {}; CO.forEach(function (c) { var v = held(c) * divPer(c) * nd; per[c.id] = Math.round(v); t += v; }); t = Math.round(t); S.dlc = per; S.dl = t; if (t <= 0) { save(); return 0; } S.dv += t; ME_S.res.gold += t; window.DIV207 = (window.DIV207 || 0) + t; try { updateRes(); } catch (e) {} toast('\ud83d\udcc8 RAILROAD DIVIDENDS +' + t + ' GOLD'); save(); return t; }
+    function buySh(co, n) { var p = sPrice(co); n = Math.min(n, SHMAX - held(co)); if (n < 1 || gold() < p * n) return 0; ME_S.res.gold -= p * n; S.hs[co.id] = held(co) + n; try { updateRes(); } catch (e) {} save(); return n; }
+    function sellSh(co, n) { n = Math.min(n, held(co)); if (n < 1) return 0; var p = Math.round(sPrice(co) * 0.95); ME_S.res.gold += p * n; S.hs[co.id] = held(co) - n; try { updateRes(); } catch (e) {} save(); return n; }
     function rideH(co, a, b) { return 0.15 + dist(a, b) / co.spd; }
-    function frate(co, k, q, a, b) { var car = carOf(k); if (!co.rate[car]) return -1; return Math.max(2, Math.round(q * Math.max(0.5, dist(a, b) / 10000) * BASE[car] * co.rate[car] * S.m[co.id])); }
+    function frate(co, k, q, a, b) { var car = carOf(k); if (!co.rate[car]) return -1; return Math.max(2, Math.round(q * Math.max(0.5, dist(a, b) / 10000) * BASE[car] * co.rate[car] * S.m[co.id] * (1 - disc(co)))); }
     function fH(co, a, b) { return 0.5 + dist(a, b) / co.fspd; }
     function share() { var t = 0, pt = 0, o = {}; CO.forEach(function (c) { pt += S.pat[c.id] || 0; }); CO.forEach(function (c) { o[c.id] = c.w / (S.m[c.id] * S.m[c.id]) + 1.2 * (S.pat[c.id] || 0) / (4 + pt); t += o[c.id]; }); CO.forEach(function (c) { o[c.id] /= t; }); return o; }
     function gold() { return ME_S && ME_S.res ? ME_S.res.gold : 0; }
@@ -14618,6 +14628,7 @@ window.B137 = (function () {
         S.war = { t: 45, co: lo.id, cut: Math.round(cut * 100), sh: 'RATE WAR: ' + lo.sh + ' \u2212' + Math.round(cut * 100) + '%', s: 'RATE WAR \u00b7 ' + lo.sh + ' CUTS ' + Math.round(cut * 100) + '%' + (ans.length ? ' \u00b7 ' + ans.join(' \u00b7 ') : ' \u00b7 NO ANSWER YET') };
       }
       S.ft += dt;
+      var day = Math.floor(S.ft / DAY); if (S.dd < 0) S.dd = day; else if (day > S.dd) { var nd = Math.min(3, day - S.dd); S.dd = day; payDiv(nd); }
       for (var i = S.ship.length - 1; i >= 0; i--) { var sp = S.ship[i]; if (S.ft >= sp.at) { S.ship.splice(i, 1); deliver(sp); save(); saveGoods(); } }
       wantTick(dt);
       syncRuns();
@@ -14679,7 +14690,7 @@ window.B137 = (function () {
       S.want.forEach(function (w) {
         if (w.st !== 'open') return;
         if (S.ft > w.due) { w.st = 'late'; w.end = S.ft; ch = 1; }
-        else if (w.rv > 0 && S.ft >= w.rv) { w.st = 'lost'; w.end = S.ft; S.pat[w.rco] = (S.pat[w.rco] || 0) + 1; ch = 1; toast('\ud83d\udcdc ' + w.to + ' WANTED FILLED BY ' + ((COI[w.rco] || CO[0]).sh) + ' (' + w.q + ' ' + ECON131.G[w.k].n + ')'); }
+        else if (w.rv > 0 && S.ft >= w.rv) { w.st = 'lost'; w.end = S.ft; S.pat[w.rco] = (S.pat[w.rco] || 0) + 1; ch = 1; /* v207: no toast - the signboard says TAKEN */ }
       });
       var n0 = S.want.length; S.want = S.want.filter(function (w) { return w.st === 'open' || S.ft - w.end < 50; }); if (ch || n0 !== S.want.length) save();
     }
@@ -14752,13 +14763,16 @@ window.B137 = (function () {
       '#rc203 .go{flex:0 0 auto;min-width:112px;min-height:42px;font:bold 13px monospace;background:#7a4a1c;color:#ffe9b8;border:2px solid #3b2410;border-radius:6px;padding:0 8px}#rc203 .go:disabled{background:#d8c49c;color:#7a6040;border-color:#a08660}' +
       '#rc203 .ln.wl .lb{width:50px;color:#7a1a1a}#rc203 .ch button.wn{border-color:#7a1a1a;background:#fff0d8}#rc203 .ch button.wn.on{background:#7a1a1a;color:#ffe9b8}#rc203 .ch button.wh{background:#2e6a2e;color:#f2ffe0;border-color:#1a3a1a}#rc203 .ch button.wd{background:#e8dcc0;color:#6a5030;border-style:dashed}#rc203 .wem{font-size:11px;color:#5a3a1c;align-self:center;white-space:nowrap}' +
       '#rc203 .row.hl{background:#fff3d0;box-shadow:inset 3px 0 0 #7a4a1c}' +
+      '#rc203 .ln.wl .ch{flex-wrap:wrap;overflow:visible;row-gap:4px}#rc203 .ln.wl .ch button{font-size:11px;padding:3px 8px}' +
+      '#rc203 .gb{flex:0 0 auto;display:flex;gap:5px}#rc203 .gb .go{min-width:96px}#rc203 .gb .sl{min-width:62px;background:#fff8e8;color:#2a1a0a}#rc203 .gb .sl:disabled{background:#e8dcc0;color:#9a8460}' +
+      '#rc203 .tabs button{padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
       '#rc203 .dn{color:#2e7a2e}#rc203 .go .dn{color:#b8f0a0}#rc203 .go .up{color:#ffb0a0}#rc203 .up{color:#a02020}#rc203 .ban{font-size:11px;background:#7a1a1a;color:#ffe9b8;border-radius:4px;padding:3px 7px;margin:4px 0}#rc203 .em{padding:10px 4px;color:#5a3a1c;font-size:12px}' +
       '#rc203 .st{font-size:11px;color:#3b2410;border-top:2px solid #3b2410;margin-top:4px;padding-top:4px}#rc203 .st div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:17px}#rc203 .st .lst{color:#2e6a2e}#rc203 .st i{display:inline-block;width:9px;height:9px;border:1px solid #3b2410;margin-right:4px;vertical-align:-1px}' +
       '#ride203{position:fixed;inset:0;z-index:90;background:rgba(26,18,8,.92);display:none;align-items:center;justify-content:center}#ride203 .rb{background:#f3e3c3;border:4px solid;border-radius:10px;padding:12px 16px;width:min(460px,86vw);font:bold 13px monospace;color:#2a1a0a;text-align:center}' +
       '#ride203 .rt{font:bold 18px Georgia,serif}#ride203 .rt i{display:inline-block;width:14px;height:14px;border:1px solid #3b2410;margin-right:6px;vertical-align:-1px}#ride203 .rr{margin:6px 0}#ride203 .rbar{height:12px;border:2px solid #3b2410;border-radius:6px;overflow:hidden;background:#fff8e8}#ride203 .rbar b{display:block;height:100%;width:0}#ride203 .rs{margin-top:6px;font-size:12px}' +
       '#rail136{left:50%!important;transform:translateX(-50%)!important;bottom:calc(env(safe-area-inset-bottom,0px) + 22px)!important;padding:8px 16px!important;font:bold 14px monospace!important;background:#7a4a1c!important;color:#ffe9b8!important;border:2px solid #3b2410!important;border-radius:8px!important;box-shadow:0 3px 0 #3b2410;min-height:40px}' +
       '@media (max-width:700px),(max-height:500px){#rc203 .row .nm{flex:0 0 128px}#rc203 .go{min-width:100px}}' +
-      '@media (max-height:500px){#rc203{padding:5px 8px;max-height:96vh}#rc203 .hd{min-height:36px}#rc203 .sh{margin:3px 0 1px;height:14px}#rc203 .sh i{line-height:14px}#rc203 .x{height:36px}#rc203 .tabs{margin:3px 0}#rc203 .tabs button{min-height:36px}#rc203 .ln{margin:2px 0}#rc203 .row{min-height:40px;padding:2px}#rc203 .go{min-height:38px}#rc203 .ttl{font-size:15px}#rc203 .ban{margin:2px 0;padding:2px 6px}#rail136{bottom:8px!important}}';
+      '@media (max-height:500px){#rc203{padding:5px 8px;max-height:96vh}#rc203 .hd{min-height:36px}#rc203 .sh{margin:3px 0 1px;height:14px}#rc203 .sh i{line-height:14px}#rc203 .x{height:36px}#rc203 .tabs{margin:3px 0}#rc203 .tabs button{min-height:36px}#rc203 .ln{margin:2px 0}#rc203 .row{min-height:40px;padding:2px}#rc203 .go{min-height:38px}#rc203 .ttl{font-size:15px}#rc203 .ban{margin:2px 0;padding:2px 6px}#rail136{bottom:8px!important}#rc203 .st{margin-top:2px;padding-top:2px}#rc203 .st div{line-height:15px}#rc203 .ch{padding:0 0 2px}#rc203 .ln.wl .ch button,#rc203 .ch button{min-height:36px;padding-top:2px;padding-bottom:2px}#rc203 .q button{height:36px}#rc203 .row{min-height:38px}#rc203 .gb .go{min-width:86px}#rc203 .ln.wl .lb{width:22px}#rc203 .ln.wl .wt{display:none}#rc203 .ln.wl .ch button{padding:2px 6px;font-size:10px}#rc203 .ln.wl .ch{gap:4px}}';
     document.head.appendChild(css);
     function el(t, cls, txt) { var e = document.createElement(t); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
     function btn(cls, html, fn, dis) { var b = el('button', cls); b.innerHTML = html; b.disabled = !!dis; b.onclick = function (e) { e.stopPropagation(); ui.last = performance.now(); fn(); }; return b; }
@@ -14778,17 +14792,19 @@ window.B137 = (function () {
       var tb = el('div', 'tabs');
       tb.appendChild(btn(ui.tab === 't' ? 'on' : '', '\ud83c\udfab TICKETS', function () { ui.tab = 't'; render(); }));
       tb.appendChild(btn(ui.tab === 'f' ? 'on' : '', '\ud83d\udce6 FREIGHT' + (S.ship.length ? ' (' + S.ship.length + ')' : ''), function () { ui.tab = 'f'; render(); }));
+      tb.appendChild(btn(ui.tab === 's' ? 'on' : '', '\ud83d\udcc8 SHARES', function () { ui.tab = 's'; render(); }));
       P.appendChild(tb);
+      if (ui.tab === 's') { renderShares(); P.scrollTop = stp; return; }
       if (ui.tab === 'f') {
         var GK = Object.keys(ECON131.G).filter(function (k) { return have(k, st) > 0; });
         if (GK.indexOf(ui.good) < 0) { ui.good = GK[0] || null; ui.q = ui.good ? Math.min(10, have(ui.good, st)) : 0; }
         /* v206: WANTED notices (all towns); at the town itself you can hand goods in */
-        var wl = el('div', 'ln wl'); wl.appendChild(el('div', 'lb', '\ud83d\udcdc WANTED')); var wc = el('div', 'ch'), WL = S.want.filter(function (w) { return w.st === 'open' || w.st === 'won'; });
+        var wl = el('div', 'ln wl'), wlb = el('div', 'lb'); wlb.innerHTML = '\ud83d\udcdc<span class="wt"> WANTED</span>'; wl.appendChild(wlb); var wc = el('div', 'ch'), WL = S.want.filter(function (w) { return w.st === 'open' || w.st === 'won'; }).sort(function (a, b) { return (a.st === 'open' ? 0 : 1) - (b.st === 'open' ? 0 : 1) || (b.to === st.name) - (a.to === st.name) || a.due - b.due; }).slice(0, innerHeight < 500 ? 3 : 6); /* v207: one tidy line on phones */
         if (!WL.length) wc.appendChild(el('div', 'wem', 'NO NOTICES POSTED \u00b7 TOWNS POST WANTED BOARDS SOON'));
         WL.forEach(function (w) { var nm = ECON131.G[w.k] ? ECON131.G[w.k].n : w.k, here = w.to === st.name, hv = Math.min(w.q - w.got, Math.floor(bag()[w.k] || 0));
-          if (w.st === 'won') { wc.appendChild(btn('wd', '\u2714 ' + w.to + ' \u00b7 ' + wTxt(w) + ' FILLED', function () {}, true)); return; }
+          if (w.st === 'won') { wc.appendChild(btn('wd', '\u2714 ' + w.to + ' ' + wTxt(w), function () {}, true)); return; }
           if (here && hv > 0) { wc.appendChild(btn('wh', '\u270b HAND IN ' + hv + ' ' + nm + ' <small>\u2605+' + w.bonus + '</small>', function () { hand(st); render(); })); return; }
-          var b = btn('wn' + (ui.to && ui.to.name === w.to && ui.good === w.k ? ' on' : ''), (here ? 'HERE' : w.to) + ': ' + wTxt(w) + ' BY ' + hhmm(w.dueH) + ' <small>\u2605+' + w.bonus + ' \u00b7 ' + w.got + '/' + w.q + '</small>', function () { if (!here) ui.to = stByName(w.to); if (have(w.k, st) > 0) { ui.good = w.k; ui.q = Math.min(w.q - w.got, have(w.k, st)); } render(); });
+          var b = btn('wn' + (ui.to && ui.to.name === w.to && ui.good === w.k ? ' on' : ''), (here ? 'HERE' : w.to) + ' ' + wTxt(w) + ' ' + hhmm(w.dueH).replace(':00', '').replace(' AM', 'A').replace(' PM', 'P') + ' <small>\u2605+' + w.bonus + (w.got ? ' \u00b7 ' + w.got + '/' + w.q : '') + '</small>', function () { if (!here) ui.to = stByName(w.to); if (have(w.k, st) > 0) { ui.good = w.k; ui.q = Math.min(w.q - w.got, have(w.k, st)); } render(); });
           b.title = here ? 'BRING ' + nm + ' IN YOUR SADDLEBAGS TO HAND IT IN' : 'SHIP ' + nm + ' TO ' + w.to + ' BEFORE ' + hhmm(w.dueH); wc.appendChild(b); });
         wl.appendChild(wc); P.appendChild(wl);
         var gl = el('div', 'ln'); gl.appendChild(el('div', 'lb', 'SHIP')); var gc = el('div', 'ch');
@@ -14811,14 +14827,14 @@ window.B137 = (function () {
         if (!ok) row.className = 'row off'; else if (ui.hl === c.id) row.className = 'row hl';
         if (ui.tab === 't') {
           var f = fare(c, st, to), w = nextDep(c), h = rideH(c, st, to);
-          nm.innerHTML = '<b>' + c.n + '</b><small>' + c.tag + '</small>';
+          nm.innerHTML = '<b>' + c.n + '</b><small>' + (disc(c) > 0 ? '\u2605 ' + Math.round(disc(c) * 100) + '% OFF \u00b7 YOUR SHARES' : c.tag) + '</small>';
           inf.innerHTML = ok ? '<span>DEP <b>' + hhmm(H0 + w) + '</b> \u2192 ARR ' + hhmm(H0 + w + h) + '</span><span>' + h.toFixed(1) + ' H RIDE \u00b7 ' + Math.round(c.ot * 100) + '% ON TIME</span>' : '<span class="ns">NO SERVICE ON THIS ROUTE</span><span class="ns">' + (serves(c, st) ? 'DOES NOT STOP AT ' + to.name : 'DOES NOT STOP HERE') + '</span>';
           go = btn('go', ok ? f + ' GOLD' + arrow(c) : 'NO SERVICE', function () { ride(c, st, to); }, !ok || gold() < f);
           if (ok && gold() < f) go.innerHTML = 'NEED ' + f;
         } else {
           var k = ui.good, q = ui.q || 0, cost = k ? frate(c, k, q, st, to) : -1, hf = fH(c, st, to), wf = fDep(c), val = k ? Math.round(sellValue(to, k, q)) : 0, car = k ? carOf(k) : 'box', why = '';
           if (!k) why = '\u2014'; else if (!ok) why = 'NO SERVICE'; else if (cost < 0) why = 'NO ' + CAR[car] + 'S'; else if (q > c.cap) why = 'MAX ' + c.cap; else if (gold() < cost) why = 'NEED ' + cost;
-          nm.innerHTML = '<b>' + c.n + '</b><small>' + (k && cost >= 0 ? CAR[car] + ' \u2264' + c.cap : k ? 'NO ' + CAR[car] + 'S' : c.tag) + '</small>';
+          nm.innerHTML = '<b>' + c.n + '</b><small>' + (k && cost >= 0 ? CAR[car] + ' \u2264' + c.cap + (disc(c) > 0 ? ' \u2605\u2212' + Math.round(disc(c) * 100) + '%' : '') : k ? 'NO ' + CAR[car] + 'S' : c.tag) + '</small>';
           var pr = val - cost;
           inf.innerHTML = !k ? '<span class="ns">PICK SOMETHING TO SHIP</span>' : !ok ? '<span class="ns">NO SERVICE ON THIS ROUTE</span>' : cost < 0 ? '<span class="ns">NO ' + CAR[car] + 'S ON THIS LINE</span><span class="ns">' + c.tag + '</span>' :
             '<span>TRAIN <b>' + hhmm(H0 + wf) + '</b> \u2192 ARR ' + hhmm(H0 + wf + hf) + '</span><span>' + (to.home ? 'INTO YOUR STOREHOUSE' : 'SELLS ~' + val + ' \u00b7 <span style="display:inline" class="' + (pr >= 0 ? 'dn' : 'up') + '">' + (pr >= 0 ? 'PROFIT +' : 'LOSS ') + pr + '</span>') + wNote(to, k, (wf + hf) * 20) + '</span>';
@@ -14828,14 +14844,52 @@ window.B137 = (function () {
       });
       if (ui.tab === 'f' && (S.ship.length || S.done.length)) {
         var sd = el('div', 'st');
-        S.ship.slice(0, 2).forEach(function (sp) { var d = el('div'), c = COI[sp.co] || CO[0], wait = sp.dep != null && sp.dep > S.ft, left = Math.max(0, (sp.at - S.ft) / 20);
+        var nS = innerHeight < 500 ? 1 : 2;
+        S.ship.slice(0, nS).forEach(function (sp) { var d = el('div'), c = COI[sp.co] || CO[0], wait = sp.dep != null && sp.dep > S.ft, left = Math.max(0, (sp.at - S.ft) / 20);
           d.innerHTML = '<i style="background:' + c.c + '"></i>\u2605 ' + sp.q + ' ' + (ECON131.G[sp.k] ? ECON131.G[sp.k].n : sp.k) + ' \u00b7 ' + CAR[sp.car] + ' ON THE ' + c.sh + ' \u2192 ' + sp.to + ' \u00b7 ' + (wait ? 'LOADING, LEAVES ' + hhmm(sp.depH != null ? sp.depH : hourNow() + (sp.dep - S.ft) / 20 + 0.004) : 'ROLLING, ' + left.toFixed(1) + ' H TO GO'); sd.appendChild(d); });
-        if (S.ship.length > 2) sd.appendChild(el('div', '', '+' + (S.ship.length - 2) + ' MORE ON THE RAILS'));
-        if (S.done[0]) sd.appendChild(el('div', 'lst', '\u2714 LAST: ' + S.done[0]));
+        if (S.ship.length > nS) sd.lastChild.innerHTML += ' \u00b7 +' + (S.ship.length - nS) + ' MORE';
+        if (S.done[0] && (nS > 1 || !S.ship.length)) sd.appendChild(el('div', 'lst', '\u2714 LAST: ' + S.done[0]));
         P.appendChild(sd);
       }
       P.querySelectorAll('.ch').forEach(function (c, i) { if (sl[i]) c.scrollLeft = sl[i]; else { var o = c.querySelector('.on'); if (o && o.offsetLeft > c.clientWidth - 40) c.scrollLeft = o.offsetLeft - 20; } }); P.scrollTop = stp;
     }
+    function renderShares() {
+      var sh = share();
+      CO.forEach(function (c) {
+        var row = el('div', 'row'), sw = el('div', 'sw'), nm = el('div', 'nm'), inf = el('div', 'inf'), gb = el('div', 'gb'), h = held(c), p = sPrice(c), dp = divPer(c), war = S.war && S.war.co === c.id;
+        sw.style.background = c.c; row.appendChild(sw); if (ui.hl === c.id) row.className = 'row hl';
+        nm.innerHTML = '<b>' + c.n + '</b><small>' + (h ? 'YOU HOLD ' + h + ' \u00b7 <span style="display:inline" class="dn">' + Math.round(disc(c) * 100) + '% OFF</span>' : 'NO SHARES YET') + '</small>';
+        inf.innerHTML = '<span>SHARE <b>' + p + '</b> \u00b7 MARKET ' + Math.round(sh[c.id] * 100) + '%' + (war ? ' \u00b7 <span style="display:inline" class="up">RATE WAR</span>' : '') + '</span><span>DIVIDEND ~' + dp.toFixed(1) + '/SH A DAY' + (h ? ' \u00b7 YOURS ~' + Math.round(dp * h) : '') + '</span>';
+        gb.appendChild(btn('go', h >= SHMAX ? 'MAX ' + SHMAX : gold() < p ? 'NEED ' + p : 'BUY ' + p, function () { buySh(c, 1); render(); }, h >= SHMAX || gold() < p));
+        gb.appendChild(btn('go sl', 'SELL', function () { sellSh(c, 1); render(); }, !h));
+        row.appendChild(nm); row.appendChild(inf); row.appendChild(gb); P.appendChild(row);
+      });
+      var sd = el('div', 'st'), tot = CO.reduce(function (a, c) { return a + held(c); }, 0), left = Math.max(0, (S.dd + 1) * DAY - S.ft) / 20;
+      sd.appendChild(el('div', '', '\ud83d\udcc8 DIVIDENDS AT MIDNIGHT (IN ' + left.toFixed(1) + ' H)' + (S.dl ? ' \u00b7 LAST +' + S.dl : '') + (S.dv ? ' \u00b7 TOTAL +' + S.dv : '')));
+      sd.appendChild(el('div', tot ? 'lst' : '', tot ? '\u2605 SHAREHOLDER FARES + FREIGHT: 1% OFF PER SHARE, UP TO 20%' : 'BUSY LINES PAY MORE \u00b7 RATE WARS CUT THE PAYOUT \u00b7 SELL AT 95%'));
+      P.appendChild(sd);
+    }
+    /* v207: the MAP shows your rolling shipments (company colours) and towns' WANTED notices */
+    window.MAPHOOK207 = function (c, P2, sc, W, Hh) {
+      if (!on() || !S) return 0; var nW = 0, nS = 0, seen = {}, n = 0, BX = []; c.save();
+      function free7(x0, y0, x1, y1) { for (var i = 0; i < BX.length; i++) { var q = BX[i]; if (x1 > q[0] && x0 < q[2] && y1 > q[1] && y0 < q[3]) return false; } BX.push([x0, y0, x1, y1]); return true; }
+      try { var hm = P2(city.x, city.y); BX.push([hm[0] - 40, hm[1] - 8, hm[0] + 40, hm[1] + 22]); BX.push([W / 2 - 18, Hh / 2 - 24, W / 2 + 18, Hh / 2 + 8]); } catch (e) {}
+      S.want.forEach(function (w) { if (w.st !== 'open' || seen[w.to]) return; var st = stByName(w.to); if (!st) return; seen[w.to] = 1;
+        var t = st.t, a = P2(t ? t.x : st.x, t ? t.y : st.y), r = t && t.d ? 3 + Math.sqrt(t.d.pop) : 4, x = a[0] + r + 9, y = a[1] + 4; if (x < -40 || x > W + 40 || y < -20 || y > Hh + 20) return; nW++;
+        c.fillStyle = '#7a1a1a'; c.strokeStyle = '#fff4d8'; c.lineWidth = 1.5; c.beginPath(); c.arc(x, y, 7, 0, 7); c.fill(); c.stroke();
+        c.fillStyle = '#ffe9b8'; c.font = 'bold 10px sans-serif'; c.textAlign = 'center'; c.fillText('\u2605', x, y + 3.5);
+        c.textAlign = 'left'; c.font = 'bold 9px monospace'; var tx = w.q + ' ' + (ECON131.G[w.k] ? ECON131.G[w.k].n : w.k); BX.push([x - 8, y - 8, x + 8, y + 8]); if (!free7(x + 9, y - 6, x + 12 + c.measureText(tx).width, y + 6)) return; c.lineWidth = 3; c.strokeStyle = 'rgba(243,227,195,.9)'; c.strokeText(tx, x + 10, y + 3); c.fillStyle = '#7a1a1a'; c.fillText(tx, x + 10, y + 3); });
+      var runs = []; try { runs = TRAIN167.runs() || []; } catch (e) {}
+      groups().forEach(function (g) { var co = COI[g.co] || CO[0], A = stByName(g.from), B = stByName(g.to); if (!A || !B) return; var pa = pos(A), pb = pos(B), u = Math.max(0, Math.min(1, (S.ft - g.dep) / Math.max(1, g.at - g.dep))), x = pa.x + (pb.x - pa.x) * u, y = pa.y + (pb.y - pa.y) * u;
+        var tr = runs.filter(function (t) { return t.run === g.key; })[0]; if (tr && tr.parts && tr.parts[0] && tr.parts[0].x != null) { x = tr.parts[0].x; y = tr.parts[0].y; }
+        var a = P2(x, y), b = P2(pb.x, pb.y); nS++;
+        c.strokeStyle = co.c; c.globalAlpha = 0.55; c.lineWidth = 2; c.setLineDash([2, 3]); c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke(); c.setLineDash([]); c.globalAlpha = 1;
+        var oy = (n++ % 3) * 0; c.fillStyle = co.c; c.strokeStyle = '#2a1a0a'; c.lineWidth = 1.5; c.beginPath(); if (c.roundRect) c.roundRect(a[0] - 8, a[1] - 5 + oy, 16, 10, 3); else c.rect(a[0] - 8, a[1] - 5 + oy, 16, 10); c.fill(); c.stroke();
+        c.fillStyle = co.c2; c.fillRect(a[0] - 5, a[1] - 1.5 + oy, 10, 3); BX.push([a[0] - 9, a[1] - 6, a[0] + 9, a[1] + 6]);
+        var sp = g.ships[0], lb = (u <= 0 ? 'LOADING ' : '') + sp.q + ' ' + (ECON131.G[sp.k] ? ECON131.G[sp.k].n : sp.k) + (g.ships.length > 1 ? ' +' + (g.ships.length - 1) : '');
+        c.font = 'bold 9px monospace'; c.textAlign = 'center'; var lw = c.measureText(lb).width / 2 + 2, ly = a[1] + 16; if (!free7(a[0] - lw, ly - 9, a[0] + lw, ly + 3)) { ly = a[1] - 9; if (!free7(a[0] - lw, ly - 9, a[0] + lw, ly + 3)) return; } c.lineWidth = 3; c.strokeStyle = 'rgba(243,227,195,.9)'; c.strokeText(lb, a[0], ly); c.fillStyle = co.c; c.fillText(lb, a[0], ly); });
+      c.restore(); window.MAP207 = { wanted: nW, ships: nS }; return nW + nS;
+    };
     function wNote(to, k, inSec) { var w = to && k ? wFor(to.name, k) : null; if (!w) return ''; return S.ft + inSec <= w.due ? ' \u00b7 <span style="display:inline" class="dn">\u2605+' + w.bonus + ' WANTED</span>' : ' \u00b7 <span style="display:inline" class="up">\u2605 TOO LATE</span>'; }
     function open(st) { if (!on() || !st) return; if (!S || KEY !== key()) load(); OPEN = st; ui.last = performance.now(); P.style.display = 'block'; try { RAIL136.RB.style.display = 'none'; } catch (e) {} render(); }
     function close() { OPEN = null; P.style.display = 'none'; }
@@ -14866,6 +14920,7 @@ window.B137 = (function () {
     function drawStand(st, sx, sy) {
       var c = ctx, L = CO.filter(function (co) { return serves(co, st); }), H0 = hourNow(), n = L.length, bh = 19, sh = 18 + n * 14, W6 = st.home ? null : wAt(st.name), wh = W6 ? 46 : 0, top = -(n * (bh + 2) + sh + 26 + wh), i;
       c.save(); c.translate(sx, sy);
+      try { var m7 = c.getTransform(), d7 = window.devicePixelRatio || 1; (window.__sb207 = window.__sb207 || {})[st.name] = { l: (m7.e - 56 * m7.a) / d7, r: (m7.e + 56 * m7.a) / d7, t2: (m7.f + top * m7.d) / d7, b: (m7.f + 4 * m7.d) / d7, t: performance.now() }; } catch (e) {}
       if (W6) { window.WPOST206 = (window.WPOST206 || 0) + 1; }
       c.fillStyle = 'rgba(40,25,10,.22)'; c.beginPath(); c.ellipse(0, 2, 54, 6, 0, 0, 7); c.fill();
       c.fillStyle = '#6a4224'; c.fillRect(-42, top + 6, 6, -top - 6); c.fillRect(36, top + 6, 6, -top - 6);
@@ -14956,12 +15011,20 @@ window.B137 = (function () {
       c.font = 'bold 11px monospace'; var bw = Math.max(c.measureText(P2[0]).width, c.measureText(P2[1]).width, c.measureText(co.sh + ' AGENT').width) + 16, by = -112, lim = 0, side = 0;
       try { var e = document.getElementById('pp133'); if (e && e.style.display !== 'none') lim = e.getBoundingClientRect().bottom + 6; } catch (er) {}
       if (lim && (sy + by) * z < lim) { side = 1; by = Math.min(-40, Math.max(-66, lim / z - sy)); x = 26 + 14 + bw / 2; }
+      /* v207: never cover the player - a side bubble goes to the far side of the agent; a top bubble rises above you */
+      var rx = px - a.x, ry = py - a.y, hit = function () { return rx + 20 > x - bw / 2 && rx - 20 < x + bw / 2 && ry > by && ry - 74 < by + 55; };
+      if (side && hit()) { side = -1; x = 26 - 14 - bw / 2; }
+      if (side && hit()) { side = 1; x = 26 + 14 + bw / 2; }
+      if (side && hit()) { side = 2; x = 26; by = Math.max(ry, 4) + 8; } /* right on top of the agent: the card drops below your feet */
+      if (!side && hit()) by = Math.min(by, ry - 74 - 60);
+      window.ABUBHIT207 = hit() ? 1 : 0;
         c.fillStyle = '#fff8e8'; c.strokeStyle = co.c; c.lineWidth = 2; c.beginPath(); if (c.roundRect) c.roundRect(x - bw / 2, by, bw, 48, 6); else c.rect(x - bw / 2, by, bw, 48); c.fill(); c.stroke();
-        if (side) { var lx = x - bw / 2; c.fillStyle = '#fff8e8'; c.beginPath(); c.moveTo(lx + 1, by + 18); c.lineTo(lx + 1, by + 30); c.lineTo(lx - 7, by + 24); c.closePath(); c.fill(); c.strokeStyle = co.c; c.beginPath(); c.moveTo(lx, by + 18); c.lineTo(lx - 7, by + 24); c.lineTo(lx, by + 30); c.stroke(); }
-        else { c.fillStyle = '#fff8e8'; c.beginPath(); c.moveTo(x - 6, by + 47); c.lineTo(x + 6, by + 47); c.lineTo(x, by + 55); c.closePath(); c.fill(); c.strokeStyle = co.c; c.beginPath(); c.moveTo(x - 6, by + 48); c.lineTo(x, by + 55); c.lineTo(x + 6, by + 48); c.stroke(); }
+        if (side < 0) { var rx2 = x + bw / 2; c.fillStyle = '#fff8e8'; c.beginPath(); c.moveTo(rx2 - 1, by + 18); c.lineTo(rx2 - 1, by + 30); c.lineTo(rx2 + 7, by + 24); c.closePath(); c.fill(); c.strokeStyle = co.c; c.beginPath(); c.moveTo(rx2, by + 18); c.lineTo(rx2 + 7, by + 24); c.lineTo(rx2, by + 30); c.stroke(); }
+        else if (side === 1) { var lx = x - bw / 2; c.fillStyle = '#fff8e8'; c.beginPath(); c.moveTo(lx + 1, by + 18); c.lineTo(lx + 1, by + 30); c.lineTo(lx - 7, by + 24); c.closePath(); c.fill(); c.strokeStyle = co.c; c.beginPath(); c.moveTo(lx, by + 18); c.lineTo(lx - 7, by + 24); c.lineTo(lx, by + 30); c.stroke(); }
+        else if (!side) { c.fillStyle = '#fff8e8'; c.beginPath(); c.moveTo(x - 6, by + 47); c.lineTo(x + 6, by + 47); c.lineTo(x, by + 55); c.closePath(); c.fill(); c.strokeStyle = co.c; c.beginPath(); c.moveTo(x - 6, by + 48); c.lineTo(x, by + 55); c.lineTo(x + 6, by + 48); c.stroke(); }
         c.fillStyle = co.c; c.fillRect(x - bw / 2, by, bw, 13); c.fillStyle = co.c2; c.font = 'bold 9px monospace'; c.fillText(co.sh + ' AGENT', x, by + 10);
         c.fillStyle = '#2a1a0a'; c.font = 'bold 11px monospace'; c.fillText(P2[0], x, by + 27); c.fillStyle = '#5a3a1c'; c.font = 'bold 10px monospace'; c.fillText(P2[1], x, by + 41);
-      window.ABUB206 = side ? 'side' : 'top'; c.restore();
+      window.ABUB206 = side === 2 ? 'below' : side > 0 ? 'side' : side < 0 ? 'left' : 'top'; c.restore();
     }
     var _pf205 = pushFactionItems;
     pushFactionItems = function (items) {
@@ -14986,7 +15049,8 @@ window.B137 = (function () {
       fare: function (id, a, b) { return fare(COI[id], stByName(a), stByName(b)); }, frate: function (id, k, q, a, b) { return frate(COI[id], k, q, stByName(a), stByName(b)); },
       ride: function (id, a, b) { ride(COI[id], stByName(a), stByName(b)); }, ship: function (id, a, b, k, q) { return ship(COI[id], stByName(a), stByName(b), k, q); },
       war: function () { if (S) { S.warT = 0; tick(0.01); } return S && S.war; }, ff: function (sec) { if (S) tick(sec); }, ui: ui, render: render, load: load,
-      want: function () { return S ? S.want : []; }, post: function (n, k, q, h) { return S ? post(n, k, q, h) : null; }, hand: function (n) { return hand(stByName(n)); }, agents: function (n) { var st = stByName(n); return st ? agentsAt(st).map(function (a) { return { co: a.co.id, x: a.x, y: a.y }; }) : []; } };
+      want: function () { return S ? S.want : []; }, post: function (n, k, q, h) { return S ? post(n, k, q, h) : null; }, hand: function (n) { return hand(stByName(n)); }, shares: function () { return S ? CO.map(function (c) { return { id: c.id, held: held(c), price: sPrice(c), div: divPer(c), disc: disc(c) }; }) : []; }, buy: function (id, n) { return buySh(COI[id], n || 1); }, sell: function (id, n) { return sellSh(COI[id], n || 1); },
+      agents: function (n) { var st = stByName(n); return st ? agentsAt(st).map(function (a) { return { co: a.co.id, x: a.x, y: a.y }; }) : []; } };
   })();
 
 
@@ -15031,5 +15095,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --><!-- v204-railroads --><!-- v205-freight-cars --><!-- v206-wanted-agents --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --><!-- v204-railroads --><!-- v205-freight-cars --><!-- v206-wanted-agents --><!-- v207-map-shares --></body>
 </html>
