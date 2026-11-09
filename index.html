@@ -15144,12 +15144,52 @@ window.B137 = (function () {
     function cLease(co, ct) { return Math.round(PCAR[ct][1] * PCF[co.id]); }
     function cEarn(co, ct) { var sh = share()[co.id]; return Math.max(2, Math.round(PCAR[ct][2] * PCF[co.id] * (0.75 + 0.75 * sh))); }
     function myCar(co, ct) { return S && S.cars ? S.cars.filter(function (c) { return c.co === co.id && c.ct === ct; })[0] || null : null; }
-    function carBusy(c) { return S.ship.some(function (sp) { return sp.own && sp.co === c.co && sp.car === c.ct; }); }
-    function buyCar(co, ct, lease) { if (!co.rate[ct] || myCar(co, ct)) return 0; var p = lease ? cLease(co, ct) : cPrice(co, ct); if (gold() < p) return 0; ME_S.res.gold -= p; S.cars.push({ co: co.id, ct: ct, own: lease ? 0 : 1, paid: p, earn: 0, used: 0, ud: -1, d0: Math.floor(S.ft / DAY) }); try { updateRes(); } catch (e) {} save(); syncRuns(); return p; }
-    function dropCar(co, ct) { var c = myCar(co, ct); if (!c || carBusy(c)) return 0; var back = c.own ? Math.round(cPrice(co, ct) * 0.7) : 0; ME_S.res.gold += back; S.cars.splice(S.cars.indexOf(c), 1); try { updateRes(); } catch (e) {} save(); syncRuns(); return back || 1; }
+    /* v218: your cars stand somewhere - parked on a station siding (empty or loaded) or rolling on the line's train - so you can fill one at an oil town and send it down the line to sell */
+    var CAP218 = { tank: 50, hop: 50, stock: 15, box: 40 };
+    function carRoll(c) { return S.ship.filter(function (sp) { return sp.cid ? sp.cid === c.id : (sp.own && sp.co === c.co && sp.car === c.ct); })[0] || null; }
+    function carBusy(c) { return !!(carRoll(c) || (c.ld && c.ld.q > 0)); }
+    function fix218() { if (!S || !S.cars) return; var L = null; S.cars.forEach(function (c) { if (!c.id) c.id = 'c' + (S.nid++); if (!c.at || (L || (L = stations())).length && !stByName(c.at)) { L = L || stations(); var h = L.filter(function (s) { return s.home; })[0] || L[0]; if (h) c.at = h.name; } if (c.ld && !(c.ld.q > 0)) c.ld = null; }); }
+    function hereSt() { if (OPEN) return OPEN; var L = stations(), b = null, bd = 900; L.forEach(function (s) { var p = pos(s), d = Math.hypot(p.x - px, p.y - py); if (d < bd) { bd = d; b = s; } }); return b || L.filter(function (s) { return s.home; })[0] || L[0] || null; }
+    function freeCar(co, ct, st) { var c = myCar(co, ct); if (!c || !st) return null; fix218(); return c.at === st.name && !carBusy(c) ? c : null; }
+    function carById(id) { return S.cars.filter(function (c) { return c.id === id; })[0] || null; }
+    function gn(k) { return ECON131.G[k] ? ECON131.G[k].n : String(k || '').toUpperCase(); }
+    function goodsFor(ct) { return Object.keys(ECON131.G).filter(function (k) { return carOf(k) === ct; }); }
+    /* car loads trade wholesale at the depot: no shop mark-up and a gentler price walk; an oil town's wells fill a tank car even when the store runs low */
+    function wells(st, k) { try { return (k === 'crude' || k === 'fuel') && ECON131.ty(realm(st)) === 'oil'; } catch (e) { return false; } }
+    function mktHave(st, k) { var r = st && !st.home ? realm(st) : null; if (!r) return 0; var n = Math.max(0, Math.floor(ECON131.stock(r)[k] || 0)); return wells(st, k) ? Math.max(n, k === 'crude' ? 80 : 40) : n; }
+    function mktCost(st, k, q) { var r = realm(st); if (!r || st.home || mktHave(st, k) < q) return -1; var g = ECON131.stock(r), s0 = g[k] || 0, b0 = wells(st, k) ? Math.max(s0, 60) : s0, t = 0; for (var i = 0; i < q; i++) { g[k] = Math.max(0, b0 - i * 0.4); t += ECON131.price(r, k); } g[k] = s0; return Math.round(t); }
+    function fillCar(c, st, k, q, src) {
+      if (!c || !st || c.at !== st.name || carRoll(c) || carOf(k) !== c.ct || (c.ld && c.ld.k !== k)) return 0;
+      q = Math.min(q, CAP218[c.ct] - (c.ld ? c.ld.q : 0)); var cost = 0;
+      if (src === 'bag') { q = Math.min(q, have(k, st)); if (q < 1) return 0; take(k, q, st); saveGoods(); }
+      else { q = Math.min(q, mktHave(st, k)); if (q < 1) return 0; cost = mktCost(st, k, q); if (cost < 0 || gold() < cost) return 0; ME_S.res.gold -= cost; var g = ECON131.stock(realm(st)); g[k] = Math.max(0, (g[k] || 0) - q); }
+      c.ld = { k: k, q: (c.ld ? c.ld.q : 0) + q, pd: (c.ld ? c.ld.pd : 0) + cost }; c.ud = Math.floor(S.ft / DAY); window.FILL218 = (window.FILL218 || 0) + 1;
+      try { updateRes(); } catch (e) {} save(); syncRuns(); return q;
+    }
+    function book(co, from, to, cost, o) {
+      var h = fH(co, from, to), w = fDep(co), dep = S.ft + w * 20;
+      var mate = S.ship.filter(function (x) { return x.co === co.id && x.from === from.name && x.to === to.name && x.dep != null && x.dep > S.ft && Math.abs(x.dep - dep) < 12; })[0];
+      if (mate) { dep = mate.dep; h = (mate.at - mate.dep) / 20; } else if (Math.random() > co.ot) h *= 1.3;
+      var sp = { id: S.nid++, own: 1, cid: o.cid, cs: 1, call: o.call || 0, k: o.k, q: o.q, pd: o.pd || 0, from: from.name, to: to.name, co: co.id, cost: cost, car: o.car, dep: dep, depH: mate && mate.depH != null ? mate.depH : hourNow() + w, at: dep + h * 20, eta: hourNow() + w + h };
+      S.ship.push(sp); S.pat[co.id] = (S.pat[co.id] || 0) + 1; save(); syncRuns(); return sp;
+    }
+    function sendCost(c, to) { var co = COI[c.co], a = stByName(c.at); if (!co || !a || !to || !c.ld) return -1; return frate(co, c.ld.k, c.ld.q, a, to, 1); }
+    function sendCar(c, to) {
+      var co = COI[c.co], a = c && stByName(c.at); if (!co || !a || !to || to === a || !c.ld || carRoll(c) || !serves(co, a) || !serves(co, to)) return 0;
+      var cost = sendCost(c, to); if (cost < 0 || gold() < cost) return 0; ME_S.res.gold -= cost; try { updateRes(); } catch (e) {}
+      var sp = book(co, a, to, cost, { cid: c.id, k: c.ld.k, q: c.ld.q, pd: c.ld.pd, car: c.ct }); c.ld = null; c.used++; c.ud = Math.floor(S.ft / DAY); save(); syncRuns(); window.SEND218 = (window.SEND218 || 0) + 1; return sp;
+    }
+    function callFee(c, st) { var co = COI[c.co], a = stByName(c.at); if (!co || !a || !st) return -1; return Math.max(4, Math.round(dist(a, st) / 10000 * 3 * S.m[co.id] * (1 - disc(co)))); }
+    function callCar(c, st) {
+      var co = COI[c.co], a = c && stByName(c.at); if (!co || !a || !st || a === st || c.ld || carRoll(c) || !serves(co, a) || !serves(co, st)) return 0;
+      var f = callFee(c, st); if (gold() < f) return 0; ME_S.res.gold -= f; try { updateRes(); } catch (e) {}
+      var sp = book(co, a, st, f, { cid: c.id, call: 1, k: goodsFor(c.ct)[0] || 'crude', q: 0, car: c.ct }); c.ud = Math.floor(S.ft / DAY); save(); return sp;
+    }
+    function buyCar(co, ct, lease) { var st = hereSt(); if (!co.rate[ct] || myCar(co, ct) || (st && !serves(co, st))) return 0; var p = lease ? cLease(co, ct) : cPrice(co, ct); if (gold() < p) return 0; ME_S.res.gold -= p; S.cars.push({ id: 'c' + (S.nid++), at: st ? st.name : null, ld: null, co: co.id, ct: ct, own: lease ? 0 : 1, paid: p, earn: 0, used: 0, ud: -1, d0: Math.floor(S.ft / DAY) }); try { updateRes(); } catch (e) {} save(); syncRuns(); return p; }
+    function dropCar(co, ct) { var c = myCar(co, ct); if (!c || carBusy(c) || (OPEN && c.at !== OPEN.name)) return 0; var back = c.own ? Math.round(cPrice(co, ct) * 0.7) : 0; ME_S.res.gold += back; S.cars.splice(S.cars.indexOf(c), 1); try { updateRes(); } catch (e) {} save(); syncRuns(); return back || 1; }
     function carDay(nd, endDay) { /* runs at game midnight: idle cars earn, leases are charged */
       if (!S.cars.length) return ''; var e = 0, l = 0, gone = [];
-      S.cars.slice().forEach(function (c) { var co = COI[c.co]; if (!co) return; if (c.ud !== endDay) { var v = cEarn(co, c.ct) * nd; c.earn += v; e += v; }
+      S.cars.slice().forEach(function (c) { var co = COI[c.co]; if (!co) return; if (c.ud !== endDay && !carBusy(c)) { var v = cEarn(co, c.ct) * nd; c.earn += v; e += v; }
         if (!c.own) { var L = cLease(co, c.ct) * nd; if (gold() + e - l < L) { gone.push(c); return; } l += L; } });
       gone.forEach(function (c) { S.cars.splice(S.cars.indexOf(c), 1); });
       ME_S.res.gold += e - l; S.ce += e; try { updateRes(); } catch (e2) {}
@@ -15158,20 +15198,20 @@ window.B137 = (function () {
       return S.cl ? '\ud83d\ude83 YOUR CARS ' + S.cl : '';
     }
     function myCars208() { /* idle cars ride the company's own trains with your name on them */
-      var o = []; if (S && S.cars) S.cars.forEach(function (c) { if (!carBusy(c)) o.push({ co: c.co, k: KIND208[c.ct], n: '\u2605 ' + S.pn }); }); window.MYC208 = o; }
+      var o = []; if (S && S.cars) S.cars.forEach(function (c) { if (!c.at && !carBusy(c)) o.push({ co: c.co, k: KIND208[c.ct], n: '\u2605 ' + S.pn }); }); window.MYC208 = o; }
     var KIND208 = { tank: 'tanker', hop: 'gondola', stock: 'cattle', box: 'box' };
     function rideH(co, a, b) { return 0.15 + dist(a, b) / co.spd; }
-    function frate(co, k, q, a, b) { var car = carOf(k); if (!co.rate[car]) return -1; var c = q * Math.max(0.5, dist(a, b) / 10000) * BASE[car] * co.rate[car] * S.m[co.id];
+    function frate(co, k, q, a, b, own) { var car = carOf(k); if (!co.rate[car]) return -1; var c = q * Math.max(0.5, dist(a, b) / 10000) * BASE[car] * co.rate[car] * S.m[co.id];
       /* v217: freight never eats the sale - the list rate tops out at 45% of what the load fetches at a town (shareholder and own-car discounts still come off after) */
       var sv = 0; try { sv = b && !b.home ? sellValue(b, k, q) : 0; } catch (e) {} if (sv > 0) c = Math.min(c, sv * 0.45);
-      return Math.max(2, Math.round(c * (1 - disc(co)) * (myCar(co, car) ? OWNR : 1))); }
+      return Math.max(2, Math.round(c * (1 - disc(co)) * ((own || freeCar(co, car, a)) ? OWNR : 1))); }
     function fH(co, a, b) { return 0.5 + dist(a, b) / co.fspd; }
     function share() { var t = 0, pt = 0, o = {}; CO.forEach(function (c) { pt += S.pat[c.id] || 0; }); CO.forEach(function (c) { o[c.id] = c.w / (S.m[c.id] * S.m[c.id]) + 1.2 * (S.pat[c.id] || 0) / (4 + pt); t += o[c.id]; }); CO.forEach(function (c) { o[c.id] /= t; }); return o; }
     function gold() { return ME_S && ME_S.res ? ME_S.res.gold : 0; }
     function bag() { return window.TP131 ? TP131.bag() : {}; }
     function have(k, st) { var n = Math.floor(bag()[k] || 0); if (st && st.home) n += Math.floor(ECON131.stock(ME_S)[k] || 0); return n; }
     function take(k, q, st) { var B = bag(), a = Math.min(q, Math.floor(B[k] || 0)); B[k] = (B[k] || 0) - a; q -= a; if (q > 0 && st && st.home) { var g = ECON131.stock(ME_S); g[k] = Math.max(0, (g[k] || 0) - q); } }
-    function sellValue(st, k, q) { if (st.home) return 0; var r = realm(st); if (!r) return 0; var g = ECON131.stock(r), s0 = g[k] || 0, t = 0, i; for (i = 0; i < q; i++) { t += ECON131.price(r, k) * 0.9; g[k] = (g[k] || 0) + 1; } g[k] = s0; return t; }
+    function sellValue(st, k, q, ws) { if (st.home) return 0; var r = realm(st); if (!r) return 0; var g = ECON131.stock(r), s0 = g[k] || 0, t = 0, i; for (i = 0; i < q; i++) { t += ECON131.price(r, k) * 0.9; g[k] = ws ? s0 + (i + 1) * 0.5 : (g[k] || 0) + 1; } g[k] = s0; return t; }
     function toast(t) { try { showToast(t); } catch (e) {} }
 
     // ---- rate wars: the line losing the market cuts, rivals answer; prices drift back
@@ -15190,6 +15230,7 @@ window.B137 = (function () {
       var day = Math.floor(S.ft / DAY); if (S.dd < 0) S.dd = day; else if (day > S.dd) { var nd = Math.min(3, day - S.dd), ed = S.dd; S.dd = day; payDiv(nd, carDay(nd, ed)); }
       for (var i = S.ship.length - 1; i >= 0; i--) { var sp = S.ship[i]; if (S.ft >= sp.at) { S.ship.splice(i, 1); deliver(sp); save(); saveGoods(); } }
       wantTick(dt);
+      fix218();
       syncRuns();
     }
     // ---- v205: each company's next train carries your cars, one car per ~10 loads, labelled
@@ -15205,8 +15246,8 @@ window.B137 = (function () {
       var out = [];
       groups().forEach(function (g) {
         var cars = [{ k: FILL[g.co] || 'box' }];
-        g.ships.forEach(function (sp) { var n = Math.max(1, Math.min(5, Math.ceil(sp.q / (PER[sp.car] || 10)))), nm = ECON131.G[sp.k] ? ECON131.G[sp.k].n : sp.k.toUpperCase(), ld = sp.car === 'hop' ? (sp.k === 'coal' ? 'coal' : 'ore') : null;
-          for (var j = 0; j < n; j++) cars.push({ k: sp.car, tag: j === 0 ? '\u2605 ' + sp.q + ' ' + nm : null, load: ld, mine: sp.own && j === 0 ? '\u2605 ' + S.pn : null }); });
+        g.ships.forEach(function (sp) { var n = sp.cs ? 1 : Math.max(1, Math.min(5, Math.ceil(sp.q / (PER[sp.car] || 10)))), nm = ECON131.G[sp.k] ? ECON131.G[sp.k].n : sp.k.toUpperCase(), ld = sp.car === 'hop' && !sp.call ? (sp.k === 'coal' ? 'coal' : 'ore') : null;
+          for (var j = 0; j < n; j++) cars.push({ k: sp.car, tag: j === 0 && !sp.call ? '\u2605 ' + sp.q + ' ' + nm : null, load: ld, mine: sp.own && j === 0 ? '\u2605 ' + S.pn : null }); });
         if (cars.length > 12) cars.length = 12;
         var co = COI[g.co] || CO[0];
         out.push({ key: g.key, co: g.co, from: stByName(g.from), to: stByName(g.to), dep: g.dep, at: g.at, ft: S.ft, cars: cars, board: co.sh + ' \u2192 ' + g.to + (S.ft < g.dep ? ' \u00b7 ' + hhmm(g.depH != null ? g.depH : hourNow() + (g.dep - S.ft) / 20 + 0.004) : '') });
@@ -15216,10 +15257,15 @@ window.B137 = (function () {
     function stByName(n) { return stations().filter(function (s) { return s.name === n; })[0]; }
     function deliver(sp) {
       var st = stByName(sp.to), G = ECON131.G[sp.k] || { n: sp.k.toUpperCase() };
+      /* v218: your car stays where it was taken (empty once unloaded) */
+      var car = sp.cid ? carById(sp.cid) : sp.own ? S.cars.filter(function (c) { return c.co === sp.co && c.ct === sp.car; })[0] : null;
+      if (car && st) { car.at = st.name; car.ld = null; }
+      if (sp.call) { S.done.unshift('YOUR ' + CAR[sp.car] + ' IS AT ' + sp.to); try { var dq = pos(st); FX205.push({ x: dq.x, y: dq.y - 150, t: 3, s: '\u2605 YOUR ' + CAR[sp.car] + ' IS HERE', c: (COI[sp.co] || CO[0]).c }); } catch (e) {} if (OPEN === st) toast('\ud83d\ude83 YOUR ' + CAR[sp.car] + ' IS ON THE SIDING'); return; }
       if (!st || st.home) { var g = ECON131.stock(ME_S); g[sp.k] = (g[sp.k] || 0) + sp.q; S.done.unshift(sp.q + ' ' + G.n + ' IN YOUR STOREHOUSE'); toast('\ud83d\ude82 FREIGHT IN: ' + sp.q + ' ' + G.n + ' TO YOUR STOREHOUSE'); return; }
-      var r = realm(st), t = 0; if (r) { var gg = ECON131.stock(r); for (var i = 0; i < sp.q; i++) { t += ECON131.price(r, sp.k) * 0.9; gg[sp.k] = (gg[sp.k] || 0) + 1; } }
+      var r = realm(st), t = 0; if (r) { var gg = ECON131.stock(r), s5 = gg[sp.k] || 0; for (var i = 0; i < sp.q; i++) { t += ECON131.price(r, sp.k) * 0.9; gg[sp.k] = sp.cs ? s5 + (i + 1) * 0.5 : (gg[sp.k] || 0) + 1; } if (sp.cs) gg[sp.k] = s5 + sp.q; }
       t = Math.round(t); ME_S.res.gold += t; try { updateRes(); } catch (e) {}
-      try { var dp = pos(st); FX205.push({ x: dp.x, y: dp.y - 150 - 24 * FX205.filter(function (f) { return f.t > 2; }).length, t: 3.4, s: '+' + t + ' GOLD \u00b7 ' + sp.q + ' ' + G.n, c: (COI[sp.co] || CO[0]).c }); } catch (e) {}
+      if (sp.cs) { var pf = t - (sp.pd || 0) - (sp.cost || 0); window.LAST218 = { sold: t, paid: sp.pd || 0, freight: sp.cost || 0, profit: pf, to: st.name }; S.cp = (S.cp || 0) + pf; }
+      try { var dp = pos(st); FX205.push({ x: dp.x, y: dp.y - 150 - 24 * FX205.filter(function (f) { return f.t > 2; }).length, t: 3.4, s: '+' + t + ' GOLD \u00b7 ' + sp.q + ' ' + G.n + (sp.cs ? ' \u00b7 PROFIT ' + (t - (sp.pd || 0) - (sp.cost || 0) >= 0 ? '+' : '') + (t - (sp.pd || 0) - (sp.cost || 0)) : ''), c: (COI[sp.co] || CO[0]).c }); } catch (e) {}
       S.done.unshift(sp.q + ' ' + G.n + ' SOLD AT ' + st.name + ' +' + t); window.FREIGHT203 = (window.FREIGHT203 || 0) + 1;
       credit206(st, sp.k, sp.q, sp.at, sp.co);
       toast('\ud83d\ude82 FREIGHT SOLD AT ' + st.name + ': ' + sp.q + ' ' + G.n + ' +' + t + ' GOLD');
@@ -15298,8 +15344,8 @@ window.B137 = (function () {
       var h = fH(co, from, to), w = fDep(co), dep = S.ft + w * 20;
       var mate = S.ship.filter(function (o) { return o.co === co.id && o.from === from.name && o.to === to.name && o.dep != null && o.dep > S.ft && Math.abs(o.dep - dep) < 12; })[0];
       if (mate) { dep = mate.dep; h = (mate.at - mate.dep) / 20; } else if (Math.random() > co.ot) h *= 1.3;
-      var mc = myCar(co, carOf(k)); if (mc) { mc.ud = Math.floor(S.ft / DAY); mc.used++; }
-      S.ship.push({ id: S.nid++, own: mc ? 1 : 0, k: k, q: q, from: from.name, to: to.name, co: co.id, cost: c, car: carOf(k), dep: dep, depH: mate && mate.depH != null ? mate.depH : hourNow() + w, at: dep + h * 20, eta: hourNow() + w + h });
+      var mc = freeCar(co, carOf(k), from); if (mc) { mc.ud = Math.floor(S.ft / DAY); mc.used++; }
+      S.ship.push({ id: S.nid++, own: mc ? 1 : 0, cid: mc ? mc.id : 0, k: k, q: q, from: from.name, to: to.name, co: co.id, cost: c, car: carOf(k), dep: dep, depH: mate && mate.depH != null ? mate.depH : hourNow() + w, at: dep + h * 20, eta: hourNow() + w + h });
       S.pat[co.id] = (S.pat[co.id] || 0) + 1; save(); saveGoods(); syncRuns();
       ui.q = Math.min(ui.q, have(k, from)); return true;
     }
@@ -15398,7 +15444,7 @@ window.B137 = (function () {
         } else {
           var k = ui.good, q = ui.q || 0, cost = k ? frate(c, k, q, st, to) : -1, hf = fH(c, st, to), wf = fDep(c), val = k ? Math.round(sellValue(to, k, q)) : 0, car = k ? carOf(k) : 'box', why = '';
           if (!k) why = '\u2014'; else if (!ok) why = 'NO SERVICE'; else if (cost < 0) why = 'NO ' + CAR[car] + 'S'; else if (q > c.cap) why = 'MAX ' + c.cap; else if (gold() < cost) why = 'NEED ' + cost;
-          nm.innerHTML = '<b>' + c.n + '</b><small>' + (k && cost >= 0 ? (myCar(c, car) ? '\u2605 YOUR ' + CAR[car] + ' \u221265%' : CAR[car] + ' \u2264' + c.cap) + (disc(c) > 0 ? ' \u2605\u2212' + Math.round(disc(c) * 100) + '%' : '') : k ? 'NO ' + CAR[car] + 'S' : c.tag) + '</small>';
+          nm.innerHTML = '<b>' + c.n + '</b><small>' + (k && cost >= 0 ? (freeCar(c, car, st) ? '\u2605 YOUR ' + CAR[car] + ' \u221265%' : myCar(c, car) ? '\u2605 YOUR ' + CAR[car] + ' AWAY' : CAR[car] + ' \u2264' + c.cap) + (disc(c) > 0 ? ' \u2605\u2212' + Math.round(disc(c) * 100) + '%' : '') : k ? 'NO ' + CAR[car] + 'S' : c.tag) + '</small>';
           var pr = val - cost;
           inf.innerHTML = !k ? '<span class="ns">PICK SOMETHING TO SHIP</span>' : !ok ? '<span class="ns">NO SERVICE ON THIS ROUTE</span>' : cost < 0 ? '<span class="ns">NO ' + CAR[car] + 'S ON THIS LINE</span><span class="ns">' + c.tag + '</span>' :
             '<span>TRAIN <b>' + hhmm(H0 + wf) + '</b> \u2192 ARR ' + hhmm(H0 + wf + hf) + '</span><span>' + (to.home ? 'INTO YOUR STOREHOUSE' : 'SELLS ~' + val + ' \u00b7 <span style="display:inline" class="' + (pr >= 0 ? 'dn' : 'up') + '">' + (pr >= 0 ? 'PROFIT +' : 'LOSS ') + pr + '</span>') + wNote(to, k, (wf + hf) * 20) + '</span>';
@@ -15410,15 +15456,21 @@ window.B137 = (function () {
         var sd = el('div', 'st');
         var nS = innerHeight < 500 ? 1 : 2;
         S.ship.slice(0, nS).forEach(function (sp) { var d = el('div'), c = COI[sp.co] || CO[0], wait = sp.dep != null && sp.dep > S.ft, left = Math.max(0, (sp.at - S.ft) / 20);
-          d.innerHTML = '<i style="background:' + c.c + '"></i>\u2605 ' + sp.q + ' ' + (ECON131.G[sp.k] ? ECON131.G[sp.k].n : sp.k) + ' \u00b7 ' + CAR[sp.car] + ' ON THE ' + c.sh + ' \u2192 ' + sp.to + ' \u00b7 ' + (wait ? 'LOADING, LEAVES ' + hhmm(sp.depH != null ? sp.depH : hourNow() + (sp.dep - S.ft) / 20 + 0.004) : 'ROLLING, ' + left.toFixed(1) + ' H TO GO'); sd.appendChild(d); });
+          d.innerHTML = '<i style="background:' + c.c + '"></i>\u2605 ' + (sp.call ? 'EMPTY' : sp.q + ' ' + (ECON131.G[sp.k] ? ECON131.G[sp.k].n : sp.k)) + ' \u00b7 ' + (sp.cs ? 'YOUR ' : '') + CAR[sp.car] + ' ON THE ' + c.sh + ' \u2192 ' + sp.to + ' \u00b7 ' + (wait ? 'LOADING, LEAVES ' + hhmm(sp.depH != null ? sp.depH : hourNow() + (sp.dep - S.ft) / 20 + 0.004) : 'ROLLING, ' + left.toFixed(1) + ' H TO GO'); sd.appendChild(d); });
         if (S.ship.length > nS) sd.lastChild.innerHTML += ' \u00b7 +' + (S.ship.length - nS) + ' MORE';
         if (S.done[0] && (nS > 1 || !S.ship.length)) sd.appendChild(el('div', 'lst', '\u2714 LAST: ' + S.done[0]));
         P.appendChild(sd);
       }
       P.querySelectorAll('.ch').forEach(function (c, i) { if (sl[i]) c.scrollLeft = sl[i]; else { var o = c.querySelector('.on'); if (o && o.offsetLeft > c.clientWidth - 40) c.scrollLeft = o.offsetLeft - 20; } }); P.scrollTop = stp;
     }
+    function carWhere(c, st) { var r = carRoll(c); if (r) return (r.call ? 'EMPTY' : 'LOADED') + ' \u00b7 ROLLING \u2192 ' + r.to + ' ' + Math.max(0, (r.at - S.ft) / 20).toFixed(1) + ' H';
+      return (st && c.at === st.name ? 'HERE' : 'AT ' + c.at) + ' \u00b7 ' + (c.ld ? c.ld.q + '/' + CAP218[c.ct] + ' ' + gn(c.ld.k) : 'EMPTY'); }
     function renderCars() {
+      fix218(); var st = OPEN;
       if (!ui.ct || !PCAR[ui.ct]) ui.ct = 'tank';
+      var A = ui.act218, ac = A && carById(A.cid);
+      if (ac && (carRoll(ac) || (A.m === 'fill' && ac.at !== st.name) || (A.m === 'send' && !ac.ld))) ac = null;
+      if (!ac) ui.act218 = null; else return renderAct(ac, st, A.m);
       var cl = el('div', 'ln'); cl.appendChild(el('div', 'lb', 'CAR')); var cc = el('div', 'ch');
       ['tank', 'box', 'stock', 'hop'].forEach(function (ct) { var n = S.cars.filter(function (c) { return c.ct === ct; }).length; cc.appendChild(btn((ct === ui.ct ? 'on' : '') + (n ? ' own' : ''), CICO[ct] + ' ' + CSH208[ct] + (n ? ' <small>\u2605' + n + '</small>' : ''), function () { ui.ct = ct; render(); })); });
       cl.appendChild(cc);
@@ -15426,24 +15478,77 @@ window.B137 = (function () {
       inp.oninput = function () { ui.last = performance.now(); S.pn = (inp.value || '').toUpperCase().replace(/[^A-Z0-9 .&'-]/g, '').slice(0, 14) || 'HOMESTEAD CO.'; save(); syncRuns(); };
       inp.onkeydown = function (e) { e.stopPropagation(); }; inp.onclick = function (e) { e.stopPropagation(); };
       pn.appendChild(el('span', '', '\u2605')); pn.appendChild(inp); cl.appendChild(pn); P.appendChild(cl);
-      var ct = ui.ct, day = Math.floor(S.ft / DAY);
+      var ct = ui.ct;
       CO.forEach(function (c) {
-        var row = el('div', 'row'), sw = el('div', 'sw'), nm = el('div', 'nm'), inf = el('div', 'inf'), gb = el('div', 'gb'), m = myCar(c, ct), ok = !!c.rate[ct], p = cPrice(c, ct), L = cLease(c, ct), E = cEarn(c, ct);
-        sw.style.background = c.c; row.appendChild(sw); if (m) row.className = 'row mine'; else if (!ok) row.className = 'row off'; else if (ui.hl === c.id) row.className = 'row hl';
-        nm.innerHTML = '<b>' + c.n + '</b><small>' + (m ? '\u2605 YOURS \u00b7 ' + (m.own ? 'OWNED' : 'LEASED') : ok ? 'YOUR FREIGHT \u2212' + Math.round((1 - OWNR) * 100) + '%' : 'NO ' + CAR[ct] + 'S') + '</small>';
+        var row = el('div', 'row'), sw = el('div', 'sw'), nm = el('div', 'nm'), inf = el('div', 'inf'), gb = el('div', 'gb'), m = myCar(c, ct), ok = !!c.rate[ct], stops = serves(c, st), p = cPrice(c, ct), L = cLease(c, ct), E = cEarn(c, ct);
+        sw.style.background = c.c; row.appendChild(sw); if (m) row.className = 'row mine'; else if (!ok || !stops) row.className = 'row off'; else if (ui.hl === c.id) row.className = 'row hl';
+        nm.innerHTML = '<b>' + c.n + '</b><small>' + (m ? '\u2605 YOURS \u00b7 ' + (m.own ? 'OWNED' : 'LEASED') + ' \u00b7 HOLDS ' + CAP218[ct] : ok ? 'YOUR FREIGHT \u2212' + Math.round((1 - OWNR) * 100) + '% \u00b7 HOLDS ' + CAP218[ct] : 'NO ' + CAR[ct] + 'S') + '</small>';
         if (!ok) { inf.innerHTML = '<span class="ns">THIS LINE RUNS NO ' + CAR[ct] + 'S</span><span class="ns">' + c.tag + '</span>'; gb.appendChild(btn('go', 'NONE', function () {}, true)); }
-        else if (m) { var bz = carBusy(m);
-          inf.innerHTML = '<span>' + (bz ? '<b>LOADED WITH YOUR GOODS</b>' : m.ud === day ? 'USED TODAY \u00b7 ' + m.used + ' RUNS' : 'IDLE: HAULING OTHERS ~<span style="display:inline" class="dn">+' + E + '/DAY</span>') + '</span><span>EARNED +' + m.earn + (m.own ? ' \u00b7 RESELL ' + Math.round(p * 0.7) : ' \u00b7 LEASE \u2212' + L + '/DAY') + '</span>';
-          gb.appendChild(btn('go sl', m.own ? 'SELL ' + Math.round(p * 0.7) : 'RETURN', function () { dropCar(c, ct); render(); }, bz)); }
-        else { inf.innerHTML = '<span>BUY <b>' + p + '</b> \u00b7 LEASE <b>' + L + '</b>/DAY</span><span>IDLE: HAULS OTHERS ~+' + E + '/DAY</span>';
+        else if (m) { var rl = carRoll(m), here = !rl && m.at === st.name, bz = carBusy(m), f = !rl && !here && !m.ld ? callFee(m, st) : -1, sv = !rl && m.ld && !here;
+          inf.innerHTML = '<span><b>' + carWhere(m, st) + '</b></span><span>' + (bz ? 'EARNED +' + m.earn : 'IDLE ~<span style="display:inline" class="dn">+' + E + '/DAY</span> \u00b7 EARNED +' + m.earn) + (m.own ? '' : ' \u00b7 LEASE \u2212' + L + '/DAY') + '</span>';
+          var pb;
+          if (rl) pb = btn('go', 'ROLLING', function () {}, true);
+          else if (here && !m.ld) pb = btn('go', '\u2b07 FILL', function () { ui.act218 = { cid: m.id, m: 'fill' }; ui.k218 = null; render(); });
+          else if (m.ld) pb = btn('go', 'SEND \u25b6', function () { ui.act218 = { cid: m.id, m: 'send' }; ui.to218 = null; render(); });
+          else if (!stops) pb = btn('go', 'NO STOP', function () {}, true);
+          else pb = btn('go', gold() < f ? 'NEED ' + f : 'CALL ' + f, function () { callCar(m, st); render(); }, gold() < f);
+          pb.title = rl ? '' : here ? 'BUY GOODS HERE INTO YOUR CAR' : m.ld ? 'WIRE YOUR CAR AT ' + m.at + ' ON TO A TOWN' : 'BRING YOUR EMPTY CAR HERE ON THE NEXT ' + c.sh + ' TRAIN';
+          gb.appendChild(pb);
+          gb.appendChild(btn('go sl', m.own ? 'SELL ' + Math.round(p * 0.7) : 'RETURN', function () { dropCar(c, ct); render(); }, bz || !here)); void sv; }
+        else if (!stops) { inf.innerHTML = '<span class="ns">' + c.sh + ' DOES NOT STOP HERE</span><span class="ns">BUY ONE AT A ' + c.sh + ' DEPOT</span>'; gb.appendChild(btn('go', 'NO STOP', function () {}, true)); }
+        else { inf.innerHTML = '<span>BUY <b>' + p + '</b> \u00b7 LEASE <b>' + L + '</b>/DAY</span><span>FILL IT, SEND IT, SELL AT THE TOWN</span>';
           gb.appendChild(btn('go', gold() < p ? 'NEED ' + p : 'BUY ' + p, function () { buyCar(c, ct, 0); render(); }, gold() < p));
           gb.appendChild(btn('go sl', 'LEASE', function () { buyCar(c, ct, 1); render(); }, gold() < L)); }
         row.appendChild(nm); row.appendChild(inf); row.appendChild(gb); P.appendChild(row);
       });
       var sd = el('div', 'st'), left = Math.max(0, (S.dd + 1) * DAY - S.ft) / 20;
-      sd.appendChild(el('div', '', S.cars.length ? '\ud83d\ude83 ' + S.cars.map(function (c) { return CAR[c.ct] + ' ON ' + COI[c.co].sh + (c.own ? '' : ' (LEASE)'); }).join(' \u00b7 ') : '\ud83d\ude83 YOUR OWN CAR RIDES THAT LINE\'S TRAINS WITH YOUR NAME ON IT'));
-      sd.appendChild(el('div', S.cl ? 'lst' : '', 'PAID AT MIDNIGHT (IN ' + left.toFixed(1) + ' H)' + (S.cl ? ' \u00b7 LAST: ' + S.cl : ' \u00b7 IDLE CARS EARN, LEASES ARE CHARGED')));
+      sd.appendChild(el('div', '', S.cars.length ? '\ud83d\ude83 ' + S.cars.map(function (c) { var r = carRoll(c); return CSH208[c.ct] + ' ' + COI[c.co].sh + (r ? ' \u2192 ' + r.to : c.at === st.name ? ' HERE' : ' @ ' + c.at) + (c.ld ? ' (' + c.ld.q + ' ' + gn(c.ld.k) + ')' : ''); }).join(' \u00b7 ') + (S.cp ? ' \u00b7 CAR PROFIT ' + (S.cp > 0 ? '+' : '') + Math.round(S.cp) : '') : '\ud83d\ude83 BUY A CAR \u00b7 FILL IT AT A TOWN \u00b7 SEND IT DOWN THE LINE TO SELL'));
+      sd.appendChild(el('div', S.cl ? 'lst' : '', 'PAID AT MIDNIGHT (IN ' + left.toFixed(1) + ' H)' + (S.cl ? ' \u00b7 LAST: ' + S.cl : ' \u00b7 IDLE EMPTY CARS EARN, LEASES ARE CHARGED')));
       P.appendChild(sd);
+    }
+    function renderAct(c, st, mode) { /* v218: one car - fill it here, or send it down its line */
+      var co = COI[c.co], from = stByName(c.at);
+      var hr = el('div', 'row mine'), sw = el('div', 'sw'), nm = el('div', 'nm'), inf = el('div', 'inf'), gb = el('div', 'gb'); sw.style.background = co.c; hr.appendChild(sw);
+      nm.innerHTML = '<b>' + CICO[c.ct] + ' YOUR ' + CSH208[c.ct] + '</b><small>' + co.sh + ' \u00b7 \u2605 ' + S.pn + '</small>';
+      inf.innerHTML = '<span><b>' + carWhere(c, st) + '</b></span><span>' + (mode === 'fill' ? 'HOLDS ' + CAP218[c.ct] + ' \u00b7 ' + goodsFor(c.ct).map(gn).slice(0, 4).join(', ') : c.at === st.name ? 'RIDES THE NEXT ' + co.sh + ' TRAIN' : 'WIRED TO THE ' + co.sh + ' AGENT AT ' + c.at) + '</span>';
+      gb.appendChild(btn('go sl', '\u25c0 BACK', function () { ui.act218 = null; render(); })); hr.appendChild(nm); hr.appendChild(inf); hr.appendChild(gb); P.appendChild(hr);
+      if (mode === 'fill') {
+        var opts = []; goodsFor(c.ct).forEach(function (k) { if (c.ld && c.ld.k !== k) return; if (mktHave(st, k) > 0) opts.push({ k: k, src: 'm' }); if (have(k, st) > 0) opts.push({ k: k, src: 'bag' }); });
+        if (!ui.k218 || !opts.some(function (o) { return o.k === ui.k218.k && o.src === ui.k218.src; })) { var cheap = opts.filter(function (o) { return o.src === 'm'; }).sort(function (a, b) { return ECON131.price(realm(st), a.k) - ECON131.price(realm(st), b.k); })[0]; ui.k218 = opts.length ? (cheap || opts[0]) : null; ui.q218 = 0; }
+        var room = CAP218[c.ct] - (c.ld ? c.ld.q : 0), O = ui.k218, mx = O ? Math.min(room, O.src === 'm' ? mktHave(st, O.k) : have(O.k, st)) : 0;
+        var gl = el('div', 'ln'); gl.appendChild(el('div', 'lb', 'FILL')); var gc = el('div', 'ch');
+        if (!opts.length) gc.appendChild(el('div', 'em', (st.home ? 'NOTHING FOR THIS CAR IN YOUR STOREHOUSE' : st.name + ' SELLS NO ' + goodsFor(c.ct).map(gn).slice(0, 2).join(' OR ')) + (c.ct === 'tank' ? ' \u00b7 TRY AN OIL TOWN' : '')));
+        opts.forEach(function (o) { var on1 = O && o.k === O.k && o.src === O.src, pr = o.src === 'm' ? ECON131.price(realm(st), o.k) : 0;
+          gc.appendChild(btn(on1 ? 'on' : '', gn(o.k) + ' <small>' + (o.src === 'm' ? 'BUY ' + (pr < 10 ? pr.toFixed(1) : Math.round(pr)) : (st.home ? 'YOURS ' : 'BAG ') + have(o.k, st)) + '</small>', function () { ui.k218 = o; ui.q218 = 0; render(); })); });
+        gl.appendChild(gc);
+        if (O && mx > 0) { if (!ui.q218) ui.q218 = mx; ui.q218 = Math.max(1, Math.min(ui.q218, mx)); var qd = el('div', 'q');
+          qd.appendChild(btn('', '\u2212', function () { ui.q218 = Math.max(1, ui.q218 - (ui.q218 > 10 ? 5 : 1)); render(); })); qd.appendChild(el('span', '', String(ui.q218)));
+          qd.appendChild(btn('', '+', function () { ui.q218 = Math.min(mx, ui.q218 + (ui.q218 >= 10 ? 5 : 1)); render(); })); qd.appendChild(btn('', 'FULL', function () { ui.q218 = mx; render(); }));
+          qd.lastChild.style.width = '52px'; qd.lastChild.style.fontSize = '12px'; gl.appendChild(qd); }
+        P.appendChild(gl);
+        var row = el('div', 'row'), sw2 = el('div', 'sw'), n2 = el('div', 'nm'), i2 = el('div', 'inf'), g2 = el('div', 'gb'); sw2.style.background = co.c; row.appendChild(sw2);
+        var q = O && mx > 0 ? ui.q218 : 0, cost = O && q && O.src === 'm' ? mktCost(st, O.k, q) : 0;
+        n2.innerHTML = '<b>' + (O ? (O.src === 'm' ? (wells(st, O.k) ? 'WELLHEAD' : 'BUY HERE') : 'FROM YOUR ' + (st.home ? 'STORE' : 'BAGS')) : 'NOTHING TO LOAD') + '</b><small>' + (O && O.src === 'm' ? 'WHOLESALE \u00b7 ' : '') + (room < CAP218[c.ct] ? 'ROOM FOR ' + room : 'EMPTY CAR') + '</small>';
+        i2.innerHTML = O && q ? '<span>' + q + ' ' + gn(O.k) + ' INTO YOUR CAR' + (cost ? ' \u00b7 <b>' + cost + ' GOLD</b>' : '') + '</span><span>THEN SEND IT DOWN THE LINE TO SELL</span>' : '<span class="ns">' + (room < 1 ? 'YOUR CAR IS FULL' : 'NOTHING HERE FITS THIS CAR') + '</span><span class="ns">' + (c.ld ? 'SEND IT \u25b6' : 'CALL IT TO ANOTHER DEPOT') + '</span>';
+        var why = !O || !q ? 'NONE' : O.src === 'm' && gold() < cost ? 'NEED ' + cost : '';
+        g2.appendChild(btn('go', why || (O.src === 'm' ? 'FILL ' + cost : 'LOAD ' + q), function () { if (fillCar(c, st, O.k, q, O.src === 'm' ? 'm' : 'bag') > 0) { ui.q218 = 0; if (c.ld && c.ld.q >= CAP218[c.ct]) { ui.act218 = { cid: c.id, m: 'send' }; ui.to218 = null; } } render(); }, !!why));
+        if (c.ld) g2.appendChild(btn('go sl', 'SEND \u25b6', function () { ui.act218 = { cid: c.id, m: 'send' }; ui.to218 = null; render(); }));
+        row.appendChild(n2); row.appendChild(i2); row.appendChild(g2); P.appendChild(row);
+      } else {
+        var D = stations().filter(function (d) { return d !== from && serves(co, d); });
+        if (!ui.to218 || D.indexOf(ui.to218) < 0) { var bv = -1e9; D.forEach(function (d) { var v = d.home ? -1e8 : sellValue(d, c.ld.k, c.ld.q, 1) - Math.max(0, sendCost(c, d)) + (wFor(d.name, c.ld.k) ? wFor(d.name, c.ld.k).bonus : 0); if (v > bv) { bv = v; ui.to218 = d; } }); }
+        var dl = el('div', 'ln'); dl.appendChild(el('div', 'lb', 'TO')); var dc = el('div', 'ch');
+        D.forEach(function (d) { dc.appendChild(btn(d === ui.to218 ? 'on' : '', d.name + ' <small>' + Math.round(dist(from, d) / 1000) + 'K</small>', function () { ui.to218 = d; render(); })); });
+        dl.appendChild(dc); P.appendChild(dl);
+        var to = ui.to218, rw = el('div', 'row'), s3 = el('div', 'sw'), n3 = el('div', 'nm'), i3 = el('div', 'inf'), g3 = el('div', 'gb'); s3.style.background = co.c; rw.appendChild(s3);
+        if (to) { var cost2 = sendCost(c, to), H0 = hourNow(), wf = fDep(co), hf = fH(co, from, to), val = Math.round(sellValue(to, c.ld.k, c.ld.q, 1)), pf = val - (c.ld.pd || 0) - cost2;
+          n3.innerHTML = '<b>' + co.n + '</b><small>\u2605 YOUR CAR \u221265%</small>';
+          i3.innerHTML = '<span>TRAIN <b>' + hhmm(H0 + wf) + '</b> \u2192 ARR ' + hhmm(H0 + wf + hf) + '</span><span>' + (to.home ? 'INTO YOUR STOREHOUSE' : 'SELLS ~' + val + ' \u00b7 <span style="display:inline" class="' + (pf >= 0 ? 'dn' : 'up') + '">' + (pf >= 0 ? 'PROFIT +' : 'LOSS ') + pf + '</span>') + wNote(to, c.ld.k, (wf + hf) * 20) + '</span>';
+          g3.appendChild(btn('go', gold() < cost2 ? 'NEED ' + cost2 : 'SEND ' + cost2 + arrow(co), function () { if (sendCar(c, to)) { ui.act218 = null; } render(); }, gold() < cost2 || cost2 < 0)); }
+        else { n3.innerHTML = '<b>' + co.n + '</b><small>NO OTHER STOP</small>'; i3.innerHTML = '<span class="ns">THIS LINE HAS NOWHERE ELSE TO GO</span>'; g3.appendChild(btn('go', 'NONE', function () {}, true)); }
+        rw.appendChild(n3); rw.appendChild(i3); rw.appendChild(g3); P.appendChild(rw);
+      }
+      var sd = el('div', 'st'); sd.appendChild(el('div', S.done[0] ? 'lst' : '', S.done[0] ? '\u2714 LAST: ' + S.done[0] : '\ud83d\ude83 YOUR CAR RIDES THE ' + co.sh + ' TRAIN AND SELLS ON ARRIVAL')); P.appendChild(sd);
     }
     function renderShares() {
       var sh = share();
@@ -15488,7 +15593,7 @@ window.B137 = (function () {
         var oy = (n++ % 3) * 0, pu = 0.5 + 0.5 * Math.sin(performance.now() / 260); c.strokeStyle = co.c; c.globalAlpha = 0.35 + 0.35 * pu; c.lineWidth = 2; c.beginPath(); c.arc(a[0], a[1], 13 + 3 * pu, 0, 7); c.stroke(); c.globalAlpha = 1; /* v208: bigger, pulsing freight markers */
         c.fillStyle = co.c; c.strokeStyle = '#2a1a0a'; c.lineWidth = 1.5; c.beginPath(); if (c.roundRect) c.roundRect(a[0] - 10, a[1] - 6 + oy, 20, 12, 3); else c.rect(a[0] - 10, a[1] - 6 + oy, 20, 12); c.fill(); c.stroke();
         c.fillStyle = co.c2; c.fillRect(a[0] - 7, a[1] - 1.5 + oy, 14, 3); if (g.ships.some(function (q) { return q.own; })) { c.fillStyle = '#e8b83a'; c.font = 'bold 10px sans-serif'; c.textAlign = 'center'; c.fillText('\u2605', a[0], a[1] - 9); } BX.push([a[0] - 11, a[1] - 7, a[0] + 11, a[1] + 7]);
-        var sp = g.ships[0], lb = (u <= 0 ? 'LOADING ' : '') + sp.q + ' ' + (ECON131.G[sp.k] ? ECON131.G[sp.k].n : sp.k) + (g.ships.length > 1 ? ' +' + (g.ships.length - 1) : '');
+        var sp = g.ships[0], lb = (u <= 0 ? 'LOADING ' : '') + (sp.call ? 'YOUR ' + CAR[sp.car] : sp.q + ' ' + (ECON131.G[sp.k] ? ECON131.G[sp.k].n : sp.k)) + (g.ships.length > 1 ? ' +' + (g.ships.length - 1) : '');
         c.font = 'bold 10px Georgia,serif'; c.textAlign = 'center'; var lw = c.measureText(lb).width / 2 + 2, ly = a[1] + 19; if (!free7(a[0] - lw, ly - 9, a[0] + lw, ly + 3)) { ly = a[1] - 9; if (!free7(a[0] - lw, ly - 9, a[0] + lw, ly + 3)) return; } c.lineWidth = 3; c.strokeStyle = 'rgba(243,227,195,.9)'; c.strokeText(lb, a[0], ly); c.fillStyle = co.c; c.fillText(lb, a[0], ly); });
       c.restore(); window.MAP207 = { wanted: nW, ships: nS }; return nW + nS;
     };
@@ -15550,6 +15655,38 @@ window.B137 = (function () {
         c.fillStyle = '#2a1a0a'; c.textAlign = 'left'; c.font = 'bold 10px monospace'; c.fillText(q.sh, -37, ly);
         c.textAlign = 'right'; c.fillText(hhmm(H0 + nextDep(q)).replace(' AM', 'A').replace(' PM', 'P'), 49, ly); c.textAlign = 'center'; }
       c.restore();
+    }
+    // ---- v218: your parked cars stand on their own short siding by the station, clear of the line, the signboard, the agents, buildings and roads
+    function parkedAt(st) { return S && S.cars ? S.cars.filter(function (c) { return c.at === st.name && !carRoll(c); }) : []; }
+    var GAP218 = 96;
+    function parkAt(st, n) {
+      var k = st.x + ',' + st.y + ',' + n, now = performance.now(); if (st._p218 && st._pk218 === k && now - st._pt218 < 6000) return st._p218;
+      var sp = pos(st), sd = standAt(st), A = []; try { if (agentSts().indexOf(st) >= 0) A = agentsAt(st); } catch (e) {}
+      var G = (RAIL136.rail().seg || []).filter(function (g) { return Math.min(Math.abs(g[0] - sp.x), Math.abs(g[2] - sp.x)) < 1600 || Math.abs((g[0] + g[2]) / 2 - sp.x) < 1600; }).filter(function (g) { return Math.min(Math.abs(g[1] - sp.y), Math.abs(g[3] - sp.y)) < 1200 || Math.abs((g[1] + g[3]) / 2 - sp.y) < 1200; });
+      var RD = [], FP = [];
+      try { TOWN133.segs().forEach(function (g) { if (Math.abs((g[0] + g[2]) / 2 - sp.x) < 2000 && Math.abs((g[1] + g[3]) / 2 - sp.y) < 2000) RD.push(g); }); } catch (e) {}
+      try { TOWN133.fps().forEach(function (t) { if (t.f && Math.abs((t.f.x0 + t.f.x1) / 2 - sp.x) < 1500 && Math.abs((t.f.y0 + t.f.y1) / 2 - sp.y) < 1500) FP.push(t.f); }); } catch (e) {}
+      try { allS75().forEach(function (s2) { if (!s2 || !s2.bld) return; s2.bld.forEach(function (b) { if (b.hp <= 0) return; var f = FP131(s2, b); if (f && Math.abs((f.x0 + f.x1) / 2 - sp.x) < 1500 && Math.abs((f.y0 + f.y1) / 2 - sp.y) < 1500) FP.push(f); }); try { T102.segs(s2).forEach(function (g) { if (Math.abs((g[0] + g[2]) / 2 - sp.x) < 2000 && Math.abs((g[1] + g[3]) / 2 - sp.y) < 2000) RD.push(g); }); } catch (e) {} }); } catch (e) {}
+      if (sd) FP.push({ x0: sd.x - 62, x1: sd.x + 62, y0: sd.y - 230, y1: sd.y + 12 });
+      A.forEach(function (a) { FP.push({ x0: a.x - 40, x1: a.x + 56, y0: a.y - 96, y1: a.y + 12 }); });
+      function dseg(x, y, g) { var dx = g[2] - g[0], dy = g[3] - g[1], l2 = dx * dx + dy * dy || 1, u = Math.max(0, Math.min(1, ((x - g[0]) * dx + (y - g[1]) * dy) / l2)); return Math.hypot(x - g[0] - dx * u, y - g[1] - dy * u); }
+      var W = (n - 1) * GAP218, best = null, bs = -1e9, ox, oy;
+      for (ox = -560; ox <= 560; ox += 40) for (oy = -300; oy <= 340; oy += 40) {
+        var x = sp.x + ox, y = sp.y + oy, x0 = x - 56, x1 = x + W + 56, y0 = y - 70, y1 = y + 18, bad = 0, m = 1e9, i, j;
+        for (i = 0; i < FP.length && !bad; i++) { var f = FP[i]; if (x0 < f.x1 + 16 && x1 > f.x0 - 16 && y0 < f.y1 + 16 && y1 > f.y0 - 16) bad = 1; } if (bad) continue;
+        for (j = 0; j <= n * 2 && !bad; j++) { var qx = x0 + (x1 - x0) * j / (n * 2);
+          for (i = 0; i < G.length; i++) { var d = Math.min(dseg(qx, y - 30, G[i]), dseg(qx, y + 10, G[i]), dseg(qx, y - 66, G[i])); if (d < 52) { bad = 1; break; } m = Math.min(m, d); }
+          for (i = 0; i < RD.length && !bad; i++) if (Math.min(dseg(qx, y + 8, RD[i]), dseg(qx, y - 40, RD[i])) < 30) bad = 1; }
+        if (bad) continue;
+        var sc = -Math.hypot(x + W / 2 - sp.x, y - 20 - sp.y) + Math.min(m, 140) * 0.6; if (sc > bs) { bs = sc; best = { x: x, y: y }; } }
+      if (!best) best = { x: sp.x - W / 2, y: sp.y + 200 };
+      st._p218 = best; st._pk218 = k; st._pt218 = now; return best;
+    }
+    var PK218 = {};
+    function parkParts(st) {
+      var L = parkedAt(st); if (!L.length) return []; var b = parkAt(st, L.length);
+      return L.map(function (c, i) { var p = PK218[c.id] || (PK218[c.id] = { ang: 0, face: 0, sid: 1, ph: 0, dirS: 1 }), ld = c.ld && c.ld.q > 0 ? c.ld : null;
+        p.k = KIND208[c.ct]; p.co = c.co; p.x = b.x + i * GAP218; p.y = b.y; p.mine = '\u2605 ' + S.pn; p.tag = ld ? '\u2605 ' + ld.q + ' ' + gn(ld.k) : null; p.load = c.ct === 'hop' && ld ? (ld.k === 'coal' ? 'coal' : 'ore') : null; p.cid = c.id; return p; });
     }
     // ---- v206: a ticket agent per company (booth in the company's colours) at the big depots
     function agentSts() { return stations().filter(function (s) { return !s.home && ((s.t && s.t.d && s.t.d.pop >= 30) || s.name === 'RED MESA'); }); }
@@ -15642,6 +15779,9 @@ window.B137 = (function () {
         if (best) ui.hl = best.co.id;
         agentSts().forEach(function (st) { var A = agentsAt(st); A.forEach(function (a) { if (Math.abs(a.x - px) > vw || Math.abs(a.y - py) > vh) return; na++; items.push({ y: a.y, x: a.x, y2: a.y, fn: function (sx, sy) { drawAgent(a, st, sx, sy, a === best); } }); if (a === best) items.push({ y: Math.max(a.y, py) + 0.5, x: a.x, y2: a.y, fn: function (sx, sy) { agentBubble(a, st, sx, sy); } }); }); });
         window.AGENTS206 = na; window.AGENTNEAR206 = best ? best.co.id : null;
+        if (S.cars && S.cars.length && window.TRAIN167 && TRAIN167.v211) { var npk = 0; stations().forEach(function (st) { var sp2 = pos(st); if (Math.abs(sp2.x - px) > vw + 700 || Math.abs(sp2.y - py) > vh + 500) return;
+          parkParts(st).forEach(function (p) { if (Math.abs(p.x - px) > vw || Math.abs(p.y - py) > vh) return; npk++; items.push({ y: p.y, x: p.x, y2: p.y, fn: function (sx, sy) { try { TRAIN167.v211.draw(p, sx, sy); } catch (e) { if (!window.E218d) { window.E218d = 1; console.warn(e); } } } }); }); });
+          window.PARK218 = (window.PARK218 || 0) + npk; window.PARKN218 = npk; }
         var now = performance.now(), dt = Math.min(0.1, (now - fxT) / 1000); fxT = now;
         FX205 = FX205.filter(function (f) { f.t -= dt; f.y -= 16 * dt; return f.t > 0; });
         FX205.forEach(function (f) { if (Math.abs(f.x - px) > vw || Math.abs(f.y - py) > vh) return; items.push({ y: f.y + 400, x: f.x, y2: f.y + 400, fn: function (sx, sy) { var c = ctx; c.save(); c.globalAlpha = Math.min(1, f.t); c.font = 'bold 14px monospace'; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = '#fff4d8'; c.strokeText(f.s, sx, sy - 400); c.fillStyle = '#2e6a2e'; c.fillText(f.s, sx, sy - 400); c.restore(); } }); });
@@ -15652,11 +15792,14 @@ window.B137 = (function () {
       fare: function (id, a, b) { return fare(COI[id], stByName(a), stByName(b)); }, frate: function (id, k, q, a, b) { return frate(COI[id], k, q, stByName(a), stByName(b)); },
       ride: function (id, a, b) { ride(COI[id], stByName(a), stByName(b)); }, ship: function (id, a, b, k, q) { return ship(COI[id], stByName(a), stByName(b), k, q); },
       war: function () { if (S) { S.warT = 0; tick(0.01); } return S && S.war; }, ff: function (sec) { if (S) tick(sec); }, ui: ui, render: render, load: load,
-      want: function () { return S ? S.want : []; }, post: function (n, k, q, h) { return S ? post(n, k, q, h) : null; }, hand: function (n) { return hand(stByName(n)); }, shares: function () { return S ? CO.map(function (c) { return { id: c.id, held: held(c), price: sPrice(c), div: divPer(c), disc: disc(c) }; }) : []; }, buy: function (id, n) { return buySh(COI[id], n || 1); }, cars: function () { return S ? S.cars.map(function (c) { return { co: c.co, ct: c.ct, own: c.own, earn: c.earn, used: c.used, busy: carBusy(c) }; }) : []; }, buyCar: function (id, ct) { return buyCar(COI[id], ct, 0); }, leaseCar: function (id, ct) { return buyCar(COI[id], ct, 1); }, dropCar: function (id, ct) { return dropCar(COI[id], ct); }, carCost: function (id, ct) { return { buy: cPrice(COI[id], ct), lease: cLease(COI[id], ct), earn: cEarn(COI[id], ct) }; }, pn: function (v) { if (S && v) { S.pn = v; save(); syncRuns(); } return S ? S.pn : ''; }, sell: function (id, n) { return sellSh(COI[id], n || 1); },
+      want: function () { return S ? S.want : []; }, post: function (n, k, q, h) { return S ? post(n, k, q, h) : null; }, hand: function (n) { return hand(stByName(n)); }, shares: function () { return S ? CO.map(function (c) { return { id: c.id, held: held(c), price: sPrice(c), div: divPer(c), disc: disc(c) }; }) : []; }, buy: function (id, n) { return buySh(COI[id], n || 1); }, cars: function () { if (S) fix218(); return S ? S.cars.map(function (c) { var r = carRoll(c); return { id: c.id, co: c.co, ct: c.ct, own: c.own, earn: c.earn, used: c.used, busy: carBusy(c), at: c.at, ld: c.ld ? { k: c.ld.k, q: c.ld.q, pd: c.ld.pd } : null, roll: r ? { to: r.to, call: r.call, left: Math.max(0, (r.at - S.ft) / 20) } : null }; }) : []; },
+      car218: { cap: CAP218, fill: function (id, k, q, src) { var c = carById(id); return fillCar(c, c && stByName(c.at), k, q, src); }, send: function (id, to) { var c = carById(id); return !!(c && sendCar(c, stByName(to))); }, call: function (id, to) { var c = carById(id); return !!(c && callCar(c, stByName(to))); },
+        cost: function (id, k, q) { var c = carById(id), st = c && stByName(c.at); return st ? mktCost(st, k, q) : -1; }, sendCost: function (id, to) { var c = carById(id); return c ? sendCost(c, stByName(to)) : -1; }, sellValue: function (to, k, q) { var st = stByName(to); return st ? Math.round(sellValue(st, k, q, 1)) : 0; }, mkt: function (n, k) { return mktHave(stByName(n), k); },
+        last: function () { return window.LAST218 || null; }, spot: function (n) { var st = stByName(n); return st ? parkAt(st, Math.max(1, parkedAt(st).length)) : null; }, parked: function (n) { var st = stByName(n); return st ? parkedAt(st).map(function (c) { return c.id; }) : []; }, oil: function () { return stations().filter(function (s) { try { return !s.home && ECON131.ty(realm(s)) === 'oil'; } catch (e) { return false; } }).map(function (s) { return s.name; }); }, ui: function () { return ui.act218 || null; } }, buyCar: function (id, ct) { return buyCar(COI[id], ct, 0); }, leaseCar: function (id, ct) { return buyCar(COI[id], ct, 1); }, dropCar: function (id, ct) { return dropCar(COI[id], ct); }, carCost: function (id, ct) { return { buy: cPrice(COI[id], ct), lease: cLease(COI[id], ct), earn: cEarn(COI[id], ct) }; }, pn: function (v) { if (S && v) { S.pn = v; save(); syncRuns(); } return S ? S.pn : ''; }, sell: function (id, n) { return sellSh(COI[id], n || 1); },
       inv210: { on: function () { return !!(S && on()); }, home: function () { var h = stations().filter(function (s) { return s.home; })[0]; return h ? h.name : null; },
         dests: function () { return stations().filter(function (s) { return !s.home && s.name; }).map(function (s) { return s.name; }); }, have: function (k) { var h = stations().filter(function (s) { return s.home; })[0]; return have(k, h); },
-        ships: function () { return S ? S.ship.map(function (sp) { return { id: sp.id, k: sp.k, q: sp.q, to: sp.to, from: sp.from, co: sp.co, sh: (COI[sp.co] || CO[0]).sh, c: (COI[sp.co] || CO[0]).c, wait: sp.dep != null && sp.dep > S.ft, left: Math.max(0, (sp.at - S.ft) / 20), depH: sp.depH, eta: sp.eta, own: sp.own }; }) : []; }, done: function () { return S ? S.done.slice(0, 3) : []; },
-        quote: function (k, q, to) { var a = stations().filter(function (s) { return s.home; })[0], b = stByName(to); if (!S || !a || !b) return []; var w = wFor(b.name, k); return CO.map(function (c) { var f = frate(c, k, q, a, b), ok = f >= 0 && serves(c, a) && serves(c, b) && q >= 1 && q <= c.cap, arr = hourNow() + fDep(c) + fH(c, a, b); return { id: c.id, sh: c.sh, n: c.n, c: c.c, cost: f, ok: ok, cap: c.cap, why: f < 0 ? 'NO ' + CAR[carOf(k)] + 'S' : !serves(c, b) ? 'DOES NOT STOP' : q > c.cap ? 'MAX ' + c.cap : '', arrH: arr, arr: hhmm(arr), est: Math.round(sellValue(b, k, q)), wb: w && S.ft + (arr - hourNow()) * 20 <= w.due ? w.bonus : 0, mine: !!myCar(c, carOf(k)) }; }); },
+        ships: function () { return S ? S.ship.filter(function (sp) { return !sp.call; }).map(function (sp) { return { id: sp.id, k: sp.k, q: sp.q, to: sp.to, from: sp.from, co: sp.co, sh: (COI[sp.co] || CO[0]).sh, c: (COI[sp.co] || CO[0]).c, wait: sp.dep != null && sp.dep > S.ft, left: Math.max(0, (sp.at - S.ft) / 20), depH: sp.depH, eta: sp.eta, own: sp.own }; }) : []; }, done: function () { return S ? S.done.slice(0, 3) : []; },
+        quote: function (k, q, to) { var a = stations().filter(function (s) { return s.home; })[0], b = stByName(to); if (!S || !a || !b) return []; var w = wFor(b.name, k); return CO.map(function (c) { var f = frate(c, k, q, a, b), ok = f >= 0 && serves(c, a) && serves(c, b) && q >= 1 && q <= c.cap, arr = hourNow() + fDep(c) + fH(c, a, b); return { id: c.id, sh: c.sh, n: c.n, c: c.c, cost: f, ok: ok, cap: c.cap, why: f < 0 ? 'NO ' + CAR[carOf(k)] + 'S' : !serves(c, b) ? 'DOES NOT STOP' : q > c.cap ? 'MAX ' + c.cap : '', arrH: arr, arr: hhmm(arr), est: Math.round(sellValue(b, k, q)), wb: w && S.ft + (arr - hourNow()) * 20 <= w.due ? w.bonus : 0, mine: !!freeCar(c, carOf(k), a) }; }); },
         ship: function (id, k, q, to) { var a = stations().filter(function (s) { return s.home; })[0], b = stByName(to), c = COI[id]; if (!S || !a || !b || !c || !serves(c, a) || !serves(c, b)) return false; return ship(c, a, b, k, q); },
         wants: function () { return S ? S.want.slice() : []; }, accept: function (id) { if (!S) return false; var w = S.want.filter(function (x) { return x.id === id && x.st === 'open'; })[0]; if (!w || w.acc || S.want.filter(function (x) { return x.acc && x.st === 'open'; }).length >= 2) return false; w.acc = 1; w.rv = -1; save(); return true; },
         hhmm: hhmm, hour: hourNow, car: function (k) { return CAR[carOf(k)]; } },
