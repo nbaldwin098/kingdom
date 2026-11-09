@@ -234,7 +234,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer's offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow's man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow&#39;s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won't stop, so ride beside the green express car, match the engineer's throttle and hand the strongbox up to the messenger. Then The Freshet: back at the diggings a cloudburst sends a flash flood down the creek. Take Hank&#39;s pike pole and hook the drift, brush, logs and whole trees, ashore before it smashes the sluice. The Cabin: snow is a month off, so roll the beached drift logs up skid poles onto the cabin walls while Hank holds the rope.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer's offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow's man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow&#39;s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won't stop, so ride beside the green express car, match the engineer's throttle and hand the strongbox up to the messenger. Then The Freshet: back at the diggings a cloudburst sends a flash flood down the creek. Take Hank&#39;s pike pole and hook the drift, brush, logs and whole trees, ashore before it smashes the sluice. The Cabin: snow is a month off, so roll the beached drift logs up skid poles onto the cabin walls while Hank holds the rope. The Chimney: with Hank gone for roof poles, carry creek stones up from the bar and lay a fieldstone chimney course by course, level and plumb, then daub it with clay before the first frost.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -10530,7 +10530,8 @@ window.B137 = (function () {
       { id: 30, title: 'The Ford', year: 1, need: ['tully30', 'brann30'] },
       { id: 31, title: 'The Express', year: 1, need: ['harker31', 'brann31'] },
       { id: 32, title: 'The Freshet', year: 1, need: ['brann32', 'creed32'] },
-      { id: 33, title: 'The Cabin', year: 1, need: ['creed33', 'brann33'] }
+      { id: 33, title: 'The Cabin', year: 1, need: ['creed33', 'brann33'] },
+      { id: 34, title: 'The Chimney', year: 1, need: ['brann34'] }
     ];
 
     var NODES = {
@@ -12497,6 +12498,23 @@ window.B137 = (function () {
       brann_ch33_stay: { who: 'brann', say: "It means we're not giving Marlow a winter of empty creek to jump. A cabin on a claim says somebody lives here. Go on, I'll knock the chock out.", replies: [
         { t: "Then let's live here.", next: 'end', flag: 'met_brann33', rel: { brann: 1 } }
       ] },
+      brann_ch34: { who: 'brann', say: "Hank's gone up the gulch after roof poles. He says a cabin with no chimney is just a smokehouse with a door. I can smell frost coming tonight, the first one. If we want a fire in there, the stones go up today and the clay goes on before it freezes.", replies: [
+        { t: "Where do the stones come from?", next: 'brann_ch34_how', rel: { brann: 1 } },
+        { t: "A fire tonight sounds good.", next: 'brann_ch34_fire' }
+      ] },
+      brann_ch34_fire: { who: 'brann', say: "Then build me one that doesn't fall down. The footing is set at the east end of the cabin.", replies: [
+        { t: "How do I lay it?", next: 'brann_ch34_how' }
+      ] },
+      brann_ch34_how: { who: 'brann', say: "The creek bar is full of good fieldstone: thin slabs, cobbles and big boulders. Carry them up one at a time and set two to a course, one on each side. Match the pair so the course sits level, because a fat one beside a thin one tips her. My plumb bob hangs on the pole. If the stack leans too far, the top course comes down and you lay it again. When she's to height, I'll have the clay tub mixed, and every joint gets daubed before the frost.", replies: [
+        { t: "Two to a course, matched.", next: 'end', flag: 'met_brann34', rel: { brann: 1 } },
+        { t: "And if they don't match?", next: 'brann_ch34_odd' }
+      ] },
+      brann_ch34_odd: { who: 'brann', say: "Then lean the next course back the other way. A little lean on one course can be paid back on the next one. Lean two the same way and she falls.", replies: [
+        { t: "Got it. Let's build.", next: 'end', flag: 'met_brann34', rel: { brann: 1 } }
+      ] },
+      brann_ch34_again: { who: 'brann', say: "Stones from the bar, two to a course, matched so she sits level. Watch my plumb bob.", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
       brann_ch33_again: { who: 'brann', say: "Roll the front log on the deck to the foot of the skid poles. Mind it doesn't roll back on you.", replies: [
         { t: "Right.", next: 'end' }
       ] },
@@ -12663,10 +12681,11 @@ window.B137 = (function () {
       30: { cast: ['tully', 'brann'], at: 'ford', do: 'ford', mark: 'DRY FORK FORD' },
       31: { cast: ['harker', 'brann'], at: 'siding', do: 'express', mark: 'DRY FORK SIDING' },
       32: { cast: ['brann', 'creed'], at: 'diggings', do: 'freshet', mark: 'THE FRESHET' },
-      33: { cast: ['creed', 'brann'], at: 'diggings', do: 'cabin', mark: 'THE CABIN' }
+      33: { cast: ['creed', 'brann'], at: 'diggings', do: 'cabin', mark: 'THE CABIN' },
+      34: { cast: ['brann'], at: 'diggings', do: 'chimney', mark: 'THE CHIMNEY' }
     };
     CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
-    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]], 26: [[-190, -10], [230, 0]], 27: [[0, -40], [-210, -10]], 28: [[-210, 160], [-70, 200]], 29: [[40, -150], [-250, 150]], 30: [[-420, -220], [380, -150]], 31: [[-150, -24], [150, 40]], 32: [[-150, 240], [10, 290]], 33: [[-160, 300], [-405, 610]] };
+    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]], 26: [[-190, -10], [230, 0]], 27: [[0, -40], [-210, -10]], 28: [[-210, 160], [-70, 200]], 29: [[40, -150], [-250, 150]], 30: [[-420, -220], [380, -150]], 31: [[-150, -24], [150, 40]], 32: [[-150, 240], [10, 290]], 33: [[-160, 300], [-405, 610]], 34: [[30, 430]] };
     var GENERIC = [[-90, -30], [95, -10], [10, 105]];
     var DW = null;
     var EU = null;
@@ -12722,7 +12741,7 @@ window.B137 = (function () {
     function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
     function charId(need) { return String(need).replace(/\d+$/, ''); }
 
-    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, weigh: null, stock: null, lantern: null, boots: null, ford: null, express: null, freshet: null, cabin: null, t: 0 };
+    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, weigh: null, stock: null, lantern: null, boots: null, ford: null, express: null, freshet: null, cabin: null, chimney: null, t: 0 };
     function talksDone() { var d = chDef(); for (var i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return false; return true; }
     function actOK() {
       var d = chDef(); if (!d) return true;
@@ -12731,10 +12750,11 @@ window.B137 = (function () {
       if (d.do === 'arrive') { var s = scenePos(); if (Math.hypot(px - s.x, py - s.y) < 280) { ST.flags['act' + d.id] = 1; save(); return true; } return false; }
       return !!(ACT.id === d.id && ACT.done);
     }
-    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; ACT.weigh = null; ACT.stock = null; ACT.lantern = null; ACT.boots = null; ACT.ford = null; ACT.express = null; ACT.freshet = null; ACT.cabin = null; }
+    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; ACT.weigh = null; ACT.stock = null; ACT.lantern = null; ACT.boots = null; ACT.ford = null; ACT.express = null; ACT.freshet = null; ACT.cabin = null; ACT.chimney = null; }
     function setupAct() {
       var d = chDef(); clearAct(); ACT.id = d.id; ACT.kind = d.do || ''; ACT.done = !!ST.flags['act' + d.id];
       if (ACT.done && ST.on && d.do === 'cabin') { cbSetup(scenePos()); var CBd = ACT.cabin; CBd.n = CBd.N; CBd.done2 = 1; CBd.a = null; CBd.deckN = 0; cbCast(CBd); cbEndSay(); }
+      if (ACT.done && ST.on && d.do === 'chimney') chmSetup(scenePos(), 1);
       if (ACT.done || !ST.on) return;
       var s = scenePos(), i;
       if (d.do === 'herd') {
@@ -12888,6 +12908,8 @@ window.B137 = (function () {
         NODES.creed_ch32_box.say = (fpay ? "Five boards on the upstream end, with the spares Marlow paid for." : "Four boards on the upstream end.") + " A log takes one, a tree takes two. Lose them all and I'll nail her back together, but the water won't wait on us.";
       } else if (d.do === 'cabin') {
         cbSetup(s);
+      } else if (d.do === 'chimney') {
+        chmSetup(s, 0);
       } else if (d.do === 'shovel') {
         ACT.shovel = { x: s.x + 50, y: s.y + 160, n: 0, need: 10, miss: 0, ph: 0, flash: 0, flashT: 0, pile: 1 };
       }
@@ -12909,6 +12931,7 @@ window.B137 = (function () {
       if (ACT.express) { ACT.express.done2 = 1; ACT.express.carry = 1; expBrannSay(); }
       if (ACT.freshet) { ACT.freshet.done2 = 1; ACT.freshet.deb = []; frEndSay(); }
       if (ACT.cabin) { ACT.cabin.done2 = 1; ACT.cabin.n = ACT.cabin.N; ACT.cabin.a = null; cbEndSay(); }
+      if (ACT.chimney && ACT.kind === 'chimney') { var CHd = ACT.chimney; CHd.done2 = 1; CHd.ph = 'done'; CHd.n = CHd.N; while (CHd.crs.length < CHd.N) CHd.crs.push([12, 12]); CHd.cur = { L: null, R: null }; CHd.carry = null; CHd.daub = CHd.daub.map(function () { return 1; }); chmEndSay(); }
       if (ACT.wagon) ACT.wagon.ex = ACT.wagon.x;
       save(); finishChapter();
     }
@@ -13231,6 +13254,151 @@ window.B137 = (function () {
       }
       B.prevPy = py;
     }
+    /* v220 STORY chapter 34 The Chimney: carry fieldstones up from the creek bar and lay a chimney beside the cabin, two matched stones to a course,
+       keeping every course level and the stack plumb (a lean topples the top course), then daub every joint with clay before the first frost */
+    var CHM_SZ = [{ k: 'SLAB', h: 8, w: 27 }, { k: 'COBBLE', h: 12, w: 26 }, { k: 'BOULDER', h: 16, w: 25 }];
+    var CHM_COL = [['#a49d90', '#c4bdb0', '#7e776c'], ['#b4a284', '#d2c2a2', '#8a7a60'], ['#9c8c7c', '#bcae9c', '#766656'], ['#a8927a', '#c8b49a', '#806c56'], ['#8f9890', '#b0b8ae', '#6c746c']];
+    function chmStone(B, sz) { B.sid = (B.sid || 0) + 1; var z = sz == null ? Math.floor(Math.random() * 3) : sz; return { id: B.sid, z: z, h: CHM_SZ[z].h, col: (B.sid * 7 + z) % CHM_COL.length, seed: (B.sid * 37) % 100 }; }
+    function chmBarSpot(B, i) { var a = (i / 7) * Math.PI * 2 + 0.3; return { x: B.bar.x + Math.cos(a) * 62 + (i % 2 ? 8 : -6), y: B.bar.y + Math.sin(a) * 20 }; }
+    function chmFillBar(B) {
+      for (var i = 0; i < 7; i++) {
+        if (B.stones[i] || (B.wait[i] || 0) > 0) continue;
+        var have = [0, 0, 0]; B.stones.forEach(function (q) { if (q) have[q.z]++; });
+        var miss = have.indexOf(0), st = chmStone(B, miss >= 0 ? miss : null), p = chmBarSpot(B, i); st.x = p.x; st.y = p.y; B.stones[i] = st;
+      }
+    }
+    function chmPop(B, x, y, txt, col) { B.pops.push({ x: x, y: y, txt: txt, t: 0, col: col || '40,110,40' }); if (B.pops.length > 8) B.pops.shift(); }
+    function chmJoints(B) { return B.N * 2; }
+    function chmCast(B) { var L = byId('brann'); if (L && !L.dead209) { L.x = B.tub.x + 36; L.y = B.tub.y - 14; L.face = -1; } }
+    function chmSay(B) {
+      var n = NODES.brann_ch34_again; if (!n || !B) return;
+      if (B.done2 || ACT.done) { chmEndSay(); return; }
+      if (B.ph === 'daub') { n.say = B.cracks ? "The frost cracked it. We chip it out and go again. Clay in every joint, both sides, bottom up, before it freezes." : "It's to height. Now the clay, before the frost: every joint, both sides, bottom up. I'll keep the tub mixed."; n.replies = [{ t: "Bucket's coming.", next: 'end' }]; return; }
+      n.say = (B.n > 0 ? B.n + " courses up. " : "") + "Stones from the bar, two to a course, matched so she sits level. Watch my plumb bob.";
+      n.replies = [{ t: "Right.", next: 'end' }, { t: "And if they don't match?", next: 'brann_ch34_odd' }];
+    }
+    function chmEndSay() {
+      var B = ACT.chimney, n = NODES.brann_ch34_again; if (!n) return;
+      var clean = B && !B.topples && !B.cracks;
+      n.say = (clean ? "Not one course came down and not one crack. " : "She fought us, but she's up and she draws. ") + "A chimney on our own claim, and a fire in it the night of the first frost. Hank will say he'd have laid it straighter. Let him try.";
+      n.replies = [{ t: "Supper by the fire.", next: 'end', rel: { brann: 1 } }, { t: "Next it needs a roof.", next: 'end' }];
+    }
+    function chmSetup(s, done) {
+      cbSetup(s); var CB = ACT.cabin; CB.n = CB.N; CB.done2 = 1; CB.a = null; CB.deckN = 0; cbEndSay();
+      var C = CB.C, K = { x: C.x + 146, y: C.y + 40 }, f = ST.flags, N = 6;
+      var B = ACT.chimney = { C: C, K: K, N: N, bar: { x: s.x - 120, y: s.y + 92 }, tub: { x: K.x + 100, y: K.y + 104 }, pole: { x: K.x + 64, y: K.y - 4 },
+        n: Math.max(0, Math.min(N, f.ch34_n | 0)), lean: f.ch34_lean | 0, crs: (Array.isArray(f.ch34_c) ? f.ch34_c : []).slice(0, N), topples: f.ch34_tp | 0, cracks: f.ch34_ck | 0,
+        cur: { L: null, R: null }, carry: null, stones: [], wait: [], ph: 'lay', setT: 0, fall: [], pops: [], daub: [], clay: 0, fillT: 0, frost: 0, FROST: 32, slapCD: 0, done2: 0, reward: 0, smoke: [], fireT: 0, sid: 0, wob: 0 };
+      if (B.crs.length !== B.n) { B.n = Math.min(B.n, B.crs.length); }
+      B.lean = 0; B.crs.forEach(function (c) { B.lean += c[0] - c[1]; });
+      for (var i = 0; i < chmJoints(B); i++) B.daub.push(0);
+      chmFillBar(B);
+      if (done) { B.done2 = 1; B.ph = 'done'; B.n = N; while (B.crs.length < N) B.crs.push([12, 12]); B.daub = B.daub.map(function () { return 1; }); B.fireT = 9; }
+      else if (B.n >= N) { B.ph = 'daub'; }
+      chmCast(B); chmSay(B);
+    }
+    function chmZone(B) { return Math.abs(px - B.K.x) < 58 && py > B.K.y + 2 && py < B.K.y + 112; }
+    function chmNearStone(B) { var best = -1, bd = 58; B.stones.forEach(function (q, i) { if (!q) return; var d = Math.hypot(q.x - px, q.y - py); if (d < bd) { bd = d; best = i; } }); return best; }
+    function chmNear() {
+      var B = ACT.chimney; if (!ST.on || !B || ACT.kind !== 'chimney' || ACT.done || B.done2 || !talksDone()) return false;
+      if (chmZone(B)) return true;
+      if (B.ph === 'lay' && Math.hypot(px - B.bar.x, py - B.bar.y) < 120) return true;
+      if (Math.hypot(px - B.tub.x, py - B.tub.y) < 60) return true;
+      return false;
+    }
+    function chmAct() {
+      var B = ACT.chimney; if (!chmNear()) return 0;
+      if (B.ph === 'lay') {
+        if (!chmZone(B)) {
+          var i = chmNearStone(B); if (i < 0) return 0;
+          var q = B.stones[i], old = B.carry; B.carry = q; B.stones[i] = null;
+          if (old) { old.x = q.x; old.y = q.y; B.stones[i] = old; chmPop(B, px, py - 60, 'SWAPPED FOR A ' + CHM_SZ[q.z].k, '90,60,30'); }
+          else { B.wait[i] = 1.0; chmPop(B, px, py - 60, CHM_SZ[q.z].k, '90,60,30'); }
+          return 1;
+        }
+        var side = px < B.K.x ? 'L' : 'R', slot = B.cur[side];
+        if (B.carry) {
+          B.cur[side] = B.carry; B.carry = slot || null;
+          chmPop(B, B.K.x + (side === 'L' ? -20 : 20), B.K.y - chmTopY(B) * 1.35 - 30, 'SET', '40,110,40');
+          if (B.cur.L && B.cur.R) { B.ph = 'settle'; B.setT = 0; }
+          return 1;
+        }
+        if (slot) { B.carry = slot; B.cur[side] = null; chmPop(B, px, py - 60, 'TAKEN BACK UP', '90,60,30'); return 1; }
+        return 0;
+      }
+      if (B.ph === 'daub' && chmZone(B)) {
+        if (B.slapCD > 0) return 1;
+        if (B.clay <= 0) { chmPop(B, px, py - 64, 'BUCKET EMPTY', '150,40,30'); return 1; }
+        var sd = px < B.K.x ? 0 : 1, j = -1;
+        for (var k = 0; k < B.N; k++) if (!B.daub[k * 2 + sd]) { j = k * 2 + sd; break; }
+        if (j < 0) { chmPop(B, px, py - 64, 'THIS SIDE IS DAUBED', '90,60,30'); return 1; }
+        B.daub[j] = 1; B.clay--; B.slapCD = 0.32; chmPop(B, B.K.x + (sd ? 40 : -40), B.K.y - chmCourseY(B, j >> 1) * 1.35 - 8, 'SLAP', '150,80,40');
+        if (B.daub.every(function (v) { return v; })) { B.ph = 'fire'; B.fireT = 0; chmPop(B, B.K.x, B.K.y - chmTopY(B) * 1.35 - 30, 'DAUBED BEFORE THE FROST', '40,110,40'); }
+        return 1;
+      }
+      return 1; /* at the tub: Lottie fills the bucket, no swinging at her */
+    }
+    function chmCourseY(B, k) { var y = 0; for (var i = 0; i < k && i < B.crs.length; i++) y += (B.crs[i][0] + B.crs[i][1]) / 2 + 1; return y; }
+    function chmTopY(B) { return chmCourseY(B, B.crs.length); }
+    function chmSettle(B) {
+      var hL = B.cur.L.h, hR = B.cur.R.h, t = hL - hR, nl = B.lean + t, cx = B.K.x, ty = B.K.y - chmTopY(B) * 1.35;
+      if (Math.abs(t) >= 8 || Math.abs(nl) >= 8) {
+        B.topples++; ST.flags.ch34_tp = B.topples;
+        var dir = (Math.abs(t) >= 8 ? t : nl) > 0 ? 1 : -1;
+        [B.cur.L, B.cur.R].forEach(function (q, i) { B.fall.push({ st: q, x: cx + (i ? 18 : -18), y: ty - q.h * 0.7, vx: dir * (60 + i * 40) + (Math.random() - 0.5) * 30, vy: -90 - Math.random() * 40, g: B.K.y + 14 + Math.random() * 30, rot: 0, vr: dir * (4 + Math.random() * 3), t: 0 }); });
+        chmPop(B, cx, ty - 40, Math.abs(t) >= 8 ? 'NOT LEVEL - THE COURSE ROLLS OFF' : 'OUT OF PLUMB - THE TOP COURSE FALLS', '150,40,30');
+        B.wob = 0;
+      } else {
+        B.crs.push([hL, hR]); B.lean = nl; B.n = B.crs.length;
+        ST.flags.ch34_n = B.n; ST.flags.ch34_c = B.crs.map(function (c) { return [c[0], c[1]]; }); ST.flags.ch34_lean = B.lean; save();
+        chmPop(B, cx, ty - 40, t === 0 ? (B.lean === 0 ? 'LEVEL AND PLUMB' : 'LEVEL') : 'SHE LEANS A LITTLE', t === 0 ? '40,110,40' : '160,100,20');
+        if (B.n >= B.N) { B.ph = 'daub'; B.frost = 0; chmPop(B, cx, ty - 60, 'TO HEIGHT', '40,110,40'); chmSay(B); }
+      }
+      B.cur = { L: null, R: null }; if (B.ph === 'settle') B.ph = 'lay'; chmSay(B);
+    }
+    function chmFinish(B) {
+      B.done2 = 1; B.ph = 'done';
+      B.reward = Math.max(5, 22 - 2 * B.topples - 3 * B.cracks) + (ST.flags.ch33_tight ? 4 : 0);
+      if (!B.topples && !B.cracks) ST.flags.ch34_true = 1;
+      try { gold += B.reward; updateRes(); showToast('THE CHIMNEY DRAWS +' + B.reward + ' GOLD'); } catch (e) {}
+      window.CH220 = { n: B.n, topples: B.topples, cracks: B.cracks, lean: B.lean, reward: B.reward };
+      chmEndSay(); completeAct();
+    }
+    function chmTick(dt) {
+      var B = ACT.chimney; if (!B) return;
+      B.pops.forEach(function (q) { q.t += dt; }); B.pops = B.pops.filter(function (q) { return q.t < 1.6; });
+      B.fall.forEach(function (q) { q.t += dt; if (q.y < q.g) { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 520 * dt; q.rot += q.vr * dt; } else { q.y = q.g; q.vx *= Math.pow(0.02, dt); q.x += q.vx * dt; q.vr *= Math.pow(0.02, dt); q.rot += q.vr * dt; } });
+      B.fall = B.fall.filter(function (q) { return q.t < 2.6; });
+      if (B.done2 || ACT.done) { B.fireT += dt; chmSmoke(B, dt); chmSolid(B); return; }
+      if (B.slapCD > 0) B.slapCD -= dt;
+      for (var i = 0; i < 7; i++) if (B.wait[i] > 0) { B.wait[i] -= dt; if (B.wait[i] <= 0) { B.wait[i] = 0; chmFillBar(B); } }
+      chmSolid(B);
+      if (B.ph === 'settle') { B.setT += dt; B.wob = Math.sin(B.setT * 30) * (1 - B.setT / 0.7); if (B.setT >= 0.7) chmSettle(B); }
+      else if (B.ph === 'daub') {
+        if (Math.hypot(px - B.tub.x, py - B.tub.y) < 56 && B.clay < 6) { B.fillT += dt; if (B.fillT >= 0.22) { B.fillT = 0; B.clay++; } } else B.fillT = 0;
+        if (talksDone()) B.frost += dt / B.FROST;
+        if (B.frost >= 1) {
+          B.cracks++; ST.flags.ch34_ck = B.cracks; B.frost = 0; B.daub = B.daub.map(function () { return 0; });
+          chmPop(B, B.K.x, B.K.y - chmTopY(B) * 1.35 - 40, 'THE FROST GOT IN - THE DAUB CRACKED', '60,90,150'); chmSay(B);
+        }
+      } else if (B.ph === 'fire') { B.fireT += dt; chmSmoke(B, dt); if (B.fireT >= 2.2) chmFinish(B); }
+    }
+    function chmSmoke(B, dt) {
+      B.smokeT = (B.smokeT || 0) - dt; if (B.smokeT <= 0) { B.smokeT = 0.28; B.smoke.push({ x: B.K.x + Math.sin(B.lean) * 0 + (Math.random() - 0.5) * 6, y: B.K.y - chmTopY(B) * 1.35 - 10, t: 0, r: 5 + Math.random() * 3 }); if (B.smoke.length > 14) B.smoke.shift(); }
+      B.smoke.forEach(function (q) { q.t += dt; q.y -= 22 * dt; q.x += 9 * dt; q.r += 6 * dt; }); B.smoke = B.smoke.filter(function (q) { return q.t < 3.2; });
+    }
+    function chmSolid(B) {
+      var C = B.C, cab = ACT.cabin;
+      if (cab && Math.abs(px - C.x) < 112 && py > cab.yb - 14 && py < cab.yf + 12) {
+        var dS = cab.yf + 12 - py, dN = py - (cab.yb - 14), dW = px - (C.x - 112), dE = C.x + 112 - px, m = Math.min(dS, dN, dW, dE);
+        if (m === dS) py = cab.yf + 12; else if (m === dN) py = cab.yb - 14; else if (m === dW) px = C.x - 112; else px = C.x + 112;
+      }
+      var K = B.K;
+      if (Math.abs(px - K.x) < 42 && py > K.y - 54 && py < K.y + 2) {
+        var a1 = K.y + 2 - py, a2 = py - (K.y - 54), a3 = px - (K.x - 42), a4 = K.x + 42 - px, mm = Math.min(a1, a2, a3, a4);
+        if (mm === a1) py = K.y + 2; else if (mm === a2) py = K.y - 54; else if (mm === a3) px = K.x - 42; else px = K.x + 42;
+      }
+    }
     window.WADE202 = function () { try { var F = ACT.ford; return !!(ST.on && F && ACT.kind === 'ford' && F.inW && !F.onBar); } catch (e) { return false; } };
     function fordReset(F, why) {
       px = F.sx; py = F.sy; try { moveId = null; targetX = px; targetY = py; } catch (e) {}
@@ -13246,6 +13414,7 @@ window.B137 = (function () {
       if (d.do === 'express' && ACT.express) expTick(dt);
       if (d.do === 'freshet' && ACT.freshet) frTick(dt);
       if (d.do === 'cabin' && ACT.cabin) cbTick(dt);
+      if (d.do === 'chimney' && ACT.chimney) chmTick(dt);
       if (ACT.done) return;
       var i, a;
       if (d.do === 'herd') {
@@ -13575,6 +13744,7 @@ window.B137 = (function () {
     try { if (window.WILD141 && WILD141.hitAt) { var _ha180 = WILD141.hitAt; WILD141.hitAt = function (x, y, rx, ry, p) { var n = _ha180.apply(this, arguments); try { n += hitFoes(x, y + 20, Math.max(rx, 30) + 20, p || 1); } catch (e) {} return n; }; } } catch (e) {}
 
     try { var _atk233 = attack; attack = function () { try { if ((typeof started === 'undefined' || started) && cbHoldNear()) { cbHold(); return; } } catch (e) {} return _atk233.apply(this, arguments); }; } catch (e) {}
+    try { var _atk234 = attack; attack = function () { try { if ((typeof started === 'undefined' || started) && chmNear()) { chmAct(); return; } } catch (e) {} return _atk234.apply(this, arguments); }; } catch (e) {}
     function marker() {
       if (!ST.on || typeof city === 'undefined' || !city) return null;
       var d = chDef(), s = scenePos(), lab = d.mark || d.title.toUpperCase();
@@ -13622,6 +13792,11 @@ window.B137 = (function () {
           var slm = frAt(FRm, FRm.sd);
           if (!FRm.on) t = { x: slm.x, y: slm.y, label: 'GUARD THE SLUICE' };
           else { var urg = FRm.deb.slice().sort(function (a, b) { return b.d - a.d; })[0]; if (urg) { var up = frDebXY(FRm, urg); t = { x: up.x, y: up.y, label: urg.kind === 'tree' ? 'UPROOTED TREE' : urg.kind === 'log' ? 'DRIFT LOG' : 'BRUSH' }; } else t = { x: slm.x, y: slm.y, label: 'GUARD THE SLUICE' }; }
+        } }
+        else if (d.do === 'chimney') { var CHm = ACT.chimney; if (CHm && talksDone() && !CHm.done2) {
+          if (CHm.ph === 'lay') { if (CHm.carry) t = { x: CHm.K.x, y: CHm.K.y + 40, label: 'CHIMNEY' }; else if (CHm.cur.L || CHm.cur.R) t = Math.hypot(px - CHm.bar.x, py - CHm.bar.y) < 120 ? { x: CHm.bar.x, y: CHm.bar.y, label: 'PICK A STONE TO MATCH' } : { x: CHm.bar.x, y: CHm.bar.y, label: 'CREEK BAR' }; else t = { x: CHm.bar.x, y: CHm.bar.y, label: 'CREEK BAR' }; }
+          else if (CHm.ph === 'settle') t = { x: CHm.K.x, y: CHm.K.y + 40, label: 'CHIMNEY' };
+          else if (CHm.ph === 'daub') t = CHm.clay > 0 ? { x: CHm.K.x, y: CHm.K.y + 40, label: 'DAUB THE JOINTS' } : { x: CHm.tub.x, y: CHm.tub.y, label: 'CLAY TUB' };
         } }
         else if (d.do === 'cabin') { var CBm = ACT.cabin; if (CBm && talksDone() && CBm.a) { var am = CBm.a; if (am.ph === 'deck') t = { x: CBm.C.x, y: am.y, label: 'DRIFT LOG' }; else t = { x: CBm.C.x, y: cbYg(CBm, am.s), label: 'SKID POLES' }; } }
         else if (d.do === 'ford') { var FM = ACT.ford; if (FM && FM.carry) {
@@ -14799,6 +14974,143 @@ window.B137 = (function () {
     }
     try { var _pf233 = pushFactionItems; pushFactionItems = function (items) { _pf233.apply(this, arguments); try { if (ST.on && ACT.kind === 'cabin' && ACT.cabin && ACT.id === ST.ch) cabinItems(items); } catch (e) { if (!window.E233) { window.E233 = 1; console.warn(e); } } }; } catch (e) {}
     try { var _fa233 = featuresAt; featuresAt = function (cx, cy) { var a = _fa233(cx, cy); try { var B = ACT.cabin; if (B && ST.on && ACT.kind === 'cabin') { var X0 = cx * 384, Y0 = cy * 384, y0 = B.yb - 90, y1 = cbDeckY(B, B.N) + 60; if (X0 + 384 > B.C.x - 260 && X0 < B.C.x + 260 && Y0 + 384 > y0 && Y0 < y1) a = a.filter(function (f) { return !(Math.abs(f.x - B.C.x) < 250 && f.y > y0 && f.y < y1); }); } } catch (e) {} return a; }; } catch (e) {}
+    /* v220 ch34 The Chimney art: rounded creek fieldstones in real stone colours, the course-by-course stack, Lottie's plumb pole, clay tub, frost */
+    var CHM_S = 1.35;
+    function chmStoneArt(c, x, y, st, rot, sc) {
+      var S = CHM_SZ[st.z], w = S.w * (sc || 1) * CHM_S, h = (S.h + 1) * (sc || 1) * CHM_S, P = CHM_COL[st.col], sd = st.seed;
+      c.save(); c.translate(x, y); if (rot) c.rotate(rot);
+      c.fillStyle = 'rgba(40,30,20,.22)'; c.beginPath(); c.ellipse(1.5, 1, w * 0.52, 3, 0, 0, 7); c.fill();
+      c.fillStyle = P[2]; c.beginPath();
+      c.moveTo(-w / 2, -1); c.quadraticCurveTo(-w / 2 - 1, -h * 0.75, -w * 0.25, -h + (sd % 3)); c.quadraticCurveTo(w * 0.1, -h - 1.5, w * 0.32, -h + ((sd >> 2) % 3));
+      c.quadraticCurveTo(w / 2 + 1.5, -h * 0.6, w / 2, -1); c.quadraticCurveTo(0, 1.5, -w / 2, -1); c.closePath(); c.fill();
+      c.fillStyle = P[0]; c.beginPath(); c.moveTo(-w / 2 + 2, -h * 0.35); c.quadraticCurveTo(-w / 2 + 1, -h * 0.8, -w * 0.22, -h + 1.5 + (sd % 3)); c.quadraticCurveTo(w * 0.1, -h + 0.5, w * 0.3, -h + 1.5 + ((sd >> 2) % 3)); c.quadraticCurveTo(w / 2 - 1, -h * 0.6, w / 2 - 2.5, -h * 0.3); c.quadraticCurveTo(0, -h * 0.18, -w / 2 + 2, -h * 0.35); c.fill();
+      c.fillStyle = P[1]; c.beginPath(); c.ellipse(-w * 0.12, -h * 0.72, w * 0.22, h * 0.13, -0.15, 0, 7); c.fill();
+      c.fillStyle = 'rgba(110,90,60,.35)'; c.fillRect(-w * 0.3 + (sd % 7), -h * 0.45, 2, 1.5); c.fillRect(w * 0.12 - (sd % 5), -h * 0.3, 2.5, 1.5);
+      c.strokeStyle = 'rgba(70,56,40,.55)'; c.lineWidth = 1; c.beginPath(); c.moveTo(-w / 2, -1); c.quadraticCurveTo(-w / 2 - 1, -h * 0.75, -w * 0.25, -h + (sd % 3)); c.quadraticCurveTo(w * 0.1, -h - 1.5, w * 0.32, -h + ((sd >> 2) % 3)); c.quadraticCurveTo(w / 2 + 1.5, -h * 0.6, w / 2, -1); c.stroke();
+      c.restore();
+    }
+    /* walk the stack bottom up: each course sits on the one below and carries its lean */
+    function chmStack(B, fn) {
+      var x = 0, y = 0, th = 0, i;
+      for (i = 0; i < B.crs.length; i++) {
+        var hL = B.crs[i][0], hR = B.crs[i][1], hg = ((hL + hR) / 2 + 1) * CHM_S;
+        fn(i, x, y, th, hL, hR);
+        x += Math.sin(th) * hg; y -= Math.cos(th) * hg; th += Math.atan((hL - hR) / 28) * 0.55;
+      }
+      return { x: x, y: y, th: th };
+    }
+    function chmItem(c, B, sx, sy) {
+      var K = B.K, ST2 = B.crs, i;
+      c.save();
+      /* footing: flat sill stones half sunk in the dirt */
+      c.fillStyle = 'rgba(90,70,46,.35)'; c.beginPath(); c.ellipse(sx, sy + 2, 48, 9, 0, 0, 7); c.fill();
+      c.fillStyle = '#8c867a'; c.fillRect(sx - 40, sy - 5, 80, 7); c.fillStyle = '#aaa396'; c.fillRect(sx - 40, sy - 5, 80, 2.5);
+      c.fillStyle = 'rgba(70,56,40,.4)'; c.fillRect(sx - 2, sy - 5, 1.5, 7); c.fillRect(sx - 18, sy - 5, 1.5, 7); c.fillRect(sx + 15, sy - 5, 1.5, 7);
+      /* the firebox opening into the cabin wall side */
+      var top = chmStack(B, function (k, x, y, th, hL, hR) {
+        c.save(); c.translate(sx + x, sy - 5 + y); c.rotate(th);
+        var stL = { z: hL === 8 ? 0 : hL === 12 ? 1 : 2, col: (k * 3 + 1) % CHM_COL.length, seed: k * 29 + 3 }, stR = { z: hR === 8 ? 0 : hR === 12 ? 1 : 2, col: (k * 3 + 2) % CHM_COL.length, seed: k * 41 + 11 };
+        chmStoneArt(c, -18, 0, stL, 0, 1); chmStoneArt(c, 18, 0, stR, 0, 1);
+        /* the joints: open dark gaps until daubed with red-brown clay */
+        [0, 1].forEach(function (sd) {
+          var dd = B.daub[k * 2 + sd], hx = sd ? 34 : -34, hh = (sd ? hR : hL) * CHM_S;
+          c.fillStyle = dd ? '#b26a3e' : 'rgba(70,50,32,.55)'; c.fillRect(hx - (sd ? 1 : 3), -hh - 1, 4, hh + 1);
+          if (dd) { c.fillStyle = '#c98652'; c.fillRect(hx - (sd ? 1 : 3), -hh, 2, hh * 0.6); }
+          c.fillStyle = dd ? '#a65e34' : 'rgba(70,50,32,.4)'; c.fillRect(-2, -Math.max(hL, hR) * CHM_S * 0.8, 3, Math.max(hL, hR) * CHM_S * 0.75);
+        });
+        c.restore();
+      });
+      /* the course you are setting now */
+      if (!B.done2 && (B.cur.L || B.cur.R)) {
+        c.save(); c.translate(sx + top.x + (B.ph === 'settle' ? B.wob * 2 : 0), sy - 5 + top.y); c.rotate(top.th + (B.ph === 'settle' && B.cur.L && B.cur.R ? Math.atan((B.cur.L.h - B.cur.R.h) / 28) * 0.4 * (B.setT / 0.7) : 0));
+        if (B.cur.L) chmStoneArt(c, -18, 0, B.cur.L, 0, 1);
+        if (B.cur.R) chmStoneArt(c, 18, 0, B.cur.R, 0, 1);
+        c.restore();
+      }
+      /* when it is to height: a flat cap stone and a lick of firelight at the firebox */
+      if (B.n >= B.N) {
+        c.save(); c.translate(sx + top.x, sy - 5 + top.y); c.rotate(top.th);
+        c.fillStyle = '#8a8478'; c.fillRect(-38, -6, 76, 7); c.fillStyle = '#b0a99c'; c.fillRect(-38, -6, 76, 2.5);
+        c.fillStyle = '#4a3a2c'; c.fillRect(-9, -6, 18, 3);
+        c.restore();
+        if (B.ph === 'fire' || B.done2) { var fl = 0.6 + Math.sin(performance.now() / 90) * 0.2; c.fillStyle = 'rgba(255,150,50,' + (0.5 * fl).toFixed(3) + ')'; c.beginPath(); c.ellipse(sx - 42, sy - 10, 6, 9, 0, 0, 7); c.fill(); }
+      }
+      c.restore();
+    }
+    function chmPoleItem(c, B, sx, sy) {
+      c.save();
+      c.fillStyle = 'rgba(40,30,20,.2)'; c.beginPath(); c.ellipse(sx + 2, sy + 1, 7, 2.5, 0, 0, 7); c.fill();
+      c.fillStyle = '#7a5230'; c.fillRect(sx - 2, sy - 112, 4, 113); c.fillStyle = '#a07040'; c.fillRect(sx - 2, sy - 112, 1.5, 113);
+      c.fillStyle = '#7a5230'; c.fillRect(sx - 22, sy - 112, 22, 3);
+      var top = chmStack(B, function () {}), bx = sx - 22, by = sy - 112;
+      c.strokeStyle = '#7a6a4a'; c.lineWidth = 1; c.beginPath(); c.moveTo(bx, by + 2); c.lineTo(bx, by + 96); c.stroke();
+      c.fillStyle = '#c8a040'; c.beginPath(); c.moveTo(bx - 3.5, by + 96); c.lineTo(bx + 3.5, by + 96); c.lineTo(bx, by + 104); c.closePath(); c.fill();
+      c.restore();
+    }
+    function chmTubItem(c, B, sx, sy) {
+      c.save();
+      c.fillStyle = 'rgba(40,30,20,.22)'; c.beginPath(); c.ellipse(sx + 2, sy + 2, 24, 7, 0, 0, 7); c.fill();
+      c.fillStyle = '#8a5a30'; c.beginPath(); c.moveTo(sx - 20, sy - 22); c.lineTo(sx + 20, sy - 22); c.lineTo(sx + 17, sy); c.lineTo(sx - 17, sy); c.closePath(); c.fill();
+      c.fillStyle = '#a8743e'; for (var q = -16; q < 16; q += 8) c.fillRect(sx + q, sy - 21, 3, 20);
+      c.fillStyle = '#7a8088'; c.fillRect(sx - 20, sy - 17, 40, 2.5); c.fillRect(sx - 18, sy - 6, 36, 2.5);
+      c.fillStyle = '#b26a3e'; c.beginPath(); c.ellipse(sx, sy - 22, 20, 5.5, 0, 0, 7); c.fill(); c.fillStyle = '#c98652'; c.beginPath(); c.ellipse(sx - 4, sy - 23, 10, 2.5, 0, 0, 7); c.fill();
+      c.fillStyle = '#7a5030'; c.save(); c.translate(sx + 8, sy - 24); c.rotate(0.5); c.fillRect(-1.5, -22, 3, 24); c.restore();
+      /* the bank of clay Lottie dug it from */
+      c.fillStyle = '#a8603a'; c.beginPath(); c.ellipse(sx + 44, sy + 16, 20, 7, 0.2, 0, 7); c.fill(); c.fillStyle = '#c07448'; c.beginPath(); c.ellipse(sx + 41, sy + 14, 12, 3.5, 0.2, 0, 7); c.fill();
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 9px monospace'; c.textAlign = 'center'; c.fillText('CLAY TUB', sx, sy + 16);
+      c.restore();
+    }
+    function chmBarGround(c, B, sx, sy) {
+      c.save();
+      c.fillStyle = '#cdb88e'; c.beginPath(); c.ellipse(sx, sy, 92, 34, 0, 0, 7); c.fill();
+      c.fillStyle = 'rgba(150,130,96,.55)'; for (var i = 0; i < 26; i++) { var a = i * 2.4, r = (i * 13) % 80; c.beginPath(); c.ellipse(sx + Math.cos(a) * r, sy + Math.sin(a) * r * 0.33, 2.5, 1.5, 0, 0, 7); c.fill(); }
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 9px monospace'; c.textAlign = 'center'; c.fillText('CREEK BAR', sx, sy + 44);
+      c.restore();
+    }
+    function chimneyItems(items) {
+      var B = ACT.chimney; if (!B || Math.abs(B.K.x - px) > 1500 || Math.abs(B.K.y - py) > 1100) return;
+      items.push({ y: B.K.y, x: B.K.x, y2: B.K.y, fn: function (sx, sy) { chmItem(ctx, B, sx, sy); } });
+      items.push({ y: B.pole.y, x: B.pole.x, y2: B.pole.y, fn: function (sx, sy) { chmPoleItem(ctx, B, sx, sy); } });
+      items.push({ y: B.tub.y, x: B.tub.x, y2: B.tub.y, fn: function (sx, sy) { chmTubItem(ctx, B, sx, sy); } });
+      B.stones.forEach(function (q) { if (q) items.push({ y: q.y, x: q.x, y2: q.y, fn: function (sx, sy) { chmStoneArt(ctx, sx, sy, q, 0, 1); } }); });
+      B.fall.forEach(function (q) { items.push({ y: q.g, x: q.x, y2: q.g, fn: function (sx, sy) { ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, (2.6 - q.t) / 0.6)); chmStoneArt(ctx, sx, sy - (q.g - q.y), q.st, q.rot, 1); ctx.restore(); } }); });
+    }
+    function drawChimTop(c, B, camX0, camY0) {
+      c.save();
+      var K = B.K, kx = K.x - camX0, ky = K.y - camY0, top = chmStack(B, function () {});
+      B.smoke.forEach(function (q) { var a = Math.max(0, 0.5 * (1 - q.t / 3.2)); c.fillStyle = 'rgba(214,210,204,' + a.toFixed(3) + ')'; c.beginPath(); c.arc(q.x - camX0 + top.x, q.y - camY0, q.r, 0, 7); c.fill(); });
+      if (B.carry) { var cs = B.carry; chmStoneArt(c, px - camX0, py - camY0 - 46, cs, 0, 1); c.fillStyle = '#3b2410'; c.font = 'bold 8px monospace'; c.textAlign = 'center'; c.fillText(CHM_SZ[cs.z].k, px - camX0, py - camY0 - 74); }
+      if (B.ph === 'lay' && Math.hypot(px - B.bar.x, py - B.bar.y) < 150) { c.font = 'bold 8px monospace'; c.textAlign = 'center'; B.stones.forEach(function (q) { if (!q) return; c.fillStyle = 'rgba(59,36,16,.85)'; c.fillText(CHM_SZ[q.z].k, q.x - camX0, q.y - camY0 + 11); }); }
+      B.pops.forEach(function (q) { c.fillStyle = 'rgba(' + q.col + ',' + (1 - q.t / 1.6).toFixed(3) + ')'; c.font = 'bold 12px monospace'; c.textAlign = 'center'; c.fillText(q.txt, q.x - camX0, q.y - camY0 - q.t * 22); });
+      if (!B.done2 && B.ph !== 'fire' && Math.abs(px - K.x) < 260 && Math.abs(py - K.y) < 240) {
+        var x = kx + 92, y = ky - 140, w = 84;
+        c.fillStyle = 'rgba(42,26,10,.8)'; c.fillRect(x - 4, y - 4, w + 8, B.ph === 'daub' ? 58 : 44);
+        c.fillStyle = '#ffe9b8'; c.font = 'bold 8px monospace'; c.textAlign = 'left';
+        c.fillText('COURSE ' + Math.min(B.N, B.n + (B.ph === 'daub' ? 0 : 1)) + ' OF ' + B.N, x, y + 6);
+        /* level: the course being set now */
+        var tl = B.cur.L && B.cur.R ? B.cur.L.h - B.cur.R.h : B.cur.L ? 0 : 0; c.fillText('LEVEL', x, y + 18);
+        c.fillStyle = 'rgba(255,255,255,.15)'; c.fillRect(x + 34, y + 12, 48, 7); c.fillStyle = Math.abs(tl) >= 8 ? '#d8402a' : Math.abs(tl) >= 4 ? '#e8a030' : '#7ac85a'; c.fillRect(x + 55 + Math.max(-1, Math.min(1, tl / 8)) * 20, y + 11, 6, 9);
+        c.fillStyle = '#ffe9b8'; c.fillText('PLUMB', x, y + 31);
+        c.fillStyle = 'rgba(255,255,255,.15)'; c.fillRect(x + 34, y + 25, 48, 7); c.fillStyle = Math.abs(B.lean) >= 8 ? '#d8402a' : Math.abs(B.lean) >= 4 ? '#e8a030' : '#7ac85a'; c.fillRect(x + 55 + Math.max(-1, Math.min(1, B.lean / 8)) * 20, y + 24, 6, 9);
+        c.fillStyle = 'rgba(216,64,42,.7)'; c.fillRect(x + 34, y + 25, 2, 7); c.fillRect(x + 80, y + 25, 2, 7);
+        if (B.ph === 'daub') {
+          c.fillStyle = '#ffe9b8'; c.fillText('FROST', x, y + 44); c.fillStyle = 'rgba(255,255,255,.15)'; c.fillRect(x + 34, y + 38, 48, 7);
+          c.fillStyle = B.frost > 0.75 ? '#9ad0ff' : '#cfe6f8'; c.fillRect(x + 34, y + 38, 48 * Math.min(1, B.frost), 7);
+          c.fillStyle = '#ffe9b8'; c.fillText('CLAY ' + B.clay + '/6 \u00b7 JOINTS ' + B.daub.filter(function (v) { return v; }).length + '/' + B.daub.length, x, y + 53 + 2);
+        }
+      }
+      /* the first frost creeping in across the ground */
+      if (B.ph === 'daub' && B.frost > 0.05) {
+        var a2 = Math.min(0.42, B.frost * 0.45), Wc = c.canvas.width, Hc = c.canvas.height;
+        c.setTransform(1, 0, 0, 1, 0, 0);
+        var g = c.createRadialGradient(Wc / 2, Hc / 2, Math.min(Wc, Hc) * (0.62 - 0.3 * B.frost), Wc / 2, Hc / 2, Math.max(Wc, Hc) * 0.72);
+        g.addColorStop(0, 'rgba(220,236,250,0)'); g.addColorStop(1, 'rgba(220,236,250,' + a2.toFixed(3) + ')'); c.fillStyle = g; c.fillRect(0, 0, Wc, Hc);
+      }
+      c.restore();
+    }
+    try { var _pf234 = pushFactionItems; pushFactionItems = function (items) { _pf234.apply(this, arguments); try { if (ST.on && ACT.kind === 'chimney' && ACT.chimney && ACT.id === ST.ch) { cabinItems(items); chimneyItems(items); } } catch (e) { if (!window.E234) { window.E234 = 1; console.warn(e); } } }; } catch (e) {}
+    try { var _fa234 = featuresAt; featuresAt = function (cx, cy) { var a = _fa234(cx, cy); try { var B = ACT.chimney; if (B && ST.on && ACT.kind === 'chimney') { var X0 = cx * 384, Y0 = cy * 384, x0 = B.C.x - 260, x1 = B.tub.x + 120, y0 = B.bar.y - 60, y1 = B.C.y + 200; if (X0 + 384 > x0 && X0 < x1 && Y0 + 384 > y0 && Y0 < y1) a = a.filter(function (f) { return !(f.x > x0 && f.x < x1 && f.y > y0 && f.y < y1); }); } } catch (e) {} return a; }; } catch (e) {}
+    try { var _dg234 = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dg234.apply(this, arguments); try { var B = ACT.chimney; if (ST.on && ACT.kind === 'chimney' && B && ACT.id === ST.ch && Math.abs(B.bar.x - px) < (x1 - x0) / 2 + 300 && Math.abs(B.bar.y - py) < (y1 - y0) / 2 + 300) chmBarGround(ctx, B, B.bar.x - camX, B.bar.y - camY); } catch (e) {} }; } catch (e) {}
     function drawExpressTop(c, T, camX0, camY0) {
       T.puffs.forEach(function (q) { var k = q.t / 1.6; c.fillStyle = 'rgba(236,232,224,' + (0.7 * (1 - k)).toFixed(3) + ')'; c.beginPath(); c.arc(q.x - camX0, q.y - camY0, q.r * (1 + k * 1.8), 0, 7); c.fill(); });
       if (!T.carry && !ACT.done) { var B = byId('brann'); if (B) drawStrongbox(c, B.x - camX0 + 26, B.y - camY0 + 2, 1); return; }
@@ -15049,7 +15361,7 @@ window.B137 = (function () {
       c.fillText(k.got ? 'COLOR' : 'GRAVEL BAR', 0, -22);
       c.restore();
     }
-    var DIG205 = { pan: 1, corners: 1, sluice: 1, race: 1, shovel: 1, haul: 1, lantern: 1, cabin: 1 };
+    var DIG205 = { pan: 1, corners: 1, sluice: 1, race: 1, shovel: 1, haul: 1, lantern: 1, cabin: 1, chimney: 1 };
     try { var _dg205 = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dg205.apply(this, arguments); try { if (ST.on && ACT.id === ST.ch && DIG205[ACT.kind]) { var s = scenePos(); if (s && Math.abs(s.x - px) < (x1 - x0) / 2 + 700 && Math.abs(s.y - py) < (y1 - y0) / 2 + 500) { window.DIG205N = (window.DIG205N || 0) + 1; drawDiggings(ctx, s.x - camX, s.y - camY); } } } catch (e) { if (!window.E205d) { window.E205d = 1; console.warn(e); } } }; } catch (e) {}
     function drawAct(camX, camY) {
       if (!ST.on || ACT.id !== ST.ch) return;
@@ -15093,6 +15405,7 @@ window.B137 = (function () {
       if (ACT.kind === 'express' && ACT.express) drawExpressTop(c, ACT.express, camX, camY);
       if (ACT.kind === 'freshet' && ACT.freshet) drawFreshet(c, ACT.freshet, camX, camY, Wv);
       if (ACT.kind === 'cabin' && ACT.cabin) drawCabinTop(c, ACT.cabin, camX, camY);
+      if (ACT.kind === 'chimney' && ACT.chimney) drawChimTop(c, ACT.chimney, camX, camY);
       if (ACT.kind === 'weigh' && ACT.weigh) drawWeigh(c, ACT.weigh, ACT.weigh.x - camX, ACT.weigh.y - camY, camX, camY);
       if (ACT.kind === 'shovel' && ACT.shovel) drawShovel(c, ACT.shovel, ACT.shovel.x - camX, ACT.shovel.y - camY);
       if (ACT.kind === 'sluice') {
@@ -15380,6 +15693,9 @@ window.B137 = (function () {
       freshetPoke: function () { return frPoke(); },
       cabin: function () { var B = ACT.cabin; if (!B) return null; var a = B.a; return { C: { x: B.C.x, y: B.C.y }, yf: B.yf, yb: B.yb, n: B.n, N: B.N, done2: B.done2, reward: B.reward, slews: B.slews, jumps: B.jumps, slips: B.slips, knocks: B.knocks, wind: B.wind, strain: B.strain, snub: B.snub ? B.snub.at : -1, deck: B.deckN, a: a ? { ph: a.ph, y: a.y, vy: a.vy, s: a.s, v: a.v, cant: a.cant, t: a.t, yg: a.ph === 'deck' ? a.y : cbYg(B, a.s), yfoot: cbFoot(B), push: !!B.push } : null, seatV: B.seatV, vmax: cbVmax(B) }; },
       cabinHold: function () { return cbHold(); },
+      chimney: function () { var B = ACT.chimney; if (!B) return null; return { K: { x: B.K.x, y: B.K.y }, bar: { x: B.bar.x, y: B.bar.y }, tub: { x: B.tub.x, y: B.tub.y }, N: B.N, n: B.n, lean: B.lean, ph: B.ph, crs: B.crs.map(function (c) { return c.slice(); }), topples: B.topples, cracks: B.cracks, carry: B.carry ? B.carry.h : 0, L: B.cur.L ? B.cur.L.h : 0, R: B.cur.R ? B.cur.R.h : 0, stones: B.stones.map(function (q) { return q ? { x: q.x, y: q.y, h: q.h } : null; }), clay: B.clay, frost: B.frost, FROST: B.FROST, daub: B.daub.slice(), done2: B.done2, reward: B.reward, near: chmNear() }; },
+      chimneyFrost: function (v) { if (ACT.chimney) ACT.chimney.frost = v; },
+      nodeSay: function (id) { return NODES[id] ? NODES[id].say : null; },
       cabinCant: function (v) { if (ACT.cabin && ACT.cabin.a) ACT.cabin.a.cant = v; },
       freshetGo: function () { var F = ACT.freshet; if (F && F.armed && !F.on) F.wait = 0; },
       freshetAt: function (d, l) { var F = ACT.freshet; if (!F) return null; var q = frAt(F, d); return { x: q.x + q.nx * (l || 0), y: q.y + q.ny * (l || 0) }; },
