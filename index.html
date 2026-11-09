@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer's offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow's man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow&#39;s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won't stop, so ride beside the green express car, match the engineer's throttle and hand the strongbox up to the messenger.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer's offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow's man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow&#39;s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won't stop, so ride beside the green express car, match the engineer's throttle and hand the strongbox up to the messenger. Then The Freshet: back at the diggings a cloudburst sends a flash flood down the creek. Take Hank&#39;s pike pole and hook the drift, brush, logs and whole trees, ashore before it smashes the sluice.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -9908,7 +9908,8 @@ window.B137 = (function () {
       { id: 28, title: 'The Lantern', year: 1, need: ['brann28', 'creed28'] },
       { id: 29, title: 'The Hobnails', year: 1, need: ['marlow29', 'brann29'] },
       { id: 30, title: 'The Ford', year: 1, need: ['tully30', 'brann30'] },
-      { id: 31, title: 'The Express', year: 1, need: ['harker31', 'brann31'] }
+      { id: 31, title: 'The Express', year: 1, need: ['harker31', 'brann31'] },
+      { id: 32, title: 'The Freshet', year: 1, need: ['brann32', 'creed32'] }
     ];
 
     var NODES = {
@@ -11821,6 +11822,32 @@ window.B137 = (function () {
       brann_ch31: { who: 'brann', say: "I've got the box. Talk to Harker first, he knows when the express comes through.", replies: [
         { t: "Going.", next: 'end' }
       ] },
+      brann_ch32: { who: 'brann', say: "Feel that wind? Thunderheads have been stacking on the peaks since noon. When a cloudburst lets go up there, the whole canyon drains down this creek in one brown wall. A freshet. It brings half the mountain with it, brush, drift logs, whole trees, and every one of them is headed for our sluice.", replies: [
+        { t: "What do we do?", next: 'brann_ch32_how', rel: { brann: 1 } },
+        { t: "Can't we just pull the sluice out?", next: 'brann_ch32_pull' }
+      ] },
+      brann_ch32_how: { who: 'brann', say: "Hank has the pike pole. Stand on the bank, and when drift comes down, tap ATTACK to hook it and haul it up onto your bank. Brush comes easy, logs take a few pulls, trees take a lot. If it's riding the far side out of reach, cross on the footbridge.", replies: [
+        { t: "Haul it ashore before it hits the box.", next: 'end', flag: 'met_brann32', rel: { brann: 1 } }
+      ] },
+      brann_ch32_pull: { who: 'brann', say: "Not with a week's color in the riffles and the box spiked to bedrock. We'd lose more tearing it apart than the water will take. Keep the drift off it and it will stand.", replies: [
+        { t: "Then I'll keep the drift off.", next: 'end', flag: 'met_brann32' }
+      ] },
+      brann_ch32_again: { who: 'brann', say: "Hook the drift and haul it onto your bank. Footbridge if it's riding the far side!", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
+      creed_ch32: { who: 'creed', say: "Forty years on creeks and I've seen three freshets take a sluice clean down to the river. Here's the pike pole, iron hook on the end.", replies: [
+        { t: "How many knocks can the box take?", next: 'creed_ch32_box', rel: { creed: 1 } },
+        { t: "Give me the pole.", next: 'creed_ch32_pole' }
+      ] },
+      creed_ch32_box: { who: 'creed', say: "Four boards on the upstream end. A log takes one, a tree takes two. Lose them all and I'll nail her back together, but the water won't wait on us.", replies: [
+        { t: "Then nothing gets through.", next: 'end', flag: 'met_creed32', rel: { creed: 1 } }
+      ] },
+      creed_ch32_pole: { who: 'creed', say: "Hook it, haul it, don't fall in. Once she comes down it's too deep and fast to wade, so use the footbridge.", replies: [
+        { t: "Right.", next: 'end', flag: 'met_creed32' }
+      ] },
+      creed_ch32_again: { who: 'creed', say: "Hook and haul! Pull it up onto your bank.", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
       creed_ch25_again: { who: 'creed', say: "Walk beside her, lean high. The scale's at the end of the road.", replies: [
         { t: "Right.", next: 'end' }
       ] },
@@ -11982,10 +12009,11 @@ window.B137 = (function () {
       28: { cast: ['brann', 'creed'], at: 'diggings', do: 'lantern', mark: 'THE LANTERN' },
       29: { cast: ['marlow', 'brann'], at: 'marlow', do: 'boots', mark: 'MARLOW & SONS' },
       30: { cast: ['tully', 'brann'], at: 'ford', do: 'ford', mark: 'DRY FORK FORD' },
-      31: { cast: ['harker', 'brann'], at: 'siding', do: 'express', mark: 'DRY FORK SIDING' }
+      31: { cast: ['harker', 'brann'], at: 'siding', do: 'express', mark: 'DRY FORK SIDING' },
+      32: { cast: ['brann', 'creed'], at: 'diggings', do: 'freshet', mark: 'THE FRESHET' }
     };
     CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
-    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]], 26: [[-190, -10], [230, 0]], 27: [[0, -40], [-210, -10]], 28: [[-210, 160], [-70, 200]], 29: [[40, -150], [-250, 150]], 30: [[-420, -220], [380, -150]], 31: [[-150, -24], [150, 40]] };
+    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]], 26: [[-190, -10], [230, 0]], 27: [[0, -40], [-210, -10]], 28: [[-210, 160], [-70, 200]], 29: [[40, -150], [-250, 150]], 30: [[-420, -220], [380, -150]], 31: [[-150, -24], [150, 40]], 32: [[-150, 240], [10, 290]] };
     var GENERIC = [[-90, -30], [95, -10], [10, 105]];
     var DW = null;
     var EU = null;
@@ -12041,7 +12069,7 @@ window.B137 = (function () {
     function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
     function charId(need) { return String(need).replace(/\d+$/, ''); }
 
-    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, weigh: null, stock: null, lantern: null, boots: null, ford: null, express: null, t: 0 };
+    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, weigh: null, stock: null, lantern: null, boots: null, ford: null, express: null, freshet: null, t: 0 };
     function talksDone() { var d = chDef(); for (var i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return false; return true; }
     function actOK() {
       var d = chDef(); if (!d) return true;
@@ -12050,7 +12078,7 @@ window.B137 = (function () {
       if (d.do === 'arrive') { var s = scenePos(); if (Math.hypot(px - s.x, py - s.y) < 280) { ST.flags['act' + d.id] = 1; save(); return true; } return false; }
       return !!(ACT.id === d.id && ACT.done);
     }
-    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; ACT.weigh = null; ACT.stock = null; ACT.lantern = null; ACT.boots = null; ACT.ford = null; ACT.express = null; }
+    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; ACT.weigh = null; ACT.stock = null; ACT.lantern = null; ACT.boots = null; ACT.ford = null; ACT.express = null; ACT.freshet = null; }
     function setupAct() {
       var d = chDef(); clearAct(); ACT.id = d.id; ACT.kind = d.do || ''; ACT.done = !!ST.flags['act' + d.id];
       if (ACT.done || !ST.on) return;
@@ -12194,6 +12222,16 @@ window.B137 = (function () {
           puffs: [], shove: 0, done2: 0, leave: 0, reward: 0, dry: xdry ? 1 : 0 };
         NODES.harker_ch31.say = "Ned Harker, agent at Dry Fork siding. You're the claim with the strongbox? The express won't stop here, company rule since the Red Mesa robbery. She only crawls through the siding. " + (xlaw ? "The sheriff wired the line about your saboteur, so the engineer has orders to hold her steady for you." : xsq ? "Marlow & Sons have a freight car on her today. Their man rides the cab and he likes the throttle, so she'll surge." : xpay ? "That box is heavy with Marlow's money. The messenger will need a long, steady hold to take it." : "The engineer's fair. Mostly.");
         expBrannSay();
+      } else if (d.do === 'freshet') {
+        var fpay = !!ST.flags.ch29_pay, flw = !!ST.flags.ch29_law, fsq2 = !!ST.flags.ch29_square;
+        var SG = [[-390, 78, -170, 130, 20, -100], [20, -100, 190, -170, 410, 66]], FP = [], k3;
+        for (k3 = 0; k3 <= 80; k3++) { var u3 = k3 / 80, sg3 = u3 < 0.5 ? SG[0] : SG[1], t3 = u3 < 0.5 ? u3 * 2 : (u3 - 0.5) * 2, m3 = 1 - t3; FP.push({ x: s.x + m3 * m3 * sg3[0] + 2 * m3 * t3 * sg3[2] + t3 * t3 * sg3[4], y: s.y + m3 * m3 * sg3[1] + 2 * m3 * t3 * sg3[3] + t3 * t3 * sg3[5] }); }
+        var L3 = 0; FP[0].d = 0; for (k3 = 1; k3 < FP.length; k3++) { L3 += Math.hypot(FP[k3].x - FP[k3 - 1].x, FP[k3].y - FP[k3 - 1].y); FP[k3].d = L3; }
+        FP.forEach(function (p, i) { var a = FP[Math.max(0, i - 1)], b = FP[Math.min(FP.length - 1, i + 1)], dx = b.x - a.x, dy = b.y - a.y, l = Math.hypot(dx, dy) || 1; p.tx = dx / l; p.ty = dy / l; p.nx = -dy / l; p.ny = dx / l; });
+        ACT.freshet = { x: s.x, y: s.y, P: FP, L: L3, sd: L3 * 0.86, bd: L3 * 0.47, boards: fpay ? 5 : 4, max: fpay ? 5 : 4, t: 0, dur: 50, on: 0, armed: 0, wait: 0, W: 40, deb: [], beached: [], pops: [], splash: [], spawnT: 1.5,
+          tree: flw ? 0.26 : fsq2 ? 0.06 : 0.14, gap: fsq2 ? 1.18 : 1, pass: 1, hits: 0, saved: 0, pokeCD: 0, pole: null, done2: 0, reward: 0, warned: 0 };
+        NODES.creed_ch32.say = "Forty years on creeks and I've seen three freshets take a sluice clean down to the river. " + (flw ? "And Marlow's upper camp has a splash dam full of logs. With his man in the sheriff's cells, nobody up there will lift a finger to hold it, so look for whole trees. " : fsq2 ? "Marlow sent a rider at noon. His men are letting their splash dam down slow so it won't hit us in one lump. Fewer trees, maybe. He's keeping his word. " : fpay ? "I spent some of Marlow's money on spare boards for the head of the box, so she can take an extra knock. " : "") + "Here's the pike pole, iron hook on the end.";
+        NODES.creed_ch32_box.say = (fpay ? "Five boards on the upstream end, with the spares Marlow paid for." : "Four boards on the upstream end.") + " A log takes one, a tree takes two. Lose them all and I'll nail her back together, but the water won't wait on us.";
       } else if (d.do === 'shovel') {
         ACT.shovel = { x: s.x + 50, y: s.y + 160, n: 0, need: 10, miss: 0, ph: 0, flash: 0, flashT: 0, pile: 1 };
       }
@@ -12213,6 +12251,7 @@ window.B137 = (function () {
       if (ACT.boots) ACT.boots.done2 = 1;
       if (ACT.ford) { ACT.ford.done2 = 1; ACT.ford.logs = []; fordBrannSay(); }
       if (ACT.express) { ACT.express.done2 = 1; ACT.express.carry = 1; expBrannSay(); }
+      if (ACT.freshet) { ACT.freshet.done2 = 1; ACT.freshet.deb = []; frEndSay(); }
       if (ACT.wagon) ACT.wagon.ex = ACT.wagon.x;
       save(); finishChapter();
     }
@@ -12285,6 +12324,107 @@ window.B137 = (function () {
       }
       if (T.leave && (T.dir > 0 ? tail > T.x + 2600 : T.head < T.x - 2600)) { T.run = 0; T.puffs = []; }
     }
+    /* v203 STORY chapter 32 The Freshet: a flash flood down the diggings creek; pole the drift ashore before it smashes the sluice */
+    function frAt(F, d) {
+      var P = F.P, lo = 0, hi = P.length - 1; d = Math.max(0, Math.min(F.L, d));
+      while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (P[mid].d < d) lo = mid; else hi = mid; }
+      var a = P[lo], b = P[hi], f = (d - a.d) / ((b.d - a.d) || 1);
+      return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, nx: a.nx + (b.nx - a.nx) * f, ny: a.ny + (b.ny - a.ny) * f, tx: a.tx + (b.tx - a.tx) * f, ty: a.ty + (b.ty - a.ty) * f };
+    }
+    function frNear(F, x, y) {
+      var P = F.P, bi = 0, bd = 1e18;
+      for (var i = 0; i < P.length; i++) { var dd = (P[i].x - x) * (P[i].x - x) + (P[i].y - y) * (P[i].y - y); if (dd < bd) { bd = dd; bi = i; } }
+      var p = P[bi], dx = x - p.x, dy = y - p.y;
+      return { d: p.d + dx * p.tx + dy * p.ty, l: dx * p.nx + dy * p.ny, dist: Math.sqrt(bd) };
+    }
+    function frK(F) { var t = F.t; return !F.on ? 0 : t < 16 ? t / 16 : t < 32 ? 1 : Math.max(0, 1 - (t - 32) / 26); }
+    function frDebXY(F, b) { var q = frAt(F, b.d); return { x: q.x + q.nx * b.l, y: q.y + q.ny * b.l, q: q }; }
+    function frTres(F) {
+      if (F.tres) return F.tres; var out = [];
+      try { var R = window.MAP136 && MAP136.rail(); (R && R.seg || []).forEach(function (g) {
+        for (var i = 1; i < F.P.length; i++) { var a = F.P[i - 1], b = F.P[i], d1x = b.x - a.x, d1y = b.y - a.y, d2x = g[2] - g[0], d2y = g[3] - g[1], den = d1x * d2y - d1y * d2x; if (Math.abs(den) < 1e-9) continue;
+          var u = ((g[0] - a.x) * d2y - (g[1] - a.y) * d2x) / den, v = ((g[0] - a.x) * d1y - (g[1] - a.y) * d1x) / den;
+          if (u >= 0 && u <= 1 && v >= 0 && v <= 1) { var L = Math.hypot(d2x, d2y) || 1; out.push({ x: a.x + d1x * u, y: a.y + d1y * u, ux: d2x / L, uy: d2y / L, d: a.d + (b.d - a.d) * u }); }
+        } }); } catch (e) {}
+      F.tres = out; return out;
+    }
+    function frOnTres(F, x, y) { var T = frTres(F); for (var i = 0; i < T.length; i++) { var t = T[i], dx = x - t.x, dy = y - t.y, al = dx * t.ux + dy * t.uy; if (Math.abs(al) < 100 && Math.abs(dx * t.uy - dy * t.ux) < 20) return true; } return false; }
+    function frEndSay() {
+      var F = ACT.freshet, n = NODES.brann_ch32_again; if (!n) return;
+      var whole = F && F.pass <= 1 && F.boards >= F.max;
+      n.say = (whole ? "Not a board lost! " : F && F.pass > 1 ? "Hank had to nail her back together once, but she's standing. " : "She took a knock or two, but she's standing. ") + (ST.flags.ch29_law ? "Marlow's splash dam threw everything it had at us and the sluice is still here." : ST.flags.ch29_square ? "Marlow kept his word about the splash dam. I'll allow he's a fair neighbor, when he wants to be." : ST.flags.ch29_pay ? "Good thing Hank bought those spare boards with Marlow's money." : "That's the last of the drift.") + " Look at the bank, enough drift logs to see us through the winter.";
+      n.replies = [{ t: "Firewood for the winter.", next: 'end', rel: { brann: 1 } }];
+      var c2 = NODES.creed_ch32_again; if (c2) { c2.say = "Forty years, and that's the first freshet I've watched a sluice stand through. Coffee's on."; c2.replies = [{ t: "I'll take a cup.", next: 'end', rel: { creed: 1 } }]; }
+    }
+    function frPoke() {
+      var F = ACT.freshet; if (!ST.on || !F || ACT.kind !== 'freshet' || !F.on || F.done2 || ACT.done || F.pokeCD > 0) return 0;
+      var pn = frNear(F, px, py), best = null, bd = 1e9, bp = null;
+      F.deb.forEach(function (b) { var p = frDebXY(F, b), r = Math.hypot(p.x - px, p.y - py) - (b.kind === 'tree' ? 26 : b.kind === 'log' ? 14 : 8); if (r < 96 && r < bd) { bd = r; best = b; bp = p; } });
+      F.pokeCD = 0.26;
+      if (!best) { F.pole = { x: px + (typeof face !== 'undefined' ? face : 1) * 70, y: py - 6, t: 0.2, miss: 1 }; return 0; }
+      var dir = pn.l >= best.l ? 1 : -1, push = best.kind === 'tree' ? 15 : best.kind === 'log' ? 25 : 36; /* the hook hauls it toward you, onto your bank */
+      best.vl = dir * push * 3.9; best.slow = 0.45; best.pk = (best.pk || 0) + 1;
+      F.pole = { x: bp.x, y: bp.y, t: 0.22 };
+      return 1;
+    }
+    function frTick(dt) {
+      var F = ACT.freshet; if (!F || ACT.done || F.done2) return;
+      F.pokeCD = Math.max(0, F.pokeCD - dt); if (F.pole) { F.pole.t -= dt; if (F.pole.t <= 0) F.pole = null; }
+      F.pops.forEach(function (q) { q.t += dt; }); F.pops = F.pops.filter(function (q) { return q.t < 1.4; });
+      F.splash.forEach(function (q) { q.t += dt; }); F.splash = F.splash.filter(function (q) { return q.t < 0.9; });
+      F.beached.forEach(function (q) { q.t += dt; });
+      if (!F.on) {
+        if (talksDone()) {
+          if (!F.armed) { F.armed = 1; F.wait = 3.5; try { showToast('THUNDER UP THE CANYON - HERE COMES THE FRESHET'); } catch (e) {} }
+          F.wait -= dt; if (F.wait <= 0) { F.on = 1; F.t = 0; F.spawnT = 1.2; try { showToast('THE FRESHET! HOOK THE DRIFT ASHORE'); } catch (e) {} }
+        }
+        return;
+      }
+      F.t += dt; var k = frK(F); F.W = 40 + 84 * k; var hw = F.W / 2;
+      if (F.t < F.dur) {
+        F.spawnT -= dt;
+        if (F.spawnT <= 0) {
+          F.spawnT = (3.3 - 1.8 * k) * F.gap * (0.8 + Math.random() * 0.4);
+          var r = Math.random(), kind = r < F.tree * (0.4 + k) ? 'tree' : r < 0.5 ? 'log' : 'brush';
+          F.deb.push({ kind: kind, d: 0, l: (Math.random() * 1.6 - 0.8) * hw * 0.85, vl: 0, v: (kind === 'tree' ? 48 : 58) + 42 * k, slow: 0, rot: Math.random() * 6.28, spin: (Math.random() - 0.5) * (kind === 'brush' ? 2 : 0.8), seed: Math.random() * 100 });
+        }
+      }
+      F.deb.forEach(function (b) {
+        var sp = b.v * (b.slow > 0 ? 0.45 : 1); if (b.slow > 0) b.slow -= dt;
+        b.d += sp * dt; b.l += b.vl * dt; b.vl *= Math.pow(0.02, dt); b.rot += b.spin * dt;
+        b.l -= b.l * 0.12 * dt;
+        if (Math.abs(b.l) > hw + 8) {
+          b.gone = 1; var side = b.l > 0 ? 1 : -1, q = frAt(F, b.d);
+          F.beached.push({ x: q.x + q.nx * side * (hw + 26), y: q.y + q.ny * side * (hw + 26), d: b.d, side: side, off: hw + 26 + Math.random() * 14, kind: b.kind, rot: b.rot, seed: b.seed, t: 0 });
+          if (F.beached.length > 40) F.beached.shift();
+          F.saved++; F.pops.push({ x: q.x + q.nx * side * (hw + 26), y: q.y + q.ny * side * (hw + 26) - 30, txt: b.kind === 'tree' ? 'TREE ASHORE!' : 'ASHORE', t: 0 });
+        } else if (b.d >= F.sd) {
+          b.gone = 1; var dmg = b.kind === 'tree' ? 2 : 1; F.boards = Math.max(0, F.boards - dmg); F.hits++;
+          var sq = frAt(F, F.sd); F.splash.push({ x: sq.x, y: sq.y, t: 0 });
+          try { showToast((b.kind === 'tree' ? 'A TREE SLAMS' : b.kind === 'log' ? 'A LOG HITS' : 'BRUSH JAMS') + ' THE SLUICE - ' + F.boards + ' BOARD' + (F.boards === 1 ? '' : 'S') + ' LEFT'); } catch (e) {}
+        }
+      });
+      F.deb = F.deb.filter(function (b) { return !b.gone; });
+      if (F.boards <= 0) {
+        F.pass++; F.boards = F.max; F.t = Math.min(F.t, 8); F.deb = []; F.spawnT = 2.5;
+        try { showToast('THE SLUICE IS SMASHED - HANK NAILS HER BACK TOGETHER. HERE COMES MORE WATER'); } catch (e) {}
+      }
+      /* too deep to wade once the freshet is down: the water puts you back on your bank, except on the footbridge */
+      var pn = frNear(F, px, py); F.onBridge = (Math.abs(pn.d - F.bd) < 24 && Math.abs(pn.l) < hw + 60) || frOnTres(F, px, py);
+      if (!F.onBridge && pn.d > 6 && pn.d < F.L - 6 && Math.abs(pn.l) < hw + 4) {
+        var sd2 = pn.l >= 0 ? 1 : -1, q2 = frAt(F, pn.d + 40 * dt);
+        px = q2.x + q2.nx * sd2 * (hw + 6); py = q2.y + q2.ny * sd2 * (hw + 6);
+        if (!F.warned) { F.warned = 1; try { showToast('TOO DEEP TO WADE - CROSS ON THE FOOTBRIDGE'); } catch (e) {} }
+      }
+      if (F.t >= F.dur && !F.deb.length) {
+        F.done2 = 1;
+        F.reward = Math.max(5, 10 + 5 * F.boards - 8 * (F.pass - 1)) + (ST.flags.ch31_first ? 5 : 0);
+        if (F.pass <= 1 && F.boards >= F.max) ST.flags.ch32_whole = 1;
+        try { gold += F.reward; updateRes(); showToast('THE FRESHET HAS PASSED - SLUICE STANDING +' + F.reward + ' GOLD'); } catch (e) {}
+        window.FR203 = { boards: F.boards, max: F.max, hits: F.hits, saved: F.saved, pass: F.pass, reward: F.reward };
+        frEndSay(); completeAct();
+      }
+    }
     window.WADE202 = function () { try { var F = ACT.ford; return !!(ST.on && F && ACT.kind === 'ford' && F.inW && !F.onBar); } catch (e) { return false; } };
     function fordReset(F, why) {
       px = F.sx; py = F.sy; try { moveId = null; targetX = px; targetY = py; } catch (e) {}
@@ -12298,6 +12438,7 @@ window.B137 = (function () {
       var d = chDef(); if (!d || ACT.id !== d.id) return;
       if (d.do === 'arrive') { if (!ST.flags['act' + d.id] && actOK()) finishChapter(); return; }
       if (d.do === 'express' && ACT.express) expTick(dt);
+      if (d.do === 'freshet' && ACT.freshet) frTick(dt);
       if (ACT.done) return;
       var i, a;
       if (d.do === 'herd') {
@@ -12609,6 +12750,7 @@ window.B137 = (function () {
       return 'wrong';
     }
     try { var _atk229 = attack; attack = function () { var r = _atk229.apply(this, arguments); try { if (typeof started === 'undefined' || started) callOut(); } catch (e) {} return r; }; } catch (e) {}
+    try { var _atk232 = attack; attack = function () { var r = _atk232.apply(this, arguments); try { if (typeof started === 'undefined' || started) frPoke(); } catch (e) {} return r; }; } catch (e) {}
     function moveFoes(dt, goal) {
       ACT.foes.forEach(function (f) {
         if (f.hp <= 0) return;
@@ -12667,6 +12809,11 @@ window.B137 = (function () {
         else if (d.do === 'express') { var TX = ACT.express; if (TX && TX.carry && !TX.done2) {
           if (TX.run) t = { x: TX.head - TX.doorOff, y: TX.ty + 80, label: 'EXPRESS CAR DOOR' };
           else t = { x: TX.x, y: TX.ty + 80, label: 'WAIT BY THE TRACK' };
+        } }
+        else if (d.do === 'freshet') { var FRm = ACT.freshet; if (FRm && talksDone()) {
+          var slm = frAt(FRm, FRm.sd);
+          if (!FRm.on) t = { x: slm.x, y: slm.y, label: 'GUARD THE SLUICE' };
+          else { var urg = FRm.deb.slice().sort(function (a, b) { return b.d - a.d; })[0]; if (urg) { var up = frDebXY(FRm, urg); t = { x: up.x, y: up.y, label: urg.kind === 'tree' ? 'UPROOTED TREE' : urg.kind === 'log' ? 'DRIFT LOG' : 'BRUSH' }; } else t = { x: slm.x, y: slm.y, label: 'GUARD THE SLUICE' }; }
         } }
         else if (d.do === 'ford') { var FM = ACT.ford; if (FM && FM.carry) {
           if (px < FM.x - FM.hw) t = { x: FM.x - FM.hw + 10, y: FM.y - 200, label: 'WADE IN UPSTREAM' };
@@ -13608,6 +13755,112 @@ window.B137 = (function () {
         items.push({ y: T.ty, x: cx, y2: T.ty, fn: function (sx, sy) { try { drawCar(ctx, T, cr[0], sx, sy, L); } catch (e) {} } });
       });
     }
+    function drawDrift(c, kind, x, y, rot, seed, alpha) {
+      c.save(); c.translate(x, y); c.rotate(rot); if (alpha < 1) c.globalAlpha = alpha;
+      if (kind === 'brush') {
+        c.strokeStyle = '#5a3a1e'; c.lineWidth = 2; c.lineCap = 'round';
+        for (var i = 0; i < 6; i++) { var a = i * 1.05 + seed; c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(a) * 20, Math.sin(a) * 14); c.stroke(); }
+        var BC = ['#6a7a3a', '#8a7a44', '#5a6a30', '#9a8a4a'];
+        for (var j = 0; j < 7; j++) { var b2 = j * 0.9 + seed * 0.3; c.fillStyle = BC[j % 4]; c.beginPath(); c.ellipse(Math.cos(b2) * 10, Math.sin(b2) * 7, 8, 6, b2, 0, 7); c.fill(); }
+      } else if (kind === 'log') {
+        c.fillStyle = '#7a4a26'; c.beginPath(); c.moveTo(-36, -7); c.lineTo(36, -7); c.lineTo(36, 7); c.lineTo(-36, 7); c.closePath(); c.fill();
+        c.strokeStyle = '#5a341a'; c.lineWidth = 1.5; for (var k = -28; k < 30; k += 11) { c.beginPath(); c.moveTo(k, -6); c.lineTo(k + 6, -1); c.stroke(); c.beginPath(); c.moveTo(k + 3, 2); c.lineTo(k + 9, 6); c.stroke(); }
+        c.fillStyle = '#9a6a3a'; c.fillRect(-36, -7, 72, 3);
+        c.fillStyle = '#d0a468'; c.beginPath(); c.ellipse(36, 0, 4, 7, 0, 0, 7); c.fill(); c.strokeStyle = '#a8784a'; c.lineWidth = 1; c.beginPath(); c.ellipse(36, 0, 2, 4, 0, 0, 7); c.stroke();
+      } else {
+        c.strokeStyle = '#5a3a20'; c.lineWidth = 3; c.lineCap = 'round';
+        for (var r = 0; r < 7; r++) { var ra = 1.9 + r * 0.42; c.beginPath(); c.moveTo(-54, 0); c.lineTo(-54 + Math.cos(ra) * 26, Math.sin(ra) * 22); c.stroke(); }
+        c.fillStyle = '#6a4a2a'; c.beginPath(); c.ellipse(-56, 0, 12, 16, 0, 0, 7); c.fill();
+        c.fillStyle = '#6a4224'; c.beginPath(); c.moveTo(-54, -9); c.lineTo(50, -5); c.lineTo(50, 5); c.lineTo(-54, 9); c.closePath(); c.fill();
+        c.fillStyle = '#8a5a32'; c.fillRect(-50, -8, 96, 3);
+        c.strokeStyle = '#6a4224'; c.lineWidth = 4; c.beginPath(); c.moveTo(10, 0); c.lineTo(36, -22); c.moveTo(22, 0); c.lineTo(46, 20); c.stroke();
+        var TC = ['#3f6a30', '#4f7a3a', '#5f8a44', '#4a7234'];
+        [[52, 0, 22], [38, -22, 15], [46, 20, 15], [70, -8, 14], [68, 12, 13]].forEach(function (q, i) { c.fillStyle = TC[i % 4]; c.beginPath(); c.ellipse(q[0], q[1], q[2], q[2] * 0.8, 0, 0, 7); c.fill(); });
+      }
+      c.restore();
+    }
+    function drawFreshetGround(c, F, camX0, camY0, Wv) {
+      try { drawDiggings(c, F.x - camX0, F.y - camY0); } catch (e) {}
+      var P = F.P, now = performance.now(), k = frK(F), i;
+      function path(off) { c.beginPath(); for (var j = 0; j < P.length; j++) { var x = P[j].x + P[j].nx * off - camX0, y = P[j].y + P[j].ny * off - camY0; if (j) c.lineTo(x, y); else c.moveTo(x, y); } }
+      c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+      if (F.on && !F.done2) {
+        c.strokeStyle = 'rgba(96,70,40,.38)'; c.lineWidth = F.W + 30; path(0); c.stroke();
+        c.strokeStyle = 'rgba(158,124,80,.96)'; c.lineWidth = F.W; path(0); c.stroke();
+        c.strokeStyle = 'rgba(128,98,62,.7)'; c.lineWidth = F.W * 0.38; path(0); c.stroke();
+        c.strokeStyle = 'rgba(232,220,190,.55)'; c.lineWidth = 2; c.setLineDash([16, 34]);
+        [-0.62, -0.22, 0.2, 0.58].forEach(function (f, n) { c.lineDashOffset = -(now / 1000) * (90 + 50 * k) - n * 13; path(f * F.W / 2); c.stroke(); });
+        c.setLineDash([]);
+        c.strokeStyle = 'rgba(240,232,210,.65)'; c.lineWidth = 3; [-1, 1].forEach(function (sd) { c.setLineDash([6, 10]); c.lineDashOffset = -(now / 1000) * 60; path(sd * F.W / 2); c.stroke(); });
+        c.setLineDash([]);
+      }
+      /* beached drift on the banks */
+      F.beached.forEach(function (q) { if (q.d != null) { var bq0 = frAt(F, q.d), off = Math.max(q.off, F.W / 2 + 26); q.x = bq0.x + bq0.nx * q.side * off; q.y = bq0.y + bq0.ny * q.side * off; } if (Math.abs(q.x - px) < Wv && Math.abs(q.y - py) < Wv) drawDrift(c, q.kind, q.x - camX0, q.y - camY0, q.rot, q.seed, Math.max(0.55, 1 - q.t / 60)); });
+      /* footbridge: two peeled logs and planks across the creek */
+      var bq = frAt(F, F.bd), ba = Math.atan2(bq.ny, bq.nx);
+      c.save(); c.translate(bq.x - camX0, bq.y - camY0); c.rotate(ba);
+      c.fillStyle = 'rgba(40,25,10,.25)'; c.fillRect(-100, -10, 200, 30);
+      c.fillStyle = '#7a4a24'; c.fillRect(-100, -15, 200, 7); c.fillRect(-100, 9, 200, 7);
+      for (i = -96; i < 96; i += 12) { c.fillStyle = (i / 12) % 2 ? '#a8743e' : '#9a6634'; c.fillRect(i, -12, 10, 24); }
+      c.fillStyle = '#5a3418'; [-96, -40, 40, 96].forEach(function (x) { c.fillRect(x - 2, -20, 4, 8); c.fillRect(x - 2, 13, 4, 8); });
+      c.strokeStyle = '#c8a870'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(-96, -18); c.lineTo(96, -18); c.moveTo(-96, 18); c.lineTo(96, 18); c.stroke();
+      c.restore();
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 9px monospace'; c.textAlign = 'center';
+      c.fillText('FOOTBRIDGE', bq.x - camX0 - bq.nx * 112, bq.y - camY0 - bq.ny * 112 - 4);
+      /* the sluice, set in the creek, with its upstream boards */
+      var sq = frAt(F, F.sd), sa = Math.atan2(sq.ty, sq.tx), sx = sq.x - camX0, sy = sq.y - camY0;
+      c.save(); c.translate(sx, sy); c.rotate(sa);
+      try { drawSluiceBox(c, { got: 1 }, { got: 1 }, null, 0, 0); } catch (e) {}
+      for (i = 0; i < F.max; i++) { var by = -24 + i * (44 / F.max); c.fillStyle = i < F.boards ? '#c8925a' : 'rgba(40,25,10,.55)'; c.fillRect(-60, by, 9, 44 / F.max - 2); }
+      c.restore();
+      F.splash.forEach(function (q) { var f = q.t / 0.9; c.strokeStyle = 'rgba(245,240,225,' + (0.9 * (1 - f)).toFixed(3) + ')'; c.lineWidth = 4; c.beginPath(); c.arc(q.x - camX0, q.y - camY0, 14 + 46 * f, 0, 7); c.stroke(); });
+      var lx = sx, ly = sy - 58, wd = 16 + F.max * 14;
+      c.fillStyle = 'rgba(243,230,196,.92)'; c.fillRect(lx - wd / 2 - 30, ly - 11, wd + 60, 16);
+      c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.textAlign = 'left'; c.fillText('SLUICE', lx - wd / 2 - 26, ly + 1);
+      for (i = 0; i < F.max; i++) { c.fillStyle = i < F.boards ? '#a8582e' : '#d8c8a8'; c.fillRect(lx - wd / 2 + 26 + i * 14, ly - 8, 10, 10); }
+      /* drift in the water */
+      F.deb.forEach(function (b) { var p = frDebXY(F, b); if (Math.abs(p.x - px) > Wv || Math.abs(p.y - py) > Wv) return;
+        var fa = Math.atan2(p.q.ty, p.q.tx); c.fillStyle = 'rgba(240,232,214,.5)'; c.beginPath(); c.ellipse(p.x - camX0, p.y - camY0 + 4, b.kind === 'tree' ? 50 : b.kind === 'log' ? 38 : 22, 9, fa, 0, 7); c.fill();
+        drawDrift(c, b.kind, p.x - camX0, p.y - camY0, (b.kind === 'brush' ? b.rot : fa + Math.sin(b.rot) * 0.5), b.seed, 1); });
+      /* the railroad crosses the creek on a timber trestle */
+      frTres(F).forEach(function (t) { if (Math.abs(t.x - px) > Wv + 200 || Math.abs(t.y - py) > Wv + 200) return;
+        c.save(); c.translate(t.x - camX0, t.y - camY0); c.rotate(Math.atan2(t.uy, t.ux));
+        c.fillStyle = 'rgba(40,25,10,.25)'; c.fillRect(-96, -14, 192, 34);
+        c.fillStyle = '#6a4224'; [-80, -40, 0, 40, 80].forEach(function (x) { c.fillRect(x - 3, -16, 6, 34); });
+        c.fillStyle = '#8a5a2e'; c.fillRect(-98, -13, 196, 26);
+        for (var q = -94; q < 96; q += 10) { c.fillStyle = (q / 10) % 2 ? '#a8743e' : '#9a6634'; c.fillRect(q, -15, 6, 30); }
+        c.strokeStyle = '#7a7a84'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-98, -6); c.lineTo(98, -6); c.moveTo(-98, 6); c.lineTo(98, 6); c.stroke();
+        c.strokeStyle = '#5a3418'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(-98, -15); c.lineTo(98, -15); c.moveTo(-98, 15); c.lineTo(98, 15); c.stroke();
+        c.restore(); });
+      c.restore();
+    }
+    function drawFreshet(c, F, camX0, camY0, Wv) {
+      var now = performance.now(), k = frK(F), i;
+      c.save();
+      /* pike pole */
+      if (F.pole) { var hx = px - camX0, hy = py - camY0 - 22, tx = F.pole.x - camX0, ty = F.pole.y - camY0, dd = Math.hypot(tx - hx, ty - hy) || 1, L = Math.min(dd, 100), ex = hx + (tx - hx) / dd * L, ey = hy + (ty - hy) / dd * L;
+        c.strokeStyle = '#8a6038'; c.lineWidth = 3.5; c.beginPath(); c.moveTo(hx, hy); c.lineTo(ex, ey); c.stroke();
+        c.strokeStyle = '#8a8a90'; c.lineWidth = 3; c.beginPath(); c.moveTo(ex, ey); c.lineTo(ex + (tx - hx) / dd * 8, ey + (ty - hy) / dd * 8); c.stroke(); }
+      F.pops.forEach(function (q) { c.fillStyle = 'rgba(40,110,40,' + (1 - q.t / 1.4).toFixed(3) + ')'; c.font = 'bold 12px monospace'; c.textAlign = 'center'; c.fillText(q.txt, q.x - camX0, q.y - camY0 - q.t * 24); });
+      /* the storm: dim light and rain */
+      if (F.armed && !F.done2) {
+        var dim = F.on ? 0.1 + 0.14 * k : 0.08;
+        c.fillStyle = 'rgba(46,56,78,' + dim.toFixed(3) + ')'; c.fillRect(px - camX0 - Wv - 200, py - camY0 - Wv - 200, 2 * Wv + 400, 2 * Wv + 400);
+        c.strokeStyle = 'rgba(206,218,232,.5)'; c.lineWidth = 1.2; c.beginPath();
+        var n = F.on ? 50 + Math.round(70 * k) : 40, span = 2 * Wv;
+        for (i = 0; i < n; i++) { var rx = ((i * 137.5 + now * 0.12) % span + span) % span - Wv, ry = ((i * 251.3 + now * 0.75) % span + span) % span - Wv; c.moveTo(px - camX0 + rx, py - camY0 + ry); c.lineTo(px - camX0 + rx - 5, py - camY0 + ry + 16); }
+        c.stroke();
+      }
+      /* meter under the player */
+      if (F.armed && !F.done2) {
+        var x = px - camX0, y = py - camY0 + 22, w = 70;
+        c.fillStyle = 'rgba(42,26,10,.75)'; c.fillRect(x - w / 2 - 2, y - 2, w + 4, 11);
+        c.fillStyle = F.on ? '#6a9ac8' : '#e8c040'; c.fillRect(x - w / 2, y, w * (F.on ? Math.min(1, F.t / F.dur) : 1 - Math.max(0, F.wait) / 3.5), 7);
+        c.fillStyle = '#3b2410'; c.font = 'bold 9px monospace'; c.textAlign = 'center';
+        c.fillText(!F.on ? 'THE FRESHET IS COMING' : F.t < F.dur ? (k >= 0.99 ? 'CREST! KEEP HAULING' : F.t < 16 ? 'WATER RISING' : 'WATER FALLING') : 'LAST OF THE DRIFT', x, y + 20);
+      }
+      c.restore();
+    }
     function drawExpressTop(c, T, camX0, camY0) {
       T.puffs.forEach(function (q) { var k = q.t / 1.6; c.fillStyle = 'rgba(236,232,224,' + (0.7 * (1 - k)).toFixed(3) + ')'; c.beginPath(); c.arc(q.x - camX0, q.y - camY0, q.r * (1 + k * 1.8), 0, 7); c.fill(); });
       if (!T.carry && !ACT.done) { var B = byId('brann'); if (B) drawStrongbox(c, B.x - camX0 + 26, B.y - camY0 + 2, 1); return; }
@@ -13624,6 +13877,8 @@ window.B137 = (function () {
     try { var _fa202 = featuresAt; featuresAt = function (cx, cy) { var a = _fa202(cx, cy); try { var T = ACT.express; if (T && ST.on && ACT.kind === 'express') { var X0 = cx * 384, Y0 = cy * 384; if (X0 + 384 > T.x - 2800 && X0 < T.x + 2800 && Y0 + 384 > T.ty - 260 && Y0 < T.ty + 200) a = a.filter(function (f) { return !(Math.abs(f.x - T.x) < 2800 && f.y > T.ty - 260 && f.y < T.ty + 200); }); } } catch (e) {} return a; }; } catch (e) {}
     window.NODEC201 = function (x, y) { try { if (!ST.on || typeof city === 'undefined' || !city) return false; var p = placeXY('ford'); if (Math.abs(x - p.x) < 540 && Math.abs(y - p.y) < 720) return true; var q = placeXY('siding'); return Math.abs(x - q.x) < 2800 && y > q.y - 330 && y < q.y + 130; } catch (e) { return false; } };
     try { var _fa230 = featuresAt; featuresAt = function (cx, cy) { var a = _fa230(cx, cy); try { var F = ACT.ford; if (F && ST.on && ACT.kind === 'ford') { var X0 = cx * 384, Y0 = cy * 384, hx = F.hw + 300; if (X0 + 384 > F.x - hx && X0 < F.x + hx && Y0 + 384 > F.y - 660 && Y0 < F.y + 660) a = a.filter(function (f) { return !(Math.abs(f.x - F.x) < hx && Math.abs(f.y - F.y) < 660); }); } } catch (e) {} return a; }; } catch (e) {}
+    try { var _fa232 = featuresAt; featuresAt = function (cx, cy) { var a = _fa232(cx, cy); try { var F = ACT.freshet; if (F && ST.on && ACT.kind === 'freshet') { var X0 = cx * 384, Y0 = cy * 384; if (X0 + 384 > F.x - 560 && X0 < F.x + 580 && Y0 + 384 > F.y - 330 && Y0 < F.y + 260) a = a.filter(function (f) { return !(Math.abs(f.x - F.x - 10) < 520 && f.y > F.y - 300 && f.y < F.y + 230 && frNear(F, f.x, f.y).dist < 110); }); } } catch (e) {} return a; }; } catch (e) {}
+    try { var _dg232 = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dg232.apply(this, arguments); try { var F = ACT.freshet; if (ST.on && ACT.kind === 'freshet' && F && ACT.id === ST.ch && Math.abs(F.x - px) < (x1 - x0) / 2 + 700 && Math.abs(F.y - py) < (y1 - y0) / 2 + 500) { var z = (typeof zoom !== 'undefined' && zoom) || 1; drawFreshetGround(ctx, F, camX, camY, (typeof W !== 'undefined' ? W : 1280) / (2 * z) + 160); } } catch (e) { if (!window.E232) { window.E232 = 1; console.warn(e); } } }; } catch (e) {}
     try { var _dg230 = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dg230.apply(this, arguments); try { if (ST.on && ACT.kind === 'ford' && ACT.ford && ACT.id === ST.ch && Math.abs(ACT.ford.x - px) < (x1 - x0) / 2 + 400 && Math.abs(ACT.ford.y - py) < (y1 - y0) / 2 + 700) drawFordGround(ctx, ACT.ford, camX, camY); } catch (e) { if (!window.E230) { window.E230 = 1; console.warn(e); } } }; } catch (e) {}
     function drawStock(c, SK, camX0, camY0) {
       var sx = SK.x - camX0, sy = SK.y - camY0;
@@ -13874,6 +14129,7 @@ window.B137 = (function () {
       if (ACT.kind === 'boots' && ACT.boots && !ACT.done) drawBoots(c, ACT.boots, camX, camY);
       if (ACT.kind === 'ford' && ACT.ford) drawFordTop(c, ACT.ford, camX, camY);
       if (ACT.kind === 'express' && ACT.express) drawExpressTop(c, ACT.express, camX, camY);
+      if (ACT.kind === 'freshet' && ACT.freshet) drawFreshet(c, ACT.freshet, camX, camY, Wv);
       if (ACT.kind === 'weigh' && ACT.weigh) drawWeigh(c, ACT.weigh, ACT.weigh.x - camX, ACT.weigh.y - camY, camX, camY);
       if (ACT.kind === 'shovel' && ACT.shovel) drawShovel(c, ACT.shovel, ACT.shovel.x - camX, ACT.shovel.y - camY);
       if (ACT.kind === 'sluice') {
@@ -14157,6 +14413,12 @@ window.B137 = (function () {
       fordLog: function (x, y, v) { if (ACT.ford) ACT.ford.logs.push({ x: x, y: y, v: v || 120, a: 0, ph: 0 }); },
       fordLogsOn: function () { if (ACT.ford) { var f = ST.flags; ACT.ford.logRate = f.ch29_law ? 1.5 : f.ch29_square ? 3.0 : 2.2; ACT.ford.spawnT = 0.5; } },
       express: function () { var T = ACT.express; return T ? { x: T.x, y: T.y, ty: T.ty, head: T.head, door: T.head - T.doorOff, dir: T.dir, v: T.v, sp: T.sp, run: T.run, carry: T.carry, hand: T.hand, inZ: T.inZ, need: T.need, pass: T.pass, done2: T.done2, leave: T.leave, reward: T.reward, len: T.len } : null; },
+      freshet: function () { var F = ACT.freshet; if (!F) return null; var sl = frAt(F, F.sd), br = frAt(F, F.bd); return { x: F.x, y: F.y, on: F.on, armed: F.armed, t: F.t, dur: F.dur, W: F.W, hw: F.W / 2, boards: F.boards, max: F.max, pass: F.pass, hits: F.hits, saved: F.saved, done2: F.done2, reward: F.reward, sd: F.sd, bd: F.bd, L: F.L, onBridge: !!F.onBridge, sl: { x: sl.x, y: sl.y }, br: { x: br.x, y: br.y, nx: br.nx, ny: br.ny }, deb: F.deb.map(function (b) { var p = frDebXY(F, b); return { kind: b.kind, d: b.d, l: b.l, x: p.x, y: p.y, nx: p.q.nx, ny: p.q.ny }; }) }; },
+      freshetPoke: function () { return frPoke(); },
+      freshetGo: function () { var F = ACT.freshet; if (F && F.armed && !F.on) F.wait = 0; },
+      freshetAt: function (d, l) { var F = ACT.freshet; if (!F) return null; var q = frAt(F, d); return { x: q.x + q.nx * (l || 0), y: q.y + q.ny * (l || 0) }; },
+      freshetNear: function (x, y) { var F = ACT.freshet; return F ? frNear(F, x, y) : null; },
+      freshetDeb: function (kind, d, l) { var F = ACT.freshet; if (F) F.deb.push({ kind: kind, d: d || 0, l: l || 0, vl: 0, v: 70, slow: 0, rot: 0, spin: 0, seed: 1 }); },
       expressGo: function () { var T = ACT.express; if (T && T.carry && !T.run) T.wait = 0; },
       fordNoLogs: function () { if (ACT.ford) { ACT.ford.logRate = 1e6; ACT.ford.spawnT = 1e6; ACT.ford.logs = []; } },
       haulLean: function (v) { if (ACT.haul) ACT.haul.lean = v; },
@@ -14189,7 +14451,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer\'s offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow\'s man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow\'s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your  claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won\'t stop, so ride beside the green express car, match the engineer\'s throttle and hand the strongbox up to the messenger.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer\'s offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow\'s man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow\'s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your  claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won\'t stop, so ride beside the green express car, match the engineer\'s throttle and hand the strongbox up to the messenger. Then The Freshet: back at the diggings a cloudburst sends a flash flood down the creek. Take Hank\'s pike pole and hook the drift, brush, logs and whole trees, ashore before it smashes the sluice.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
