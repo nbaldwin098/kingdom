@@ -189,7 +189,7 @@
 
 <div id="modes"><div id="mbox"><h2>CHOOSE A MODE</h2><div id="mgrid">
   <button class="mode" data-mode="free"><b>FREE WORLD</b><small>One huge island drawn from a formula, ringed by shallows and deep ocean. Factions with their own cities. Build an army and conquer.</small></button>
-  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer's offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow's man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow&#39;s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill.</small></button>
+  <button class="mode" data-mode="story"><b>STORY</b><small>A year on the frontier. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer's offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow's man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow&#39;s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won't stop, so ride beside the green express car, match the engineer's throttle and hand the strongbox up to the messenger.</small></button>
   <button class="mode" data-mode="islands"><b>ISLANDS</b><small>A finite map of islands and seas. Your horse stays on land, but troops sail across in boats. 10 island nations.</small></button>
   <button class="mode" data-mode="nations"><b>50 NATIONS</b><small>A big finite map with 50 AI nations that train armies and war. Last hall standing wins.</small></button>
   <button class="mode" data-mode="duel"><b>1V1 VS CPU</b><small>You against one AI kingdom to the south. Destroy their town hall. Keep yours.</small></button>
@@ -7251,7 +7251,7 @@ window.B137 = (function () {
     var D = [], acc = 0, lt = 0;
     var _pf = pushFactionItems; pushFactionItems = function (items) { _pf.apply(this, arguments); if (!started) return; try {
       var now = performance.now(), dt = Math.min(0.05, (now - (lt || now)) / 1000); lt = now;
-      if (moving && mounted()) { acc += dt * (window.GALLOP155 && GALLOP155() ? 26 : 12); while (acc > 1) { acc--; D.push({ x: px - face * 26 + (Math.random() - 0.5) * 22, y: py + 2 + Math.random() * 6, t: 0, r: 5 + Math.random() * 5 }); } }
+      if (moving && mounted() && !(window.WADE202 && window.WADE202())) { acc += dt * (window.GALLOP155 && GALLOP155() ? 26 : 12); while (acc > 1) { acc--; D.push({ x: px - face * 26 + (Math.random() - 0.5) * 22, y: py + 2 + Math.random() * 6, t: 0, r: 5 + Math.random() * 5 }); } }
       for (var i = D.length - 1; i >= 0; i--) { var p = D[i]; p.t += dt; if (p.t > 0.9) D.splice(i, 1); }
       if (D.length > 60) D.splice(0, D.length - 60);
       D.forEach(function (p) { items.push({ y: p.y - 1, x: p.x, y2: p.y - 1, fn: function (sx, sy) { var k = p.t / 0.9; ctx.fillStyle = 'rgba(190,160,115,' + (0.45 * (1 - k)).toFixed(3) + ')'; ctx.beginPath(); ctx.arc(sx, sy - k * 10, p.r * (1 + k * 1.6), 0, 6.283); ctx.fill(); } }); });
@@ -9873,7 +9873,8 @@ window.B137 = (function () {
       { id: 'bale', name: 'Hoyt Bale', title: 'Sluice Carpenter', role: 'mason', age: 48, fem: 0, ox: 20, oy: -170, face: 1, from: 22 },
       { id: 'rook', name: 'Abel Rook', title: 'Eureka Storekeeper', role: 'merchant', age: 52, fem: 0, ox: 20, oy: -170, face: 1, from: 27 },
       { id: 'marlow', name: 'Josiah Marlow', title: 'Marlow & Sons, Dustwater', role: 'merchant', age: 58, fem: 0, ox: 0, oy: -150, face: 1, from: 29 },
-      { id: 'tully', name: 'Moss Tully', title: 'Dry Fork Ford Keeper', role: 'farmer', age: 61, fem: 0, ox: 0, oy: -150, face: 1, from: 30 }
+      { id: 'tully', name: 'Moss Tully', title: 'Dry Fork Ford Keeper', role: 'farmer', age: 61, fem: 0, ox: 0, oy: -150, face: 1, from: 30 },
+      { id: 'harker', name: 'Ned Harker', title: 'Dry Fork Siding Agent', role: 'merchant', age: 50, fem: 0, ox: 0, oy: -150, face: 1, from: 31 }
     ];
 
     var CHAPTERS = [
@@ -9906,7 +9907,8 @@ window.B137 = (function () {
       { id: 27, title: 'The Outfit', year: 1, need: ['rook27', 'brann27'] },
       { id: 28, title: 'The Lantern', year: 1, need: ['brann28', 'creed28'] },
       { id: 29, title: 'The Hobnails', year: 1, need: ['marlow29', 'brann29'] },
-      { id: 30, title: 'The Ford', year: 1, need: ['tully30', 'brann30'] }
+      { id: 30, title: 'The Ford', year: 1, need: ['tully30', 'brann30'] },
+      { id: 31, title: 'The Express', year: 1, need: ['harker31', 'brann31'] }
     ];
 
     var NODES = {
@@ -11803,6 +11805,22 @@ window.B137 = (function () {
       brann_ch30: { who: 'brann', say: "Moss has the strongbox on the far bank. Bring it across before the water gets any higher!", replies: [
         { t: "Coming.", next: 'end' }
       ] },
+      harker_ch31: { who: 'harker', say: "Ned Harker, agent at Dry Fork siding. You're the claim with the strongbox? The express won't stop here, company rule since the Red Mesa robbery. She only crawls through the siding.", replies: [
+        { t: "Then how does the box get on?", next: 'harker_ch31_how', rel: { harker: 1 } },
+        { t: "I'll ride it up to her. Which car?", next: 'harker_ch31_car' }
+      ] },
+      harker_ch31_how: { who: 'harker', say: "You ride alongside the green express car and hand it up to the messenger in the door. Ride a horse length out from the rails, beside that door, till she has a good hold. The engineer plays the throttle, so match her speed. Keep off the rails.", replies: [
+        { t: "Ride beside the door, match her, hand it up.", next: 'end', flag: 'met_harker31', rel: { harker: 1 } }
+      ] },
+      harker_ch31_car: { who: 'harker', say: "Green car, open door, fourth back from the engine. Stay beside the door and keep pace. If you miss, the engineer backs her down past you again, but every pass costs the company time, and the messenger's fee goes up.", replies: [
+        { t: "Green car. Got it.", next: 'end', flag: 'met_harker31' }
+      ] },
+      harker_ch31_again: { who: 'harker', say: "Green car, open door. Keep pace with her till the messenger has it. Off the rails!", replies: [
+        { t: "Right.", next: 'end' }
+      ] },
+      brann_ch31: { who: 'brann', say: "I've got the box. Talk to Harker first, he knows when the express comes through.", replies: [
+        { t: "Going.", next: 'end' }
+      ] },
       creed_ch25_again: { who: 'creed', say: "Walk beside her, lean high. The scale's at the end of the road.", replies: [
         { t: "Right.", next: 'end' }
       ] },
@@ -11963,14 +11981,16 @@ window.B137 = (function () {
       27: { cast: ['rook', 'brann'], at: 'store', do: 'stock', mark: 'THE OUTFIT' },
       28: { cast: ['brann', 'creed'], at: 'diggings', do: 'lantern', mark: 'THE LANTERN' },
       29: { cast: ['marlow', 'brann'], at: 'marlow', do: 'boots', mark: 'MARLOW & SONS' },
-      30: { cast: ['tully', 'brann'], at: 'ford', do: 'ford', mark: 'DRY FORK FORD' }
+      30: { cast: ['tully', 'brann'], at: 'ford', do: 'ford', mark: 'DRY FORK FORD' },
+      31: { cast: ['harker', 'brann'], at: 'siding', do: 'express', mark: 'DRY FORK SIDING' }
     };
     CHAPTERS.forEach(function (c) { var s = SCENE[c.id]; if (s) { c.cast = s.cast; c.at = s.at; c.do = s.do; c.mark = s.mark; } });
-    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]], 26: [[-190, -10], [230, 0]], 27: [[0, -40], [-210, -10]], 28: [[-210, 160], [-70, 200]], 29: [[40, -150], [-250, 150]], 30: [[-370, -70], [370, -40]] };
+    var SPOTS = { 1: [[-160, -20], [220, 30], [-40, 350]], 20: [[-220, 20], [-30, 30], [230, 50]], 21: [[-180, 40], [200, 50], [20, -160]], 22: [[-160, 100], [200, 110], [-10, -190]], 23: [[-90, 200], [150, 190]], 24: [[-120, 210], [210, 200]], 25: [[-60, 150], [90, 190]], 26: [[-190, -10], [230, 0]], 27: [[0, -40], [-210, -10]], 28: [[-210, 160], [-70, 200]], 29: [[40, -150], [-250, 150]], 30: [[-420, -220], [380, -150]], 31: [[-150, -24], [150, 40]] };
     var GENERIC = [[-90, -30], [95, -10], [10, 105]];
     var DW = null;
     var EU = null;
     var FORD_OFF = [1500, -3300];
+    var SIDING_OFF = [3100, -2900];
     function dustwater() {
       if (DW) return DW;
       try { if (window.TOWN133) { var L = TOWN133.towns() || []; for (var i = 0; i < L.length; i++) if (L[i] && L[i].name === 'DUSTWATER') { DW = { x: L[i].x, y: L[i].y }; return DW; } } } catch (e) {}
@@ -12015,12 +12035,13 @@ window.B137 = (function () {
       if (at === 'assay') { var a = assayXY(); return { x: a.x, y: a.y }; }
       if (at === 'marlow') { var d12 = dustwater(); return { x: d12.x, y: d12.y + 1120 }; }
       if (at === 'ford') { var d13 = dustwater(); return { x: d13.x + FORD_OFF[0], y: d13.y + FORD_OFF[1] }; }
+      if (at === 'siding') { var d14 = dustwater(); return { x: d14.x + SIDING_OFF[0], y: d14.y + SIDING_OFF[1] }; }
       return { x: city.x, y: city.y };
     }
     function scenePos() { var d = chDef(); return placeXY(d.at || 'home'); }
     function charId(need) { return String(need).replace(/\d+$/, ''); }
 
-    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, weigh: null, stock: null, lantern: null, boots: null, ford: null, t: 0 };
+    var ACT = { id: 0, kind: '', done: false, cattle: [], foes: [], stakes: [], pans: [], files: [], corners: [], sluices: [], marks: [], mi: 0, coach: null, wagon: null, ferry: null, log: null, slide: null, pump: null, wire: null, span: null, bar: null, race: null, shovel: null, haul: null, weigh: null, stock: null, lantern: null, boots: null, ford: null, express: null, t: 0 };
     function talksDone() { var d = chDef(); for (var i = 0; i < d.need.length; i++) if (!ST.met[d.need[i]]) return false; return true; }
     function actOK() {
       var d = chDef(); if (!d) return true;
@@ -12029,7 +12050,7 @@ window.B137 = (function () {
       if (d.do === 'arrive') { var s = scenePos(); if (Math.hypot(px - s.x, py - s.y) < 280) { ST.flags['act' + d.id] = 1; save(); return true; } return false; }
       return !!(ACT.id === d.id && ACT.done);
     }
-    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; ACT.weigh = null; ACT.stock = null; ACT.lantern = null; ACT.boots = null; ACT.ford = null; }
+    function clearAct() { ACT.cattle = []; ACT.foes = []; ACT.stakes = []; ACT.pans = []; ACT.files = []; ACT.corners = []; ACT.sluices = []; ACT.marks = []; ACT.mi = 0; ACT.coach = null; ACT.wagon = null; ACT.ferry = null; ACT.log = null; ACT.slide = null; ACT.pump = null; ACT.wire = null; ACT.span = null; ACT.bar = null; ACT.race = null; ACT.shovel = null; ACT.haul = null; ACT.weigh = null; ACT.stock = null; ACT.lantern = null; ACT.boots = null; ACT.ford = null; ACT.express = null; }
     function setupAct() {
       var d = chDef(); clearAct(); ACT.id = d.id; ACT.kind = d.do || ''; ACT.done = !!ST.flags['act' + d.id];
       if (ACT.done || !ST.on) return;
@@ -12166,6 +12187,13 @@ window.B137 = (function () {
           heavy: fpay ? 1.15 : 1, logRate: flaw ? 1.5 : fsq ? 3.0 : 2.2, done2: 0, reward: 0 };
         NODES.tully_ch30.say = "Moss Tully. I keep the Dry Fork ford. Your partner took the horses over an hour ago, before the snowmelt came down. Now the water's rising. " + (fpay ? "That box is heavy with Marlow's money on top of your gold, so the current will pull harder on you." : flaw ? "Word is the saboteur's friends went up to the mill when the sheriff took him. They're rolling logs in. Expect plenty." : fsq ? "Marlow's word is good. His men are holding the log boom at the mill, so few logs will get through." : "The mill lets a log go now and then.");
         fordBrannSay();
+      } else if (d.do === 'express') {
+        var xpay = !!ST.flags.ch29_pay, xlaw = !!ST.flags.ch29_law, xsq = !!ST.flags.ch29_square, xdry = !!ST.flags.ch30_dry;
+        ACT.express = { x: s.x, y: s.y, ty: s.y - 70, len: 462, doorOff: 334, head: s.x - 1300, dir: 1, v: 0, sp: 0, run: 0, wait: 0, t: 0, dist: 0, pass: 1,
+          carry: 0, hand: 0, inZ: 0, need: xpay ? 3.0 : 2.3, amp: xlaw ? 0.12 : xsq ? 0.26 : 0.2, surge: xlaw ? 0.15 : xsq ? 0.42 : 0.3, sgEvery: xsq ? 2.6 : 4.2, sgT: 3, sgOn: 0,
+          puffs: [], shove: 0, done2: 0, leave: 0, reward: 0, dry: xdry ? 1 : 0 };
+        NODES.harker_ch31.say = "Ned Harker, agent at Dry Fork siding. You're the claim with the strongbox? The express won't stop here, company rule since the Red Mesa robbery. She only crawls through the siding. " + (xlaw ? "The sheriff wired the line about your saboteur, so the engineer has orders to hold her steady for you." : xsq ? "Marlow & Sons have a freight car on her today. Their man rides the cab and he likes the throttle, so she'll surge." : xpay ? "That box is heavy with Marlow's money. The messenger will need a long, steady hold to take it." : "The engineer's fair. Mostly.");
+        expBrannSay();
       } else if (d.do === 'shovel') {
         ACT.shovel = { x: s.x + 50, y: s.y + 160, n: 0, need: 10, miss: 0, ph: 0, flash: 0, flashT: 0, pile: 1 };
       }
@@ -12184,6 +12212,7 @@ window.B137 = (function () {
       if (ACT.lantern) ACT.lantern.T.forEach(function (t) { t.ok = 1; t.seen = 1; });
       if (ACT.boots) ACT.boots.done2 = 1;
       if (ACT.ford) { ACT.ford.done2 = 1; ACT.ford.logs = []; fordBrannSay(); }
+      if (ACT.express) { ACT.express.done2 = 1; ACT.express.carry = 1; expBrannSay(); }
       if (ACT.wagon) ACT.wagon.ex = ACT.wagon.x;
       save(); finishChapter();
     }
@@ -12199,6 +12228,64 @@ window.B137 = (function () {
       }
     }
     function fordSpd() { var sp = 130; try { sp = window.SP102 ? SP102(mounted() ? 260 * horseMul() : 130) : 130; } catch (e) {} return sp; }
+    function expBrannSay() {
+      var T = ACT.express, n = NODES.brann_ch31; if (!n) return;
+      if (ACT.done || (T && T.done2)) {
+        var p = T ? T.pass : 1;
+        n.say = (p <= 1 ? "First pass! The messenger didn't even have to lean. " : p === 2 ? "Second pass, but she's aboard. " : "Took a few passes, but the box is on the express. ") + (ST.flags.ch29_pay ? "Marlow's money rides to the bank at Carson with our gold." : ST.flags.ch29_law ? "With the sheriff's wire on the line, nobody touches that car before Carson." : ST.flags.ch29_square ? "And right past Marlow's own freight car. Let him watch it go." : "Next stop, the bank at Carson.") + (T && T.dry ? " Dry as a bone, so the messenger signed without opening it." : "") + " Let's ride home to the diggings before Creed drinks all the coffee.";
+        n.replies = [{ t: "Home to the diggings.", next: 'end', flag: 'met_brann31', rel: { brann: 1 } }];
+      } else {
+        n.say = T && T.carry ? "You've got the box. Green car, open door, keep pace with her!" : "I've got the box. Talk to Harker first, he knows when the express comes through.";
+        n.replies = [{ t: T && T.carry ? "On it." : "Going.", next: 'end' }];
+      }
+    }
+    function expTick(dt) {
+      var T = ACT.express; if (!T) return;
+      if (!ACT.done && !T.done2 && !T.carry && ST.met.harker31) { T.carry = 1; T.wait = 2.2; try { showToast('LOTTIE HANDS YOU THE STRONGBOX - LISTEN FOR THE WHISTLE'); } catch (e) {} expBrannSay(); }
+      var sp = fordSpd(); T.sp = T.sp ? T.sp + (sp - T.sp) * Math.min(1, dt * 2) : sp;
+      if (ACT.done && !T.done2) T.done2 = 1;
+      if (!T.run) {
+        if (T.carry && !T.done2) { T.wait -= dt; if (T.wait <= 0) { T.run = 1; T.v = 0.6 * T.sp; try { showToast('WHISTLE! THE EXPRESS IS COMING FROM THE WEST'); } catch (e) {} } }
+        return;
+      }
+      T.t += dt;
+      var door = T.head - T.doorOff, rel = (px - door) * T.dir, tgt;
+      if (T.leave) tgt = 1.4 * T.sp;
+      else {
+        T.sgT -= dt; if (T.sgOn > 0) T.sgOn -= dt;
+        if (T.sgT <= 0) { T.sgT = T.sgEvery * (0.7 + Math.random() * 0.6); T.sgOn = 1.1; T.puffBig = 0.8; }
+        tgt = 0.55 * T.sp * (1 + T.amp * Math.sin(T.t * 0.8) + (T.sgOn > 0 ? T.surge : 0));
+        if (rel > 450 || rel < -450) tgt = 0.9 * T.sp; /* catch up to you, or clear out after a miss */
+        tgt = Math.max(0.25 * T.sp, Math.min(0.9 * T.sp, tgt));
+      }
+      var acc = T.leave ? 200 : 260; T.v += Math.max(-acc * dt, Math.min(acc * dt, tgt - T.v));
+      T.head += T.dir * T.v * dt; T.dist += T.v * dt;
+      if (T.puffBig > 0) T.puffBig -= dt;
+      T.pt = (T.pt || 0) - dt; if (T.pt <= 0) { T.pt = T.puffBig > 0 ? 0.06 : 0.16; T.puffs.push({ x: T.head - 22, y: T.ty - 70, t: 0, r: T.puffBig > 0 ? 10 : 7 }); }
+      T.puffs.forEach(function (q) { q.t += dt; q.y -= 22 * dt; q.x -= T.dir * T.v * dt * 0.35; });
+      T.puffs = T.puffs.filter(function (q) { return q.t < 1.6; }); if (T.puffs.length > 40) T.puffs.splice(0, T.puffs.length - 40);
+      /* keep off the rails: the cars shove you aside */
+      var tail = T.head - T.len;
+      if (px > tail - 8 && px < T.head + 14 && Math.abs(py - T.ty) < 18) { py = T.ty + (py < T.ty ? -19 : 19); T.shove = 0.8; if (!T.warned) { T.warned = 1; try { showToast('OFF THE RAILS! RIDE BESIDE THE CAR'); } catch (e) {} } }
+      if (T.shove > 0) T.shove -= dt;
+      door = T.head - T.doorOff;
+      if (!T.done2 && T.carry) {
+        T.inZ = Math.abs(px - door) < 36 && py - T.ty > 40 && py - T.ty < 120 ? 1 : 0; /* door side only, far enough out that the car stays in view */
+        if (T.inZ && T.v > 20) T.hand += dt / T.need; else T.hand = Math.max(0, T.hand - dt * 0.6);
+        if (T.hand >= 1) {
+          T.hand = 1; T.done2 = 1; T.leave = 1;
+          T.reward = Math.max(5, 30 - 7 * (T.pass - 1)) + (T.dry ? 5 : 0);
+          if (T.pass <= 1) ST.flags.ch31_first = 1;
+          try { gold += T.reward; updateRes(); showToast('BOX ABOARD THE EXPRESS +' + T.reward + ' GOLD'); } catch (e) {}
+          expBrannSay(); completeAct();
+          return;
+        }
+        if (T.dir > 0 && tail > T.x + 1300) { T.dir = -1; T.v = 0; T.pass++; T.hand = 0; try { showToast('MISSED HER - THE ENGINEER BACKS HER DOWN FOR PASS ' + T.pass); } catch (e) {} }
+        else if (T.dir < 0 && T.head < T.x - 1300) { T.dir = 1; T.v = 0; T.pass++; T.hand = 0; try { showToast('MISSED AGAIN - HERE SHE COMES, PASS ' + T.pass); } catch (e) {} }
+      }
+      if (T.leave && (T.dir > 0 ? tail > T.x + 2600 : T.head < T.x - 2600)) { T.run = 0; T.puffs = []; }
+    }
+    window.WADE202 = function () { try { var F = ACT.ford; return !!(ST.on && F && ACT.kind === 'ford' && F.inW && !F.onBar); } catch (e) { return false; } };
     function fordReset(F, why) {
       px = F.sx; py = F.sy; try { moveId = null; targetX = px; targetY = py; } catch (e) {}
       F.grip = 3; F.hitCD = 0.6;
@@ -12210,6 +12297,7 @@ window.B137 = (function () {
       if (!ST.on) return;
       var d = chDef(); if (!d || ACT.id !== d.id) return;
       if (d.do === 'arrive') { if (!ST.flags['act' + d.id] && actOK()) finishChapter(); return; }
+      if (d.do === 'express' && ACT.express) expTick(dt);
       if (ACT.done) return;
       var i, a;
       if (d.do === 'herd') {
@@ -12540,7 +12628,7 @@ window.B137 = (function () {
     function marker() {
       if (!ST.on || typeof city === 'undefined' || !city) return null;
       var d = chDef(), s = scenePos(), lab = d.mark || d.title.toUpperCase();
-      if (Math.hypot(px - s.x, py - s.y) > 900) return { x: s.x, y: s.y, label: lab };
+      if (Math.hypot(px - s.x, py - s.y) > (d.do === 'express' ? 1900 : 900)) return { x: s.x, y: s.y, label: lab };
       if (!actOK() && ACT.id === d.id) {
         var t = null;
         if (d.do === 'herd') { var c = ACT.cattle.filter(function (q) { return Math.hypot(q.x - ACT.pen.x, q.y - ACT.pen.y) >= 150; })[0]; var f = ACT.foes.filter(function (q) { return q.hp > 0; })[0]; t = f ? { x: f.x, y: f.y, label: 'RUSTLERS' } : c ? { x: c.x, y: c.y, label: 'STRAY CATTLE' } : null; }
@@ -12575,6 +12663,10 @@ window.B137 = (function () {
             if (un) { var lp = un.prints[un.prints.length - 1] || un; t = { x: lp.x, y: lp.y, label: 'FRESH PRINT: ' + un.job }; }
             else t = { x: BM.x, y: BM.y, label: 'CALL OUT YOUR MAN' };
           }
+        } }
+        else if (d.do === 'express') { var TX = ACT.express; if (TX && TX.carry && !TX.done2) {
+          if (TX.run) t = { x: TX.head - TX.doorOff, y: TX.ty + 80, label: 'EXPRESS CAR DOOR' };
+          else t = { x: TX.x, y: TX.ty + 80, label: 'WAIT BY THE TRACK' };
         } }
         else if (d.do === 'ford') { var FM = ACT.ford; if (FM && FM.carry) {
           if (px < FM.x - FM.hw) t = { x: FM.x - FM.hw + 10, y: FM.y - 200, label: 'WADE IN UPSTREAM' };
@@ -13418,16 +13510,120 @@ window.B137 = (function () {
         c.restore();
       });
       if (ACT.done || F.done2) { var bx0 = (byId('brann') || { x: F.x + F.hw + 80, y: F.y }); drawStrongbox(c, bx0.x - camX0 + 26, bx0.y - camY0 + 4, 1); return; }
-      if (!F.carry) { drawStrongbox(c, F.sx - camX0 - 30, F.sy - camY0 + 100, 1); return; }
+      if (!F.carry) { drawStrongbox(c, F.sx - camX0 - 55, F.sy - camY0 - 44, 1); return; }
       var x = px - camX0, y = py - camY0;
       if (F.inW && !F.onBar) { c.save(); c.strokeStyle = 'rgba(236,244,240,.8)'; c.lineWidth = 2; c.beginPath(); c.ellipse(x, y - 2, 22 + Math.sin(now * 8) * 2, 6, 0, 0, 7); c.stroke(); c.restore(); }
       if (F.splash > 0) { c.save(); c.fillStyle = 'rgba(236,244,240,' + F.splash + ')'; for (var s = 0; s < 8; s++) { c.beginPath(); c.arc(x + Math.cos(s * 0.8) * (30 - F.splash * 20), y - 20 + Math.sin(s * 0.8) * 18 - (0.7 - F.splash) * 30, 3, 0, 7); c.fill(); } c.restore(); }
-      var hy = 84; try { if (mounted()) hy = 134; } catch (e) {}
-      drawStrongbox(c, x, y - hy, 1.1);
-      for (var g = 0; g < 3; g++) { c.fillStyle = g < F.grip ? '#e8c040' : 'rgba(42,26,10,.35)'; c.fillRect(x - 14 + g * 10, y - hy - 20, 8, 5); }
+      var hb = heldBox(c, x, y);
+      for (var g = 0; g < 3; g++) { c.fillStyle = g < F.grip ? '#e8c040' : 'rgba(42,26,10,.35)'; c.fillRect(hb.x - 14 + g * 10, hb.y - 20, 8, 5); }
     }
-    window.NODEC201 = function (x, y) { try { if (!ST.on || typeof city === 'undefined' || !city) return false; var p = placeXY('ford'); return Math.abs(x - p.x) < 340 && Math.abs(y - p.y) < 720; } catch (e) { return false; } };
-    try { var _fa230 = featuresAt; featuresAt = function (cx, cy) { var a = _fa230(cx, cy); try { var F = ACT.ford; if (F && ST.on && ACT.kind === 'ford') { var X0 = cx * 384, Y0 = cy * 384, hx = F.hw + 90; if (X0 + 384 > F.x - hx && X0 < F.x + hx && Y0 + 384 > F.y - 660 && Y0 < F.y + 660) a = a.filter(function (f) { return !(Math.abs(f.x - F.x) < hx && Math.abs(f.y - F.y) < 660); }); } } catch (e) {} return a; }; } catch (e) {}
+
+    /* v202: the box rides on the saddle when mounted (it floated above the crown), held high on foot */
+    function heldBox(c, x, y) {
+      var m = 0; try { m = mounted(); } catch (e) {}
+      var f = (typeof face !== 'undefined' && face) || 1, bx = m ? x - f * 30 : x, by = m ? y - 58 : y - 84;
+      drawStrongbox(c, bx, by, m ? 0.95 : 1.1); return { x: bx, y: by };
+    }
+    function drawSidingGround(c, T, camX0, camY0, x0, x1) {
+      var ty = T.ty - camY0, a = Math.max(x0 - 40, T.x - 2700), b = Math.min(x1 + 40, T.x + 2700); if (b <= a) return;
+      c.save();
+      c.fillStyle = '#c8b088'; c.fillRect(a - camX0, ty - 12, b - a, 24); /* ballast */
+      c.fillStyle = '#6e4a2a'; for (var k = Math.floor(a / 26) * 26; k < b; k += 26) c.fillRect(k - camX0, ty - 10, 8, 20);
+      c.fillStyle = '#8c9298'; c.fillRect(a - camX0, ty - 7, b - a, 3); c.fillRect(a - camX0, ty + 4, b - a, 3);
+      c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(a - camX0, ty - 7, b - a, 1); c.fillRect(a - camX0, ty + 4, b - a, 1);
+      /* plank platform on the south side */
+      var px0 = T.x - 260 - camX0, py0 = ty + 14; c.fillStyle = '#b08a5a'; c.fillRect(px0, py0, 240, 40);
+      c.strokeStyle = '#7a5a34'; c.lineWidth = 1; for (var i = 0; i <= 240; i += 20) { c.beginPath(); c.moveTo(px0 + i, py0); c.lineTo(px0 + i, py0 + 40); c.stroke(); }
+      c.strokeRect(px0, py0, 240, 40);
+      /* mail crane + sign */
+      c.fillStyle = '#5a3a1e'; c.fillRect(T.x + 40 - camX0, ty + 18, 5, 46); c.fillRect(T.x + 40 - camX0, ty + 18, 18, 4);
+      c.fillStyle = '#7a4a24'; c.fillRect(T.x - 330 - camX0, ty + 30, 6, 40); c.fillStyle = '#f0e2b8'; c.fillRect(T.x - 392 - camX0, ty + 10, 130, 22); c.strokeStyle = '#3b2410'; c.lineWidth = 1.5; c.strokeRect(T.x - 392 - camX0, ty + 10, 130, 22);
+      c.fillStyle = '#7a1a10'; c.font = 'bold 10px monospace'; c.textAlign = 'center'; c.fillText('DRY FORK SIDING', T.x - 327 - camX0, ty + 25);
+      c.restore();
+    }
+    function drawShack(c, sx, sy) {
+      c.save();
+      c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(sx, sy + 2, 64, 10, 0, 0, 7); c.fill();
+      c.fillStyle = '#b8743a'; c.fillRect(sx - 56, sy - 58, 112, 58);
+      c.strokeStyle = '#8a5428'; c.lineWidth = 1; for (var i = -48; i < 56; i += 12) { c.beginPath(); c.moveTo(sx + i, sy - 58); c.lineTo(sx + i, sy); c.stroke(); }
+      c.fillStyle = '#7a3a22'; c.beginPath(); c.moveTo(sx - 66, sy - 56); c.lineTo(sx, sy - 86); c.lineTo(sx + 66, sy - 56); c.closePath(); c.fill();
+      c.fillStyle = '#5a2a18'; c.fillRect(sx - 14, sy - 34, 22, 34); c.fillStyle = '#e8d890'; c.fillRect(sx + 22, sy - 44, 20, 16); c.strokeStyle = '#5a2a18'; c.strokeRect(sx + 22, sy - 44, 20, 16);
+      c.fillStyle = '#f0e2b8'; c.fillRect(sx - 40, sy - 52, 52, 12); c.fillStyle = '#7a1a10'; c.font = 'bold 8px monospace'; c.textAlign = 'center'; c.fillText('AGENT', sx - 14, sy - 43);
+      c.restore();
+    }
+    function wheel(c, x, y, r, ang) {
+      c.fillStyle = '#a8402a'; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); c.strokeStyle = '#5a2a18'; c.lineWidth = 2; c.stroke();
+      c.strokeStyle = '#e8c070'; c.lineWidth = 1.2; for (var k = 0; k < 4; k++) { var a = ang + k * Math.PI / 4; c.beginPath(); c.moveTo(x - Math.cos(a) * r, y - Math.sin(a) * r); c.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); c.stroke(); }
+      c.fillStyle = '#e8c070'; c.beginPath(); c.arc(x, y, 2, 0, 7); c.fill();
+    }
+    function drawCar(c, T, kind, sx, sy, L) {
+      var ang = T.dist / 8, f = 1; /* the engine always leads east */
+      c.save();
+      c.fillStyle = 'rgba(0,0,0,.16)'; c.beginPath(); c.ellipse(sx, sy + 4, L / 2 + 4, 8, 0, 0, 7); c.fill();
+      if (kind === 'engine') {
+        c.fillStyle = '#8a2a1e'; c.fillRect(sx - 55, sy - 62, 34, 46); c.fillStyle = '#5a1a12'; c.fillRect(sx - 59, sy - 66, 42, 6); /* cab */
+        c.fillStyle = '#f0d890'; c.fillRect(sx - 50, sy - 56, 10, 10); c.fillRect(sx - 36, sy - 56, 10, 10);
+        c.fillStyle = '#2f6a46'; c.beginPath(); c.moveTo(sx - 21, sy - 46); c.lineTo(sx + 40, sy - 46); c.arc(sx + 40, sy - 34, 12, -Math.PI / 2, Math.PI / 2); c.lineTo(sx - 21, sy - 22); c.closePath(); c.fill(); /* boiler */
+        c.fillStyle = '#d8a840'; for (var b = -10; b < 40; b += 16) c.fillRect(sx + b, sy - 46, 3, 24);
+        c.fillStyle = '#d8a840'; c.beginPath(); c.arc(sx + 8, sy - 50, 6, Math.PI, 0); c.fill(); /* dome */
+        c.fillStyle = '#4a4a5a'; c.beginPath(); c.moveTo(sx + 28, sy - 46); c.lineTo(sx + 24, sy - 70); c.lineTo(sx + 40, sy - 70); c.lineTo(sx + 36, sy - 46); c.closePath(); c.fill(); /* stack */
+        c.fillStyle = '#f8f0b0'; c.fillRect(sx + 46, sy - 50, 8, 8); c.strokeStyle = '#7a5a20'; c.strokeRect(sx + 46, sy - 50, 8, 8); /* lamp */
+        c.fillStyle = '#b8322a'; c.beginPath(); c.moveTo(sx + 50, sy - 20); c.lineTo(sx + 62, sy - 2); c.lineTo(sx + 44, sy - 2); c.closePath(); c.fill(); /* cowcatcher */
+        c.fillStyle = '#6a3a24'; c.fillRect(sx - 55, sy - 18, 108, 6);
+        wheel(c, sx - 38, sy - 8, 11, ang); wheel(c, sx - 8, sy - 8, 14, ang); wheel(c, sx + 22, sy - 8, 14, ang); wheel(c, sx + 46, sy - 6, 6, ang);
+        c.strokeStyle = '#c8c8b8'; c.lineWidth = 3; c.beginPath(); c.moveTo(sx - 8 + Math.cos(ang) * 8, sy - 8 + Math.sin(ang) * 8); c.lineTo(sx + 22 + Math.cos(ang) * 8, sy - 8 + Math.sin(ang) * 8); c.stroke();
+      } else {
+        var col = kind === 'tender' ? '#7a2a1c' : kind === 'box' ? '#a8582e' : kind === 'express' ? '#3d7a52' : '#b83a2a', h = kind === 'tender' ? 30 : 44;
+        c.fillStyle = col; c.fillRect(sx - L / 2, sy - 14 - h, L, h);
+        c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(sx - L / 2, sy - 14 - h, L, 4);
+        c.strokeStyle = 'rgba(40,20,10,.6)'; c.lineWidth = 1; c.strokeRect(sx - L / 2, sy - 14 - h, L, h);
+        if (kind === 'tender') { c.fillStyle = '#8a6a3a'; for (var w = -24; w < 24; w += 9) { c.beginPath(); c.ellipse(sx + w, sy - 46, 6, 4, 0, 0, 7); c.fill(); } }
+        if (kind === 'box') { c.strokeStyle = '#7a3a1c'; for (var q = -L / 2 + 10; q < L / 2; q += 10) { c.beginPath(); c.moveTo(sx + q, sy - 58); c.lineTo(sx + q, sy - 14); c.stroke(); } c.fillStyle = '#f0e2b8'; c.font = 'bold 8px monospace'; c.textAlign = 'center'; c.fillText(ST.flags.ch29_square ? 'MARLOW & SONS' : 'D.W. & P. R.R.', sx, sy - 36); }
+        if (kind === 'caboose') { c.fillStyle = '#8a2a1c'; c.fillRect(sx - 14, sy - 72, 28, 14); c.fillStyle = '#f0d890'; c.fillRect(sx - 10, sy - 69, 8, 7); c.fillRect(sx + 2, sy - 69, 8, 7); c.fillRect(sx - 24, sy - 48, 10, 10); c.fillRect(sx + 14, sy - 48, 10, 10); }
+        if (kind === 'express') {
+          c.fillStyle = '#e8c040'; c.font = 'bold 9px monospace'; c.textAlign = 'center'; c.fillText('EXPRESS', sx - 30, sy - 46); c.fillText('EXPRESS', sx + 30, sy - 46);
+          var dx = sx + (T.doorX0 || 0);
+          c.fillStyle = '#4a2e18'; c.fillRect(dx - 13, sy - 54, 26, 40); /* open door */
+          /* the messenger in the door */
+          var reach = !T.done2 && T.carry ? T.hand : 0;
+          c.fillStyle = '#2a4a7a'; c.fillRect(dx - 7, sy - 40, 14, 22); c.fillStyle = '#e0b088'; c.beginPath(); c.arc(dx, sy - 46, 6, 0, 7); c.fill();
+          c.fillStyle = '#1e3460'; c.fillRect(dx - 7, sy - 54, 14, 5);
+          c.strokeStyle = '#2a4a7a'; c.lineWidth = 3; c.beginPath(); c.moveTo(dx, sy - 34); c.lineTo(dx + 4, sy - 22 + reach * 10); c.stroke();
+          if (T.done2) drawStrongbox(c, dx, sy - 22, 0.8);
+          if (!T.done2 && T.carry) { var near = Math.abs((T.head - T.doorOff) - px) < 420; if (near) { c.strokeStyle = T.inZ ? 'rgba(80,200,90,.95)' : 'rgba(232,192,64,' + (0.55 + 0.4 * Math.sin(performance.now() / 160)) + ')'; c.lineWidth = 3; c.strokeRect(dx - 16, sy - 57, 32, 46); c.beginPath(); c.ellipse(dx, sy + 80, 36, 12, 0, 0, 7); c.stroke(); } }
+        }
+        wheel(c, sx - L / 2 + 14, sy - 8, 7, ang); wheel(c, sx - L / 2 + 30, sy - 8, 7, ang); wheel(c, sx + L / 2 - 30, sy - 8, 7, ang); wheel(c, sx + L / 2 - 14, sy - 8, 7, ang);
+      }
+      c.restore();
+    }
+    var CARS202 = [['engine', 110], ['tender', 60], ['box', 90], ['express', 100], ['caboose', 70]];
+    function trainItems(items) {
+      var T = ACT.express; if (!T || !T.run) return;
+      var z = (typeof zoom !== 'undefined' && zoom) || 1, half = (typeof W !== 'undefined' ? W : 1280) / (2 * z) + 200;
+      var x = T.head;
+      CARS202.forEach(function (cr) {
+        var L = cr[1], cx = x - L / 2; x -= L + 8;
+        if (Math.abs(cx - px) > half + L) return;
+        if (cr[0] === 'express') T.doorX0 = (T.head - T.doorOff) - cx;
+        items.push({ y: T.ty, x: cx, y2: T.ty, fn: function (sx, sy) { try { drawCar(ctx, T, cr[0], sx, sy, L); } catch (e) {} } });
+      });
+    }
+    function drawExpressTop(c, T, camX0, camY0) {
+      T.puffs.forEach(function (q) { var k = q.t / 1.6; c.fillStyle = 'rgba(236,232,224,' + (0.7 * (1 - k)).toFixed(3) + ')'; c.beginPath(); c.arc(q.x - camX0, q.y - camY0, q.r * (1 + k * 1.8), 0, 7); c.fill(); });
+      if (!T.carry && !ACT.done) { var B = byId('brann'); if (B) drawStrongbox(c, B.x - camX0 + 26, B.y - camY0 + 2, 1); return; }
+      if (T.done2) return;
+      var x = px - camX0, y = py - camY0, hb = heldBox(c, x, y);
+      if (T.run && T.carry) {
+        var w = 64, bx = x - w / 2, by = y + 22;
+        c.save(); c.fillStyle = 'rgba(42,26,10,.75)'; c.fillRect(bx - 2, by - 2, w + 4, 11); c.fillStyle = T.inZ ? '#5ac85a' : '#e8c040'; c.fillRect(bx, by, w * T.hand, 7);
+        c.fillStyle = '#3b2410'; c.font = 'bold 9px monospace'; c.textAlign = 'center'; c.fillText(T.inZ ? (T.v > 20 ? 'HAND IT UP...' : 'SHE STOPPED') : 'GET BESIDE THE DOOR', x, by + 20); c.restore();
+      }
+    }
+    try { var _pf202 = pushFactionItems; pushFactionItems = function (items) { _pf202.apply(this, arguments); try { if (ST.on && ACT.kind === 'express' && ACT.express && ACT.id === ST.ch) { trainItems(items); var T = ACT.express; if (Math.abs(T.x - 140 - px) < 1400 && Math.abs(T.ty - py) < 900) items.push({ y: T.ty - 46, x: T.x - 140, y2: T.ty - 46, fn: function (sx, sy) { drawShack(ctx, sx, sy); } }); } } catch (e) { if (!window.E202) { window.E202 = 1; console.warn(e); } } }; window.PF202 = 1; } catch (e) {}
+    try { var _dg202 = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dg202.apply(this, arguments); try { var T = ACT.express; if (ST.on && ACT.kind === 'express' && T && ACT.id === ST.ch && Math.abs(T.ty - py) < (y1 - y0) / 2 + 300) drawSidingGround(ctx, T, camX, camY, x0, x1); } catch (e) { if (!window.E202g) { window.E202g = 1; console.warn(e); } } }; } catch (e) {}
+    try { var _fa202 = featuresAt; featuresAt = function (cx, cy) { var a = _fa202(cx, cy); try { var T = ACT.express; if (T && ST.on && ACT.kind === 'express') { var X0 = cx * 384, Y0 = cy * 384; if (X0 + 384 > T.x - 2800 && X0 < T.x + 2800 && Y0 + 384 > T.ty - 260 && Y0 < T.ty + 200) a = a.filter(function (f) { return !(Math.abs(f.x - T.x) < 2800 && f.y > T.ty - 260 && f.y < T.ty + 200); }); } } catch (e) {} return a; }; } catch (e) {}
+    window.NODEC201 = function (x, y) { try { if (!ST.on || typeof city === 'undefined' || !city) return false; var p = placeXY('ford'); if (Math.abs(x - p.x) < 540 && Math.abs(y - p.y) < 720) return true; var q = placeXY('siding'); return Math.abs(x - q.x) < 2800 && y > q.y - 330 && y < q.y + 130; } catch (e) { return false; } };
+    try { var _fa230 = featuresAt; featuresAt = function (cx, cy) { var a = _fa230(cx, cy); try { var F = ACT.ford; if (F && ST.on && ACT.kind === 'ford') { var X0 = cx * 384, Y0 = cy * 384, hx = F.hw + 300; if (X0 + 384 > F.x - hx && X0 < F.x + hx && Y0 + 384 > F.y - 660 && Y0 < F.y + 660) a = a.filter(function (f) { return !(Math.abs(f.x - F.x) < hx && Math.abs(f.y - F.y) < 660); }); } } catch (e) {} return a; }; } catch (e) {}
     try { var _dg230 = drawGround; drawGround = function (x0, x1, y0, y1, camX, camY) { _dg230.apply(this, arguments); try { if (ST.on && ACT.kind === 'ford' && ACT.ford && ACT.id === ST.ch && Math.abs(ACT.ford.x - px) < (x1 - x0) / 2 + 400 && Math.abs(ACT.ford.y - py) < (y1 - y0) / 2 + 700) drawFordGround(ctx, ACT.ford, camX, camY); } catch (e) { if (!window.E230) { window.E230 = 1; console.warn(e); } } }; } catch (e) {}
     function drawStock(c, SK, camX0, camY0) {
       var sx = SK.x - camX0, sy = SK.y - camY0;
@@ -13677,6 +13873,7 @@ window.B137 = (function () {
       if (ACT.kind === 'boots' && vis(scenePos())) drawMarlowYard(c, scenePos().x - camX, scenePos().y - camY);
       if (ACT.kind === 'boots' && ACT.boots && !ACT.done) drawBoots(c, ACT.boots, camX, camY);
       if (ACT.kind === 'ford' && ACT.ford) drawFordTop(c, ACT.ford, camX, camY);
+      if (ACT.kind === 'express' && ACT.express) drawExpressTop(c, ACT.express, camX, camY);
       if (ACT.kind === 'weigh' && ACT.weigh) drawWeigh(c, ACT.weigh, ACT.weigh.x - camX, ACT.weigh.y - camY, camX, camY);
       if (ACT.kind === 'shovel' && ACT.shovel) drawShovel(c, ACT.shovel, ACT.shovel.x - camX, ACT.shovel.y - camY);
       if (ACT.kind === 'sluice') {
@@ -13959,6 +14156,8 @@ window.B137 = (function () {
       ford: function () { var F = ACT.ford; return F ? { x: F.x, y: F.y, hw: F.hw, deep: F.deep, sx: F.sx, sy: F.sy, carry: F.carry, started: F.started, t: F.t, rise: F.rise, grip: F.grip, knocks: F.knocks, swept: F.swept, slips: F.slips, cur: F.cur || 0, inW: F.inW, onBar: F.onBar, reward: F.reward, done2: F.done2, bars: F.bars.map(function (b) { return [b.x, b.y, b.rx, b.ry]; }), logs: F.logs.map(function (L) { return [L.x, L.y, L.v]; }) } : null; },
       fordLog: function (x, y, v) { if (ACT.ford) ACT.ford.logs.push({ x: x, y: y, v: v || 120, a: 0, ph: 0 }); },
       fordLogsOn: function () { if (ACT.ford) { var f = ST.flags; ACT.ford.logRate = f.ch29_law ? 1.5 : f.ch29_square ? 3.0 : 2.2; ACT.ford.spawnT = 0.5; } },
+      express: function () { var T = ACT.express; return T ? { x: T.x, y: T.y, ty: T.ty, head: T.head, door: T.head - T.doorOff, dir: T.dir, v: T.v, sp: T.sp, run: T.run, carry: T.carry, hand: T.hand, inZ: T.inZ, need: T.need, pass: T.pass, done2: T.done2, leave: T.leave, reward: T.reward, len: T.len } : null; },
+      expressGo: function () { var T = ACT.express; if (T && T.carry && !T.run) T.wait = 0; },
       fordNoLogs: function () { if (ACT.ford) { ACT.ford.logRate = 1e6; ACT.ford.spawnT = 1e6; ACT.ford.logs = []; } },
       haulLean: function (v) { if (ACT.haul) ACT.haul.lean = v; },
       shovelPh: function (p) { if (ACT.shovel) ACT.shovel.ph = p; },
@@ -13990,7 +14189,7 @@ window.B137 = (function () {
 (function(){function go(){var g=document.getElementById('mgrid');if(!g)return setTimeout(go,50);var q=function(m){return g.querySelector('.mode[data-mode='+m+']')};if(!q('ages'))return setTimeout(go,50);
 var d=q('duel'),f=q('free'),st=q('story');d.querySelector('b').textContent='1V1 — PLAY';d.style.order=0;d.style.borderWidth='3px';g.insertBefore(d,g.firstChild);
 f.querySelector('b').textContent='FREE — SANDBOX';f.querySelector('small').textContent='No enemy rush, build at your own pace.';g.insertBefore(f,d.nextSibling);
-if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer\'s offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow\'s man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow\'s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your  claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill.';g.insertBefore(st,f.nextSibling);}
+if(st){st.querySelector('b').textContent='STORY';st.querySelector('small').textContent='A year-long frontier tale. The Claim, The Rustlers, The Grade, The Showdown, The Posse, The Trial, The Verdict, The Sentence, The Wagon, The Road, The Crossing, The Landing, The Cut, The Tank, The Wire, The Draw, The Station, The Gate, The Diggings: a creek outside Eureka, pan three gravel bars to prove the claim, then The Assay: ride into Eureka and file the proved claim at the assay office, then The Corners: ride back to the diggings and keep four corner posts standing while a jumper pulls them behind you., then The Sluice: stay at the diggings and set a sluice box — place the box, seat the riffles, and run a load of gravel, then The Race: stay at the diggings and cut a head race up to the pool so the new sluice has steady water — dig along the stakes and watch the water come down, then The Shovel: with the water running, feed gravel to the sluice on a steady beat and watch the gold catch in the riffles, then The Haul: tie the first gold onto an ore cart and walk it down the rutted Eureka road to the ore scale, leaning on the high side so the load never spills, then The Weigh-In: at the Eureka assay office, set brass weights on the balance until the beam hangs level, then choose what the payout buys, then The Outfit: at the Eureka general store, fill a basket from the shelves, one of each supply, on a budget set by what you did with the payout, before a rival buyer\'s offer for the claim goes out, then The Lantern: back at the diggings on a moonless night, Marlow\'s man has been at the claim. Follow his hobnail prints by lamplight, keep the lamp filled at the fire, and undo what he did, then The Hobnails: ride to Dustwater with the Marlow & Sons tag. In Marlow\'s yard, hold your plaster cast against the fresh boot prints behind each of his men and call out the one whose hobnails walked your  claim. Then The Ford: carry the claim strongbox across the rising Dry Fork, leaning into the current, resting on the gravel bars and dodging the logs coming down from the mill. Then The Express: at Dry Fork siding the express won\'t stop, so ride beside the green express car, match the engineer\'s throttle and hand the strongbox up to the messenger.';g.insertBefore(st,f.nextSibling);}
 ['islands','nations','ages'].forEach(function(m){var e=q(m);if(e)e.style.display='none'});g.style.gridTemplateColumns=st?'1fr 1fr 1fr':'1fr 1fr';[d,f].concat(st?[st]:[]).forEach(function(e){e.style.minHeight='130px';e.querySelector('b').style.fontSize='18px'});}
 go();})();
 </script>
@@ -14010,5 +14209,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --></body>
 </html>
