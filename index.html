@@ -5,6 +5,51 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Kingdom</title>
+<script>/* v213 PAUSE CLOCK + SAVE SLOT: runs before the game. While paused, game time (performance.now, Date.now, animation frames, timers) stands still. */
+(function () {
+  var P = window.PAUSE213 = { on: false, off: 0, t0: 0, w0: 0, tq: [], auto: null };
+  var pf = window.performance, _pn = pf.now.bind(pf), _dn = Date.now.bind(Date), _raf = window.requestAnimationFrame.bind(window), _st = window.setTimeout.bind(window), _si = window.setInterval.bind(window);
+  var SP = Storage.prototype, _get = SP.getItem, _set = SP.setItem, _rm = SP.removeItem, _key = SP.key;
+  P.raw = { now: _pn, dnow: _dn, raf: _raf, st: _st, si: _si };
+  pf.now = function () { return (P.on ? P.t0 : _pn()) - P.off; };
+  Date.now = function () { return (P.on ? P.w0 : _dn()) - Math.round(P.off); };
+  window.requestAnimationFrame = function (cb) { return _raf(function w(t) { if (P.on) { _raf(w); return; } cb(t - P.off); }); };
+  window.setTimeout = function (fn, ms) { if (typeof fn !== 'function') return _st.apply(window, arguments); var a = [].slice.call(arguments, 2); var w = function () { if (P.on) { P.tq.push(w); return; } fn.apply(window, a); }; return _st(w, ms); };
+  window.setInterval = function (fn, ms) { if (typeof fn !== 'function') return _si.apply(window, arguments); var a = [].slice.call(arguments, 2); return _si(function () { if (!P.on) fn.apply(window, a); }, ms); };
+  P.pause = function () { if (P.on) return; P.t0 = _pn(); P.w0 = _dn(); P.on = true; };
+  P.resume = function () { if (!P.on) return; P.off += _pn() - P.t0; P.on = false; var q = P.tq; P.tq = []; q.forEach(function (w) { _st(w, 0); }); };
+  /* settings (sound on/off and effects volume keep their old keys kingdom-snd / kingdom-vol) */
+  var SK = 'kingdom-set213', S = { music: 0.3, gfx: 'high', joy: 'right' };
+  try { var j = JSON.parse(_get.call(localStorage, SK) || 'null'); if (j) { if (typeof j.music === 'number') S.music = Math.max(0, Math.min(1, j.music)); if (j.gfx === 'low' || j.gfx === 'high') S.gfx = j.gfx; if (j.joy === 'left' || j.joy === 'right') S.joy = j.joy; } } catch (e) {}
+  P.set = S; P.saveSet = function () { try { _set.call(localStorage, SK, JSON.stringify(S)); } catch (e) {} };
+  window.LOFX213 = S.gfx === 'low';
+  /* low graphics draws the canvas at 1 pixel per CSS pixel instead of the screen's full density */
+  try { var dd = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio') || Object.getOwnPropertyDescriptor(Window.prototype, 'devicePixelRatio');
+    if (dd && dd.get) Object.defineProperty(window, 'devicePixelRatio', { configurable: true, get: function () { var r = dd.get.call(window); return window.LOFX213 ? 1 : r; } }); } catch (e) {}
+  /* one save slot: a copy of every saved game key, taken whenever you save */
+  var SLOT = 'kingdom-slot213', SKIP = /^kingdom-(snd|vol|tips|set213|slot213)$/;
+  function keys() { var o = []; for (var i = 0; i < localStorage.length; i++) { var k = _key.call(localStorage, i); if (k && k.indexOf('kingdom') === 0 && !SKIP.test(k)) o.push(k); } return o; }
+  P.keys = keys;
+  P.slot = function () { try { var s = JSON.parse(_get.call(localStorage, SLOT) || 'null'); return s && s.keys ? s : null; } catch (e) { return null; } };
+  P.snap = function (mode, label) { var k = {}; keys().forEach(function (n) { k[n] = _get.call(localStorage, n); }); var s = { v: 1, t: _dn(), mode: mode || null, label: label || '', keys: k }; _set.call(localStorage, SLOT, JSON.stringify(s)); return s; };
+  P.restore = function (s) { keys().forEach(function (n) { if (!(n in s.keys)) _rm.call(localStorage, n); }); Object.keys(s.keys).forEach(function (n) { if (s.keys[n] !== null) _set.call(localStorage, n, s.keys[n]); }); };
+  try {
+    var act = sessionStorage.getItem('k213act'); sessionStorage.removeItem('k213act');
+    var s = P.slot();
+    if (!s && keys().length) { var m = _get.call(localStorage, 'kingdom-econ-v1') ? 'free' : null; s = P.snap(m, m ? 'FREE' : ''); s.t = 0; _set.call(localStorage, SLOT, JSON.stringify(s)); }
+    if (act === 'quit') { if (s) P.restore(s); else keys().forEach(function (n) { _rm.call(localStorage, n); }); }
+    if (act === 'load' && s) { P.restore(s); P.auto = s.mode; }
+  } catch (e) {}
+  /* while paused the game gets no keys; P / Escape resume */
+  window.addEventListener('keydown', function (e) {
+    var t = e.target, typing = t && /INPUT|TEXTAREA|SELECT/.test(t.tagName);
+    if (P.on) { if (!typing) { if ((e.key === 'Escape' || e.key === 'p' || e.key === 'P') && window.PZ213) PZ213.key(e.key); e.stopImmediatePropagation(); e.preventDefault(); } return; }
+    if (typing || !window.PZ213) return;
+    if ((e.key === 'p' || e.key === 'P') && PZ213.canOpen()) { PZ213.open(); e.stopImmediatePropagation(); e.preventDefault(); }
+    else if (e.key === 'Escape' && PZ213.canOpen() && PZ213.nothingOpen()) { PZ213.open(); e.stopImmediatePropagation(); e.preventDefault(); }
+  }, true);
+})();
+</script>
 <style>
   html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #fff; touch-action: none; font-family: monospace; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
   * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -945,7 +990,7 @@ window.B137 = (function () {
   function hitFeature(f, power) {
     dmg[f.id] = (dmg[f.id] || 0) + power; shakeT[f.id] = 0.2; sfx(f.kind === 'tree' ? 'chop' : 'mine', f.x, f.y);
     var hp = f.kind === 'tree' ? 3 : f.kind === 'gold' ? 6 : 4;
-    for (var i = 0; i < 4; i++) bits.push({ x: f.x + (Math.random() - 0.5) * 20, y: f.y - 20 - Math.random() * 30, vx: (Math.random() - 0.5) * 160, vy: -80 - Math.random() * 120, life: 0.5, sq: f.kind === 'rock' });
+    for (var i = 0; i < (window.LOFX213 ? 2 : 4); i++) bits.push({ x: f.x + (Math.random() - 0.5) * 20, y: f.y - 20 - Math.random() * 30, vx: (Math.random() - 0.5) * 160, vy: -80 - Math.random() * 120, life: 0.5, sq: f.kind === 'rock' });
     if (dmg[f.id] >= hp) {
       destroyed.add(f.id); delete dmg[f.id];
       if (f.kind === 'tree') wood += 1 + Math.round(f.s);
@@ -953,7 +998,7 @@ window.B137 = (function () {
       else { stone += 1 + Math.round(f.s); if (Math.random() < 0.25) gold += 1; }
       var k = Math.floor(f.x / 384) + ',' + Math.floor(f.y / 384);
       if (chunkCache.has(k)) chunkCache.set(k, chunkCache.get(k).filter(function (g) { return g.id !== f.id; }));
-      for (var j = 0; j < 10; j++) bits.push({ x: f.x + (Math.random() - 0.5) * 30, y: f.y - Math.random() * 50, vx: (Math.random() - 0.5) * 260, vy: -120 - Math.random() * 180, life: 0.7, sq: f.kind === 'rock' });
+      for (var j = 0; j < (window.LOFX213 ? 4 : 10); j++) bits.push({ x: f.x + (Math.random() - 0.5) * 30, y: f.y - Math.random() * 50, vx: (Math.random() - 0.5) * 260, vy: -120 - Math.random() * 180, life: 0.7, sq: f.kind === 'rock' });
       updateRes();
     }
   }
@@ -1318,7 +1363,7 @@ window.B137 = (function () {
   cv.addEventListener('touchstart', function (e) { e.preventDefault(); }, { passive: false });
   atk.addEventListener('touchstart', function (e) { e.preventDefault(); }, { passive: false });
   function setMenu(open) { menuEl.style.display = open ? 'block' : 'none'; }
-  menuBtn.addEventListener('click', function () { setMenu(menuEl.style.display !== 'block'); });
+  menuBtn.addEventListener('click', function () { if (window.PZ213) { setMenu(false); PZ213.open(); return; } setMenu(menuEl.style.display !== 'block'); });
   function syncSettings() {
     Object.keys(optVals).forEach(function (g) {
       document.querySelectorAll('#settings .step[data-sg="' + g + '"] .val').forEach(function (el) { el.textContent = picks[g].toUpperCase(); });
@@ -3005,7 +3050,7 @@ window.B137 = (function () {
     document.getElementById('sndBtn').addEventListener('click', function () { sndOn = !sndOn; setVol(); sync(); });
     document.getElementById('volDn').addEventListener('click', function () { vol = Math.max(0, Math.round((vol - 0.1) * 10) / 10); setVol(); sync(); });
     document.getElementById('volUp').addEventListener('click', function () { vol = Math.min(1, Math.round((vol + 0.1) * 10) / 10); setVol(); sync(); sfx('coin'); }); sync(); })();
-  window.__snd = { sfx: sfx, ctx: function () { return AC; } };
+  window.__snd = { sfx: sfx, ctx: function () { return AC; }, master: function () { return master; }, init: audioInit, get: function () { return { on: sndOn, vol: vol }; }, set: function (on, v) { if (on !== null && on !== undefined) sndOn = !!on; if (v !== null && v !== undefined) vol = v; setVol(); } }; /* v213 settings */
   // ===== v22 ROYALS, rally flags, war STATS =====
   var STATS = {}; function stOf(fid) { return STATS[fid] = STATS[fid] || { k: 0, l: 0, wars: {}, conq: 0 }; }
   var _deal2 = dealDamage;
@@ -6368,7 +6413,7 @@ window.B137 = (function () {
     var _du = drawUnits; drawUnits = function (camX, camY) { var r = _du.apply(this, arguments); try { var c = ctx, T = performance.now() / 1000, dk = MODE === 'free' ? dark() : 0;
       (VIEW || []).forEach(function (q) { var b = q[0], A = q[1], sx = b.x - camX, sy = b.y - camY; (A.m.smoke || []).forEach(function (s) { for (var i = 0; i < 4; i++) { var ph = (T * 0.5 + i / 4 + b.i * 0.13) % 1; c.fillStyle = 'rgba(120,110,100,' + (0.35 * (1 - ph)).toFixed(2) + ')'; c.beginPath(); c.arc(sx + s[0] + 6 + ph * 18 + Math.sin(ph * 6 + b.i) * 4, sy + s[1] - ph * 50, 4 + ph * 9, 0, 7); c.fill(); } }); });
       // dust kicked up when you move
-      if (Math.hypot(px - lpx, py - lpy) > 2) { DUST.push({ x: px + (Math.random() - 0.5) * 14, y: py, l: 1 }); } lpx = px; lpy = py; if (DUST.length > 30) DUST.shift();
+      if (!window.LOFX213 && Math.hypot(px - lpx, py - lpy) > 2) { DUST.push({ x: px + (Math.random() - 0.5) * 14, y: py, l: 1 }); } lpx = px; lpy = py; if (DUST.length > 30) DUST.shift();
       DUST.forEach(function (d) { d.l -= 0.025; d.y -= 0.3; if (d.l > 0) { c.fillStyle = 'rgba(190,160,110,' + (0.35 * d.l).toFixed(2) + ')'; c.beginPath(); c.arc(d.x - camX, d.y - camY, 4 + (1 - d.l) * 8, 0, 7); c.fill(); } }); DUST = DUST.filter(function (d) { return d.l > 0; });
       if (dk > 0.01) { c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = 'rgba(10,15,45,' + dk.toFixed(2) + ')'; c.fillRect(0, 0, c.canvas.width, c.canvas.height); c.restore();
         (VIEW || []).forEach(function (q) { var b = q[0], A = q[1], sx = b.x - camX - A.ox + A.ox, sy = b.y - camY; if (b.k === 'farm' || b.k === 'ranch') return; var lit = (b.i * 7 + Math.floor(hour())) % 5 !== 0; if (!lit) return; (A.m.wins || []).forEach(function (w) { c.fillStyle = 'rgba(255,200,90,' + Math.min(1, dk * 1.7).toFixed(2) + ')'; c.fillRect(sx + w[0], sy + w[1], w[2], w[3]); c.fillStyle = 'rgba(255,190,80,' + (dk * 0.25).toFixed(2) + ')'; c.beginPath(); c.arc(sx + w[0] + w[2] / 2, sy + w[1] + w[3] / 2, 20, 0, 7); c.fill(); }); }); }
@@ -9180,7 +9225,7 @@ window.B137 = (function () {
       for (i = 0; i < TRAINS.length; i++) { var t = TRAINS[i], L = t.parts && t.parts[0]; if (!L || Math.abs(L.x - px) > 2200 || Math.abs(L.y - py) > 1600) continue;
         var mv = !L.stop && !L.robbed; t.sme = (t.sme || 0) - dt; if (t.sme > 0) continue; t.sme = mv ? 0.055 : 0.36;
         var fa = L.face != null ? L.face : L.ang, ux = Math.cos(fa), uy = Math.sin(fa), sp = mv ? (t.run ? 260 : (t.spd || 240)) * (L.dirS || 1) : 0;
-        if (SMK.length < 260) SMK.push({ x: L.x + ux * 40, y: L.y + uy * 40, z: 56, vx: -ux * sp * 0.08 + (Math.random() - 0.5) * 10, vy: -uy * sp * 0.08 + (Math.random() - 0.5) * 8, vz: mv ? 38 + Math.random() * 14 : 18, a: 0, l: mv ? 2.4 + Math.random() * 0.8 : 3.2, r: 4 + Math.random() * 2, g: 200 + Math.random() * 30 | 0 }); }
+        if (SMK.length < (window.LOFX213 ? 40 : 260) && !(window.LOFX213 && Math.random() < 0.6)) SMK.push({ x: L.x + ux * 40, y: L.y + uy * 40, z: 56, vx: -ux * sp * 0.08 + (Math.random() - 0.5) * 10, vy: -uy * sp * 0.08 + (Math.random() - 0.5) * 8, vz: mv ? 38 + Math.random() * 14 : 18, a: 0, l: mv ? 2.4 + Math.random() * 0.8 : 3.2, r: 4 + Math.random() * 2, g: 200 + Math.random() * 30 | 0 }); }
     }
     function drawSmoke(sx0, sy0, wx, wy) { var c = ctx; c.save();
       for (var i = 0; i < SMK.length; i++) { var q = SMK[i], u = q.a / q.l, X = sx0 + (q.x - wx) + q.z * HX, Y = sy0 + (q.y - wy) - q.z, r = q.r + u * 24, al = (u < 0.15 ? u / 0.15 : 1) * (0.5 - 0.48 * u);
@@ -15456,7 +15501,7 @@ window.B137 = (function () {
     function stChars() { try { return window.STORY170 && STORY170.on() && STORY170._chars ? STORY170._chars() : []; } catch (e) { return []; } }
     function agentsNear(x, y, r) { try { return window.RAILCO203 && RAILCO203.agents209 ? RAILCO203.agents209(x, y, r) : []; } catch (e) { return []; } }
     function pop(x, y, s, col) { K.puffs.push({ x: x, y: y, t: 1.4, s: s, col: col || '#2e6a2e', txt: 1 }); }
-    function puff(x, y) { for (var i = 0; i < 4; i++) K.puffs.push({ x: x + (Math.random() - 0.5) * 14, y: y - 30 - Math.random() * 16, t: 0.35 + Math.random() * 0.15, vx: (Math.random() - 0.5) * 90, vy: -40 - Math.random() * 60, r: 3 + Math.random() * 3 }); }
+    function puff(x, y) { for (var i = 0; i < (window.LOFX213 ? 2 : 4); i++) K.puffs.push({ x: x + (Math.random() - 0.5) * 14, y: y - 30 - Math.random() * 16, t: 0.35 + Math.random() * 0.15, vx: (Math.random() - 0.5) * 90, vy: -40 - Math.random() * 60, r: 3 + Math.random() * 3 }); }
     function sfx2(n, x, y, v) { try { sfx(n, x, y, v); } catch (e) {} }
     // ---------- actors: anyone hurt, fleeing, fighting or dead is run here ----------
     function mkActor(src, ref, x, y, o) { var a = { src: src, ref: ref, x: x, y: y, f: 1, hp: 6, max: 6, st: 'calm', t: 0, hitT: 0, cd: 1 + Math.random(), ph: Math.random() * 6, say: null, sayT: 0, kind: 'civ', name: '', job: '' }; for (var k in o) a[k] = o[k]; a.max = a.hp; K.act.push(a); return a; }
@@ -15665,7 +15710,7 @@ window.B137 = (function () {
 <script>
 // v114: one panel at a time; Escape / Back closes the open panel
 (function () {
-  var KEEP = { stage: 1, rcol: 1, menu: 1, modes: 1, creator: 1, banner: 1, ordBtns: 1 };
+  var KEEP = { stage: 1, rcol: 1, menu: 1, modes: 1, creator: 1, banner: 1, ordBtns: 1, pause213: 1, load213: 1 };
   function big() { var W = innerWidth, H = innerHeight, out = []; document.querySelectorAll('body *').forEach(function (e) { if (KEEP[e.id] || e.tagName === 'CANVAS' || e.querySelector('canvas')) return; var cs = getComputedStyle(e); if ((cs.position !== 'fixed' && cs.position !== 'absolute') || cs.display === 'none' || cs.visibility === 'hidden') return; var r = e.getBoundingClientRect(); if (r.width * r.height < W * H * 0.12 || r.width < 120) return; for (var a = e.parentElement; a && a !== document.body; a = a.parentElement) { if (out.indexOf(a) >= 0) return; } out.push(e); }); return out.filter(function (e) { return !out.some(function (o) { return o !== e && o.contains(e); }); }); }
   function shut(e) { var c = [].slice.call(e.querySelectorAll('button')).filter(function (b) { return /^(CLOSE|✕|X|×|NO)$/i.test(b.textContent.trim()); })[0]; if (c) c.click(); if (getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width) e.style.display = 'none'; }
   var open = [];
@@ -15937,9 +15982,213 @@ body.nomap212 #inv210 { top: calc(64px + env(safe-area-inset-top, 0px)) !importa
   }
   setInterval(tick, 300); tick();
   /* v212: closing or reloading the page mid-game keeps your gold and goods (HOME -> NO still discards a run) */
-  window.addEventListener('pagehide', function () { try { if (window.__v73 && __v73.buf() && typeof started !== 'undefined' && started && window.__save119) { __save119(); __v73.save(); } } catch (e) {} });
+  window.addEventListener('pagehide', function () { try { if (!window.NOSAVE213 && MODE !== 'duel' && window.__v73 && __v73.buf() && typeof started !== 'undefined' && started && window.__save119) { __save119(); __v73.save(); } } catch (e) {} });
   window.UI212 = { tick: tick };
 })();
 
-</script><!-- v212-ui --></body>
+</script><!-- v212-ui -->
+<style id="v213css">/* v213 PAUSE / MAIN MENU: pause button, pause panel, settings, title screen (same paper and wood as v212) */
+#menuBtn.pz213 { gap: 6px !important; flex-direction: row !important; }
+#menuBtn.pz213 span { display: none !important; }
+#menuBtn.pz213 i { display: block; width: 7px; height: 20px; background: var(--i212); border-radius: 2px; }
+#pause213 { position: fixed; inset: 0; z-index: 99990; display: none; align-items: center; justify-content: center; background: rgba(60,36,12,.5); padding: calc(8px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left)); box-sizing: border-box; }
+#pause213.on { display: flex; }
+#pause213.hid { visibility: hidden; }
+.pp213 { background: var(--p212); color: var(--i212); border: 4px solid var(--w212); border-radius: 14px; box-shadow: inset 0 0 0 2px #c9a46a, 0 6px 18px rgba(40,24,8,.45); padding: 12px 18px 14px; width: min(440px, 100%); max-height: 100%; overflow-y: auto; box-sizing: border-box; text-align: center; }
+.pp213 h2 { margin: 0 0 2px; font-size: 22px; letter-spacing: 6px; color: var(--w212d); }
+.sub213 { font-size: 12px; opacity: .8; margin-bottom: 10px; min-height: 14px; }
+.g213 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.g213 button { min-height: 42px; font-size: 15px; padding: 6px 8px; }
+.g213 button.wide { grid-column: 1 / -1; }
+.g213 button.pri, #title213 button.pri { background: var(--w212) !important; color: #fff3d6 !important; border: 3px solid var(--w212d) !important; }
+.q213 { white-space: pre-line; font-size: 15px; font-weight: bold; margin: 4px 0 10px; line-height: 1.35; }
+#pzMsg { font-size: 13px; font-weight: bold; min-height: 16px; margin-top: 8px; color: #2e6a2e; }
+/* title */
+#startRow #start { display: none !important; }
+#title213 { display: flex; gap: 8px; justify-content: center; align-items: stretch; flex-wrap: wrap; width: 100%; }
+#title213 button { min-width: 112px; min-height: 52px; padding: 5px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; border-width: 3px; border-radius: 10px; }
+#title213 button b { font-size: 17px; letter-spacing: 1px; }
+#title213 button small { font-size: 10px; font-weight: normal; opacity: .85; margin-top: 2px; }
+#title213 #tSet { min-width: 52px; font-size: 22px; }
+@media (min-height: 600px) and (min-width: 1000px) { #title213 { gap: 12px; } #title213 button { min-width: 170px; min-height: 68px; } #title213 button b { font-size: 22px; } #title213 button small { font-size: 12px; } #title213 #tSet { min-width: 68px; } }
+#load213 { position: fixed; inset: 0; z-index: 99995; display: none; align-items: center; justify-content: center; background: #e9d4a6; }
+#load213 div { background: var(--p212); border: 4px solid var(--w212); border-radius: 14px; padding: 18px 28px; font-size: 18px; font-weight: bold; letter-spacing: 3px; color: var(--w212d); }
+/* settings: two columns, game settings left */
+#sbox { justify-content: flex-start; }
+#cols213 { display: flex; gap: 22px; width: 100%; max-width: 760px; justify-content: center; align-items: flex-start; }
+#cols213 > div { flex: 1 1 0; min-width: 0; }
+#cols213 h3 { margin: 0 0 6px; font-size: 13px; letter-spacing: 3px; color: var(--w212d); }
+.r213 { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 38px; border-bottom: 1px dashed #c9a46a; }
+.r213 > span { font-size: 14px; font-weight: bold; text-align: left; }
+.r213 .c213 { display: flex; align-items: center; gap: 4px; }
+.r213 button { min-width: 50px; min-height: 32px; padding: 2px 8px; font-size: 13px; }
+.r213 .v213 { min-width: 40px; text-align: center; font-weight: bold; font-size: 14px; }
+.r213 small { font-size: 10px; opacity: .7; display: block; font-weight: normal; }
+#cols213 #sgrid { grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+#settings.title213 #rider213 { display: none; }
+#settings > #sbox > .grp.old213 { display: none !important; }
+@media (max-height: 480px) { #sbox { padding: 6px 12px !important; gap: 4px !important; } #sbox h2 { font-size: 17px !important; } .r213 { min-height: 34px; } .r213 button { min-height: 28px; } #cols213 #sgrid .step button { min-height: 28px; } }
+/* joystick on the left (setting): mirror the touch layout */
+@media (any-pointer:coarse) and (orientation:landscape) {
+body.joyL213 #joy { right: auto !important; left: calc(var(--pad) + 6px + var(--sl)) !important; transform-origin: left bottom !important; }
+body.joyL213 #atk { left: auto !important; right: calc(var(--pad) + 6px + var(--sr)) !important; transform-origin: right bottom !important; }
+body.joyL213 #rcol { left: auto !important; right: calc(var(--pad) + 6px + var(--sr)) !important; transform-origin: right bottom !important; align-items: flex-end !important; }
+}
+</style>
+<div id="pause213" role="dialog" aria-label="Paused"><div class="pp213">
+  <h2>PAUSED</h2><div class="sub213" id="pzSub"></div>
+  <div id="pzMain" class="g213">
+    <button id="pzResume" class="pri wide">&#9654; RESUME</button>
+    <button id="pzSave">SAVE</button><button id="pzLoad">LOAD</button>
+    <button id="pzSet">SETTINGS</button><button id="pzStats">STATS</button>
+    <button id="pzCh">CHALLENGES</button><button id="pzTitle">RETURN TO TITLE</button>
+  </div>
+  <div id="pzAsk" style="display:none"><div class="q213" id="pzQ"></div><div class="g213" id="pzA"></div></div>
+  <div id="pzMsg"></div>
+</div></div>
+<div id="load213"><div>LOADING YOUR SAVE&hellip;</div></div>
+<script>
+/* v213 PAUSE / MAIN MENU */
+(function () {
+  var P = window.PAUSE213, S = P.set, $ = function (id) { return document.getElementById(id); };
+  var ov = $('pause213'), sub = $('pzSub'), main = $('pzMain'), ask = $('pzAsk'), msg = $('pzMsg'), settingsEl = $('settings'), mb = $('menuBtn');
+  function inGame() { return typeof started !== 'undefined' && !!started; }
+  function mode() { try { if (MODE === 'duel') return 'duel'; return window.STORY170 && STORY170.on() ? 'story' : 'free'; } catch (e) { return 'free'; } }
+  function label(m) { m = m || mode(); if (m === 'duel') return '1V1'; if (m === 'story') { try { return 'STORY \u00b7 ' + STORY170.chapter().title.toUpperCase(); } catch (e) { return 'STORY'; } } return 'FREE'; }
+  function hhmm(t) { var d = new Date(t), h = d.getHours(), m = d.getMinutes(); return (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' AM' : ' PM'); }
+  function slotTxt(s) { if (!s || !s.mode) return ''; return (s.label || label(s.mode)) + (s.t ? ' \u00b7 ' + hhmm(s.t) : ''); }
+  function vis(e) { return !!(e && getComputedStyle(e).display !== 'none'); }
+  /* ---------- pause ---------- */
+  var OPEN = false;
+  function refresh() {
+    var s = P.slot(), m = mode();
+    sub.textContent = label() + '  \u00b7  ' + (s && s.mode ? 'LAST SAVE ' + (s.t ? hhmm(s.t) : '') + (s.mode !== m ? ' (' + (s.label || label(s.mode)) + ')' : '') : 'NOT SAVED YET');
+    $('pzSave').disabled = m === 'duel'; $('pzSave').textContent = m === 'duel' ? 'SAVE (NOT IN 1V1)' : 'SAVE';
+    $('pzLoad').disabled = !(s && s.mode);
+  }
+  function show(v) { main.style.display = v === 'main' ? '' : 'none'; ask.style.display = v === 'ask' ? '' : 'none'; }
+  function open() {
+    if (OPEN || !inGame()) return; OPEN = true; P.pause(); muteFx(true);
+    try { if (typeof moveId !== 'undefined') moveId = null; if (typeof joyV !== 'undefined') joyV = null; } catch (e) {}
+    msg.textContent = ''; show('main'); refresh(); ov.classList.remove('hid'); ov.classList.add('on');
+  }
+  function resume() { if (!OPEN) return; OPEN = false; ov.classList.remove('on', 'hid'); if (vis(settingsEl)) settingsEl.style.display = 'none'; muteFx(false); P.resume(); ui(); }
+  function askBox(q, btns) { $('pzQ').textContent = q; var a = $('pzA'); a.innerHTML = ''; btns.forEach(function (b) { var e = document.createElement('button'); e.textContent = b[0]; if (b[2]) e.className = b[2]; e.onclick = b[1]; a.appendChild(e); }); msg.textContent = ''; show('ask'); }
+  function flush() { try { if (window.__save119) __save119(); } catch (e) {} try { if (window.__v73) __v73.save(); } catch (e) {} }
+  function save() { var m = mode(); if (m === 'duel' || !inGame()) return null; flush(); try { return P.snap(m, label(m)); } catch (e) { return false; } }
+  function leave(act) { window.NOSAVE213 = 1; try { if (act) sessionStorage.setItem('k213act', act); } catch (e) {} $('load213').style.display = act === 'load' ? 'flex' : 'none'; location.reload(); }
+  $('pzResume').onclick = resume;
+  $('pzSave').onclick = function () { var r = save(); if (r === false) { msg.style.color = '#b0281c'; msg.textContent = 'COULD NOT SAVE: THE BROWSER STORAGE IS FULL'; return; } if (r) { refresh(); msg.style.color = '#2e6a2e'; msg.textContent = 'SAVED \u00b7 ' + hhmm(r.t); } };
+  $('pzLoad').onclick = function () { var s = P.slot(); if (!s || !s.mode) return; askBox('LOAD ' + slotTxt(s) + '?\nANYTHING SINCE THAT SAVE IS LOST.', [['LOAD', function () { leave('load'); }, 'pri'], ['CANCEL', function () { show('main'); }]]); };
+  $('pzTitle').onclick = function () {
+    if (mode() === 'duel') askBox('LEAVE THIS 1V1 MATCH?\nYOUR FREE AND STORY SAVES STAY AS THEY ARE.', [['LEAVE MATCH', function () { leave('quit'); }, 'pri'], ['CANCEL', function () { show('main'); }]]);
+    else askBox('RETURN TO THE TITLE SCREEN?', [['SAVE & QUIT', function () { if (save() === false) { msg.style.color = '#b0281c'; msg.textContent = 'COULD NOT SAVE: THE BROWSER STORAGE IS FULL'; return; } leave(null); }, 'pri'], ['QUIT WITHOUT SAVING', function () { leave('quit'); }], ['CANCEL', function () { show('main'); }, 'wide']]);
+  };
+  $('pzSet').onclick = function () { ov.classList.add('hid'); settingsEl.classList.remove('title213'); syncSet(); try { $('menuSettings').click(); } catch (e) { settingsEl.style.display = 'block'; } ui(); };
+  function viaMenu(id) { resume(); var b = $(id); if (b) b.click(); }
+  $('pzStats').onclick = function () { viaMenu('menuStats'); };
+  $('pzCh').onclick = function () { viaMenu('menuCh'); };
+  if (!$('menuStats')) $('pzStats').style.display = 'none'; if (!$('menuCh')) $('pzCh').style.display = 'none';
+  function ui() { try { if (window.UI212) UI212.tick(); } catch (e) {} }
+  $('settingsClose').addEventListener('click', function () { if (OPEN) ov.classList.remove('hid'); ui(); });
+  /* if anything else hides the panel, the game never stays frozen without it */
+  P.raw.si(function () { if (OPEN && !vis(settingsEl) && ov.classList.contains('hid')) ov.classList.remove('hid'); if (OPEN && !inGame()) resume(); }, 250);
+  /* pause button = the corner menu button */
+  mb.classList.add('pz213'); mb.innerHTML = '<i></i><i></i>'; mb.setAttribute('aria-label', 'Pause'); mb.title = 'PAUSE (P)';
+  /* banner HOME (end of a 1V1 match) goes through the same safe exit */
+  document.addEventListener('click', function (e) { var t = e.target && e.target.closest && e.target.closest('#bannerHome'); if (!t) return; e.stopImmediatePropagation(); e.preventDefault(); $('banner').style.display = 'none'; if (mode() === 'duel') leave('quit'); else { open(); $('pzTitle').click(); } }, true);
+  document.addEventListener('visibilitychange', function () { if (document.hidden && inGame() && !OPEN) open(); });
+  /* a reload or closed tab mid-game (FREE / STORY) writes the run (v212) and now also the save slot */
+  window.addEventListener('pagehide', function () { try { if (!window.NOSAVE213 && inGame() && mode() !== 'duel') P.snap(mode(), label()); } catch (e) {} });
+  window.PZ213 = { open: open, resume: resume, isOpen: function () { return OPEN; }, save: save, mode: mode,
+    canOpen: function () { return inGame() && !vis($('creator')) && !vis($('modes')) && !vis(settingsEl); },
+    nothingOpen: function () { try { if (window.__p114 && __p114().length) return false; if (window.STORY170 && STORY170.dlgOn()) return false; var L = ['shop', 'statsP', 'chP', 'invp210', 'railp136', 'map136', 'rc203', 'dlg170', 'dead209', 'ordP', 'upanel', 'bankPanel', 'crop132', 'cp133', 'tp131', 'pp133', 'gp135', 'near63', 'propPanel', 'banner', 'save73'];
+      for (var i = 0; i < L.length; i++) { var e = $(L[i]); if (e && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0) return false; } } catch (e) {} return true; },
+    key: function (k) { if (vis(settingsEl)) { $('settingsClose').click(); return; } if (ask.style.display !== 'none') { show('main'); return; } resume(); } };
+  /* ---------- sound / music ---------- */
+  function snd() { return window.__snd || null; }
+  function muteFx(on) { try { var m = snd() && __snd.master && __snd.master(); if (!m) return; if (on) m.gain.value = 0; else __snd.set(null, null); } catch (e) {} }
+  var MU = { g: null, next: 0, step: 0 }, BEAT = 0.6;
+  var PROG = [[38, [50, 54, 57]], [43, [55, 59, 62]], [38, [50, 54, 57]], [45, [57, 61, 64]], [38, [50, 54, 57]], [43, [55, 59, 62]], [45, [57, 61, 64]], [38, [50, 54, 57]]];
+  var MEL = [66, 69, 71, 71, 69, 67, 66, 64, 62, 64, 66, 64, 66, 69, 74, 71, 69, 67, 66, 64, 61, 62, 0, 0];
+  function hz(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+  function pluck(A, t, n, pk, dur, type, cut) { var o = A.createOscillator(), g = A.createGain(), f = A.createBiquadFilter(); o.type = type || 'triangle'; o.frequency.value = hz(n); f.type = 'lowpass'; f.frequency.value = cut || 1800; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(pk, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(f); f.connect(g); g.connect(MU.g); o.start(t); o.stop(t + dur + 0.05); }
+  function blow(A, t, n, dur) { var o = A.createOscillator(), v = A.createOscillator(), vg = A.createGain(), g = A.createGain(), f = A.createBiquadFilter(); o.type = 'square'; o.frequency.value = hz(n); v.frequency.value = 5.5; vg.gain.value = hz(n) * 0.012; v.connect(vg); vg.connect(o.frequency); f.type = 'lowpass'; f.frequency.value = 1400; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.06); g.gain.setValueAtTime(0.05, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(f); f.connect(g); g.connect(MU.g); o.start(t); v.start(t); o.stop(t + dur + 0.05); v.stop(t + dur + 0.05); }
+  function level() { var s = snd() && __snd.get ? __snd.get() : { on: true }; return s.on ? S.music * 0.5 : 0; }
+  function muTick() {
+    var A = snd() && __snd.ctx(); if (!A) return;
+    if (!MU.g) { MU.g = A.createGain(); MU.g.gain.value = 0; MU.g.connect(A.destination); MU.next = A.currentTime + 0.2; }
+    var L = level(); MU.g.gain.setTargetAtTime(L, A.currentTime, 0.15); window.MUSIC213 = { level: L, step: MU.step };
+    if (A.state !== 'running') return;
+    if (L <= 0 || document.hidden) { MU.next = A.currentTime + 0.2; return; }
+    if (MU.next < A.currentTime) MU.next = A.currentTime + 0.05;
+    while (MU.next < A.currentTime + 0.5) {
+      var t = MU.next, i = MU.step % 24, bar = PROG[(i / 3) | 0], beat = i % 3;
+      if (beat === 0) pluck(A, t, bar[0], 0.22, 1.1, 'triangle', 600);
+      else bar[1].forEach(function (n, k) { pluck(A, t + k * 0.018, n, 0.07, 0.45); });
+      if (((MU.step / 24) | 0) % 2 === 1 && MEL[i]) blow(A, t, MEL[i], BEAT * 0.9);
+      MU.next += BEAT; MU.step++;
+    }
+  }
+  P.raw.si(muTick, 120);
+  /* ---------- graphics / joystick ---------- */
+  function applySet() { window.LOFX213 = S.gfx === 'low'; document.body.classList.toggle('joyL213', S.joy === 'left'); document.body.classList.toggle('lofx213', S.gfx === 'low'); try { window.dispatchEvent(new Event('resize')); } catch (e) {} }
+  /* ---------- settings panel: game settings column + rider column ---------- */
+  var sbox = $('sbox'), cols = document.createElement('div'); cols.id = 'cols213';
+  var A = document.createElement('div'); A.id = 'game213'; A.innerHTML = '<h3>GAME</h3>' +
+    '<div class="r213"><span>SOUND</span><div class="c213"><button id="sOn213">ON</button><button id="sOff213">OFF</button></div></div>' +
+    '<div class="r213"><span>EFFECTS</span><div class="c213"><button id="fxDn213">&minus;</button><span class="v213" id="fxV213"></span><button id="fxUp213">+</button></div></div>' +
+    '<div class="r213"><span>MUSIC</span><div class="c213"><button id="muDn213">&minus;</button><span class="v213" id="muV213"></span><button id="muUp213">+</button></div></div>' +
+    '<div class="r213"><span>GRAPHICS<small>LOW: FEWER EFFECTS, FASTER</small></span><div class="c213"><button id="gLo213">LOW</button><button id="gHi213">HIGH</button></div></div>' +
+    '<div class="r213"><span>JOYSTICK<small id="joyN213">TOUCH SCREENS</small></span><div class="c213"><button id="jL213">LEFT</button><button id="jR213">RIGHT</button></div></div>' +
+    '<div class="r213"><span>COORDINATES</span><div class="c213" id="coord213"></div></div>';
+  var B = document.createElement('div'); B.id = 'rider213'; B.innerHTML = '<h3>RIDER</h3>';
+  var oldGrps = [].slice.call(sbox.children).filter(function (e) { return e.classList && e.classList.contains('grp'); });
+  sbox.insertBefore(cols, $('settingsClose')); cols.appendChild(A); cols.appendChild(B); B.appendChild($('sgrid'));
+  A.querySelector('#coord213').appendChild($('coordBtn'));
+  oldGrps.forEach(function (g) { g.classList.add('old213'); });
+  function syncSet() {
+    var s = snd() && __snd.get ? __snd.get() : { on: true, vol: 0.7 };
+    $('sOn213').classList.toggle('on', !!s.on); $('sOff213').classList.toggle('on', !s.on);
+    $('fxV213').textContent = Math.round(s.vol * 100); $('muV213').textContent = Math.round(S.music * 100);
+    $('gLo213').classList.toggle('on', S.gfx === 'low'); $('gHi213').classList.toggle('on', S.gfx === 'high');
+    $('jL213').classList.toggle('on', S.joy === 'left'); $('jR213').classList.toggle('on', S.joy === 'right');
+    $('fxDn213').disabled = s.vol <= 0; $('fxUp213').disabled = s.vol >= 1; $('muDn213').disabled = S.music <= 0; $('muUp213').disabled = S.music >= 1;
+    $('joyN213').textContent = matchMedia('(any-pointer:coarse)').matches ? 'SIDE OF THE MOVE STICK' : 'TOUCH SCREENS ONLY';
+  }
+  function setSnd(on, v) { try { __snd.set(on, v); } catch (e) {} if (OPEN) muteFx(true); syncSet(); }
+  function r10(v) { return Math.max(0, Math.min(1, Math.round(v * 10) / 10)); }
+  $('sOn213').onclick = function () { setSnd(true, null); try { __snd.init(); } catch (e) {} };
+  $('sOff213').onclick = function () { setSnd(false, null); };
+  $('fxDn213').onclick = function () { setSnd(null, r10(__snd.get().vol - 0.1)); };
+  $('fxUp213').onclick = function () { setSnd(null, r10(__snd.get().vol + 0.1)); if (!OPEN) try { __snd.sfx('coin'); } catch (e) {} };
+  $('muDn213').onclick = function () { S.music = r10(S.music - 0.1); P.saveSet(); syncSet(); muTick(); };
+  $('muUp213').onclick = function () { S.music = r10(S.music + 0.1); P.saveSet(); syncSet(); try { __snd.init(); } catch (e) {} muTick(); };
+  $('gLo213').onclick = function () { S.gfx = 'low'; P.saveSet(); applySet(); syncSet(); };
+  $('gHi213').onclick = function () { S.gfx = 'high'; P.saveSet(); applySet(); syncSet(); };
+  $('jL213').onclick = function () { S.joy = 'left'; P.saveSet(); applySet(); syncSet(); };
+  $('jR213').onclick = function () { S.joy = 'right'; P.saveSet(); applySet(); syncSet(); };
+  $('menuSettings').addEventListener('click', syncSet);
+  /* ---------- title screen: CONTINUE / FREE / STORY / 1V1 ---------- */
+  var row = $('startRow'), T = document.createElement('div'); T.id = 'title213'; row.appendChild(T);
+  function startMode(m) { $('start').click(); var b = document.querySelector('.mode[data-mode=' + m + ']'); if (b) b.click(); else $('modes').style.display = 'none'; }
+  function buildTitle() {
+    var s = P.slot(); T.innerHTML = '';
+    function btn(id, t, sm, fn, cls) { var b = document.createElement('button'); b.id = id; b.innerHTML = '<b>' + t + '</b>' + (sm ? '<small>' + sm + '</small>' : ''); if (cls) b.className = cls; b.onclick = fn; T.appendChild(b); return b; }
+    if (s && s.mode) btn('tCont', 'CONTINUE', slotTxt(s), function () { leave('load'); }, 'pri');
+    btn('tFree', 'FREE', 'BUILD AT YOUR PACE', function () { startMode('free'); });
+    btn('tStory', 'STORY', 'A YEAR ON THE FRONTIER', function () { startMode('story'); });
+    btn('tDuel', '1V1', 'YOU AGAINST THE CPU', function () { startMode('duel'); });
+    var g = btn('tSet', '\u2699', '', function () { settingsEl.classList.add('title213'); syncSet(); settingsEl.style.display = 'block'; }); g.title = 'SETTINGS'; g.setAttribute('aria-label', 'Settings');
+  }
+  buildTitle();
+  window.TITLE213 = { build: buildTitle, start: startMode };
+  applySet(); syncSet();
+  /* CONTINUE / LOAD: the saved slot was put back before the game booted; start its mode */
+  if (P.auto) { $('load213').style.display = 'flex';
+    var tries = 0; (function go() { if ((document.readyState !== 'complete' || !document.querySelector('.mode[data-mode=' + P.auto + ']') || !window.STORY170) && tries++ < 100) return P.raw.st(go, 50);
+      P.raw.st(function () { startMode(P.auto); P.raw.st(function () { $('load213').style.display = 'none'; }, 400); }, 150); })(); }
+})();
+</script><!-- v213-pause -->
+</body>
 </html>
