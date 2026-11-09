@@ -7798,7 +7798,7 @@ window.B137 = (function () {
         for (i = 0; i < OVER.length; i++) {
           o = OVER[i]; sx = o.x - camX; sy = o.y - camY;
           if (o.k === 'star') {
-            spr = starSpr()[(o.gleam ? 2 : 0) + (((o.x + o.y) | 0) % 2)];
+            spr = starSpr()[(o.gleam ? 2 : 0) + (((o.x + o.y) | 0) & 1)] /* v206: negative coords gave -1 */;
             c.drawImage(spr, sx + o.face * 4 - 11, sy - 38);
           } else if (o.k === 'baton') {
             ai = Math.max(0, Math.min(7, ((o.ang + 0.5) * 7 + 0.5) | 0));
@@ -8844,9 +8844,19 @@ window.B137 = (function () {
       return a;
     }
     function mixCo(n, seed, co) {
-      var K = co === 'pg' ? ['tanker', 'tanker', 'hopper', 'tanker', 'box', 'cattle', 'tanker', 'hopper'] : co === 'cw' ? ['pass', 'pass', 'mail', 'pass', 'box'] : KINDS;
-      var a = [], i; for (i = 0; i < n; i++) a.push(K[Math.abs((seed * 17 + i * 31 + i * i * 3) >> 0) % K.length]);
+      /* v206: each line carries its own kind of trade - P&G tank trains, DW&P mixed freight, Crowe stock and boxcars behind the express coaches */
+      var K = co === 'pg' ? ['tanker', 'tanker', 'hopper', 'tanker', 'tanker', 'gondola', 'tanker', 'hopper', 'tanker', 'box'] : co === 'cw' ? ['cattle', 'box', 'cattle', 'cattle', 'box'] : co === 'dwp' ? ['box', 'gondola', 'tanker', 'cattle', 'box', 'flat', 'hopper', 'gondola', 'box', 'tanker'] : KINDS;
+      var a = [], i; if (co === 'cw') { a.push('pass', 'mail'); n = Math.max(0, n - 2); }
+      for (i = 0; i < n; i++) a.push(K[Math.floor(Math.abs(Math.sin(seed * 12.9898 + i * 78.233) * 43758.5453)) % K.length]);
       return a;
+    }
+    var SHIP206 = { tanker: ['GULF OIL CO.', 'BLACK GULCH OIL', 'PECOS CRUDE', 'RED STAR OIL'], hopper: ['GULCH COAL', 'BENTON COAL CO.'], gondola: ['EUREKA ORE', 'BENTON IRON', 'SILVER K MINE'], cattle: ['RED MESA CATTLE', 'BAR-K RANCH', 'LAZY J BEEF'],
+      box: ['MARLOW & SONS', 'DUSTWATER MERC.', 'WELLS EXPRESS', 'COTTONWOOD MILL', 'EUREKA SUPPLY'], flat: ['BENTON LUMBER', 'PINE RIDGE TIMBER'] };
+    var PLATE206 = [['#3b2410', '#f3e3c3'], ['#f3e3c3', '#3b2410'], ['#5a2a6a', '#f2e6c8'], ['#1e4a4a', '#f2e6c8'], ['#d8b04a', '#2a1a0a']];
+    function npc206(t, seed) { /* other shippers' cars: a painted shipper plate on each car, coal or ore heaped in the gondolas */
+      t.npc = t.cars.map(function (k, i) { var L = SHIP206[k]; if (!L) return null; var h = Math.abs((seed * 13 + i * 7 + (i * i) % 11) >> 0); return { n: L[h % L.length], c: PLATE206[(h + L[h % L.length].length) % PLATE206.length] }; });
+      t.loads = t.cars.map(function (k, i) { return k === 'gondola' ? (t.npc[i] && /COAL/.test(t.npc[i].n) ? 'coal' : (i + seed) % 3 ? 'ore' : 'coal') : null; });
+      window.NPC206 = (window.NPC206 || 0) + t.npc.filter(function (x) { return x; }).length;
     }
     function realSt(R) { return (R.st || []).filter(function (s) { return s && (s.home || s.name) && !s.siding; }); }
     function pickDest(R, from, avoid) {
@@ -8875,7 +8885,7 @@ window.B137 = (function () {
       for (i = 0; i < kinds.length; i++) {
         p = pointAlong(segs, (t.head || 0) - i * GAP);
         var sd = 0; if (p && t.run) { var dd = (t.head || 0) - i * GAP; sd = Math.max(0, Math.min(1, Math.max(1 - (dd - t.lo0) / 320, 1 - (t.hi - 4 - dd + (t.cars.length + 1) * GAP) / 320))); if (sd > 0) { var nx = -Math.sin(p.ang), ny = Math.cos(p.ang); if (ny < 0 || (ny === 0 && nx < 0)) { nx = -nx; ny = -ny; } p = { x: p.x + nx * 34 * sd, y: p.y + ny * 34 * sd, ang: p.ang }; } }
-        if (p) parts.push({ k: kinds[i], x: p.x, y: p.y, ang: p.ang + flip, ph: t.ph, robbed: t.robbed, stop: t.stopT > 0, co: t.co, tag: t.tags && i > 0 ? t.tags[i - 1] : null, load: t.loads && i > 0 ? t.loads[i - 1] : null, head: t.run && i === 0 ? t.board : null, sid: sd >= 1 });
+        if (p) parts.push({ k: kinds[i], x: p.x, y: p.y, ang: p.ang + flip, ph: t.ph, robbed: t.robbed, stop: t.stopT > 0, co: t.co, tag: t.tags && i > 0 ? t.tags[i - 1] : null, load: t.loads && i > 0 ? t.loads[i - 1] : null, npc: t.npc && i > 0 ? t.npc[i - 1] : null, head: t.run && i === 0 ? t.board : null, sid: sd >= 1 });
       }
       t.parts = parts;
       if (parts[0]) { t.x = parts[0].x; t.y = parts[0].y; t.ang = parts[0].ang; }
@@ -8891,14 +8901,14 @@ window.B137 = (function () {
       home = home || st[0];
       var dest = pickDest(R, home);
       if (!dest) return;
-      var t1 = { cars: mix(18, 167), ph: 0, stopT: 3.2, robbed: 0, spd: 240, co: 'dwp' };
-      if (bindRoute(t1, R, home, dest, 1)) { layout(t1); TRAINS.push(t1); }
+      var t1 = { cars: mixCo(18, 167, 'dwp'), ph: 0, stopT: 3.2, robbed: 0, spd: 240, co: 'dwp' };
+      if (bindRoute(t1, R, home, dest, 1)) { npc206(t1, 167); layout(t1); TRAINS.push(t1); }
       if (st.length >= 3) {
         var far = st.filter(function (s) { return s !== home && s !== dest; })[0];
         var dest2 = pickDest(R, far, home);
         if (far && dest2) {
           var t2 = { cars: mixCo(8 + (Math.abs(Math.round(far.x)) % 43), 269, 'pg'), ph: 0, stopT: 1.4, robbed: 0, spd: 200, co: 'pg' };
-          if (bindRoute(t2, R, far, dest2, 0)) { layout(t2); TRAINS.push(t2); }
+          if (bindRoute(t2, R, far, dest2, 0)) { npc206(t2, 269); layout(t2); TRAINS.push(t2); }
         }
       }
       /* v204: a Crowe Western express on a stretch of line the other two trains don't use */
@@ -8906,7 +8916,7 @@ window.B137 = (function () {
         var used = {}; TRAINS.forEach(function (t) { if (t.run) return; (t.route || []).forEach(function (g) { used[kxy(g.x0, g.y0) + '|' + kxy(g.x1, g.y1)] = 1; used[kxy(g.x1, g.y1) + '|' + kxy(g.x0, g.y0)] = 1; }); });
         var pick = null;
         st.forEach(function (s) { if (pick || s === home) return; var d3 = pickDest(R, s, home); if (!d3 || d3 === home) return; var rt = routeSegs(R, s.x, s.y, d3.x, d3.y); if (!rt.length) return; for (var q = 0; q < rt.length; q++) if (used[kxy(rt[q].x0, rt[q].y0) + '|' + kxy(rt[q].x1, rt[q].y1)]) return; pick = [s, d3]; });
-        if (pick) { var t3 = { cars: mixCo(6, 331, 'cw'), ph: 0, stopT: 2, robbed: 0, spd: 340, co: 'cw' }; if (bindRoute(t3, R, pick[0], pick[1], 0)) { layout(t3); TRAINS.push(t3); } }
+        if (pick) { var t3 = { cars: mixCo(7, 331, 'cw'), ph: 0, stopT: 2, robbed: 0, spd: 340, co: 'cw' }; if (bindRoute(t3, R, pick[0], pick[1], 0)) { npc206(t3, 331); layout(t3); TRAINS.push(t3); } }
       } catch (e) {}
     }
 
@@ -8962,6 +8972,7 @@ window.B137 = (function () {
         put(c, carSpr(p.k), 0, 0);
         livery203(c, p, 0);
         if (p.load) load205(c, p.load);
+        if (p.npc) plate206(c, p);
         wheel(c, -24, -8, 8, p.ph); wheel(c, 24, -8, 8, p.ph);
         c.strokeStyle = '#2a1a0a'; c.lineWidth = 2; c.beginPath(); c.moveTo(42, -16); c.lineTo(48, -16); c.stroke();
       }
@@ -8977,6 +8988,12 @@ window.B137 = (function () {
       var C = LOADC[L] || LOADC.gravel, i;
       c.fillStyle = C[0]; c.beginPath(); c.moveTo(-40, -46); c.quadraticCurveTo(-20, -62, 0, -58); c.quadraticCurveTo(20, -64, 40, -46); c.closePath(); c.fill();
       for (i = 0; i < 14; i++) { var lx = -34 + (i * 37) % 68, ly = -48 - ((i * 13) % 9) - (Math.abs(lx) < 20 ? 4 : 0); c.fillStyle = C[1 + (i % 2)]; c.beginPath(); c.arc(lx, ly, 2.4 + (i % 3) * 0.7, 0, 7); c.fill(); }
+    }
+    function plate206(c, p) {
+      var y = p.k === 'flat' ? -25 : p.k === 'gondola' || p.k === 'hopper' ? -35 : p.k === 'tanker' ? -39 : -40, N = p.npc, w = Math.min(66, 10 + N.n.length * 4.3);
+      c.save(); c.translate(0, y); if (Math.cos(p.ang) < 0) c.scale(-1, 1);
+      c.fillStyle = N.c[0]; c.fillRect(-w / 2, -6, w, 11); c.strokeStyle = '#2a1a0a'; c.lineWidth = 0.8; c.strokeRect(-w / 2, -6, w, 11);
+      c.fillStyle = N.c[1]; c.font = 'bold 7px monospace'; c.textAlign = 'center'; c.fillText(N.n, 0, 2.4); c.restore();
     }
     function tag205(p, sx, sy) {
       var c = ctx, L = LIV203[p.co] || ['#7a4a1c', '#f3e3c3'], t = p.head || p.tag; if (!t) return;
@@ -14556,10 +14573,10 @@ window.B137 = (function () {
     var CAR = { tank: 'TANK CAR', hop: 'GONDOLA', stock: 'STOCK CAR', box: 'BOXCAR' }, BASE = { tank: 0.8, hop: 0.5, stock: 1, box: 0.7 };
     function carOf(k) { return k === 'crude' || k === 'fuel' ? 'tank' : k === 'coal' || k === 'iron' ? 'hop' : k === 'cattle' ? 'stock' : 'box'; }
     var S = null, KEY = '', ui = { tab: 't', to: null, good: null, q: 0, last: 0 }, OPEN = null;
-    function fresh() { return { m: { dwp: 1, cw: 1, pg: 1 }, pat: { dwp: 0, cw: 0, pg: 0 }, ship: [], ft: 0, nid: 1, warT: 50, war: null, done: [] }; }
+    function fresh() { return { m: { dwp: 1, cw: 1, pg: 1 }, pat: { dwp: 0, cw: 0, pg: 0 }, ship: [], ft: 0, nid: 1, warT: 50, war: null, done: [], want: [], wnid: 1, wT: 0 }; }
     function key() { var st = 0; try { st = window.STORY170 && STORY170.on() ? 1 : 0; } catch (e) {} return 'kingdom-rail203:' + MODE + (st ? ':story' : ''); }
-    function load() { KEY = key(); S = fresh(); try { var v = JSON.parse(localStorage.getItem(KEY) || 'null'); if (v && v.m) { S.m = v.m; S.pat = v.pat || S.pat; S.ship = v.ship || []; S.ft = v.ft || 0; S.nid = v.nid || 1; S.done = v.done || []; } } catch (e) {} }
-    function save() { try { if (S && KEY) localStorage.setItem(KEY, JSON.stringify({ m: S.m, pat: S.pat, ship: S.ship, ft: S.ft, nid: S.nid, done: S.done.slice(0, 4) })); } catch (e) {} }
+    function load() { KEY = key(); S = fresh(); try { var v = JSON.parse(localStorage.getItem(KEY) || 'null'); if (v && v.m) { S.m = v.m; S.pat = v.pat || S.pat; S.ship = v.ship || []; S.ft = v.ft || 0; S.nid = v.nid || 1; S.done = v.done || []; S.want = v.want || []; S.wnid = v.wnid || 1; S.wT = v.wT != null ? v.wT : 0; } } catch (e) {} }
+    function save() { try { if (S && KEY) localStorage.setItem(KEY, JSON.stringify({ m: S.m, pat: S.pat, ship: S.ship, ft: S.ft, nid: S.nid, done: S.done.slice(0, 4), want: S.want, wnid: S.wnid, wT: S.wT })); } catch (e) {} }
     function saveGoods() { try { if (MODE === 'free' && ME_S && ME_S.g131 && window.TP131) localStorage.setItem('kingdom-goods-v1:' + MODE, JSON.stringify({ bag: TP131.bag(), home: ME_S.g131 })); } catch (e) {} }
     function on() { return typeof MODE !== 'undefined' && MODE === 'free' && typeof city !== 'undefined' && city && window.RAIL136 && window.ECON131 && typeof ME_S !== 'undefined' && ME_S; }
     function stations() { var R = RAIL136.rail(); return R && R.st ? R.st.filter(function (s) { return s && !s.siding && (s.home || s.name); }) : []; }
@@ -14598,10 +14615,11 @@ window.B137 = (function () {
         var sh = share(), lo = CO.slice().sort(function (a, b) { return sh[a.id] - sh[b.id]; })[0], cut = 0.15 + Math.random() * 0.1;
         S.m[lo.id] = Math.max(0.62, S.m[lo.id] * (1 - cut));
         var ans = []; CO.forEach(function (c) { if (c !== lo && Math.random() < 0.6) { S.m[c.id] = Math.max(0.7, S.m[c.id] * 0.9); ans.push(c.sh + ' \u221210%'); } });
-        S.war = { t: 45, sh: 'RATE WAR: ' + lo.sh + ' \u2212' + Math.round(cut * 100) + '%', s: 'RATE WAR \u00b7 ' + lo.sh + ' CUTS ' + Math.round(cut * 100) + '%' + (ans.length ? ' \u00b7 ' + ans.join(' \u00b7 ') : ' \u00b7 NO ANSWER YET') };
+        S.war = { t: 45, co: lo.id, cut: Math.round(cut * 100), sh: 'RATE WAR: ' + lo.sh + ' \u2212' + Math.round(cut * 100) + '%', s: 'RATE WAR \u00b7 ' + lo.sh + ' CUTS ' + Math.round(cut * 100) + '%' + (ans.length ? ' \u00b7 ' + ans.join(' \u00b7 ') : ' \u00b7 NO ANSWER YET') };
       }
       S.ft += dt;
       for (var i = S.ship.length - 1; i >= 0; i--) { var sp = S.ship[i]; if (S.ft >= sp.at) { S.ship.splice(i, 1); deliver(sp); save(); saveGoods(); } }
+      wantTick(dt);
       syncRuns();
     }
     // ---- v205: each company's next train carries your cars, one car per ~10 loads, labelled
@@ -14632,8 +14650,59 @@ window.B137 = (function () {
       t = Math.round(t); ME_S.res.gold += t; try { updateRes(); } catch (e) {}
       try { var dp = pos(st); FX205.push({ x: dp.x, y: dp.y - 150 - 24 * FX205.filter(function (f) { return f.t > 2; }).length, t: 3.4, s: '+' + t + ' GOLD \u00b7 ' + sp.q + ' ' + G.n, c: (COI[sp.co] || CO[0]).c }); } catch (e) {}
       S.done.unshift(sp.q + ' ' + G.n + ' SOLD AT ' + st.name + ' +' + t); window.FREIGHT203 = (window.FREIGHT203 || 0) + 1;
+      credit206(st, sp.k, sp.q, sp.at, sp.co);
       toast('\ud83d\ude82 FREIGHT SOLD AT ' + st.name + ': ' + sp.q + ' ' + G.n + ' +' + t + ' GOLD');
     }
+
+    // ---- v206: WANTED contracts - a town posts "WANTED: 60 CRUDE BY 6 PM" with a bonus; fill it by rail or by hand before the deadline (a rival shipper may beat you to it)
+    var WANTS = { oil: ['wheat', 'cattle', 'iron', 'coal', 'tools'], farm: ['crude', 'crude', 'fuel', 'tools', 'coal', 'clothes'], gold: ['crude', 'fuel', 'coal', 'tools', 'wheat'], mixed: ['crude', 'crude', 'cattle', 'cotton', 'coal', 'iron', 'wheat'] };
+    function wOpen() { return S.want.filter(function (w) { return w.st === 'open'; }); }
+    function wAt(name) { var L = S.want.filter(function (w) { return w.to === name; }); return L.filter(function (w) { return w.st === 'open'; })[0] || L[0] || null; }
+    function wFor(name, k) { return S.want.filter(function (w) { return w.st === 'open' && w.to === name && w.k === k; })[0] || null; }
+    function post(name, k, q, hrs) {
+      var T = stations().filter(function (s) { return !s.home && !S.want.some(function (w) { return w.to === s.name && w.st === 'open'; }); });
+      var st = name ? stByName(name) : T[Math.floor(Math.random() * T.length)]; if (!st || st.home) return null;
+      if (name) S.want = S.want.filter(function (w) { return !(w.to === st.name && w.st === 'open'); });
+      var ty = 'mixed'; try { ty = ECON131.ty(realm(st)) || 'mixed'; } catch (e) {}
+      var L = WANTS[ty] || WANTS.mixed; k = k || L[Math.floor(Math.random() * L.length)]; var G = ECON131.G[k]; if (!G) return null;
+      if (!q) { var R = Math.random(); q = k === 'crude' || k === 'coal' ? 40 + 10 * Math.floor(R * 5) : k === 'cattle' ? 10 + 5 * Math.floor(R * 3) : G.p >= 8 ? 10 + 5 * Math.floor(R * 3) : 20 + 10 * Math.floor(R * 4); }
+      var H = hourNow(), dueH = Math.ceil(H + (hrs || 9 + Math.random() * 5)), due = S.ft + (dueH - H) * 20;
+      var rivals = CO.filter(function (c) { return serves(c, st); }), rco = rivals[Math.floor(Math.random() * rivals.length)] || CO[0];
+      var w = { id: S.wnid++, to: st.name, k: k, q: q, got: 0, due: due, dueH: dueH, bonus: Math.round((20 + q * G.p * 0.5) / 5) * 5, st: 'open', rv: hrs ? -1 : Math.random() < 0.55 ? S.ft + (due - S.ft) * (0.6 + 0.35 * Math.random()) : -1, rco: rco.id, end: 0, paid: 0 };
+      S.want.push(w); save();
+      if (!name) toast('\ud83d\udcdc WANTED AT ' + st.name + ': ' + q + ' ' + G.n + ' BY ' + hhmm(dueH) + ' \u00b7 +' + w.bonus + ' BONUS');
+      return w;
+    }
+    function wantTick(dt) {
+      S.wT -= dt; var ch = 0;
+      if (S.wT <= 0) { S.wT = wOpen().length ? 100 + Math.random() * 60 : 8; if (wOpen().length < 3) post(); }
+      S.want.forEach(function (w) {
+        if (w.st !== 'open') return;
+        if (S.ft > w.due) { w.st = 'late'; w.end = S.ft; ch = 1; }
+        else if (w.rv > 0 && S.ft >= w.rv) { w.st = 'lost'; w.end = S.ft; S.pat[w.rco] = (S.pat[w.rco] || 0) + 1; ch = 1; toast('\ud83d\udcdc ' + w.to + ' WANTED FILLED BY ' + ((COI[w.rco] || CO[0]).sh) + ' (' + w.q + ' ' + ECON131.G[w.k].n + ')'); }
+      });
+      var n0 = S.want.length; S.want = S.want.filter(function (w) { return w.st === 'open' || S.ft - w.end < 50; }); if (ch || n0 !== S.want.length) save();
+    }
+    function credit206(st, k, q, at, coid) { /* rail: counts if the freight arrived by the deadline */
+      var w = wFor(st.name, k); if (!w || at > w.due) return 0;
+      var n = Math.min(q, w.q - w.got); w.got += n; if (coid) w.via = coid; if (w.got >= w.q) win(w, st); save(); return n;
+    }
+    function win(w, st) {
+      if (w.paid) return; w.paid = 1; w.st = 'won'; w.end = S.ft; ME_S.res.gold += w.bonus; window.WON206 = (window.WON206 || 0) + 1; save(); try { updateRes(); } catch (e) {}
+      if (w.via) S.pat[w.via] = (S.pat[w.via] || 0) + 1;
+      try { var dp = pos(st); FX205.push({ x: dp.x, y: dp.y - 190, t: 4, s: '\u2605 WANTED FILLED +' + w.bonus + ' BONUS' }); } catch (e) {}
+      toast('\u2605 ' + w.to + ' WANTED FILLED: ' + w.q + ' ' + ECON131.G[w.k].n + ' \u00b7 +' + w.bonus + ' GOLD BONUS');
+    }
+    function hand(st) { /* by hand: unload your saddlebags at the depot */
+      var w = st && wFor(st.name, (wAt(st.name) || {}).k); if (!w) return 0;
+      var B = bag(), n = Math.min(w.q - w.got, Math.floor(B[w.k] || 0)); if (n < 1) return 0;
+      B[w.k] -= n; var r = realm(st), t = 0; if (r) { var g = ECON131.stock(r); for (var i = 0; i < n; i++) { t += ECON131.price(r, w.k) * 0.9; g[w.k] = (g[w.k] || 0) + 1; } }
+      t = Math.round(t); ME_S.res.gold += t; w.got += n; w.via = null; try { updateRes(); } catch (e) {}
+      S.done.unshift(n + ' ' + ECON131.G[w.k].n + ' HANDED IN AT ' + st.name + ' +' + t);
+      if (w.got >= w.q) win(w, st); else toast('\ud83d\udcdc HANDED IN ' + n + ' ' + ECON131.G[w.k].n + ' \u00b7 ' + w.got + '/' + w.q + ' \u00b7 +' + t + ' GOLD');
+      save(); saveGoods(); return n;
+    }
+    function wTxt(w) { return w.q + ' ' + (ECON131.G[w.k] ? ECON131.G[w.k].n : w.k); }
 
     // ---- passenger ride: wait on the platform, ride, arrive (clock moves with you)
     var RIDE = document.createElement('div'); RIDE.id = 'ride203'; document.body.appendChild(RIDE);
@@ -14681,6 +14750,8 @@ window.B137 = (function () {
       '#rc203 .row.off{opacity:.72}#rc203 .row .nm{flex:0 0 150px}' +
       '#rc203 .nm{flex:1;min-width:0}#rc203 .nm b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#rc203 .nm small{display:block;font-size:11px;color:#5a3a1c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
       '#rc203 .go{flex:0 0 auto;min-width:112px;min-height:42px;font:bold 13px monospace;background:#7a4a1c;color:#ffe9b8;border:2px solid #3b2410;border-radius:6px;padding:0 8px}#rc203 .go:disabled{background:#d8c49c;color:#7a6040;border-color:#a08660}' +
+      '#rc203 .ln.wl .lb{width:50px;color:#7a1a1a}#rc203 .ch button.wn{border-color:#7a1a1a;background:#fff0d8}#rc203 .ch button.wn.on{background:#7a1a1a;color:#ffe9b8}#rc203 .ch button.wh{background:#2e6a2e;color:#f2ffe0;border-color:#1a3a1a}#rc203 .ch button.wd{background:#e8dcc0;color:#6a5030;border-style:dashed}#rc203 .wem{font-size:11px;color:#5a3a1c;align-self:center;white-space:nowrap}' +
+      '#rc203 .row.hl{background:#fff3d0;box-shadow:inset 3px 0 0 #7a4a1c}' +
       '#rc203 .dn{color:#2e7a2e}#rc203 .go .dn{color:#b8f0a0}#rc203 .go .up{color:#ffb0a0}#rc203 .up{color:#a02020}#rc203 .ban{font-size:11px;background:#7a1a1a;color:#ffe9b8;border-radius:4px;padding:3px 7px;margin:4px 0}#rc203 .em{padding:10px 4px;color:#5a3a1c;font-size:12px}' +
       '#rc203 .st{font-size:11px;color:#3b2410;border-top:2px solid #3b2410;margin-top:4px;padding-top:4px}#rc203 .st div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:17px}#rc203 .st .lst{color:#2e6a2e}#rc203 .st i{display:inline-block;width:9px;height:9px;border:1px solid #3b2410;margin-right:4px;vertical-align:-1px}' +
       '#ride203{position:fixed;inset:0;z-index:90;background:rgba(26,18,8,.92);display:none;align-items:center;justify-content:center}#ride203 .rb{background:#f3e3c3;border:4px solid;border-radius:10px;padding:12px 16px;width:min(460px,86vw);font:bold 13px monospace;color:#2a1a0a;text-align:center}' +
@@ -14703,7 +14774,7 @@ window.B137 = (function () {
       hd.appendChild(btn('x', '\u2715', close)); P.appendChild(hd);
       var sh = share(), bar = el('div', 'sh');
       CO.forEach(function (c) { var i = el('i', '', c.sh + ' ' + Math.round(sh[c.id] * 100) + '%'); i.style.background = c.c; i.style.width = (sh[c.id] * 100).toFixed(1) + '%'; bar.appendChild(i); });
-      P.appendChild(bar);
+      if (ui.tab !== 'f') P.appendChild(bar);
       var tb = el('div', 'tabs');
       tb.appendChild(btn(ui.tab === 't' ? 'on' : '', '\ud83c\udfab TICKETS', function () { ui.tab = 't'; render(); }));
       tb.appendChild(btn(ui.tab === 'f' ? 'on' : '', '\ud83d\udce6 FREIGHT' + (S.ship.length ? ' (' + S.ship.length + ')' : ''), function () { ui.tab = 'f'; render(); }));
@@ -14711,6 +14782,15 @@ window.B137 = (function () {
       if (ui.tab === 'f') {
         var GK = Object.keys(ECON131.G).filter(function (k) { return have(k, st) > 0; });
         if (GK.indexOf(ui.good) < 0) { ui.good = GK[0] || null; ui.q = ui.good ? Math.min(10, have(ui.good, st)) : 0; }
+        /* v206: WANTED notices (all towns); at the town itself you can hand goods in */
+        var wl = el('div', 'ln wl'); wl.appendChild(el('div', 'lb', '\ud83d\udcdc WANTED')); var wc = el('div', 'ch'), WL = S.want.filter(function (w) { return w.st === 'open' || w.st === 'won'; });
+        if (!WL.length) wc.appendChild(el('div', 'wem', 'NO NOTICES POSTED \u00b7 TOWNS POST WANTED BOARDS SOON'));
+        WL.forEach(function (w) { var nm = ECON131.G[w.k] ? ECON131.G[w.k].n : w.k, here = w.to === st.name, hv = Math.min(w.q - w.got, Math.floor(bag()[w.k] || 0));
+          if (w.st === 'won') { wc.appendChild(btn('wd', '\u2714 ' + w.to + ' \u00b7 ' + wTxt(w) + ' FILLED', function () {}, true)); return; }
+          if (here && hv > 0) { wc.appendChild(btn('wh', '\u270b HAND IN ' + hv + ' ' + nm + ' <small>\u2605+' + w.bonus + '</small>', function () { hand(st); render(); })); return; }
+          var b = btn('wn' + (ui.to && ui.to.name === w.to && ui.good === w.k ? ' on' : ''), (here ? 'HERE' : w.to) + ': ' + wTxt(w) + ' BY ' + hhmm(w.dueH) + ' <small>\u2605+' + w.bonus + ' \u00b7 ' + w.got + '/' + w.q + '</small>', function () { if (!here) ui.to = stByName(w.to); if (have(w.k, st) > 0) { ui.good = w.k; ui.q = Math.min(w.q - w.got, have(w.k, st)); } render(); });
+          b.title = here ? 'BRING ' + nm + ' IN YOUR SADDLEBAGS TO HAND IT IN' : 'SHIP ' + nm + ' TO ' + w.to + ' BEFORE ' + hhmm(w.dueH); wc.appendChild(b); });
+        wl.appendChild(wc); P.appendChild(wl);
         var gl = el('div', 'ln'); gl.appendChild(el('div', 'lb', 'SHIP')); var gc = el('div', 'ch');
         if (!GK.length) gc.appendChild(el('div', 'em', st.home ? 'NOTHING IN YOUR BAGS OR STOREHOUSE' : 'NOTHING IN YOUR BAGS \u00b7 BUY GOODS AT A TRADING POST'));
         GK.forEach(function (k) { gc.appendChild(btn(k === ui.good ? 'on' : '', ECON131.G[k].n + ' <small>' + have(k, st) + '</small>', function () { ui.good = k; ui.q = Math.min(10, have(k, st)); render(); })); });
@@ -14728,7 +14808,7 @@ window.B137 = (function () {
       if (to) CO.forEach(function (c) {
         var row = el('div', 'row'), sw = el('div', 'sw'); sw.style.background = c.c; row.appendChild(sw);
         var nm = el('div', 'nm'), inf = el('div', 'inf'), ok = serves(c, st) && serves(c, to), go, H0 = hourNow();
-        if (!ok) row.className = 'row off';
+        if (!ok) row.className = 'row off'; else if (ui.hl === c.id) row.className = 'row hl';
         if (ui.tab === 't') {
           var f = fare(c, st, to), w = nextDep(c), h = rideH(c, st, to);
           nm.innerHTML = '<b>' + c.n + '</b><small>' + c.tag + '</small>';
@@ -14741,7 +14821,7 @@ window.B137 = (function () {
           nm.innerHTML = '<b>' + c.n + '</b><small>' + (k && cost >= 0 ? CAR[car] + ' \u2264' + c.cap : k ? 'NO ' + CAR[car] + 'S' : c.tag) + '</small>';
           var pr = val - cost;
           inf.innerHTML = !k ? '<span class="ns">PICK SOMETHING TO SHIP</span>' : !ok ? '<span class="ns">NO SERVICE ON THIS ROUTE</span>' : cost < 0 ? '<span class="ns">NO ' + CAR[car] + 'S ON THIS LINE</span><span class="ns">' + c.tag + '</span>' :
-            '<span>TRAIN <b>' + hhmm(H0 + wf) + '</b> \u2192 ARR ' + hhmm(H0 + wf + hf) + '</span><span>' + (to.home ? 'INTO YOUR STOREHOUSE' : 'SELLS ~' + val + ' \u00b7 <span style="display:inline" class="' + (pr >= 0 ? 'dn' : 'up') + '">' + (pr >= 0 ? 'PROFIT +' : 'LOSS ') + pr + '</span>') + '</span>';
+            '<span>TRAIN <b>' + hhmm(H0 + wf) + '</b> \u2192 ARR ' + hhmm(H0 + wf + hf) + '</span><span>' + (to.home ? 'INTO YOUR STOREHOUSE' : 'SELLS ~' + val + ' \u00b7 <span style="display:inline" class="' + (pr >= 0 ? 'dn' : 'up') + '">' + (pr >= 0 ? 'PROFIT +' : 'LOSS ') + pr + '</span>') + wNote(to, k, (wf + hf) * 20) + '</span>';
           go = btn('go', why || ('SHIP ' + cost + arrow(c)), function () { if (ship(c, st, to, k, q)) render(); }, !!why);
         }
         row.appendChild(nm); row.appendChild(inf); row.appendChild(go); P.appendChild(row);
@@ -14756,6 +14836,7 @@ window.B137 = (function () {
       }
       P.querySelectorAll('.ch').forEach(function (c, i) { if (sl[i]) c.scrollLeft = sl[i]; else { var o = c.querySelector('.on'); if (o && o.offsetLeft > c.clientWidth - 40) c.scrollLeft = o.offsetLeft - 20; } }); P.scrollTop = stp;
     }
+    function wNote(to, k, inSec) { var w = to && k ? wFor(to.name, k) : null; if (!w) return ''; return S.ft + inSec <= w.due ? ' \u00b7 <span style="display:inline" class="dn">\u2605+' + w.bonus + ' WANTED</span>' : ' \u00b7 <span style="display:inline" class="up">\u2605 TOO LATE</span>'; }
     function open(st) { if (!on() || !st) return; if (!S || KEY !== key()) load(); OPEN = st; ui.last = performance.now(); P.style.display = 'block'; try { RAIL136.RB.style.display = 'none'; } catch (e) {} render(); }
     function close() { OPEN = null; P.style.display = 'none'; }
     addEventListener('keydown', function (e) { if (!OPEN) return; if (e.key === 'Escape') close(); });
@@ -14783,12 +14864,23 @@ window.B137 = (function () {
       st._s205 = best; st._k205 = k; return best;
     }
     function drawStand(st, sx, sy) {
-      var c = ctx, L = CO.filter(function (co) { return serves(co, st); }), H0 = hourNow(), n = L.length, bh = 19, sh = 18 + n * 14, top = -(n * (bh + 2) + sh + 26), i;
+      var c = ctx, L = CO.filter(function (co) { return serves(co, st); }), H0 = hourNow(), n = L.length, bh = 19, sh = 18 + n * 14, W6 = st.home ? null : wAt(st.name), wh = W6 ? 46 : 0, top = -(n * (bh + 2) + sh + 26 + wh), i;
       c.save(); c.translate(sx, sy);
+      if (W6) { window.WPOST206 = (window.WPOST206 || 0) + 1; }
       c.fillStyle = 'rgba(40,25,10,.22)'; c.beginPath(); c.ellipse(0, 2, 54, 6, 0, 0, 7); c.fill();
       c.fillStyle = '#6a4224'; c.fillRect(-42, top + 6, 6, -top - 6); c.fillRect(36, top + 6, 6, -top - 6);
       c.fillStyle = '#8a5a2e'; c.fillRect(-42, top + 6, 2, -top - 6); c.fillRect(36, top + 6, 2, -top - 6);
+      window.STANDH206 = -top;
       c.textAlign = 'center';
+      if (W6) { var wy = top + 6, ok6 = W6.st === 'open', G6 = ECON131.G[W6.k] || { n: W6.k };
+        c.fillStyle = '#f6ecd0'; c.fillRect(-50, wy, 100, 42); c.strokeStyle = '#7a1a1a'; c.lineWidth = 1.5; c.strokeRect(-50, wy, 100, 42);
+        c.fillStyle = '#3b2410'; c.beginPath(); c.arc(-44, wy + 4, 1.6, 0, 7); c.arc(44, wy + 4, 1.6, 0, 7); c.fill();
+        c.fillStyle = '#7a1a1a'; c.font = 'bold 11px Georgia,serif'; c.fillText(W6.st === 'won' ? 'FILLED \u2714' : W6.st === 'lost' ? 'TAKEN' : W6.st === 'late' ? 'EXPIRED' : 'WANTED', 0, wy + 12);
+        c.fillStyle = '#2a1a0a'; c.font = 'bold 10px monospace'; c.fillText(W6.q + ' ' + G6.n + (ok6 ? ' BY ' + hhmm(W6.dueH).replace(':00', '') : ''), 0, wy + 24);
+        if (ok6) { c.fillStyle = '#d8c49c'; c.fillRect(-40, wy + 30, 80, 6); c.fillStyle = '#2e6a2e'; c.fillRect(-40, wy + 30, 80 * Math.min(1, W6.got / W6.q), 6); c.strokeStyle = '#3b2410'; c.lineWidth = 0.8; c.strokeRect(-40, wy + 30, 80, 6);
+          c.fillStyle = '#7a1a1a'; c.font = 'bold 8px monospace'; c.fillText('\u2605+' + W6.bonus + ' \u00b7 ' + W6.got + '/' + W6.q, 0, wy + 44 - 1); }
+        else { c.fillStyle = '#5a3a1c'; c.font = 'bold 9px monospace'; c.fillText(W6.st === 'lost' ? 'BY ' + ((COI[W6.rco] || CO[0]).sh) : W6.st === 'won' ? '+' + W6.bonus + ' PAID' : 'TOO LATE', 0, wy + 36); }
+        top += wh; }
       for (i = 0; i < n; i++) { var co = L[i], y = top + 8 + i * (bh + 2);
         c.fillStyle = co.c; c.fillRect(-52, y, 104, bh); c.strokeStyle = '#3b2410'; c.lineWidth = 1.5; c.strokeRect(-52, y, 104, bh);
         c.strokeStyle = co.c2; c.lineWidth = 1; c.strokeRect(-49, y + 2.5, 98, bh - 5);
@@ -14802,6 +14894,75 @@ window.B137 = (function () {
         c.textAlign = 'right'; c.fillText(hhmm(H0 + nextDep(q)).replace(' AM', 'A').replace(' PM', 'P'), 49, ly); c.textAlign = 'center'; }
       c.restore();
     }
+    // ---- v206: a ticket agent per company (booth in the company's colours) at the big depots
+    function agentSts() { return stations().filter(function (s) { return !s.home && ((s.t && s.t.d && s.t.d.pop >= 30) || s.name === 'RED MESA'); }); }
+    function agentsAt(st) {
+      var L = CO.filter(function (co) { return serves(co, st); }), k = st.x + ',' + st.y + ',' + L.length;
+      if (st._a206 && st._ak206 === k) return st._a206;
+      var b;
+      if (!st.halt) b = { x: st.dx - 200, y: st.dy + 150 }; /* the open platform yard south of the depot track, west of the signboards */
+      else { var G = RAIL136.rail().seg || [], sp = pos(st), sd = standAt(st), bs = -1e9, tp = st.t && st.t.econ && st.t.econ.tp133, BL = (st.t && st.t.b) || [], ox, oy;
+        function dseg(x, y, g) { var dx = g[2] - g[0], dy = g[3] - g[1], l2 = dx * dx + dy * dy || 1, u = Math.max(0, Math.min(1, ((x - g[0]) * dx + (y - g[1]) * dy) / l2)); return Math.hypot(x - g[0] - dx * u, y - g[1] - dy * u); }
+        function clear(x, y) { /* x,y = an agent's feet; the booth+agent spans x-30..x+40, y-80..y */
+          var m = 1e9; G.forEach(function (g) { m = Math.min(m, dseg(x, y, g), dseg(x, y - 60, g), dseg(x - 30, y - 30, g), dseg(x + 40, y - 30, g)); }); if (m < 70) return -1;
+          if (tp && Math.abs(x - tp.x) < 150 && y - tp.y > -60 && y - tp.y < 190) return -1;
+          if (Math.abs(x - sd.x) < 120 && Math.abs(y - sd.y) < 100) return -1;
+          for (var q = 0; q < BL.length; q++) if (Math.abs(x - BL[q].x) < (BL[q].w || 140) / 2 + 60 && Math.abs(y - BL[q].y) < (BL[q].h || 100) / 2 + 90) return -1;
+          return Math.min(m, 160); }
+        for (ox = -360; ox <= 360; ox += 60) for (oy = -220; oy <= 260; oy += 40) { var x = st.x + ox, y = st.y + oy, mn = 1e9, j;
+          for (j = 0; j < L.length && mn > 0; j++) mn = Math.min(mn, clear(x + j * 76, y)); if (mn < 0) continue;
+          var sc = mn * 0.6 - Math.hypot(x + (L.length - 1) * 38 + 26 - sp.x, y - sp.y); if (sc > bs) { bs = sc; b = { x: x, y: y }; } }
+        if (!b) b = { x: sd.x - 60, y: sd.y + 120 }; }
+      st._a206 = L.map(function (co, i) { return { co: co, x: b.x + i * 76, y: b.y }; }); st._ak206 = k; return st._a206;
+    }
+    function pitch(co, st) {
+      var t = hhmm(hourNow() + nextDep(co)), w = wAt(st.name), ph = Math.floor(performance.now() / 3200) % 2;
+      if (S.war && S.war.co === co.id) return ['FARES CUT ' + (S.war.cut || 15) + '%!', 'NEXT TRAIN ' + t];
+      if (ph && w && w.st === 'open') return ['TOWN WANTS ' + wTxt(w), 'BY ' + hhmm(w.dueH) + ' \u00b7 \u2605+' + w.bonus + ' BONUS'];
+      return co.id === 'cw' ? ['FASTEST LINE WEST', 'EXPRESS ' + t + ' \u00b7 STOCK CARS'] : co.id === 'pg' ? ['CHEAPEST OIL RATES', 'TANK CARS \u00b7 NEXT ' + t] : ['WE STOP EVERYWHERE', 'NEXT TRAIN ' + t];
+    }
+    function drawAgent(a, st, sx, sy, near) {
+      var c = ctx, co = a.co, T = performance.now() / 1000;
+      c.save(); c.translate(sx, sy);
+      c.fillStyle = 'rgba(40,25,10,.22)'; c.beginPath(); c.ellipse(4, 2, 36, 5, 0, 0, 7); c.fill();
+      /* booth */
+      c.fillStyle = '#8a5a2e'; c.fillRect(-26, -50, 40, 50); c.strokeStyle = 'rgba(42,26,10,.45)'; c.lineWidth = 1; for (var q = -20; q < 14; q += 7) { c.beginPath(); c.moveTo(q, -22); c.lineTo(q, 0); c.stroke(); }
+      c.strokeStyle = '#3b2410'; c.lineWidth = 1.4; c.strokeRect(-26, -50, 40, 50);
+      c.fillStyle = '#3a4a56'; c.fillRect(-21, -44, 30, 18); c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(-19, -42, 8, 14);
+      c.fillStyle = '#e0b088'; c.beginPath(); c.arc(-6, -33, 4, 0, 7); c.fill(); c.fillStyle = co.c; c.fillRect(-11, -29, 10, 3);
+      c.fillStyle = '#6a4224'; c.fillRect(-24, -26, 36, 4);
+      c.fillStyle = co.c; c.beginPath(); c.moveTo(-30, -50); c.lineTo(18, -50); c.lineTo(14, -60); c.lineTo(-26, -60); c.closePath(); c.fill(); c.strokeStyle = '#2a1a0a'; c.lineWidth = 1; c.stroke();
+      c.fillStyle = co.c2; for (var sI = -24; sI < 14; sI += 10) c.fillRect(sI, -59, 4, 8);
+      c.fillStyle = co.c; c.fillRect(-28, -74, 44, 13); c.strokeStyle = '#2a1a0a'; c.strokeRect(-28, -74, 44, 13);
+      c.fillStyle = co.c2; c.font = 'bold 8px monospace'; c.textAlign = 'center'; c.fillText('TICKETS', -6, -64.5);
+      /* the agent stands out front, waving when you come near */
+      var x = 26, bob = near ? Math.sin(T * 3) * 0.6 : 0;
+      c.fillStyle = '#2a2a30'; c.fillRect(x - 5, -16, 4, 16); c.fillRect(x + 1, -16, 4, 16);
+      c.fillStyle = '#1a1410'; c.fillRect(x - 6, -2, 6, 3); c.fillRect(x + 1, -2, 6, 3);
+      c.fillStyle = co.c; c.fillRect(x - 7, -36 + bob, 14, 22); c.strokeStyle = '#2a1a0a'; c.lineWidth = 1; c.strokeRect(x - 7, -36 + bob, 14, 22);
+      c.fillStyle = '#f3ead8'; c.beginPath(); c.moveTo(x - 3, -36 + bob); c.lineTo(x + 3, -36 + bob); c.lineTo(x, -29 + bob); c.closePath(); c.fill();
+      c.fillStyle = co.c2; c.fillRect(x - 1, -27 + bob, 2, 2); c.fillRect(x - 1, -22 + bob, 2, 2);
+      c.fillStyle = '#e0b088'; c.beginPath(); c.arc(x, -42 + bob, 6, 0, 7); c.fill(); c.strokeStyle = '#8a5a3a'; c.lineWidth = 0.8; c.stroke();
+      c.fillStyle = '#2a1a0a'; c.fillRect(x - 3, -43 + bob, 1.5, 1.5); c.fillRect(x + 2, -43 + bob, 1.5, 1.5); c.fillStyle = '#6a3a1a'; c.fillRect(x - 3, -39 + bob, 6, 1.4);
+      c.fillStyle = co.c; c.fillRect(x - 6, -51 + bob, 12, 6); c.fillStyle = '#2a1a0a'; c.fillRect(x - 8, -46 + bob, 16, 2); c.fillStyle = co.c2; c.fillRect(x - 6, -47.5 + bob, 12, 1.5);
+      c.strokeStyle = co.c; c.lineWidth = 3.4; c.lineCap = 'round'; c.beginPath(); c.moveTo(x + 6, -33 + bob);
+      if (near) { var wa = -2.3 + Math.sin(T * 7) * 0.35; c.lineTo(x + 6 + Math.cos(wa) * 13, -33 + bob + Math.sin(wa) * 13); } else c.lineTo(x + 8, -19 + bob); c.stroke();
+      c.beginPath(); c.moveTo(x - 6, -33 + bob); c.lineTo(x - 9, -20 + bob); c.stroke(); c.lineCap = 'butt';
+      c.fillStyle = '#fff4d8'; c.fillRect(x - 13, -22 + bob, 6, 4); c.strokeStyle = '#7a1a1a'; c.lineWidth = 0.6; c.strokeRect(x - 13, -22 + bob, 6, 4);
+      c.restore();
+    }
+    function agentBubble(a, st, sx, sy) { /* v206: the agent's pitch; drawn after the booths, moved beside the agent when the town banner would cover it */
+      var c = ctx, co = a.co, x = 26, z = (typeof zoom === 'number' && zoom > 0) ? zoom : 1, P2 = pitch(co, st); c.save(); c.translate(sx, sy); c.textAlign = 'center';
+      c.font = 'bold 11px monospace'; var bw = Math.max(c.measureText(P2[0]).width, c.measureText(P2[1]).width, c.measureText(co.sh + ' AGENT').width) + 16, by = -112, lim = 0, side = 0;
+      try { var e = document.getElementById('pp133'); if (e && e.style.display !== 'none') lim = e.getBoundingClientRect().bottom + 6; } catch (er) {}
+      if (lim && (sy + by) * z < lim) { side = 1; by = Math.min(-40, Math.max(-66, lim / z - sy)); x = 26 + 14 + bw / 2; }
+        c.fillStyle = '#fff8e8'; c.strokeStyle = co.c; c.lineWidth = 2; c.beginPath(); if (c.roundRect) c.roundRect(x - bw / 2, by, bw, 48, 6); else c.rect(x - bw / 2, by, bw, 48); c.fill(); c.stroke();
+        if (side) { var lx = x - bw / 2; c.fillStyle = '#fff8e8'; c.beginPath(); c.moveTo(lx + 1, by + 18); c.lineTo(lx + 1, by + 30); c.lineTo(lx - 7, by + 24); c.closePath(); c.fill(); c.strokeStyle = co.c; c.beginPath(); c.moveTo(lx, by + 18); c.lineTo(lx - 7, by + 24); c.lineTo(lx, by + 30); c.stroke(); }
+        else { c.fillStyle = '#fff8e8'; c.beginPath(); c.moveTo(x - 6, by + 47); c.lineTo(x + 6, by + 47); c.lineTo(x, by + 55); c.closePath(); c.fill(); c.strokeStyle = co.c; c.beginPath(); c.moveTo(x - 6, by + 48); c.lineTo(x, by + 55); c.lineTo(x + 6, by + 48); c.stroke(); }
+        c.fillStyle = co.c; c.fillRect(x - bw / 2, by, bw, 13); c.fillStyle = co.c2; c.font = 'bold 9px monospace'; c.fillText(co.sh + ' AGENT', x, by + 10);
+        c.fillStyle = '#2a1a0a'; c.font = 'bold 11px monospace'; c.fillText(P2[0], x, by + 27); c.fillStyle = '#5a3a1c'; c.font = 'bold 10px monospace'; c.fillText(P2[1], x, by + 41);
+      window.ABUB206 = side ? 'side' : 'top'; c.restore();
+    }
     var _pf205 = pushFactionItems;
     pushFactionItems = function (items) {
       _pf205.apply(this, arguments);
@@ -14809,6 +14970,12 @@ window.B137 = (function () {
         if (!on() || !S) return; var z = (typeof zoom === 'number' && zoom > 0) ? zoom : 1, vw = innerWidth / (2 * z) + 200, vh = innerHeight / (2 * z) + 200, nd = 0;
         stations().forEach(function (st) { var a = standAt(st); if (Math.abs(a.x - px) > vw || Math.abs(a.y - py) > vh) return; nd++; items.push({ y: a.y, x: a.x, y2: a.y, fn: function (sx, sy) { drawStand(st, sx, sy); } }); });
         window.BOARDS205 = nd;
+        var na = 0, best = null, bd = 95; ui.hl = null;
+        agentSts().forEach(function (st) { var A = agentsAt(st); if (!A.length || Math.abs(A[0].x - px) > vw + 200 || Math.abs(A[0].y - py) > vh) return;
+          A.forEach(function (a) { var d = Math.hypot(a.x + 26 - px, a.y - py); if (d < bd) { bd = d; best = a; } }); });
+        if (best) ui.hl = best.co.id;
+        agentSts().forEach(function (st) { var A = agentsAt(st); A.forEach(function (a) { if (Math.abs(a.x - px) > vw || Math.abs(a.y - py) > vh) return; na++; items.push({ y: a.y, x: a.x, y2: a.y, fn: function (sx, sy) { drawAgent(a, st, sx, sy, a === best); } }); if (a === best) items.push({ y: Math.max(a.y, py) + 0.5, x: a.x, y2: a.y, fn: function (sx, sy) { agentBubble(a, st, sx, sy); } }); }); });
+        window.AGENTS206 = na; window.AGENTNEAR206 = best ? best.co.id : null;
         var now = performance.now(), dt = Math.min(0.1, (now - fxT) / 1000); fxT = now;
         FX205 = FX205.filter(function (f) { f.t -= dt; f.y -= 16 * dt; return f.t > 0; });
         FX205.forEach(function (f) { if (Math.abs(f.x - px) > vw || Math.abs(f.y - py) > vh) return; items.push({ y: f.y + 400, x: f.x, y2: f.y + 400, fn: function (sx, sy) { var c = ctx; c.save(); c.globalAlpha = Math.min(1, f.t); c.font = 'bold 14px monospace'; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = '#fff4d8'; c.strokeText(f.s, sx, sy - 400); c.fillStyle = '#2e6a2e'; c.fillText(f.s, sx, sy - 400); c.restore(); } }); });
@@ -14818,7 +14985,8 @@ window.B137 = (function () {
       state: function () { return S; }, share: function () { return S ? share() : null; }, serves: function (id, name) { var st = stByName(name); return !!(st && serves(COI[id], st)); },
       fare: function (id, a, b) { return fare(COI[id], stByName(a), stByName(b)); }, frate: function (id, k, q, a, b) { return frate(COI[id], k, q, stByName(a), stByName(b)); },
       ride: function (id, a, b) { ride(COI[id], stByName(a), stByName(b)); }, ship: function (id, a, b, k, q) { return ship(COI[id], stByName(a), stByName(b), k, q); },
-      war: function () { if (S) { S.warT = 0; tick(0.01); } return S && S.war; }, ff: function (sec) { if (S) tick(sec); }, ui: ui, render: render, load: load };
+      war: function () { if (S) { S.warT = 0; tick(0.01); } return S && S.war; }, ff: function (sec) { if (S) tick(sec); }, ui: ui, render: render, load: load,
+      want: function () { return S ? S.want : []; }, post: function (n, k, q, h) { return S ? post(n, k, q, h) : null; }, hand: function (n) { return hand(stByName(n)); }, agents: function (n) { var st = stByName(n); return st ? agentsAt(st).map(function (a) { return { co: a.co.id, x: a.x, y: a.y }; }) : []; } };
   })();
 
 
@@ -14863,5 +15031,5 @@ var cov=document.querySelector('#ordP[style*=block],#shop[style*=block]');if(pla
 #atk{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important}
 #rcol{right:auto!important;left:calc(var(--pad) + var(--sl))!important;transform-origin:left bottom!important;align-items:flex-start!important}
 }</style>
-<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --><!-- v204-railroads --><!-- v205-freight-cars --></body>
+<!-- v151-endless --><!-- v152-polish --><!-- v153-hd --><!-- v154-life --><!-- v155-duel --><!-- v156-ammo --><!-- v157-path --><!-- v158-town --><!-- v159-royal --><!-- v160-life --><!-- v161-life --><!-- v162-life --><!-- v163-life --><!-- v164-life --><!-- v165-life --><!-- v166-life --><!-- v168-flip --><!-- v167-trains --><!-- v168-mountains --><!-- v169-coal --><!-- v170-story --><!-- v171-story2 --><!-- v172-story3 --><!-- v173-story4 --><!-- v174-story5 --><!-- v175-story6 --><!-- v176-story7 --><!-- v177-story8 --><!-- v178-story9 --><!-- v180-story-scenes STORY180 --><!-- v182-story11 --><!-- v183-story12 --><!-- v184-story13 --><!-- v188-story17 --><!-- v190-story19 --><!-- v191-story20 --><!-- v192-story21 --><!-- v193-story22 --><!-- v201-story30 --><!-- v202-story31 --><!-- v204-railroads --><!-- v205-freight-cars --><!-- v206-wanted-agents --></body>
 </html>
